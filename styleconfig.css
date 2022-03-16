@@ -1,0 +1,52 @@
+#modelviewer{
+    width: 70%;
+    height: 100%;
+    position: absolute;
+    margin: 0;
+    background-color:rgb(255, 252, 248);
+}
+
+
+.rightnavigator{
+   z-index: 999;
+   right: 0;
+   margin: 0;
+    position: absolute;
+    background-color: rgb(255, 255, 255);
+    width:30%;
+    height: 100%;
+}
+
+.annotation {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    margin-left: 15px;
+    margin-top: 15px;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 0.5em;
+    font-size: 12px;
+    line-height: 1.2;
+    transition: opacity 0.5s;
+  }
+  .annotation::before {
+    content: "2";
+    position: absolute;
+    top: -30px;
+    left: -30px;
+    width: 30px;
+    height: 30px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    font-size: 16px;
+    line-height: 30px;
+    text-align: center;
+    background: black;
+  }
+  
+  #number {
+    position: absolute;
+    z-index: -1;
+  }
