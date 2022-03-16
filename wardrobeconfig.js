@@ -9,8 +9,8 @@ let wWidth = 2.5,
     wHeight = 6,
     wDepth = 1.5,
     segment_id = [],
-    columns,
-    wLoft = 3;
+    columns, customColumns = 2;
+wLoft = 3;
 const thickness = 0.875;
 const ftTom = 0.3048;
 let isLoft = false;
@@ -18,19 +18,20 @@ let wBottom, wTop, wLeft, wRight, wBack, wpLoftTop, wpLoftLeft, wpLoftRight, wpL
 let segments, offset = 0,
 
     part = [],
-    isColumns = true;
+    setColumns = false;
 
 let selectedObject = null;
-let raycaster, pointer, mouse3D, group, projector;
+let raycaster, pointer, mouse3D, group;
 let exporter;
 
 let composer, effectFXAA, outlinePass;
 
-let sprite;
-let mesh;
-let spriteBehindObject;
-const annotation = document.querySelector(".annotation");
 
+let isCreated = true;
+var removed = [];
+var adjacentParts = [];
+var substitubale = 0;
+var columns_group = document.getElementById("columns-group");
 init();
 animate();
 
@@ -39,14 +40,17 @@ function getValues() {
 
     $("#loftOptionsPanel").hide();
 
-    $("#width").change(function () {
+    $("#width").on('input', function () {
 
         if ($("#width")) {
 
             wWidth = $(this).val();
 
-            isColumns = false;
-
+            setColumns = true;
+            isCreated = true;
+            
+            
+            reset_adjacents_removed_columns();
         }
     });
 
@@ -165,9 +169,10 @@ function init() {
     controls.minDistance = 6;
     controls.maxDistance = 6;
     controls.panSpeed = 0;
+    
     controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-    controls.target.set(0, 1.5, 0);
+    controls.dampingFactor = 0;
+    controls.target.set(0, 1, 0);
 
 
     getValues();
@@ -203,7 +208,6 @@ function render() {
     update_wardrobe();
     add_loft();
     generate_columns();
-
 
     // renderer.render(scene, camera);
     composer.render();
@@ -382,15 +386,53 @@ function update_columns() {
         element.scale.set((thickness / 12) * ftTom, (wHeight + (thickness / 12)) * ftTom, (((2 * thickness / 12) + wDepth) * ftTom));
 
     });
+
+
 }
 
 function generate_columns() {
+
+
+
+    
+    if (wWidth > 2.5 && wWidth < 3.5) {
+        substitubale = 0;
+    } else if (wWidth > 3 && wWidth < 5) {
+        substitubale = 1;
+    } else if (wWidth > 3.5 && wWidth < 6.5) {
+        substitubale = 2;
+    } else if (wWidth > 6 && wWidth < 8) {
+        substitubale = 3;
+    } else if (wWidth > 7 && wWidth <= 9) {
+        substitubale = 4;
+    } else if (wWidth > 9 && wWidth < 11) {
+        substitubale = 5;
+    } else if (wWidth > 10 && wWidth <= 12) {
+        substitubale = 6;
+    }
+
+
 
     if (wWidth == 9.5) {
         columns = 10;
     } else {
         columns = Math.floor(wWidth);
     }
+
+
+    if (isCreated) {
+        columns_number();
+    }
+
+    // var c = null;
+    // if (setColumns) {
+    //     c = customColumns
+    // } else {
+    //     c = columns;
+    // }
+
+
+
     var g = new THREE.BoxGeometry(1, 1, 1);
     var m = new THREE.MeshStandardMaterial({
         color: 0xacacac,
@@ -399,19 +441,28 @@ function generate_columns() {
     });
 
 
-    if (!isColumns) {
+    if (setColumns) {
+
+
+        
 
         part.forEach(e => {
 
             group.remove(e);
         });
 
-        isColumns = true;
+
+
+
+        //columns_number();
+
+        setColumns = false;
+
     } else {
+        
+        offset = (wWidth * ftTom) / customColumns;
 
-        offset = (wWidth * ftTom) / columns;
-
-        for (var i = 0; i < columns - 1; i++) {
+        for (var i = 0; i < customColumns - 1; i++) {
 
             part.push(new THREE.Mesh(g, m));
 
@@ -429,17 +480,19 @@ function generate_columns() {
 
             }
             group.add(part[i]);
-
+            group.visible = true;
 
         }
+
         group.position.set(offset + wLeft.position.x, 0, 0);
         scene.add(group);
 
     }
 
+
     // console.log("Size of Columns:",(((offset/ftTom)-(thickness/12))*12)/(columns-1),"in");
 
-    $("#columnSize").html((((wWidth*12)-(2*thickness))/(columns)).toFixed(3) +" in, " +( (wWidth-(2*thickness/12))/(columns)).toFixed(3)  + " ft" );
+    $("#columnSize").html((((wWidth * 12) - (2 * thickness)) / (customColumns)).toFixed(3) + " in, " + ((wWidth - (2 * thickness / 12)) / (customColumns)).toFixed(3) + " ft");
 
 }
 
@@ -460,39 +513,39 @@ function onClick() {
 
 
     if (selectedObject) {
-
-        // selectedObject.material.color.set('#fafafa');
-
-        selectedObject.visible = false;
-
+     
+        adjacentParts.forEach(e => {
+            if(e == selectedObject){
+                outlinePass.visibleEdgeColor.set("#ff0000");
+                
+                selectedObject = null;
+            }
+            
+        });
+        
         for (var i = 0; i < columns; i++) {
-            console.log(i);
-            // if (part[i].uuid === selectedObject.uuid) {
-
-            //  if(i<i+1 && i>i-1){
-            //         if(selectedObject == part[i]){
-
-            //             selectedObject.visible = false;
-            //         }else{
-            //             selectedObject = null;
-            //         }
-
-
-            //     }
-
-
-            // }
+            
+            if (part[i] === selectedObject) {
+                    if(part[i-1]){
+                        //part[i-1].material.color.set('#ffff00');
+                        
+                        adjacentParts.push(part[i-1]);
+                    }
+                    if(part[i+1]){
+                        //part[i+1].material.color.set('#ff00ff');
+                        
+                        adjacentParts.push(part[i+1]);
+                    }
+                    part[i].visible = false;
+                    removed.push(part[i]);
+                    
+            }
+            else{
+                
+            }
         }
 
-
-        selectedObject = null;
-
-
-
-
-
     }
-
 }
 
 function onPointerMove(event) {
@@ -518,21 +571,40 @@ function onPointerMove(event) {
 
         if (res && res.object) {
 
-
             selectedObject = res.object;
-            // selectedObject.material.color.set('#f80000');
-
             s.push(selectedObject);
+            // selectedObject.material.color.set('#f80000');
+            if(s){
+               
+                adjacentParts.forEach(e => {
+                    if(e == s.lastIndexOf(e)){
+                        
+                      //  e.material.color.set("#ff0000");
+                        outlinePass.visibleEdgeColor.set("#ff0000");
+                        s = [];
+                        
+                    }
+                   
+                  
+                });
+               
+               
+            }else{
+                s.push(selectedObject);
+                outlinePass.visibleEdgeColor.set("#33ddee");
+            }
+        
             outlinePass.selectedObjects = s;
+           
 
         } else {
             s = [];
-           
+         
         }
 
 
     } else {
-        s = [];
+       
         outlinePass.selectedObjects = [];
         selectedObject = null;
     }
@@ -617,11 +689,93 @@ function post_process() {
     outlinePass.edgeGlow = 0;
     outlinePass.edgeThickness = 0.5;
     outlinePass.pulsePeriod = 0.5;
-    outlinePass.visibleEdgeColor.set("#ff0000");
+    // outlinePass.visibleEdgeColor.set("#ff0000");
 
     outlinePass.hiddenEdgeColor.set("#000000");
     composer.addPass(outlinePass);
-    effectFXAA = new THREE.ShaderPass( THREE.FXAAShader );
-    effectFXAA.uniforms[ 'resolution' ].value.set( 1 / fwidth, 1 / fheight );
+    effectFXAA = new THREE.ShaderPass(THREE.FXAAShader);
+    effectFXAA.uniforms['resolution'].value.set(1 / fwidth, 1 / fheight);
     // composer.addPass( effectFXAA );
+}
+
+function columns_number() {
+
+ 
+
+
+    while (columns_group.firstChild) {
+        columns_group.removeChild(columns_group.firstChild);
+    }
+    customColumns = columns;
+    // var columns_radio = (' <input class="form-check-input btn-check " type="radio" name="columnsOptions" id="columns',i+1,'"',' value = ',(i+1),' checked > <label class = "form-check-label btn btn-outline-secondary m-1" for = "columns',(i+1),'">', (i+1) ,'< /label>');
+    for (var i = columns - 1; i > substitubale; i--) {
+
+
+
+
+
+        var columns_radio = document.createElement("input");
+        columns_radio.type = "radio";
+        columns_radio.value = (i + 1);
+        columns_radio.id = "columns" + (i + 1);
+        columns_radio.setAttribute("onclick", "set_columns_number(" + (i + 1) + ")");
+        columns_radio.className = "form-check-input columns-change  btn-check";
+        columns_radio.name = "columnsOptions";
+
+        var columns_label = document.createElement("label");
+        columns_label.htmlFor = "columns" + (i + 1);
+        columns_label.className = "form-check-label btn btn-outline-secondary m-1";
+        columns_label.innerHTML = i + 1;
+
+
+
+
+        columns_group.appendChild(columns_radio);
+        columns_group.appendChild(columns_label);
+
+
+
+
+        // if ($("#columns" + (i + 1))) {
+
+
+        //     $("#columns" + (i + 1)).on('input',function () {
+        //         if ($(this).is(":checked")) {
+
+        //             customColumns = $(this).val();
+
+        //             setColumns = true;
+        //         }
+
+
+        //     })
+
+        // }
+
+        // console.log("segments:", i, " columns:", i + 1);
+
+    }
+
+    columns_group.firstElementChild.setAttribute("checked", "true");
+    isCreated = false
+
+}
+
+function set_columns_number(value) {
+    reset_adjacents_removed_columns();
+    customColumns = value;
+    setColumns = true;
+}
+
+function reset_adjacents_removed_columns(){
+    if(removed){
+        removed.forEach(e=> {
+           e.visible = true;
+        });
+    
+    }
+    removed = [];
+    
+    adjacentParts = [];
+    
 }
