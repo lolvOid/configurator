@@ -20,7 +20,8 @@ let segments, offset = 0,
     part = [],
     setColumns = false;
 
-let selectedObject = null;
+let selectedObject = null,
+    selectedObjects = [];
 let raycaster, pointer, mouse3D, group;
 let exporter;
 
@@ -48,8 +49,8 @@ function getValues() {
 
             setColumns = true;
             isCreated = true;
-            
-            
+
+
             reset_adjacents_removed_columns();
         }
     });
@@ -127,8 +128,12 @@ function init() {
     scene = new THREE.Scene();
     window.scene = scene;
     THREE.Cache.enabled = true;
-    camera = new THREE.PerspectiveCamera(50, fwidth / fheight, 0.01, 100);
-    camera.position.set(0, 5, 10);
+    camera = new THREE.PerspectiveCamera(25, fwidth / fheight, 0.01, 100);
+    camera.position.set(0, 0, 15);
+    camera.aspect = fwidth / fheight;
+    camera.layers.enable(0);
+    camera.layers.enable(1);
+    camera.layers.enable(2);
     // camera.lookAt(wBottom.position);
 
     raycaster = new THREE.Raycaster();
@@ -156,40 +161,49 @@ function init() {
     renderer.setSize(fwidth, fheight);
 
 
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1;
+    // renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    // renderer.toneMappingExposure = 1;
     renderer.outputEncoding = THREE.sRGBEncoding;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFShadowMap;
 
     viewer.appendChild(renderer.domElement);
     post_process();
+
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     //controls.addEventListener('change', render); // use if there is no animation loop
     controls.minDistance = 6;
     controls.maxDistance = 6;
     controls.panSpeed = 0;
-    
+
     controls.enableDamping = true;
     controls.dampingFactor = 0;
-    controls.target.set(0, 1, 0);
+    controls.target.set(0, 1, 5);
 
 
     getValues();
-    window.addEventListener('resize', onWindowResize);
+    window.addEventListener('resize', onWindowResize, true);
     document.addEventListener('pointermove', onPointerMove);
     document.addEventListener('click', onClick);
 }
 
 
+
+
 function onWindowResize() {
+    const canvas = renderer.domElement;
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    if (canvas.width !== width || canvas.height !== height) {
 
-    camera.aspect = fwidth / fheight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(fwidth, fheight);
+        camera.aspect = fwidth / fheight;
+        camera.updateProjectionMatrix();
 
-    composer.setSize(fwidth, fheight);
-    // effectFXAA.uniforms[ 'resolution' ].value.set( 1 / fwidth, 1 / fheight );
+        renderer.setSize(fwidth, fheight);
+        composer.setSize(fwidth, fheight);
+        effectFXAA.material.uniforms['resolution'].value.x = 1 / (fwidth * pixelRatio);
+        effectFXAA.material.uniforms['resolution'].value.y = 1 / (fheight * pixelRatio);
+    }
 
 }
 
@@ -205,10 +219,12 @@ function animate() {
 }
 
 function render() {
-    update_wardrobe();
-    add_loft();
-    generate_columns();
 
+    generate_columns();
+    add_loft();    
+    update_wardrobe();
+    update_columns();
+    
     // renderer.render(scene, camera);
     composer.render();
 }
@@ -304,40 +320,48 @@ function generate_wardrobe() {
     });
     wBottom = new THREE.Mesh(g, m);
     wBottom.position.set(0, 0, 0);
+    wBottom.layers.set(0);
 
     wBack = new THREE.Mesh(g, m);
     wBack.position.set(0, 0, 0);
+    wBottom.layers.set(0);
 
     wLeft = new THREE.Mesh(g, m);
     wLeft.position.set(0, 0, 0);
+    wLeft.layers.set(0);
 
     wRight = new THREE.Mesh(g, m);
     wRight.position.set(0, 0, 0);
+    wRight.layers.set(0);
 
     wTop = new THREE.Mesh(g, m);
     wTop.position.set(0, 0, 0);
+    wTop.layers.set(0);
 
     wpLoftTop = new THREE.Mesh(g, m);
     wpLoftTop.position.set(0, 0, 0);
     wpLoftTop.visible = false;
+    wpLoftTop.layers.set(1);
 
     wpLoftLeft = new THREE.Mesh(g, m);
     wpLoftLeft.position.set(0, 0, 0);
     wpLoftLeft.visible = false;
-
+    wpLoftLeft.layers.set(1);
 
     wpLoftRight = new THREE.Mesh(g, m);
     wpLoftRight.position.set(0, 0, 0);
     wpLoftRight.visible = false;
+    wpLoftRight.layers.set(1);
 
     wpLoftBottom = new THREE.Mesh(g, m);
     wpLoftBottom.position.set(0, 0, 0);
     wpLoftBottom.visible = false;
+    wpLoftBottom.layers.set(1);
 
     wpLoftBack = new THREE.Mesh(g, m);
     wpLoftBack.position.set(0, 0, 0);
     wpLoftBack.visible = false;
-
+    wpLoftBack.layers.set(1);
 
     scene.add(wBottom);
     scene.add(wBack);
@@ -354,18 +378,18 @@ function generate_wardrobe() {
 }
 
 function create_lights() {
-    directionalLight = new THREE.DirectionalLight(0xfafafa, 1);
-    directionalLight.position.set(0.5, 1, 0.5).normalize();
+    directionalLight = new THREE.DirectionalLight(0xfefefe, 0.2);
+    directionalLight.position.set(0,0, 0.5).normalize();
 
     scene.add(directionalLight);
 
-    var directionalLight1 = new THREE.DirectionalLight(0xfefefe, 1);
-    directionalLight1.position.set(-0.5, 1, -0.5).normalize();
+    var directionalLight1 = new THREE.DirectionalLight(0xfefefe, 0.4);
+    directionalLight1.position.set(-0.5, 0, 0).normalize();
 
 
     scene.add(directionalLight1);
 
-    ambientLight = new THREE.AmbientLight(0xdedede, 0.6); // soft white light
+    ambientLight = new THREE.AmbientLight(0xfefefe, 0.8); // soft white light
 
     scene.add(ambientLight);
 }
@@ -394,7 +418,7 @@ function generate_columns() {
 
 
 
-    
+
     if (wWidth > 2.5 && wWidth < 3.5) {
         substitubale = 0;
     } else if (wWidth > 3 && wWidth < 5) {
@@ -444,7 +468,7 @@ function generate_columns() {
     if (setColumns) {
 
 
-        
+
 
         part.forEach(e => {
 
@@ -459,7 +483,7 @@ function generate_columns() {
         setColumns = false;
 
     } else {
-        
+
         offset = (wWidth * ftTom) / customColumns;
 
         for (var i = 0; i < customColumns - 1; i++) {
@@ -468,9 +492,9 @@ function generate_columns() {
 
 
 
-            part[i].position.set(i * offset, (wBack.scale.y / 2) - ((thickness / 12) * ftTom), 0);
-            part[i].scale.set((thickness / 12) * ftTom, wHeight * ftTom, (wDepth + (thickness / 12)) * ftTom);
-            part[i].receiveShadow = true;
+            part[i].position.set(i * offset,(wBack.scale.y / 2) - ((thickness / 12) * ftTom), -wBottom.scale.z / 2);
+            // part[i].scale.set((thickness / 12) * ftTom, (wHeight + (thickness / 12)) * ftTom, (((2 * thickness / 12) + wDepth) * ftTom));
+           // part[i].receiveShadow = true;
 
 
 
@@ -479,14 +503,16 @@ function generate_columns() {
                 segment_id[i, j] = [i, part[j].uuid];
 
             }
+
             group.add(part[i]);
             group.visible = true;
-
+            
         }
-
+        group.layers.set(2);
         group.position.set(offset + wLeft.position.x, 0, 0);
-        scene.add(group);
 
+        scene.add(group);
+        
     }
 
 
@@ -513,35 +539,33 @@ function onClick() {
 
 
     if (selectedObject) {
-     
+
         adjacentParts.forEach(e => {
-            if(e == selectedObject){
-                outlinePass.visibleEdgeColor.set("#ff0000");
-                
+            if (e == selectedObject) {
+
                 selectedObject = null;
             }
-            
+
         });
-        
+
         for (var i = 0; i < columns; i++) {
-            
+
             if (part[i] === selectedObject) {
-                    if(part[i-1]){
-                        //part[i-1].material.color.set('#ffff00');
-                        
-                        adjacentParts.push(part[i-1]);
-                    }
-                    if(part[i+1]){
-                        //part[i+1].material.color.set('#ff00ff');
-                        
-                        adjacentParts.push(part[i+1]);
-                    }
-                    part[i].visible = false;
-                    removed.push(part[i]);
-                    
-            }
-            else{
-                
+                if (part[i - 1]) {
+                    //part[i-1].material.color.set('#ffff00');
+
+                    adjacentParts.push(part[i - 1]);
+                }
+                if (part[i + 1]) {
+                    //part[i+1].material.color.set('#ff00ff');
+
+                    adjacentParts.push(part[i + 1]);
+                }
+                part[i].visible = false;
+                removed.push(part[i]);
+
+            } else {
+
             }
         }
 
@@ -549,19 +573,50 @@ function onClick() {
 }
 
 function onPointerMove(event) {
+    if (event.changedTouches) {
+        pointer.x = event.changedTouches[0].pageX;
+        pointer.y = event.changedTouches[0].pageY;
+    } else {
+        pointer.x = event.clientX;
+        pointer.y = event.clientY;
+    }
 
 
-
-    pointer.x = (event.clientX / viewer.clientWidth) * 2 - 1;
-    pointer.y = -(event.clientY / viewer.clientHeight) * 2 + 1;
+    pointer.x = (event.clientX / fwidth) * 2 - 1;
+    pointer.y = -(event.clientY / fheight) * 2 + 1;
     raycaster.setFromCamera(pointer, camera);
+
+
     const intersects = raycaster.intersectObject(group, true);
 
-    var s = [];
+
+    // if (intersects.length > 0) {
+
+    //     selectedObject = intersects[0].object;
+
+    //     addSelectedObject(selectedObject);
+
+    //     adjacentParts.forEach(e => {
+    //         if (e == selectedObject) {
+
+
+    //             outlinePass.visibleEdgeColor.set("#ff0000");
+
+
+    //         }
+
+    //     });
+    //     outlinePass.selectedObjects = selectedObjects;
+
+    // } else {
+    //     outlinePass.visibleEdgeColor.set("#00ffff");
+    //     outlinePass.selectedObjects = [];
+
+    //     selectedObject = null;
+    // }
+
+
     if (intersects.length > 0) {
-
-
-
 
         const res = intersects.filter(function (res) {
 
@@ -569,48 +624,44 @@ function onPointerMove(event) {
 
         })[0];
 
+
         if (res && res.object) {
 
             selectedObject = res.object;
-            s.push(selectedObject);
-            // selectedObject.material.color.set('#f80000');
-            if(s){
-               
-                adjacentParts.forEach(e => {
-                    if(e == s.lastIndexOf(e)){
-                        
-                      //  e.material.color.set("#ff0000");
-                        outlinePass.visibleEdgeColor.set("#ff0000");
-                        s = [];
-                        
-                    }
-                   
-                  
-                });
-               
-               
-            }else{
-                s.push(selectedObject);
-                outlinePass.visibleEdgeColor.set("#33ddee");
-            }
-        
-            outlinePass.selectedObjects = s;
-           
+            addSelectedObject(selectedObject);
 
-        } else {
-            s = [];
-         
+            adjacentParts.forEach(e => {
+                if (e == selectedObject) {
+
+
+                    outlinePass.visibleEdgeColor.set("#ff0000");
+
+
+                }
+
+            });
+            outlinePass.selectedObjects = selectedObjects;
+
+
         }
 
-
     } else {
-       
+
+        outlinePass.visibleEdgeColor.set("#00ffff");
         outlinePass.selectedObjects = [];
+
         selectedObject = null;
     }
 
+}
+
+function addSelectedObject(object) {
+
+    selectedObjects = [];
+    selectedObjects.push(object);
 
 }
+
 const link = document.createElement('a');
 link.style.display = 'none';
 document.body.appendChild(link);
@@ -678,6 +729,11 @@ function post_process() {
 
     const renderPass = new THREE.RenderPass(scene, camera);
     composer.addPass(renderPass);
+
+
+    const copyPass = new THREE.ShaderPass(THREE.CopyShader);
+    // composer.addPass( copyPass );
+
     const ssaoPass = new THREE.SSAOPass(scene, camera, fwidth, fheight);
     ssaoPass.kernalRadius = 16;
     ssaoPass.minDistance = 0.005;
@@ -685,22 +741,27 @@ function post_process() {
     //    composer.addPass(ssaoPass);
 
     outlinePass = new THREE.OutlinePass(new THREE.Vector2(fwidth, fheight), scene, camera);
-    outlinePass.edgeStrength = 3;
+    outlinePass.edgeStrength = 5;
     outlinePass.edgeGlow = 0;
     outlinePass.edgeThickness = 0.5;
-    outlinePass.pulsePeriod = 0.5;
+    outlinePass.pulsePeriod = 0;
     // outlinePass.visibleEdgeColor.set("#ff0000");
 
-    outlinePass.hiddenEdgeColor.set("#000000");
+    // outlinePass.hiddenEdgeColor.set("#ff0000");
     composer.addPass(outlinePass);
+
+    const pixelRatio = renderer.getPixelRatio();
+
     effectFXAA = new THREE.ShaderPass(THREE.FXAAShader);
-    effectFXAA.uniforms['resolution'].value.set(1 / fwidth, 1 / fheight);
-    // composer.addPass( effectFXAA );
+    effectFXAA.material.uniforms['resolution'].value.x = 1 / (fwidth * pixelRatio);
+    effectFXAA.material.uniforms['resolution'].value.y = 1 / (fheight * pixelRatio);
+    // effectFXAA.uniforms['resolution'].value.set(1 / fwidth, 1 / fheight);
+    composer.addPass(effectFXAA);
 }
 
 function columns_number() {
 
- 
+
 
 
     while (columns_group.firstChild) {
@@ -767,15 +828,15 @@ function set_columns_number(value) {
     setColumns = true;
 }
 
-function reset_adjacents_removed_columns(){
-    if(removed){
-        removed.forEach(e=> {
-           e.visible = true;
+function reset_adjacents_removed_columns() {
+    if (removed) {
+        removed.forEach(e => {
+            e.visible = true;
         });
-    
+
     }
     removed = [];
-    
+
     adjacentParts = [];
-    
+
 }
