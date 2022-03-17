@@ -252,8 +252,8 @@ function update_wardrobe() {
     }
 
     if (wTop) {
-        wTop.scale.set((wWidth * ftTom) + ((2 * thickness / 12) * ftTom), (thickness / 12) * ftTom, wDepth * ftTom + (2 * thickness / 12) * ftTom);
-        wTop.position.set(0, ((wBack.scale.y) + (wTop.scale.y / 2)) - ((thickness / 12) * ftTom), 0);
+        wTop.scale.set((wWidth * ftTom), (thickness / 12) * ftTom, wDepth * ftTom + (2 * thickness / 12) * ftTom);
+        wTop.position.set(0, ((wBack.scale.y) + -(wTop.scale.y / 2)) - ((thickness / 12) * ftTom), 0);
 
 
     }
@@ -262,7 +262,7 @@ function update_wardrobe() {
 
     if (wpLoftBottom) {
         wpLoftBottom.scale.set((wWidth * ftTom) + ((2 * thickness / 12) * ftTom), (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));
-        wpLoftBottom.position.set(0, (wBack.scale.y) + (wpLoftBottom.scale.y / 2), 0);
+        wpLoftBottom.position.set(0, (wBack.scale.y) + (wpLoftBottom.scale.y / 2)-((thickness / 12) * ftTom), 0);
     }
 
     if (wpLoftBack) {
@@ -463,13 +463,7 @@ function generate_columns() {
 
 
 
-    var g = new THREE.BoxGeometry(1, 1, 1);
-    var m = new THREE.MeshStandardMaterial({
-        color: 0xacacac,
-        roughness: 1
-
-    });
-
+   
 
     if (setColumns) {
 
@@ -494,12 +488,17 @@ function generate_columns() {
 
         for (var i = 0; i < customColumns - 1; i++) {
 
+            var g = new THREE.BoxGeometry(1, 1, 1);
+            var m = new THREE.MeshStandardMaterial({
+                color: 0xacacac,
+            });
+        
             part.push(new THREE.Mesh(g, m));
 
 
 
-            part[i].position.set(i * offset, (wBack.scale.y / 2) - ((thickness / 24) * ftTom), (((thickness / 24)) * ftTom));
-            part[i].scale.set((thickness / 12) * ftTom, (wHeight + (thickness / 48)) * ftTom, (((thickness / 12) + wDepth) * ftTom));
+            part[i].position.set(i * offset, (wBack.scale.y / 2) - ((thickness /12) * ftTom), (((thickness / 24)) * ftTom));
+            part[i].scale.set((thickness / 12) * ftTom, (wHeight - (thickness /12)) * ftTom, (((thickness / 12) + wDepth) * ftTom));
            // part[i].receiveShadow = true;
 
             part[i].name = "segments_"+i;
@@ -511,10 +510,10 @@ function generate_columns() {
             }
 
             group.add(part[i]);
-          
+            
                 
         }
-        
+        group.name = "segments";
         group.layers.set(2);
         group.position.set(offset + wLeft.position.x, group.position.y,group.position.z);
         
