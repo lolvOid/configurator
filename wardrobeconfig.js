@@ -172,13 +172,13 @@ function init() {
 
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     //controls.addEventListener('change', render); // use if there is no animation loop
-    controls.minDistance = 6;
+    controls.minDistance = 2;
     controls.maxDistance = 6;
-    controls.panSpeed = 0;
-
+    controls.panSpeed = 1;
+    
     controls.enableDamping = true;
-    controls.dampingFactor = 0;
-    controls.target.set(0, 1, 5);
+    controls.dampingFactor = 0.05;
+    controls.target.set(0, 0,0);
 
 
     getValues();
@@ -223,18 +223,17 @@ function render() {
     generate_columns();
     add_loft();    
     update_wardrobe();
-    update_columns();
+    // update_columns();
     
     // renderer.render(scene, camera);
     composer.render();
 }
 
 
-
 function update_wardrobe() {
     if (wBottom) {
         wBottom.scale.set(wWidth * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));
-        wBottom.position.set(0, -((thickness / 24) * ftTom), 0);
+        wBottom.position.set(0, -((thickness / 24) * ftTom), ((thickness/24) * ftTom));
     }
     if (wBack) {
         wBack.scale.set(wWidth * ftTom, ((thickness / 12) + wHeight) * ftTom, (thickness / 12) * ftTom);
@@ -448,12 +447,6 @@ function generate_columns() {
         columns_number();
     }
 
-    // var c = null;
-    // if (setColumns) {
-    //     c = customColumns
-    // } else {
-    //     c = columns;
-    // }
 
 
 
@@ -492,8 +485,8 @@ function generate_columns() {
 
 
 
-            part[i].position.set(i * offset,(wBack.scale.y / 2) - ((thickness / 12) * ftTom), -wBottom.scale.z / 2);
-            // part[i].scale.set((thickness / 12) * ftTom, (wHeight + (thickness / 12)) * ftTom, (((2 * thickness / 12) + wDepth) * ftTom));
+            part[i].position.set(i * offset, (wBack.scale.y / 2) - ((thickness / 24) * ftTom), (((thickness / 24)) * ftTom));
+            part[i].scale.set((thickness / 12) * ftTom, (wHeight + (thickness / 48)) * ftTom, (((thickness / 12) + wDepth) * ftTom));
            // part[i].receiveShadow = true;
 
 
@@ -506,13 +499,14 @@ function generate_columns() {
 
             group.add(part[i]);
             group.visible = true;
-            
+                
         }
+        
         group.layers.set(2);
         group.position.set(offset + wLeft.position.x, 0, 0);
-
-        scene.add(group);
         
+        scene.add(group);
+
     }
 
 
@@ -751,7 +745,7 @@ function post_process() {
     composer.addPass(outlinePass);
 
     const pixelRatio = renderer.getPixelRatio();
-
+    
     effectFXAA = new THREE.ShaderPass(THREE.FXAAShader);
     effectFXAA.material.uniforms['resolution'].value.x = 1 / (fwidth * pixelRatio);
     effectFXAA.material.uniforms['resolution'].value.y = 1 / (fheight * pixelRatio);
