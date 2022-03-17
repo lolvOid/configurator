@@ -518,13 +518,14 @@ function generate_columns() {
         group.position.set(offset + wLeft.position.x, group.position.y,group.position.z);
         
         scene.add(group);
-
+       
+     
     }
 
 
     // console.log("Size of Columns:",(((offset/ftTom)-(thickness/12))*12)/(columns-1),"in");
-
-    $("#columnSize").html((((wWidth * 12) - (4 * thickness)) / (customColumns)).toFixed(3) + " in, " + ((wWidth - (2 * thickness / 12)) / (customColumns)).toFixed(3) + " ft");
+        
+    // $("#columnSize").html(((wWidth/customColumns)*12 - (customColumns*thickness)));
 
 }
 
