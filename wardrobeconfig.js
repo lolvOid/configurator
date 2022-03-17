@@ -175,7 +175,7 @@ function init() {
     controls.enableDamping = true;
     controls.dampingFactor = 0;
     controls.minDistance = 7 ;
-    controls.maxDistance = 8;
+    controls.maxDistance = 10;
     controls.panSpeed = 0;
     
     controls.enableDamping = true;
