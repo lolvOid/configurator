@@ -321,46 +321,56 @@ function generate_wardrobe() {
 
     });
     wBottom = new THREE.Mesh(g, m);
+    wBottom.name = "wardrobe_bottom";
     wBottom.position.set(0, 0, 0);
     wBottom.layers.set(0);
 
     wBack = new THREE.Mesh(g, m);
+    wBack.name = "wardrobe_back";
     wBack.position.set(0, 0, 0);
     wBottom.layers.set(0);
 
     wLeft = new THREE.Mesh(g, m);
+    wLeft.name = "wardrobe_left";
     wLeft.position.set(0, 0, 0);
     wLeft.layers.set(0);
 
     wRight = new THREE.Mesh(g, m);
+    wRight.name = "wardrobe_right";
     wRight.position.set(0, 0, 0);
     wRight.layers.set(0);
 
     wTop = new THREE.Mesh(g, m);
+    wTop.name = "wardrobe_top";
     wTop.position.set(0, 0, 0);
     wTop.layers.set(0);
 
     wpLoftTop = new THREE.Mesh(g, m);
+    wpLoftTop.name = "wardrobe_loft_top";
     wpLoftTop.position.set(0, 0, 0);
     wpLoftTop.visible = false;
     wpLoftTop.layers.set(1);
 
     wpLoftLeft = new THREE.Mesh(g, m);
+    wpLoftLeft.name = "wardrobe_loft_left";
     wpLoftLeft.position.set(0, 0, 0);
     wpLoftLeft.visible = false;
     wpLoftLeft.layers.set(1);
 
     wpLoftRight = new THREE.Mesh(g, m);
+    wpLoftRight.name = "wardrobe_loft_right";
     wpLoftRight.position.set(0, 0, 0);
     wpLoftRight.visible = false;
     wpLoftRight.layers.set(1);
 
-    wpLoftBottom = new THREE.Mesh(g, m);
+    wpLoftBottom = new THREE.Mesh(g, m)
+    wpLoftBottom.name = "wardrobe_loft_bottom";
     wpLoftBottom.position.set(0, 0, 0);
     wpLoftBottom.visible = false;
     wpLoftBottom.layers.set(1);
 
     wpLoftBack = new THREE.Mesh(g, m);
+    wpLoftBack.name = "wardrobe_loft_back";
     wpLoftBack.position.set(0, 0, 0);
     wpLoftBack.visible = false;
     wpLoftBack.layers.set(1);
@@ -420,7 +430,7 @@ function generate_columns() {
 
 
 
-
+    
     if (wWidth > 2.5 && wWidth < 3.5) {
         substitubale = 0;
     } else if (wWidth > 3 && wWidth < 5) {
@@ -492,7 +502,7 @@ function generate_columns() {
             part[i].scale.set((thickness / 12) * ftTom, (wHeight + (thickness / 48)) * ftTom, (((thickness / 12) + wDepth) * ftTom));
            // part[i].receiveShadow = true;
 
-            
+            part[i].name = "segments_"+i;
 
 
             for (var j = 0; j <= i; j++) {
