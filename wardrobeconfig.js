@@ -129,7 +129,7 @@ function init() {
     window.scene = scene;
     THREE.Cache.enabled = true;
     camera = new THREE.PerspectiveCamera(25, fwidth / fheight, 0.01, 100);
-    camera.position.set(0, 0, 15);
+    camera.position.set(0, 0.5, 15);
     camera.aspect = fwidth / fheight;
     camera.layers.enable(0);
     camera.layers.enable(1);
@@ -151,7 +151,7 @@ function init() {
     renderer = new THREE.WebGLRenderer({
         antialias: true,
         alpha: true,
-        preserveDrawingBuffer: false,
+        preserveDrawingBuffer: true,
 
 
 
@@ -172,13 +172,15 @@ function init() {
 
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     //controls.addEventListener('change', render); // use if there is no animation loop
-    controls.minDistance = 2;
-    controls.maxDistance = 6;
-    controls.panSpeed = 1;
+    controls.enableDamping = true;
+    controls.dampingFactor = 0;
+    controls.minDistance = 7 ;
+    controls.maxDistance = 8;
+    controls.panSpeed = 0;
     
     controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-    controls.target.set(0, 0,0);
+    controls.dampingFactor = 0;
+    controls.target.set(0,1.5, 0);
 
 
     getValues();
@@ -226,6 +228,7 @@ function render() {
     // update_columns();
     
     // renderer.render(scene, camera);
+    document.getElementById('capturedImage').src = renderer.domElement.toDataURL();
     composer.render();
 }
 
@@ -405,10 +408,10 @@ function helpers() {
 }
 
 function update_columns() {
-    part.forEach(element => {
-        element.scale.set((thickness / 12) * ftTom, (wHeight + (thickness / 12)) * ftTom, (((2 * thickness / 12) + wDepth) * ftTom));
+    // part.forEach(element => {
+    //     element.scale.set((thickness / 12) * ftTom, (wHeight + (thickness / 12)) * ftTom, (((2 * thickness / 12) + wDepth) * ftTom));
 
-    });
+    // });
 
 
 }
@@ -462,9 +465,9 @@ function generate_columns() {
 
 
 
-
+   
         part.forEach(e => {
-
+            
             group.remove(e);
         });
 
@@ -489,7 +492,7 @@ function generate_columns() {
             part[i].scale.set((thickness / 12) * ftTom, (wHeight + (thickness / 48)) * ftTom, (((thickness / 12) + wDepth) * ftTom));
            // part[i].receiveShadow = true;
 
-
+            
 
 
             for (var j = 0; j <= i; j++) {
@@ -498,12 +501,12 @@ function generate_columns() {
             }
 
             group.add(part[i]);
-            group.visible = true;
+          
                 
         }
         
         group.layers.set(2);
-        group.position.set(offset + wLeft.position.x, 0, 0);
+        group.position.set(offset + wLeft.position.x, group.position.y,group.position.z);
         
         scene.add(group);
 
@@ -512,7 +515,7 @@ function generate_columns() {
 
     // console.log("Size of Columns:",(((offset/ftTom)-(thickness/12))*12)/(columns-1),"in");
 
-    $("#columnSize").html((((wWidth * 12) - (2 * thickness)) / (customColumns)).toFixed(3) + " in, " + ((wWidth - (2 * thickness / 12)) / (customColumns)).toFixed(3) + " ft");
+    $("#columnSize").html((((wWidth * 12) - (4 * thickness)) / (customColumns)).toFixed(3) + " in, " + ((wWidth - (2 * thickness / 12)) / (customColumns)).toFixed(3) + " ft");
 
 }
 
