@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name='viewport' content='width=device-width'/>
+    <meta name='viewport' content='width=device-width' />
     <title>Wardrobe Config</title>
 
 
@@ -33,15 +33,15 @@
     <script src="./threejs/shaders/CopyShader.js"></script>
     <script src="./threejs/math/SimplexNoise.js"></script>
     <script src="./threejs/postprocessing/SSAOPass.js"></script>
-    
-    
+
+
 
 </head>
 
 <body>
     <div class="rightnavigator shadow">
         <div class="col-12">
-            <form action=""  class="p-2">
+            <form action="" class="p-2">
                 <h5 class="text-center">Wardrobe Options</h5>
                 <div class="form-control m-1">
                     <label for="width">Width: <output id="rangeoutput">2.5</output> ft</label>
@@ -50,9 +50,9 @@
 
                     <h6>Choose Columns:</h6>
                     <div class="d-md-inline-block justify-content-center " id="columns-group">
-                       
+
                     </div>
-                    
+
                     <p>Verticle Columns: <span id="columnSize"> 1in</span></p>
                 </div>
 
@@ -100,9 +100,8 @@
 
                 <div class="form-control m-1">
                     <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" name="loftOptions" id="addloft" value="option1" > 
+                        <input class="form-check-input" type="checkbox" name="loftOptions" id="addloft">
                         <label class="form-check-label" for="addloft" id="loftLabel"></label>
-
                     </div>
 
                     <div class="form-check-inline" id="loftOptionsPanel">
@@ -127,8 +126,8 @@
                 </div>
 
                 <div class=" m-1">
-                    <button  class="btn btn-outline-success"> Reset</button>
-                    <button  class="btn btn-outline-dark" id="export"> Export</button>
+                    <button class="btn btn-outline-success"> Reset</button>
+                    <button class="btn btn-outline-dark" id="export"> Export</button>
                 </div>
 
 
@@ -139,8 +138,8 @@
 
 
     <div id="modelviewer"></div>
-   
-   
+
+
 
     <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js"
         integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="anonymous"></script>
