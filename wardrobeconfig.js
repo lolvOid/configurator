@@ -920,10 +920,10 @@ function create_hanger() {
 function update_hanger(segmentNumber) {
     if (hangerRod) {
         hangerRod.scale.set(1, offset, 1);
-        hangerRod.position.set((group.position.x + part[segmentNumber].position.x) - offset / 2,((wTop.position.y) - (ftTom * (1.5 / 12)))-  (1 / 12) * ftTom+( thickness / 12) * ftTom, wLeft.position.z / 2);
+        hangerRod.position.set((group.position.x + part[segmentNumber].position.x) - offset / 2, wTop.position.y - (1.5 / 12) * ftTom - wTop.scale.y , wLeft.position.z / 2);
+            console.log(((wTop.position.y +wTop.scale.y/2) -  ((1 / 12) * ftTom + hangerRod.scale.y/2)/ftTom)*12);
+  
         
-
-        // console.log(((wTop.position.y - hangerRod.position.y)+(wTop.scale.y)/ftTom)*12);
     }
 
 
