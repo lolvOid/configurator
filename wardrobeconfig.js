@@ -258,60 +258,57 @@ function render() {
 function update_wardrobe() {
     if (wBottom) {
         wBottom.scale.set(wWidth * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));
-        wBottom.position.set(0, (2 / 12) * ftTom + (thickness / 12) * ftTom, ((thickness / 24) * ftTom));
-   //   console.log((wBottom.position.y/ftTom)*12);
+        wBottom.position.set(0, (2 / 12) * ftTom + (thickness / 24) * ftTom , ((thickness / 24) * ftTom));
+     
     }
     if (wBack) {
-        wBack.scale.set(wWidth * ftTom, ( (wHeight   + (thickness / 12)) ) * ftTom  , (thickness / 12) * ftTom);
-        wBack.position.set(0, (wBack.scale.y / 2) - ((thickness / 12) * ftTom), -wBottom.scale.z / 2);
-        console.log(wBack.scale.y/ftTom)
+        wBack.scale.set(wWidth * ftTom, wHeight*ftTom -( 2/12  * ftTom)  , (thickness / 12) * ftTom);
+        wBack.position.set(0, (wBack.scale.y / 2)  +wBottom.position.y - wBottom.scale.y/2, -wBottom.scale.z / 2);
+        
     }
-    if (wLeft) {
-        wLeft.scale.set((thickness / 12) * ftTom, (wHeight + (thickness / 12)) * ftTom, (((2 * thickness / 12) + wDepth) * ftTom));
-        wLeft.position.set(-(((thickness / 24) * ftTom) + (wBottom.scale.x / 2)), (wBack.scale.y / 2) - ((thickness / 12) * ftTom), 0);
-    }
-    if (wRight) {
-        wRight.scale.set((thickness / 12) * ftTom, (wHeight + (thickness / 12)) * ftTom, (((2 * thickness / 12) + wDepth) * ftTom));
-        wRight.position.set((((thickness / 24) * ftTom) + (wBottom.scale.x / 2)), (wBack.scale.y / 2) - ((thickness / 12) * ftTom), 0);
-    }
-
+   
     if (wTop) {
         wTop.scale.set((wWidth * ftTom), (thickness / 12) * ftTom, wDepth * ftTom + (2 * thickness / 12) * ftTom);
-        wTop.position.set(0, ((wBack.scale.y) + -(wTop.scale.y / 2)) - ((thickness / 12) * ftTom), 0);
+        wTop.position.set(0, ((wBack.scale.y)+wBottom.position.y)-thickness/14*ftTom , 0);
 
-
+        // ((wBack.scale.y)-wTop.scale.y/2+wBottom.position.y+wBottom.scale.y/2-(thickness/12)*ftTom)
     }
 
+
+    if (wLeft) {
+        wLeft.scale.set((thickness / 12) * ftTom, (wHeight ) * ftTom, (((2 * thickness / 12) + wDepth) * ftTom));
+        wLeft.position.set(-(((thickness / 24) * ftTom) + (wBack.scale.x / 2)),(wBack.scale.y / 2) +(wBottom.position.y)-wBottom.scale.y-thickness/24*ftTom, 0);
+       
+    }
+    if (wRight) {
+        wRight.scale.set((thickness / 12) * ftTom, (wHeight) * ftTom, (((2 * thickness / 12) + wDepth) * ftTom));
+        wRight.position.set((((thickness / 24) * ftTom) + (wBack.scale.x / 2)), (wBack.scale.y / 2) +(wBottom.position.y)-wBottom.scale.y-thickness/24*ftTom, 0);
+    }
 
 
     if (wpLoftBottom) {
-        wpLoftBottom.scale.set((wWidth * ftTom) + ((2 * thickness / 12) * ftTom), (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));
-        wpLoftBottom.position.set(0, (wBack.scale.y) + (wpLoftBottom.scale.y / 2) - ((thickness / 12) * ftTom), 0);
+      wpLoftBottom.scale.set(wWidth*ftTom, (thickness / 12) * ftTom,wDepth*ftTom  + (2*(thickness / 12) * ftTom));
+      wpLoftBottom.position.set(wTop.position.x,wTop.position.y+wpLoftBottom.scale.y, wTop.position.z);
     }
 
     if (wpLoftBack) {
-        wpLoftBack.scale.set(wWidth * ftTom, ((thickness / 12) + wLoft) * ftTom, (thickness / 12) * ftTom);
-        wpLoftBack.position.set(0, (wpLoftBottom.position.y) + (wpLoftBack.scale.y / 2) - ((thickness / 12) * ftTom), -wpLoftBottom.scale.z / 2);
+       wpLoftBack.scale.set(wWidth * ftTom + (wpLoftLeft.scale.x + wpLoftRight.scale.x), wLoft*ftTom  , (thickness / 12) * ftTom);
+       wpLoftBack.position.set(0,wpLoftBottom.position.y + wpLoftBack.scale.y/2  - wpLoftBottom.scale.y/2, -wpLoftBottom.scale.z/2 + (thickness / 24) * ftTom);
     }
     if (wpLoftLeft) {
-        wpLoftLeft.scale.set((thickness / 12) * ftTom, (wLoft + (thickness / 12)) * ftTom, (((2 * thickness / 12) + wDepth) * ftTom));
-        wpLoftLeft.position.set(-(((thickness / 24) * ftTom) + (wBottom.scale.x / 2)), (wpLoftBottom.position.y) + ((wpLoftBack.scale.y / 2) - ((thickness / 12) * ftTom)), 0);
+      wpLoftLeft.scale.set(thickness/12*ftTom, wLoft * ftTom, ((2*thickness/12)+wDepth)*ftTom);
+      wpLoftLeft.position.set(-(thickness/24 * ftTom+ wpLoftBottom.scale.x/2), wpLoftBottom.position.y+wpLoftLeft.scale.y/2 - wpLoftBottom.scale.y/2,0);
     }
+
 
     if (wpLoftRight) {
-        wpLoftRight.scale.set((thickness / 12) * ftTom, (wLoft + (thickness / 12)) * ftTom, (((2 * thickness / 12) + wDepth) * ftTom));
-        wpLoftRight.position.set((((thickness / 24) * ftTom) + (wBottom.scale.x / 2)), (wpLoftBottom.position.y) + ((wpLoftRight.scale.y / 2) - ((thickness / 12) * ftTom)), 0);
+        wpLoftRight.scale.set(thickness/12*ftTom, wLoft * ftTom, ((2*thickness/12)+wDepth)*ftTom);
+        wpLoftRight.position.set((thickness/24 * ftTom+ wpLoftBottom.scale.x/2), wpLoftBottom.position.y+wpLoftRight.scale.y/2 - wpLoftBottom.scale.y/2,0);
     }
     if (wpLoftTop) {
-        wpLoftTop.scale.set((wWidth * ftTom) + ((2 * thickness / 12) * ftTom), (thickness / 12) * ftTom, wDepth * ftTom + (2 * thickness / 12) * ftTom);
-        wpLoftTop.position.set(0, (wpLoftBottom.position.y) + (((wpLoftBack.scale.y) + (wpLoftTop.scale.y / 2)) - ((thickness / 12) * ftTom)), 0);
+      wpLoftTop.scale.set(wWidth*ftTom, (thickness / 12) * ftTom,wDepth*ftTom  + (2*(thickness / 12) * ftTom));
+      wpLoftTop.position.set(0,wpLoftBack.scale.y+wpLoftBottom.position.y - (thickness/12)*ftTom  ,0 );
     }
-
-
-
-
-
-
 }
 
 function add_loft() {
@@ -415,26 +412,26 @@ function generate_wardrobe() {
 }
 
 function create_lights() {
-    directionalLight = new THREE.DirectionalLight(0xfefefe, 0.2);
+    directionalLight = new THREE.DirectionalLight(0xfefefe,0.4);
     directionalLight.position.set(0, 0, 0.5).normalize();
 
     scene.add(directionalLight);
 
-    var directionalLight1 = new THREE.DirectionalLight(0xfefefe, 0.4);
-    directionalLight1.position.set(-0.5, 0, 0).normalize();
+    var directionalLight1 = new THREE.DirectionalLight(0xfefefe, 0.2);
+    directionalLight1.position.set(0, 0, -0.5).normalize();
 
 
     scene.add(directionalLight1);
 
-    ambientLight = new THREE.AmbientLight(0xfefefe, 0.8); // soft white light
+    ambientLight = new THREE.AmbientLight(0x828282, 1); // soft white light
 
     scene.add(ambientLight);
 }
 
 function helpers() {
     // const gridHelper = new THREE.GridHelper(400, 40, 0x0000ff, 0x808080);
-    // gridHelper.position.y = -150;
-    // gridHelper.position.x = -150;
+    // gridHelper.position.y = 0;
+    // gridHelper.position.x = 0;
 
     // scene.add(gridHelper);
 
@@ -452,7 +449,7 @@ function update_columns() {
 }
 
 function generate_columns() {
-
+    
 
 
 
@@ -508,7 +505,8 @@ function generate_columns() {
 
     } else {
 
-        offset = (wWidth * ftTom) / customColumns;
+        offset = (wWidth * ftTom)/ customColumns;
+      
 
         for (var i = 0; i < customColumns - 1; i++) {
 
@@ -521,8 +519,8 @@ function generate_columns() {
             part.push(new THREE.Mesh(g, m));
 
 
-            part[i].scale.set((thickness / 12) * ftTom, (wHeight - (thickness / 12)) * ftTom - (2 / 12) * ftTom - (thickness / 12) * ftTom, (((thickness / 12) + wDepth) * ftTom));
-            part[i].position.set(i * offset, (wBack.scale.y / 2) - ((thickness / 12) * ftTom) + (2 / 12) * ftTom - (thickness / 36) * ftTom, (((thickness / 24)) * ftTom));
+            part[i].scale.set((thickness / 12) * ftTom,wHeight*ftTom -( 2/12  * ftTom) + thickness/12 * ftTom -wBottom.position.y, (((thickness / 12) + wDepth) * ftTom));
+            part[i].position.set(i * offset, (wBack.scale.y / 2)  +wBottom.position.y - wBottom.scale.y/2 , (((thickness / 24)) * ftTom));
 
             // part[i].receiveShadow = true;
 
@@ -921,8 +919,9 @@ function create_hanger() {
 
 function update_hanger(segmentNumber) {
     if (hangerRod) {
-        hangerRod.position.set((group.position.x + part[segmentNumber].position.x) - offset / 2, (wTop.position.y) - (ftTom * (1.5 / 12)) - (2 * thickness / 12) * ftTom, wLeft.position.z / 2);
         hangerRod.scale.set(1, offset, 1);
+        hangerRod.position.set((group.position.x + part[segmentNumber].position.x) - offset / 2,((wTop.position.y) - (ftTom * (1.5 / 12)))-  (1 / 12) * ftTom+( thickness / 12) * ftTom, wLeft.position.z / 2);
+        
 
         // console.log(((wTop.position.y - hangerRod.position.y)+(wTop.scale.y)/ftTom)*12);
     }
