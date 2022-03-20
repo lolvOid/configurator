@@ -1140,12 +1140,19 @@ function create_internalDrawerLarge() {
 function update_internalDrawerLarge(segmentNumber) {
     if (ID_L) {
         ID_L.scale.set(offset, (10 / 12) * ftTom, wDepth * ftTom);
-        ID_L.position.set((group.position.x + part[segmentNumber].position.x) - offset / 2, ED.position.y + ID_L.scale.y + (thickness / 12) * ftTom, wLeft.position.z / 2);
+        if(ED){
+            ID_L.position.set((group.position.x + part[segmentNumber].position.x) - offset / 2, ED.position.y + ID_L.scale.y + (thickness / 12) * ftTom, wLeft.position.z / 2);    
+        }
+        else{
+            ID_L.position.set((group.position.x + part[segmentNumber].position.x) - offset / 2, wBottom.position.y + ID_L.scale.y/2 + (thickness / 12) * ftTom, wLeft.position.z / 2);
+        }
+        
+        
     }
 }
 
 function remove_all_internal(){
-    
+
     if(bot_shelf_group){
         scene.remove(bot_shelf_group);
     }
