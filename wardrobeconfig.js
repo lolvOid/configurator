@@ -33,10 +33,11 @@ var removed = [];
 var adjacentParts = [];
 var substitubale = 0;
 var columns_group = document.getElementById("columns-group");
-var shelf_group;
+var top_shelf_group, bot_shelf_group;
 let hangerRod;
 
-let shelves = [];
+let top_shelves = [],
+    bot_shelves = [];
 
 let internalPart;
 let locker, ID_S, ID_L, ED, m_splitter;
@@ -147,7 +148,8 @@ function init() {
     pointer = new THREE.Vector2();
 
     group = new THREE.Group();
-    shelf_group = new THREE.Group();
+    top_shelf_group = new THREE.Group();
+    bot_shelf_group = new THREE.Group();
     internalPart = new THREE.Group();
     exporter = new THREE.GLTFExporter();
     create_lights();
@@ -200,13 +202,15 @@ function init() {
 
 }
 
-create_hanger();
-//create_shelf(3);
-create_h_splitter();
-create_locker();
-create_internalDrawerSmall();
-create_externalDrawer();
-create_internalDrawerLarge();
+// create_hanger();
+// create_top_shelves(3);
+// create_bot_shelves(2);
+
+// create_h_splitter();
+// create_locker();
+// create_internalDrawerSmall();
+// create_externalDrawer();
+// create_internalDrawerLarge();
 function onWindowResize() {
     const canvas = renderer.domElement;
     const width = canvas.clientWidth;
@@ -242,7 +246,7 @@ function render() {
     update_wardrobe();
 
 
-    
+
     // update_columns();
 
     // renderer.render(scene, camera);
@@ -254,11 +258,13 @@ function render() {
 function update_wardrobe() {
     if (wBottom) {
         wBottom.scale.set(wWidth * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));
-        wBottom.position.set(0, -((thickness / 24) * ftTom), ((thickness / 24) * ftTom));
+        wBottom.position.set(0, (2 / 12) * ftTom + (thickness / 12) * ftTom, ((thickness / 24) * ftTom));
+   //   console.log((wBottom.position.y/ftTom)*12);
     }
     if (wBack) {
-        wBack.scale.set(wWidth * ftTom, ((thickness / 12) + wHeight) * ftTom, (thickness / 12) * ftTom);
+        wBack.scale.set(wWidth * ftTom, ( (wHeight   + (thickness / 12)) ) * ftTom  , (thickness / 12) * ftTom);
         wBack.position.set(0, (wBack.scale.y / 2) - ((thickness / 12) * ftTom), -wBottom.scale.z / 2);
+        console.log(wBack.scale.y/ftTom)
     }
     if (wLeft) {
         wLeft.scale.set((thickness / 12) * ftTom, (wHeight + (thickness / 12)) * ftTom, (((2 * thickness / 12) + wDepth) * ftTom));
@@ -515,9 +521,9 @@ function generate_columns() {
             part.push(new THREE.Mesh(g, m));
 
 
+            part[i].scale.set((thickness / 12) * ftTom, (wHeight - (thickness / 12)) * ftTom - (2 / 12) * ftTom - (thickness / 12) * ftTom, (((thickness / 12) + wDepth) * ftTom));
+            part[i].position.set(i * offset, (wBack.scale.y / 2) - ((thickness / 12) * ftTom) + (2 / 12) * ftTom - (thickness / 36) * ftTom, (((thickness / 24)) * ftTom));
 
-            part[i].position.set(i * offset, (wBack.scale.y / 2) - ((thickness / 12) * ftTom), (((thickness / 24)) * ftTom));
-            part[i].scale.set((thickness / 12) * ftTom, (wHeight - (thickness / 12)) * ftTom, (((thickness / 12) + wDepth) * ftTom));
             // part[i].receiveShadow = true;
 
             part[i].name = "segments_" + i;
@@ -538,31 +544,33 @@ function generate_columns() {
 
         scene.add(group);
 
-        // create_shelf(3);
+        // create_top_shelves(3);
 
 
         // console.log(wLeft.position.x-part[0].position.x);
         // console.log(part[0].position.xoffset);
         // console.log(wLeft.position.x/2);
 
-        if(columns>3){
+        if (columns > 3) {
             update_hanger(1);
-          //  update_shelves(1);
-            update_h_splitter((group.position.x + part[1].position.x) - offset / 2, wTop.position.y -(3*ftTom)+wTop.scale.y/2   +(thickness/12)*ftTom, offset);
+            update_top_shelves(1);
+            update_bot_shelves(1);
+            update_h_splitter((group.position.x + part[1].position.x) - offset / 2, wTop.position.y - (3 * ftTom) + wTop.scale.y / 2 + (thickness / 12) * ftTom, offset);
             update_locker(1);
             update_internalDrawerSmall(1);
             update_externalDrawer(1);
             update_internalDrawerLarge(1);
-        }else{
+        } else {
             update_hanger(0);
-           // update_shelves(0);
-            update_h_splitter((group.position.x + part[0].position.x) - offset / 2, wTop.position.y -(3*ftTom)+wTop.scale.y/2   +(thickness/12)*ftTom, offset);
+            update_top_shelves(0);
+            update_bot_shelves(0);
+            update_h_splitter((group.position.x + part[0].position.x) - offset / 2, wTop.position.y - (3 * ftTom) + wTop.scale.y / 2 + (thickness / 12) * ftTom, offset);
             update_locker(0);
             update_internalDrawerSmall(0);
             update_externalDrawer(0);
             update_internalDrawerLarge(0);
         }
-      
+
     }
 
 
@@ -894,12 +902,15 @@ function reset_adjacents_removed_columns() {
 function create_hanger() {
     var g = new THREE.CylinderGeometry((1 / 12) * ftTom, (1 / 12) * ftTom, 1, 32, 1);
     var m = new THREE.MeshStandardMaterial({
-        color: 0xdedede, roughness:0.2, metalness:0.4
+        color: 0xdedede,
+        roughness: 0.2,
+        metalness: 0.4
     });
 
     m.name = "m_rod";
-    hangerRod = new THREE.Mesh(g, m);
 
+    hangerRod = new THREE.Mesh(g, m);
+    hangerRod.name = "hanger_rod";
 
     hangerRod.rotateZ(90 * THREE.Math.DEG2RAD);
 
@@ -910,19 +921,19 @@ function create_hanger() {
 
 function update_hanger(segmentNumber) {
     if (hangerRod) {
-        hangerRod.position.set((group.position.x + part[segmentNumber].position.x) - offset / 2, (wTop.position.y) - (ftTom * (1.5 / 12)) - (2*thickness/12)*ftTom, wLeft.position.z / 2);
+        hangerRod.position.set((group.position.x + part[segmentNumber].position.x) - offset / 2, (wTop.position.y) - (ftTom * (1.5 / 12)) - (2 * thickness / 12) * ftTom, wLeft.position.z / 2);
         hangerRod.scale.set(1, offset, 1);
-     
+
         // console.log(((wTop.position.y - hangerRod.position.y)+(wTop.scale.y)/ftTom)*12);
     }
 
-  
+
 
 
 }
 
 
-function create_shelf(count) {
+function create_top_shelves(count) {
 
     var g = new THREE.BoxGeometry(1, 1, 1);
     var m = new THREE.MeshStandardMaterial({
@@ -930,41 +941,78 @@ function create_shelf(count) {
     });
     m.name = "m_shelf";
 
-    if (shelves.length > 0) {
+    if (top_shelves.length > 0) {
 
     } else {
 
         for (var i = 0; i < count; i++) {
-            shelves[i] = new THREE.Mesh(g, m);
-
-            shelf_group.add(shelves[i]);
+            top_shelves[i] = new THREE.Mesh(g, m);
+            top_shelves[i].name = "top_shelf_" + i;
+            top_shelf_group.add(top_shelves[i]);
 
         }
-
-        scene.add(shelf_group);
+        top_shelf_group.name = "top_shelves";
+        scene.add(top_shelf_group);
     }
 
 
 
 }
 
-function update_shelves(segmentNumber) {
+function update_top_shelves(segmentNumber) {
 
     var vertical_offset = (1 * ftTom);
 
 
-    for (var i = 0; i < shelves.length; i++) {
-        shelves[i].scale.set(offset, (thickness / 12) * ftTom, wDepth * ftTom);
+    for (var i = 0; i < top_shelves.length; i++) {
+        top_shelves[i].scale.set(offset, (thickness / 12) * ftTom, wDepth * ftTom);
 
-        shelves[i].position.set((group.position.x + part[segmentNumber].position.x) - offset / 2, (i * vertical_offset), wLeft.position.z / 2);
+        top_shelves[i].position.set((group.position.x + part[segmentNumber].position.x) - offset / 2, (i * vertical_offset), wLeft.position.z / 2);
 
     }
 
-    shelf_group.position.set(shelf_group.position.x, wTop.position.y - (shelves.length * ftTom)+(thickness/12)*ftTom+wTop.scale.y/2, shelf_group.position.z);
-    
+    top_shelf_group.position.set(top_shelf_group.position.x, wTop.position.y - (top_shelves.length * ftTom) + (thickness / 12) * ftTom + wTop.scale.y / 2, top_shelf_group.position.z);
+
 }
 
+function create_bot_shelves(count) {
+    var g = new THREE.BoxGeometry(1, 1, 1);
+    var m = new THREE.MeshStandardMaterial({
+        color: 0xfaaaee
+    });
+    m.name = "m_bot_shelf";
 
+    if (bot_shelves.length > 0) {
+
+    } else {
+
+        for (var i = 0; i < count; i++) {
+            bot_shelves[i] = new THREE.Mesh(g, m);
+            bot_shelves[i].name = "bot_shelf_" + i;
+            bot_shelf_group.add(bot_shelves[i]);
+
+        }
+        bot_shelf_group.name = "bot_shelves";
+        scene.add(bot_shelf_group);
+    }
+
+}
+
+function update_bot_shelves(segmentNumber) {
+    var vertical_offset = (1 * ftTom);
+
+
+    for (var i = 0; i < bot_shelves.length; i++) {
+        bot_shelves[i].scale.set(offset, (thickness / 12) * ftTom, wDepth * ftTom);
+
+        bot_shelves[i].position.set((group.position.x + part[segmentNumber].position.x) - offset / 2, (i * vertical_offset), wLeft.position.z / 2);
+
+    }
+    
+    
+    bot_shelf_group.position.set(bot_shelf_group.position.x, wBottom.position.y + vertical_offset - (bot_shelves.length*thickness/12)*ftTom  , bot_shelf_group.position.z);
+    
+}
 
 function create_h_splitter() {
     var g = new THREE.BoxGeometry(1, 1, 1);
@@ -973,10 +1021,10 @@ function create_h_splitter() {
     });
     m.name = "m_splitter";
     m_splitter = new THREE.Mesh(g, m);
+    m_splitter.name = "horizontal_splitter";
 
+    scene.add(m_splitter);
 
-  scene.add(m_splitter);
-    
 
 }
 
@@ -1006,7 +1054,7 @@ function create_locker() {
     });
     m.name = "m_locker";
     locker = new THREE.Mesh(g, m);
-
+    locker.name = "locker";
     scene.add(locker);
 
 }
@@ -1015,13 +1063,12 @@ function update_locker(segmentNumber) {
 
     if (locker) {
         locker.scale.set(offset, (7.125 / 12) * ftTom, wDepth * ftTom)
-        if(m_splitter){
-            locker.position.set((group.position.x + part[segmentNumber].position.x) - offset / 2,  m_splitter.position.y - locker.scale.y/2 - m_splitter.scale.y/2 , wLeft.position.z / 2);
+        if (m_splitter) {
+            locker.position.set((group.position.x + part[segmentNumber].position.x) - offset / 2, m_splitter.position.y - locker.scale.y / 2 - m_splitter.scale.y / 2, wLeft.position.z / 2);
+        } else if (top_shelves) {
+            locker.position.set((group.position.x + part[segmentNumber].position.x) - offset / 2, top_shelf_group.position.y - wTop.scale.y / 2 - (4 * thickness / 12) * ftTom, wLeft.position.z / 2);
         }
-        else if(shelves){
-            locker.position.set((group.position.x + part[segmentNumber].position.x) - offset / 2,shelf_group.position.y-wTop.scale.y/2-(4*thickness/12)*ftTom, wLeft.position.z / 2);
-        }
-        
+
     }
 
 }
@@ -1033,7 +1080,7 @@ function remove_locker() {
 
 }
 
-function create_internalDrawerSmall(){
+function create_internalDrawerSmall() {
     var g = new THREE.BoxGeometry(1, 1, 1);
     var m = new THREE.MeshStandardMaterial({
         color: 0xaaddaa
@@ -1041,56 +1088,88 @@ function create_internalDrawerSmall(){
     m.name = "m_internal_drawer_small";
     ID_S = new THREE.Mesh(g, m);
 
+    ID_S.name = "internal_drawer_small";
     scene.add(ID_S);
 }
 
-function update_internalDrawerSmall(segmentNumber){
-    if(ID_S){
+function update_internalDrawerSmall(segmentNumber) {
+    if (ID_S) {
         ID_S.scale.set(offset, (8 / 12) * ftTom, wDepth * ftTom)
-        if(locker){
-            ID_S.position.set((group.position.x + part[segmentNumber].position.x) - offset / 2,  locker.position.y-ID_S.scale.y+(thickness/24)*ftTom, wLeft.position.z / 2);
-        }
-        else{
-            IDS.position.set((group.position.x + part[segmentNumber].position.x) - offset / 2,  m_splitter.position.y-ID_S.scale.y/2, wLeft.position.z / 2);
+        if (locker) {
+            ID_S.position.set((group.position.x + part[segmentNumber].position.x) - offset / 2, locker.position.y - ID_S.scale.y + (thickness /24) * ftTom, wLeft.position.z / 2);
+        } else {
+            ID_S.position.set((group.position.x + part[segmentNumber].position.x) - offset / 2, m_splitter.position.y - ID_S.scale.y / 2  - (thickness / 24) * ftTom, wLeft.position.z / 2);
         }
     }
 }
 
-function create_externalDrawer(){
+function create_externalDrawer() {
     var g = new THREE.BoxGeometry(1, 1, 1);
     var m = new THREE.MeshStandardMaterial({
         color: 0xff7f50
     });
     m.name = "m_externaldrawer";
+ 
     ED = new THREE.Mesh(g, m);
-
+    ED.name = "external_drawer";
     scene.add(ED);
 
 }
 
 
 
-function update_externalDrawer(segmentNumber){
-    if(ED){
-        ED.scale.set(offset,ftTom,wDepth*ftTom);
-        ED.position.set((group.position.x + part[segmentNumber].position.x) - offset / 2,  wBottom.position.y+ED.scale.y/2, wLeft.position.z / 2);
+function update_externalDrawer(segmentNumber) {
+    if (ED) {
+        ED.scale.set(offset, ftTom, wDepth * ftTom);
+        ED.position.set((group.position.x + part[segmentNumber].position.x) - offset / 2, wBottom.position.y + ED.scale.y / 2, wLeft.position.z / 2);
     }
 }
 
-function create_internalDrawerLarge(){
+function create_internalDrawerLarge() {
     var g = new THREE.BoxGeometry(1, 1, 1);
     var m = new THREE.MeshStandardMaterial({
         color: 0xaa7f50
     });
     m.name = "m_internaldrawer_large";
+ 
     ID_L = new THREE.Mesh(g, m);
-
+    ID_L.name = "internaldrawer_large";
     scene.add(ID_L);
 }
 
-function update_internalDrawerLarge(segmentNumber){
-    if(ID_L){
-        ID_L.scale.set(offset,(10/12)*ftTom,wDepth*ftTom);
-        ID_L.position.set((group.position.x + part[segmentNumber].position.x) - offset / 2,  ED.position.y+ID_L.scale.y+(thickness/12)*ftTom, wLeft.position.z / 2);
+function update_internalDrawerLarge(segmentNumber) {
+    if (ID_L) {
+        ID_L.scale.set(offset, (10 / 12) * ftTom, wDepth * ftTom);
+        ID_L.position.set((group.position.x + part[segmentNumber].position.x) - offset / 2, ED.position.y + ID_L.scale.y + (thickness / 12) * ftTom, wLeft.position.z / 2);
     }
+}
+
+function remove_all_internal(){
+    
+    if(bot_shelf_group){
+        scene.remove(bot_shelf_group);
+    }
+    if(top_shelf_group){
+        scene.remove(top_shelf_group);
+    }
+    if(locker){
+        scene.remove(locker);
+    }
+    if(ID_L){
+        scene.remove(ID_L);
+    }
+    if(ID_S){
+        scene.remove(ID_S);
+    }
+    if(ED){
+        scene.remove(ED);
+    }
+    if(m_splitter){
+        scene.remove(m_splitter);
+    }
+    
+    if(hangerRod){
+        scene.remove(hangerRod);    
+    }
+    
 }
