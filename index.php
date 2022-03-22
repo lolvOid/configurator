@@ -17,9 +17,9 @@
         integrity="sha384-jLKHWM3JRmfMU0A5x5AkjWkw/EYfGUAGagvnfryNV3F9VqM98XiIH7VBGVoxVSc7" crossorigin="anonymous">
 
 
-
+<!-- 
     <link href="//db.onlinewebfonts.com/c/49abeade3aa5ceb90bb591afec3aa013?family=FF+Karbid+Slab" rel="stylesheet"
-        type="text/css" />
+        type="text/css" /> -->
     <script src="./threejs/build/three.js"></script>
     <script src="./threejs/exporters/GLTFExporter.js"></script>
     <script src="./threejs/controls/OrbitControls.js"></script>

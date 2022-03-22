@@ -67,3 +67,6 @@ Locker yes -> from 3Shelves end ->  Locker size 7.125"+part
 
 if no 0> internal drawer small to locker space
 if no external -> In L to bottom
+
+
+divided into 4 equal 
