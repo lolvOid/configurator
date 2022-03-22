@@ -42,6 +42,11 @@ let top_shelves = [],
 let internalPart;
 let locker, ID_S, ID_L, ED, m_splitter;
 let cp = document.getElementById("copyto");
+
+var row_num = 0,
+    isCreatedBotRow = true;
+
+let max_width = 0;
 init();
 animate();
 create_hanger();
@@ -138,7 +143,7 @@ function getValues() {
     })
 
     $("#copyto").change(function () {
-        console.log($(this).children("option:selected").val());
+        set_copies($(this).children("option:selected").val());
     })
 
 }
@@ -214,8 +219,6 @@ function init() {
 
 }
 
-
-
 function onWindowResize() {
     const canvas = renderer.domElement;
     const width = canvas.clientWidth;
@@ -258,7 +261,6 @@ function render() {
     document.getElementById('capturedImage').src = renderer.domElement.toDataURL();
     composer.render();
 }
-
 
 function update_wardrobe() {
     if (wBottom) {
@@ -532,16 +534,9 @@ function generate_columns() {
         group.position.set(offset + wLeft.position.x, group.position.y, group.position.z);
 
         scene.add(group);
-
-
-        update_hanger(0);
-        update_top_shelves(0);
-        update_h_splitter((group.position.x + part[0].position.x) - offset / 2, wTop.position.y - (3 * ftTom) + wTop.scale.y / 2 + (thickness / 12) * ftTom, offset);
-        update_locker(0);
-        update_internalDrawerSmall(0);
-        update_externalDrawer(0);
-        update_internalDrawerLarge(0);
-        update_bot_shelves(0);
+        
+        update_interior(0,width);
+      
 
     }
 }
@@ -791,10 +786,11 @@ function get_copies() {
         cp.removeChild(cp.firstChild);
     }
     for (var i = 0; i < columns; i++) {
-
+        
         var op = document.createElement("option");
         if (i != 0) {
             op.setAttribute("value", i);
+            
             op.innerHTML = i + 1;
             cp.appendChild(op);
         } else {
@@ -804,9 +800,17 @@ function get_copies() {
         }
 
     }
+}
+function set_copies(num){
 
+
+
+ 
 }
 
+function update_parts_width(){
+    ID_L.position.set()
+}
 function columns_number() {
 
 
@@ -912,8 +916,16 @@ function create_hanger() {
 function update_hanger(segmentNumber) {
     if (hangerRod) {
 
+        
+        if(removed.length>0){
+            hangerRod.scale.set(1, (wWidth-thickness/12) *ftTom, 1);
+            hangerRod.position.set(removed[segmentNumber].position.x , wTop.position.y - (1.5 / 12) * ftTom - wTop.scale.y, wLeft.position.z / 2);
+            
+        }
+       else{
         hangerRod.scale.set(1, offset, 1);
         hangerRod.position.set((group.position.x + part[segmentNumber].position.x) - offset / 2, wTop.position.y - (1.5 / 12) * ftTom - wTop.scale.y, wLeft.position.z / 2);
+       } 
 
 
 
@@ -950,7 +962,7 @@ function update_top_shelves(segmentNumber) {
 
     var vertical_offset = (1 * ftTom);
 
-
+    
     for (var i = 0; i < top_shelves.length; i++) {
         top_shelves[i].scale.set(offset - (thickness / 12) * ftTom, (thickness / 12) * ftTom, wDepth * ftTom);
 
@@ -963,10 +975,9 @@ function update_top_shelves(segmentNumber) {
 
 function create_bot_shelves(count) {
 
-    bot_shelves.forEach(function (e) {
-
-        scene.remove(e);
-    })
+    // bot_shelves.forEach(function (e) {
+    //     scene.remove(e);
+    // })
 
 
     var g = new THREE.BoxGeometry(1, 1, 1);
@@ -998,117 +1009,124 @@ function update_bot_shelves(segmentNumber) {
     var pos = 0;
 
     if (locker instanceof(THREE.Mesh) || ID_L instanceof(THREE.Mesh) || ID_S instanceof(THREE.Mesh) || ED instanceof(THREE.Mesh)) {
-        if(!locker.visible){
-            if(bot_shelves.length > 0){
-                // if (!ID_L.visible && !ED.visible && !ID_S.visible) {
-                //     var dist =    (m_splitter.position.y-wBottom.position.y);
-                //     vertical_offset = dist / (bot_shelves.length+1)  ;
-                //     pos = m_splitter.position.y - m_splitter.scale.y/2 - vertical_offset + (thickness/24)*ftTom  ; 
-                // } 
+        if (!locker.visible) {
+            if (bot_shelves) {
+                if (!ID_L.visible && !ED.visible && !ID_S.visible) {
+                    if(wHeight > 6.5){
+                        var dist =    (m_splitter.position.y-wBottom.position.y);
+                        vertical_offset = dist / (bot_shelves.length+1)  ;
+                        pos = m_splitter.position.y - m_splitter.scale.y/2 - vertical_offset + (thickness/24)*ftTom  ; 
+                    }
+                    
+                } 
 
-                 if (ID_L.visible  && !ID_S.visible && !ED.visible) {
-                    var dist = (m_splitter.position.y-m_splitter.scale.y/2) - (ID_L.scale.y/2+ID_L.position.y); 
-                    
-                    vertical_offset = dist  / (bot_shelves.length+1 )+(thickness/(12*bot_shelves.length))*ftTom  ;
-                    pos = (m_splitter.position.y-m_splitter.scale.y/2) - vertical_offset +(thickness/(12*bot_shelves.length))*ftTom ; 
-            
-                }
-                else if (!ID_L.visible && !ED.visible && ID_S.visible) {
-                    var dist =    (ID_S.position.y-wBottom.position.y);
-                    vertical_offset = dist / (bot_shelves.length+1) - (thickness/24)*ftTom ;
-                    pos = ID_S.position.y - ID_S.scale.y/2 - vertical_offset + (2*thickness/12)*ftTom  ; 
-                }
-                else if (!ID_L.visible && ED.visible && ID_S.visible) {
-                    var dist = (ID_S.position.y-ID_S.scale.y/2) - (ED.scale.y/2+ED.position.y); 
-                    
-                    vertical_offset = dist  / (bot_shelves.length+1) - (bot_shelves.length*thickness/12)*ftTom;
-                    pos = (ID_S.position.y - ID_S.scale.y/2 - vertical_offset - (thickness/12)*ftTom) ; 
-                }
-                else if (ID_L.visible && !ED.visible && ID_S.visible) {
-                    var dist = (ID_S.position.y-ID_S.scale.y/2) - (ID_L.scale.y/2+ID_L.position.y); 
-                    
-                    vertical_offset = dist  / (bot_shelves.length+1) - (bot_shelves.length*thickness/12)*ftTom;
-                    pos = (ID_S.position.y - ID_S.scale.y/2 - vertical_offset - (thickness/12)*ftTom) ; 
-                }
-                else if (ID_L.visible && ED.visible && ID_S.visible) {
-                    var dist = (ID_S.position.y-ID_S.scale.y/2) - (ID_L.scale.y/2+ID_L.position.y); 
-                    
-                    vertical_offset = dist  / (bot_shelves.length+1) - (bot_shelves.length*thickness/12)*ftTom;
-                    pos = (ID_S.position.y - ID_S.scale.y/2 - vertical_offset - (thickness/12)*ftTom) ; 
+                if (ID_L.visible && !ID_S.visible && !ED.visible) {
+                    var dist = (m_splitter.position.y - m_splitter.scale.y / 2) - (ID_L.scale.y / 2 + ID_L.position.y);
+
+                    vertical_offset = dist / (bot_shelves.length + 1) + (thickness / (12 * bot_shelves.length)) * ftTom;
+                    pos = (m_splitter.position.y - m_splitter.scale.y / 2) - vertical_offset + (thickness / (12 * bot_shelves.length)) * ftTom;
+
+                } else if (!ID_L.visible && !ED.visible && ID_S.visible) {
+                    var dist = (ID_S.position.y - wBottom.position.y);
+                    vertical_offset = dist / (bot_shelves.length + 1) - (thickness / 24) * ftTom;
+                    pos = ID_S.position.y - ID_S.scale.y / 2 - vertical_offset + (2 * thickness / 12) * ftTom;
+                } else if (!ID_L.visible && ED.visible && ID_S.visible) {
+                    var dist = (ID_S.position.y - ID_S.scale.y / 2) - (ED.scale.y / 2 + ED.position.y);
+
+                    vertical_offset = dist / (bot_shelves.length + 1) - (bot_shelves.length * thickness / 12) * ftTom;
+                    pos = (ID_S.position.y - ID_S.scale.y / 2 - vertical_offset - (thickness / 12) * ftTom);
+                } else if (ID_L.visible && !ED.visible && ID_S.visible) {
+                    var dist = (ID_S.position.y - ID_S.scale.y / 2) - (ID_L.scale.y / 2 + ID_L.position.y);
+
+                    vertical_offset = dist / (bot_shelves.length + 1) - (bot_shelves.length * thickness / 12) * ftTom;
+                    pos = (ID_S.position.y - ID_S.scale.y / 2 - vertical_offset - (thickness / 12) * ftTom);
+                } else if (ID_L.visible && ED.visible && ID_S.visible) {
+                    var dist = (ID_S.position.y - ID_S.scale.y / 2) - (ID_L.scale.y / 2 + ID_L.position.y);
+
+                    vertical_offset = dist / (bot_shelves.length + 1) - (bot_shelves.length * thickness / 12) * ftTom;
+                    pos = (ID_S.position.y - ID_S.scale.y / 2 - vertical_offset - (thickness / 12) * ftTom);
+                }else if(ED.visible && !ID_L.visible && !ID_S.visible){
+                    var dist = (m_splitter.position.y - m_splitter.scale.y / 2) - (ED.scale.y / 2 + ED.position.y);
+
+                    vertical_offset = dist / (bot_shelves.length + 1) + (thickness / (12 * bot_shelves.length)) * ftTom;
+                    pos = (m_splitter.position.y - m_splitter.scale.y / 2) - vertical_offset + (thickness / (12 * bot_shelves.length)) * ftTom;
+                
+                }else if(ED.visible && ID_L.visible && !ID_S.visible){
+                    var dist = (m_splitter.position.y - m_splitter.scale.y / 2) - (ID_L.scale.y / 2 + ID_L.position.y);
+
+                    vertical_offset = dist / (bot_shelves.length + 1) + (thickness / (12 * bot_shelves.length)) * ftTom;
+                    pos = (m_splitter.position.y - m_splitter.scale.y / 2) - vertical_offset + (thickness / (12 * bot_shelves.length)) * ftTom;
+                
                 }
             }
 
-        }
-        else {
-            if (bot_shelves.length > 0)  {
+        } else {
+            if (bot_shelves) {
                 if (!ID_L.visible && !ED.visible && !ID_S.visible) {
-                    
-                    if(bot_shelves.length>1){
-                        var dist =   (locker.position.y-locker.scale.y/2) - (wBottom.scale.y/2-wBottom.position.y);
-                        vertical_offset = dist / (bot_shelves.length+1) - (((bot_shelves.length*thickness/12)*ftTom)-(thickness/24)*ftTom );
-                        pos = locker.position.y - locker.scale.y/2 - vertical_offset + (thickness/24)*ftTom  ; 
-                        
-                    }
-                    else{
-                        var dist = (locker.position.y-locker.scale.y/2) - (wBottom.scale.y/2+wBottom.position.y); 
-                    
-                        vertical_offset = dist  / (bot_shelves.length+1 )+(thickness/(12*bot_shelves.length))*ftTom  ;
-                        pos = (locker.position.y-locker.scale.y/2) - vertical_offset +(thickness/(12*bot_shelves.length))*ftTom ; 
-                    }
-                } 
-                else if (!ID_L.visible && !ED.visible && ID_S.visible) {
-                    if(bot_shelves.length >1){
 
-                    
-                    var dist = (ID_S.position.y+ID_S.scale.y/2) + (wBottom.scale.y/2-wBottom.position.y); 
-                    
-                    vertical_offset = dist  / (bot_shelves.length+1) - (((bot_shelves.length*thickness/12)*ftTom)-(thickness/24)*ftTom );
-                    pos = (ID_S.position.y - ID_S.scale.y/2 - vertical_offset + (thickness/24)*ftTom) ; 
+                    if (bot_shelves.length > 1) {
+                        var dist = (locker.position.y - locker.scale.y / 2) - (wBottom.scale.y / 2 - wBottom.position.y);
+                        vertical_offset = dist / (bot_shelves.length + 1) - (((bot_shelves.length * thickness / 12) * ftTom) - (thickness / 24) * ftTom);
+                        pos = locker.position.y - locker.scale.y / 2 - vertical_offset + (thickness / 24) * ftTom;
+
+                    } else {
+                        var dist = (locker.position.y - locker.scale.y / 2) - (wBottom.scale.y / 2 + wBottom.position.y);
+
+                        vertical_offset = dist / (bot_shelves.length + 1) + (thickness / (12 * bot_shelves.length)) * ftTom;
+                        pos = (locker.position.y - locker.scale.y / 2) - vertical_offset + (thickness / (12 * bot_shelves.length)) * ftTom;
                     }
-                    else {
-                        var dist = (ID_S.position.y-ID_S.scale.y/2) - (wBottom.scale.y/2+wBottom.position.y); 
-                    
-                        vertical_offset = dist  / (bot_shelves.length+1 )+(thickness/(12*bot_shelves.length))*ftTom  ;
-                        pos = (ID_S.position.y-ID_S.scale.y/2) - vertical_offset +(thickness/(12*bot_shelves.length))*ftTom ; 
+                } else if (!ID_L.visible && !ED.visible && ID_S.visible) {
+                    if (bot_shelves.length > 1) {
+
+
+                        var dist = (ID_S.position.y + ID_S.scale.y / 2) + (wBottom.scale.y / 2 - wBottom.position.y);
+
+                        vertical_offset = dist / (bot_shelves.length + 1) - (((bot_shelves.length * thickness / 12) * ftTom) - (thickness / 24) * ftTom);
+                        pos = (ID_S.position.y - ID_S.scale.y / 2 - vertical_offset + (thickness / 24) * ftTom);
+                    } else {
+                        var dist = (ID_S.position.y - ID_S.scale.y / 2) - (wBottom.scale.y / 2 + wBottom.position.y);
+
+                        vertical_offset = dist / (bot_shelves.length + 1) + (thickness / (12 * bot_shelves.length)) * ftTom;
+                        pos = (ID_S.position.y - ID_S.scale.y / 2) - vertical_offset + (thickness / (12 * bot_shelves.length)) * ftTom;
                     }
-                    
+
+                } else if (!ID_L.visible && ED.visible) {
+                    var dist = (locker.position.y - locker.scale.y / 2) - (ED.scale.y / 2 + ED.position.y);
+
+                    vertical_offset = dist / (bot_shelves.length + 1) + (thickness / (12 * bot_shelves.length)) * ftTom;
+                    pos = (locker.position.y - locker.scale.y / 2) - vertical_offset + (thickness / (12 * bot_shelves.length)) * ftTom;
+
+                } else if (ID_L.visible && !ID_S.visible) {
+                    var dist = (locker.position.y - locker.scale.y / 2) - (ID_L.scale.y / 2 + ID_L.position.y);
+
+                    vertical_offset = dist / (bot_shelves.length + 1) + (thickness / (12 * bot_shelves.length)) * ftTom;
+                    pos = (locker.position.y - locker.scale.y / 2) - vertical_offset + (thickness / (12 * bot_shelves.length)) * ftTom;
+
                 }
-                else if (!ID_L.visible && ED.visible ) {
-                    var dist = (locker.position.y-locker.scale.y/2) - (ED.scale.y/2+ED.position.y); 
-                    
-                    vertical_offset = dist  / (bot_shelves.length+1 )+(thickness/(12*bot_shelves.length))*ftTom  ;
-                    pos = (locker.position.y-locker.scale.y/2) - vertical_offset +(thickness/(12*bot_shelves.length))*ftTom ; 
-                  
-                }
-                else if (ID_L.visible  && !ID_S.visible) {
-                    var dist = (locker.position.y-locker.scale.y/2) - (ID_L.scale.y/2+ID_L.position.y); 
-                    
-                    vertical_offset = dist  / (bot_shelves.length+1 )+(thickness/(12*bot_shelves.length))*ftTom  ;
-                    pos = (locker.position.y-locker.scale.y/2) - vertical_offset +(thickness/(12*bot_shelves.length))*ftTom ; 
-            
-                }
-                else if(ID_L.visible && ID_S.visible){
-                    if(bot_shelves.length <2){
-                        var dist = (ID_S.position.y-ID_S.scale.y/2) - (ID_L.scale.y/2+ID_L.position.y); 
-                    
-                        vertical_offset = dist  / (bot_shelves.length+1 )+(thickness/(12*bot_shelves.length))*ftTom  ;
-                        pos = (ID_S.position.y-ID_S.scale.y/2) - vertical_offset +(thickness/(12*bot_shelves.length))*ftTom ; 
-                    }
-                }
+             
                 
-        } 
+                else if (ID_L.visible && ID_S.visible) {
+                    if (bot_shelves.length < 2) {
+                        var dist = (ID_S.position.y - ID_S.scale.y / 2) - (ID_L.scale.y / 2 + ID_L.position.y);
 
-       
-       
-    }
+                        vertical_offset = dist / (bot_shelves.length + 1) + (thickness / (12 * bot_shelves.length)) * ftTom;
+                        pos = (ID_S.position.y - ID_S.scale.y / 2) - vertical_offset + (thickness / (12 * bot_shelves.length)) * ftTom;
+                    }
+                }
 
-        
-      
+            }
 
-        vertical_offset *= -1;  
+
+
+        }
+
+
+
+
+        vertical_offset *= -1;
     }
     for (var i = 0; i < bot_shelves.length; i++) {
-        bot_shelves[i].scale.set(offset, (thickness / 12) * ftTom, wDepth * ftTom);
+        bot_shelves[i].scale.set(offset - (thickness / 12) * ftTom, (thickness / 12) * ftTom, wDepth * ftTom);
 
         bot_shelves[i].position.set((group.position.x + part[segmentNumber].position.x) - offset / 2, (i * vertical_offset), wLeft.position.z / 2);
 
@@ -1177,8 +1195,6 @@ function update_locker(segmentNumber) {
 
 }
 
-
-
 function create_internalDrawerSmall() {
 
     var g = new THREE.BoxGeometry(1, 1, 1);
@@ -1220,8 +1236,6 @@ function create_externalDrawer() {
     ED.visible = false;
 }
 
-
-
 function update_externalDrawer(segmentNumber) {
     if (ED) {
         ED.scale.set(offset - (thickness / 12) * ftTom, 1 * ftTom, wDepth * ftTom);
@@ -1250,9 +1264,18 @@ function update_internalDrawerLarge(segmentNumber) {
         } else {
             ID_L.position.set((group.position.x + part[segmentNumber].position.x) - offset / 2, wBottom.position.y + ID_L.scale.y / 2, wLeft.position.z / 2);
         }
-
-
     }
+}
+
+function update_interior(column_number,width){
+    update_hanger(column_number);
+    update_top_shelves(column_number);
+    update_h_splitter((group.position.x + part[column_number].position.x) - offset / 2, wTop.position.y - (3 * ftTom) + wTop.scale.y / 2 + (thickness / 12) * ftTom, offset);
+    update_locker(column_number);
+    update_internalDrawerSmall(column_number);
+    update_externalDrawer(0);
+    update_internalDrawerLarge(column_number);
+    update_bot_shelves(column_number);
 }
 
 function remove_all_internal() {
@@ -1263,8 +1286,13 @@ function remove_all_internal() {
 
 
     if (bot_shelf_group) {
-        bot_shelf_group.visible = false
-
+        bot_shelves.forEach(function(e){
+            bot_shelf_group.remove(e);
+            scene.remove(bot_shelf_group);
+            console.log(e);
+        })
+        
+        bot_shelves = [];
     }
     if (top_shelf_group) {
         top_shelf_group.visible = false
@@ -1294,7 +1322,6 @@ function remove_all_internal() {
 
 }
 
-
 function create_horizontal() {
 
     $("#hangerOrShelf").change(function () {
@@ -1322,7 +1349,10 @@ function create_horizontal() {
 
             $("#addIDS").addClass("disabled");
 
-        }
+        }else if(wHeight == 7 && ID_S.visible && locker.visible){
+            $("#addED").addClass("disabled");
+            $("#addIDL").addClass("disabled");
+       }
     })
 
 
@@ -1334,7 +1364,13 @@ function create_horizontal() {
 
             $("#addLocker").addClass("disabled");
 
-        }
+        }else if(wHeight == 7 && ID_S.visible && locker.visible){
+             $("#addED").addClass("disabled");
+            $("#addIDL").addClass("disabled");
+        }else if(wHeight == 7 && (ED.visible && ID_L.visible && ID_S.visible)){
+            $("#addLocker").addClass("disabled");
+            
+       }
     })
 
     $("#addIDL").click(function () {
@@ -1345,7 +1381,10 @@ function create_horizontal() {
 
             $("#addED").addClass("disabled");
 
-        }
+        }else if(wHeight == 7 && (ED.visible && ID_L.visible && ID_S.visible)){
+            $("#addLocker").addClass("disabled");
+            
+       }
     })
 
     $("#addED").click(function () {
@@ -1356,50 +1395,76 @@ function create_horizontal() {
 
             $("#addIDL").addClass("disabled");
 
-        }
+        }else if(wHeight == 7 && (ED.visible && ID_L.visible && ID_S.visible)){
+            $("#addLocker").addClass("disabled");
+            
+       }
     })
 
     $("#addBottomShelf").click(function () {
+
         if ($(this)) {
-
-            if (wHeight == 6.5) {
-                create_bot_shelves(1);
-            } else if (wHeight == 7 && !locker.visible) {
-                create_bot_shelves(1);
-            } else if (locker.visible && wHeight == 7 && !ID_L.visible && !ED.visible && !ID_S.visible) {
-                create_bot_shelves(2);
-            } else if (locker.visible && wHeight == 7 && ED.visible && !ID_S.visible && !ID_L.visible) {
-                create_bot_shelves(2);
-            } else if (wHeight == 7 && locker.visible && ID_L.visible && !ID_S.visible && !ED.visible) {
-                create_bot_shelves(2);
-            } else if (wHeight == 7 && locker.visible && ID_L.visible && ED.visible && !ID_S.visible) {
-                create_bot_shelves(2);
-            } else if (wHeight == 7 && locker.visible && !ID_L.visible && !ED.visible && ID_S.visible) {
-                create_bot_shelves(3);
-            } else if (wHeight == 6 || (wHeight == 6.5 && !locker.visible && !ID_L.visible && !ID_S.visible && !ED.visible)) {
-
-                bot_shelves.forEach(function (e) {
-                    bot_shelf_group.remove(e);
-                })
-                scene.remove(bot_shelf_group);
-                bot_shelves = [];
-            }
+            isCreatedBotRow = false;
         }
+      
     })
 
 
 }
 
 function onHeightChanged() {
-    if (wHeight == 6.5) {
+    if(wHeight< 6.5 ){
+        $("#addBottomShelf").addClass("disabled");
+    }   
+    else if (wHeight == 6.5) {
+        $("#addBottomShelf").removeClass("disabled");
         $("#addLocker").removeClass("disabled");
         $("#addIDS").removeClass("disabled");
-    } else if (wHeight > 6.5) {
+    } else if (wHeight > 6.5 && (!ID_S.visible && !locker.visible)) {
+        $("#addBottomShelf").removeClass("disabled");
         $("#addIDL").removeClass("disabled");
         $("#addED").removeClass("disabled");
+    }else if(wHeight > 6.5  && (!ED.visible && !ID_L.visible && !ID_S.visible)){
+        $("#addLocker").removeClass("disabled");
+        
+   }
+    if (!isCreatedBotRow) {
+
+        if (wHeight == 6.5) {
+            set_bot_rows(1);
+        } else if (wHeight == 7 && !locker.visible) {
+            set_bot_rows(1);
+        } else if (locker.visible && wHeight == 7 && !ID_L.visible && !ED.visible && !ID_S.visible) {
+            set_bot_rows(2);
+        } else if (locker.visible && wHeight == 7 && ED.visible && !ID_S.visible && !ID_L.visible) {
+            set_bot_rows(2);
+        } else if (wHeight == 7 && locker.visible && ID_L.visible && !ID_S.visible && !ED.visible) {
+            set_bot_rows(2);
+        } else if (wHeight == 7 && locker.visible && ID_L.visible && ED.visible && !ID_S.visible) {
+            set_bot_rows(2);
+        } else if (wHeight == 7 && locker.visible && !ID_L.visible && !ED.visible && ID_S.visible) {
+            set_bot_rows(3);
+        } else if (wHeight == 6 || (wHeight == 6.5 && !locker.visible && !ID_L.visible && !ID_S.visible && !ED.visible)) {
+
+            // bot_shelves.forEach(function (e) {
+            //     bot_shelf_group.remove(e);
+            // })
+            // scene.remove(bot_shelf_group);
+            // bot_shelves = [];
+        }
+        isCreatedBotRow = true;
+
     }
+
 }
 
+function set_bot_rows(num) {
+    console.log(num);
+    if (!isCreatedBotRow) {create_bot_shelves(num);
+    isCreated = true;}
+   
+    
+}
 // function create_plane(){
 
 
