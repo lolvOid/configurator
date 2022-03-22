@@ -17,9 +17,9 @@
         integrity="sha384-jLKHWM3JRmfMU0A5x5AkjWkw/EYfGUAGagvnfryNV3F9VqM98XiIH7VBGVoxVSc7" crossorigin="anonymous">
 
 
-<!-- 
+
     <link href="//db.onlinewebfonts.com/c/49abeade3aa5ceb90bb591afec3aa013?family=FF+Karbid+Slab" rel="stylesheet"
-        type="text/css" /> -->
+        type="text/css">
     <script src="./threejs/build/three.js"></script>
     <script src="./threejs/exporters/GLTFExporter.js"></script>
     <script src="./threejs/controls/OrbitControls.js"></script>
@@ -33,7 +33,6 @@
     <script src="./threejs/shaders/CopyShader.js"></script>
     <script src="./threejs/math/SimplexNoise.js"></script>
     <script src="./threejs/postprocessing/SSAOPass.js"></script>
-
 
 
 </head>
@@ -100,7 +99,7 @@
 
                 <div class="form-control m-1">
                     <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" name="loftOptions" id="addloft" > 
+                        <input class="form-check-input" type="checkbox" name="loftOptions" id="addloft">
                         <label class="form-check-label" for="addloft" id="loftLabel"></label>
                     </div>
 
@@ -125,30 +124,46 @@
 
                 </div>
                 <div class="form-control m-1">
+
+
                     <h6>Features:</h6>
                     <div class="row m-1">
-                        <a class="btn btn-outline-dark m-1" onclick="create_hanger()" >Add Hanger</a>
-                        <a class="btn btn-outline-dark m-1" onclick="create_top_shelves(3)">Add Top Shelves</a>
-                        <a class="btn btn-outline-dark m-1" onclick="create_bot_shelves(2)">Add Bottom Shelves</a>
-                        <a class="btn btn-outline-dark m-1" onclick="create_h_splitter()">Add Splitter</a>  
-                        <a class="btn btn-outline-dark m-1" onclick="create_locker()">Add Locker</a>
-                        <a class="btn btn-outline-dark m-1" onclick="create_internalDrawerSmall()">Add I.Drawer S</a>
-                        <a class="btn btn-outline-dark m-1" onclick="create_internalDrawerLarge()">Add I.Drawer L</a>
-                        <a class="btn btn-outline-dark m-1" onclick="create_externalDrawer()">Add E.Drawer</a>                    
+                        <select class="form-select m-1"  name="hangerOrShelf" id="hangerOrShelf">
+                            <option value="0">Select Hanger or Shelf</option>
+                            <option value="1">Hanger</option>
+                            <option value="2">Shelf</option>
+                        </select>
+                        <!-- <a class="btn btn-outline-dark m-1" style="color:#faaaee; border-color: #faaaee;"
+                            data-bs-toggle="modal" data-bs-target="#optionModal" >Add Bottom Shelves</a> -->
+                        <!-- <a class="btn btn-outline-dark m-1" style="color:#22ffaa; border-color: #22ffaa;"
+                            data-bs-toggle="modal" data-bs-target="#optionModal" >Add Splitter</a> -->
+                        <a class="btn btn-outline-dark m-1" id="addLocker">Add Locker</a>
+                        <a class="btn btn-outline-dark m-1" id="addIDS">Add I.Drawer S</a>
+                        <a class="btn btn-outline-dark m-1" id="addIDL">Add I.Drawer L</a>
+                        <a class="btn btn-outline-dark m-1" id="addED">Add E.Drawer</a>
+                        <a class="btn btn-outline-dark m-1" id="addBottomShelf">Add Shelf at Bottom </a>
                         <a class="btn btn-outline-danger m-1" onclick="remove_all_internal()">Remove All</a>
                     </div>
-                   
+
+                    <label for="copyto" class="form-label m-1">Copy To:</label>
+                    <select class="form-select m-1" id="copyto" aria-label="copyto">
+                        <!-- <option selected>Copy to Column:</option>
+                        <option value="1">One</option>
+                        <option value="2">Two</option>
+                        <option value="3">Three</option> -->
+                    </select>
                 </div>
                 <div class="row m-1">
                     <button class="btn btn-outline-success m-1"> Reset</button>
-                    <button class="btn btn-outline-dark m-1" id="export"> Export</button>
+                    <a class="btn btn-outline-dark m-1" id="export"> Export</a>
                 </div>
 
 
                 <div class="row  m-1 position-relative ">
 
                     <div class="col-12 col-sm-12">
-                        <img class=" img-fluid"  src="https://unsplash.it/250/100" id="capturedImage" width="100px" alt="thumbnail" />
+                        <img class=" img-fluid" src="https://unsplash.it/250/100" id="capturedImage" width="100px"
+                            alt="thumbnail" />
                     </div>
                 </div>
 
@@ -159,16 +174,23 @@
 
 
 
+
     <div id="modelviewer"></div>
+    <!-- Small modal -->
+
 
 
 
     <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js"
         integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="anonymous"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"
+        integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous">
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"
         integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous">
-        </script>
+    </script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script> -->
     <script src="./wardrobeconfig.js"></script>
 </body>
 
