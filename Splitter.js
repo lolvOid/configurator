@@ -1,54 +1,71 @@
-function Splitter() {
+
+
+function Splitter(mesh) {
     this.geometry = new THREE.BoxGeometry(1, 1, 1);
-    this.material = new THREE.MeshBasicMaterial({
+    this.material = new THREE.MeshStandardMaterial({
         color: 0xaaaafd
     });
-    this.obj = null;
-    this.name = "Splitter";
-    this.set_name = function (name) {
-        this.obj.name = name;
-    }
+    this.mesh = mesh;
+    this.name = "splitter";
+    this.map = null
+    
 
+    this.set_name = function (name) {
+        this.mesh.name = name;
+    }
+    this.set_texture = function(tex){
+    
+        this.material.map =  new THREE.TextureLoader().load(tex);
+    }
     this.create = function () {
-        this.obj = new THREE.Mesh(this.geometry, this.material);
-        this.obj.name = this.name;
-        scene.add(this.obj);
+        this.mesh = new THREE.Mesh(this.geometry, this.material);
+        this.mesh.name = this.name;
+        scene.add(this.mesh);
     }
 
     this.remove = function () {
-        scene.remove(this.obj);
+        scene.remove(this.mesh);
     }
     this.setPosition = function (vector3) {
-        if (this.obj instanceof THREE.Mesh) {
-            this.obj.position = vector3;
+        if (this.mesh instanceof THREE.Mesh) {
+            this.mesh.position = vector3;
         }
     }
     this.setScale = function (vector3) {
-        if (this.obj instanceof THREE.Mesh) {
-            this.obj.scale = vector3;
+        if (this.mesh instanceof THREE.Mesh) {
+            this.mesh.scale = vector3;
         }
     }
     this.set_position = function (pX, pY, pZ) {
-        if (this.obj instanceof THREE.Mesh) {
+        if (this.mesh instanceof THREE.Mesh) {
 
-            this.obj.position.setX(pX);
-            this.obj.position.setY(pY);
-            this.obj.position.setZ(pZ);
+            this.mesh.position.setX(pX);
+            this.mesh.position.setY(pY);
+            this.mesh.position.setZ(pZ);
 
         }
 
     }
     this.set_scale = function (sX, sY, sZ) {
-        if (this.obj instanceof THREE.Mesh) {
-
-            this.obj.scale.setX(sX);
-            this.obj.scale.setY(sY);
-            this.obj.scale.setZ(sZ);
+        if (this.mesh instanceof THREE.Mesh) {
+           
+            this.mesh.scale.setX(sX);
+            this.mesh.scale.setY(sY);
+            this.mesh.scale.setZ(sZ);
 
         }
     }
 
     this.visible = function (bool) {
-        this.obj.visible = bool;
+        this.mesh.visible = bool;
+    }
+
+    this.getPosition = function(){
+       return this.mesh.position;
+        
+
+    }
+    this.getScale = function(){
+        return this.mesh.scale;
     }
 }
