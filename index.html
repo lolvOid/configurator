@@ -94,7 +94,7 @@
                             value="option1">
                         <label class="form-check-label btn btn-outline-secondary" for="depth3">2 ft</label>
                     </div>
-
+                    
                 </div>
 
                 <div class="form-control m-1">
@@ -128,6 +128,10 @@
 
                     <h6>Features:</h6>
                     <div class="row m-1">
+                        
+                        <p for="editColumn">Edit Column:  <span id="column_id"></span></p>
+                      
+                        
                         <select class="form-select m-1"  name="hangerOrShelf" id="hangerOrShelf">
                             <option value="0">Select Hanger or Shelf</option>
                             <option value="1">Hanger</option>
@@ -190,6 +194,9 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"
         integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous">
     </script>
+
+    <script src="./Splitter.js"></script>
+    <script src="./Drawer.js"></script>
     <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script> -->
     <script src="./wardrobeconfig.js"></script>
 </body>
