@@ -97,7 +97,7 @@ create_internalDrawerSmall();
 create_externalDrawer();
 create_internalDrawerLarge();
 create_horizontal();
-create_plane();
+createInteractivePlane();
 
 function getValues() {
 
@@ -506,15 +506,6 @@ function helpers() {
 
     // const axesHelper = new THREE.AxesHelper(1);
     // scene.add(axesHelper);
-
-
-}
-
-function update_columns() {
-    // part.forEach(element => {
-    //     element.scale.set((thickness / 12) * ftTom, (wHeight + (thickness / 12)) * ftTom, (((2 * thickness / 12) + wDepth) * ftTom));
-
-    // });
 
 
 }
@@ -1440,38 +1431,76 @@ function remove_all_internal() {
     $("#addED").removeClass("disabled");
 
 
-    if (bot_shelf_group) {
-        bot_shelves.forEach(function (e) {
-            bot_shelf_group.remove(e);
-            scene.remove(bot_shelf_group);
-            console.log(e);
-        })
 
-        bot_shelves = [];
-    }
-    if (top_shelf_group) {
-        top_shelf_group.visible = false
+    _hangers.forEach(e=>{
+        if(e instanceof THREE.Mesh){
+            if(_hanger_group instanceof THREE.Group){
+                _hanger_group.remove(e);
+                scene.remove(_hanger_group);
+            }
+        }
+    })
+    _hangers = [];
 
-    }
-    if (locker) {
-        locker.visible = false
+    _top_shelves_parent.forEach(e=>{
+        if(e instanceof THREE.Group){
+            scene.remove(e);
+        }
+    })
+    _top_shelves_parent = [];
+    _top_shelves = [];
 
-    }
-    if (ID_L) {
-        ID_L.visible = false
+    
+    _smallIntDrawers.forEach(e=>{
+        if(e instanceof THREE.Mesh){
+            _smallIntDrawers.remove(e);
+            scene.remove(_smallIntDrawers);
+        }
+    })
+    _smallIntDrawers = [];
 
+    _largeIntDrawers.forEach(e=>{
+        if(e instanceof THREE.Mesh){
+            _largeIntDrawers.remove(e);
+            scene.remove(_largeIntDrawers);
+        }
+    })
+    _largeIntDrawers = [];
 
-    }
-    if (ID_S) {
-        ID_S.visible = false
+    _bot_shelf_parent.forEach(e=>{
+        if(e instanceof THREE.Group){
+            scene.remove(e);
+        }
+    })
+    _bot_shelf_parent = [];
+    _bot_shelves = [];
 
-    }
-    if (ED) {
-        ED.visible = false
+    _lockers.forEach(e=>{
+        if(e instanceof THREE.Mesh){
+            _locker_group.remove(e);
+            scene.remove(_locker_group);
+        }
+    })
+    _lockers = [];
 
-    }
+    _locker_splitters.forEach(e=>{
+        if(e instanceof THREE.Mesh){
+            _locker_splitter_group.remove(e);
+            scene.remove(_locker_splitter_group);
+        }
+    })
+    _locker_splitters = [];
 
-
+    _largeIntDrawers_splitters.forEach(e=>{
+        if(e instanceof THREE.Mesh){
+            _largeIntDrawers_splitters_group.remove(e);
+            scene.remove(_largeIntDrawers_splitters_group);
+        }
+    })
+    _largeIntDrawers_splitters = [];
+    
+    ext_drawer_group.visible = false;
+    
 
 }
 
@@ -1481,35 +1510,21 @@ function create_horizontal() {
 
         if ($(this).children("option:selected").val() == 1) {
             createHanger(plane_index);
-            // hangerRod.visible = true;
-            // top_shelf_group.visible = false;
-
+         
         } else if ($(this).children("option:selected").val() == 2) {
             createTopShelves(2,plane_index);
-            // hangerRod.visible = false;
-            // top_shelf_group.visible = true;
-
-
         }
-
-        // if($("#hangerOrShelf").children("option:selected").val() !=0){
-        //     $(this).children("option:selected").val(0);
-        // };
-
-
-
     })
 
     $("#addLocker").click(function () {
         if ($(this)) {
             createLocker(plane_index);
-            //locker.visible = true;
         }
         if (wHeight == 6) {
 
             $("#addIDS").addClass("disabled");
 
-        } else if (wHeight == 7 && ID_S.visible && locker.visible) {
+        } else if (wHeight == 7 && _smallIntDrawers[plane_index ]& _lockers[plane_index]) {
             $("#addED").addClass("disabled");
             $("#addIDL").addClass("disabled");
         }
@@ -1524,10 +1539,10 @@ function create_horizontal() {
 
             $("#addLocker").addClass("disabled");
 
-        } else if (wHeight == 7 && ID_S.visible && locker.visible) {
+        } else if (wHeight == 7 && _smallIntDrawers[plane_index ]& _lockers[plane_index]) {
             $("#addED").addClass("disabled");
             $("#addIDL").addClass("disabled");
-        } else if (wHeight == 7 && (ED.visible && ID_L.visible && ID_S.visible)) {
+        } else if (wHeight == 7 && ( ext_drawer.visible && _smallIntDrawers[plane_index ]& _largeIntDrawers[plane_index])) {
             $("#addLocker").addClass("disabled");
 
         }
@@ -1541,7 +1556,7 @@ function create_horizontal() {
 
             $("#addED").addClass("disabled");
 
-        } else if (wHeight == 7 && (ED.visible && ID_L.visible && ID_S.visible)) {
+        } else if (wHeight == 7 && ( ext_drawer.visible && _smallIntDrawers[plane_index ]& _largeIntDrawers[plane_index])) {
             $("#addLocker").addClass("disabled");
 
         }
@@ -1557,7 +1572,7 @@ function create_horizontal() {
 
             $("#addIDL").addClass("disabled");
 
-        } else if (wHeight == 7 && (ED.visible && ID_L.visible && ID_S.visible)) {
+        } else if (wHeight == 7 && ( ext_drawer.visible && _smallIntDrawers[plane_index ]& _largeIntDrawers[plane_index])) {
             $("#addLocker").addClass("disabled");
 
         }
@@ -1646,7 +1661,7 @@ function update_splitter(obj, posX, posY, posZ, scaleX, scaleY, scaleZ) {
 
 
 
-function create_plane() {
+function createInteractivePlane() {
 
 
     var g = new THREE.PlaneGeometry(1, 1);
@@ -1689,9 +1704,6 @@ function createLocker(num) {
     m.name = "wm_locker";
     var _locker = new THREE.Mesh(g, m);
     _locker.name = "_locker_" + num;
-
-    // spLocker = new Splitter();
-    // spLocker.create();
 
     _lockers[num] = _locker;
     _locker_group.name = "w_lockers";
@@ -2108,6 +2120,7 @@ function createTopShelves(row,index) {
 
     scene.add(_top_shelves_parent[index]);
     removeHanger(index);
+
 }
 
 
