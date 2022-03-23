@@ -954,10 +954,6 @@ function set_copies(index) {
         }
         
     }
-    
-    
-
-
 
 }
 
@@ -970,10 +966,6 @@ function columns_number() {
     customColumns = columns;
     // var columns_radio = (' <input class="form-check-input btn-check " type="radio" name="columnsOptions" id="columns',i+1,'"',' value = ',(i+1),' checked > <label class = "form-check-label btn btn-outline-secondary m-1" for = "columns',(i+1),'">', (i+1) ,'< /label>');
     for (var i = columns - 1; i > substitubale; i--) {
-
-
-
-
 
         var columns_radio = document.createElement("input");
         columns_radio.type = "radio";
@@ -988,32 +980,8 @@ function columns_number() {
         columns_label.className = "form-check-label btn btn-outline-secondary m-1";
         columns_label.innerHTML = i + 1;
 
-
-
-
         columns_group.appendChild(columns_radio);
         columns_group.appendChild(columns_label);
-
-
-
-
-        // if ($("#columns" + (i + 1))) {
-
-
-        //     $("#columns" + (i + 1)).on('input',function () {
-        //         if ($(this).is(":checked")) {
-
-        //             customColumns = $(this).val();
-
-        //             setColumns = true;
-        //         }
-
-
-        //     })
-
-        // }
-
-        // console.log("segments:", i, " columns:", i + 1);
 
     }
 
@@ -1270,10 +1238,6 @@ function update_h_splitter(posX, posY, scaleX) {
 
 
     }
-
-
-
-
 }
 
 function create_locker() {
@@ -1373,8 +1337,6 @@ function update_externalDrawer(segmentNumber) {
         sp2.visible(ED.visible);
     }
 }
-
-
 
 function create_internalDrawerLarge() {
     var g = new THREE.BoxGeometry(1, 1, 1);
@@ -1635,8 +1597,9 @@ function onHeightChanged() {
 
 }
 
-function set_bot_rows(num) {
-        createBotShelves(num , plane_index); 
+function set_bot_rows(index) {
+        removeBotShelves(plane_index);
+        createBotShelves(index , plane_index); 
 }
 
 
@@ -1692,6 +1655,7 @@ function update_plane() {
         plane.scale.set(offset - thickness / 12 * ftTom, wHeight * ftTom - (2 / 12 * ftTom) + thickness / 12 * ftTom - wBottom.position.y);
         plane.position.set((group.position.x + part[0].position.x) - offset / 2, wBack.position.y, wBottom.scale.z / 2);
     }
+    plane_group.visible = true;
 
 }
 
@@ -2148,6 +2112,17 @@ function updateTopShelves(){
     }
 }
 
+function removeBotShelves(index){
+   
+   
+    _bot_shelf_parent.forEach(e=>{
+        if(e instanceof THREE.Group && index == _bot_shelf_parent.indexOf(e)){
+            scene.remove(e);
+        }
+    })
+    _bot_shelf_parent[index] = null; 
+}
+
 function removeTopShelves(index){
    
    
@@ -2156,7 +2131,9 @@ function removeTopShelves(index){
             scene.remove(e);
         }
     })
-    _top_shelves_parent[index] = null;
+    _top_shelves_parent[index] = null; 
+}
+
+function Merge(){
     
-  
 }
