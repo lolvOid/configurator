@@ -88,7 +88,7 @@ let _lockers = [],
     _m_splitters_group,
     _columns = [],
     _columns_group;
-
+    
 var rowCount = 0;
 var isSplitterCreated = false;
 var removed_columns_index, removed_column_id = [];
@@ -222,25 +222,27 @@ function animate() {
 
 
     render();
-
+     
 }
 
 
 function getInputs() {
     chooseColumns_number();
-    $("#doneDimensions").on("click", function () {
 
-        updateColumns();
-        getColumnToCopy();
-    })
+ 
+
+    $("#editDimensions").hide();
+    $("#editInterior").hide();
 
     $("#width").on("input", function () {
         wWidth = $("#width").val();
-
+       
         chooseColumns_number();
+        
         removeColumns();
         removeHorizontalSplitter();
         removeExternalDrawer();
+       
     })
 
     $("input:radio[name='heightOptions']").click(function () {
@@ -295,6 +297,29 @@ function getInputs() {
         wLoft = $(this).val();
 
     });
+
+    $("#editDimensions").click(function(){
+        $(this).hide();
+     
+        $("#doneDimensions").show();
+        $("#editInterior").hide();
+        $("#sizeOptions").show();
+        removeColumns();
+        removeHorizontalSplitter();
+        removeExternalDrawer();
+        removeAllInterior();
+    })
+    $("#doneDimensions").click(function() {
+
+        updateColumns();
+
+        $("#sizeOptions").hide();
+        $("#editDimensions").show();
+        $("#editInterior").show();
+
+        $(this).hide();
+       
+    })
     $("#export").click(function () {
         Export();
     })
@@ -323,6 +348,7 @@ function create_lights() {
 function render() {
 
     updateWardrobe();
+    botShelfManager()
     interactivePlane_group.visible = true;
     // renderer.render(scene, camera);
     document.getElementById('column_id').innerHTML = plane_index + 1;
@@ -437,11 +463,13 @@ function addHorizontalParts() {
                 updateExternalDrawer(i);
                 updateInternalDrawerLarge(i);
                 updateBotShelves(i);
+                columnsCombination();
             } else {
                 if (_extDrawers[i] instanceof THREE.Mesh) {
                     updateExternalDrawer(i);
                     updateInternalDrawerLarge(i);
                     updateBotShelves(i);
+                    columnsCombination();
                 }
             }
             i++;
@@ -453,10 +481,12 @@ function addHorizontalParts() {
             createInternalDrawerLarge(plane_index);
             updateInternalDrawerLarge(plane_index);
             updateBotShelves(plane_index);
+            columnsCombination()
         } else {
             if (_largeIntDrawers[plane_index] instanceof THREE.Mesh) {
                 updateInternalDrawerLarge(plane_index);
                 updateBotShelves(plane_index);
+                columnsCombination()
             }
         }
     })
@@ -466,11 +496,13 @@ function addHorizontalParts() {
             createInternalDrawerSmall(plane_index);
             updateInternalDrawerSmall(plane_index);
             updateBotShelves(plane_index);
+            columnsCombination()
 
         } else {
             if (_smallIntDrawers[plane_index] instanceof THREE.Mesh) {
                 updateInternalDrawerSmall(plane_index);
                 updateBotShelves(plane_index);
+                columnsCombination()
             }
         }
     })
@@ -481,12 +513,13 @@ function addHorizontalParts() {
             updateLocker(plane_index);
             updateInternalDrawerSmall(plane_index);
             updateBotShelves(plane_index);
+            columnsCombination()
         } else {
             if (_lockers[plane_index] instanceof THREE.Mesh) {
                 updateLocker(plane_index);
                 updateInternalDrawerSmall(plane_index);
                 updateBotShelves(plane_index);
-            }
+                columnsCombination()            }
         }
     })
 
@@ -497,6 +530,7 @@ function addHorizontalParts() {
         } else {
             if (_bot_shelf_parent[i] instanceof THREE.Group) {
                 updateBotShelves(plane_index);
+                columnsCombination()
             }
         }
     })
@@ -509,8 +543,10 @@ function addHorizontalParts() {
             } else {
                 if (_hangers[plane_index] instanceof THREE.Mesh) {
                     updateHanger(plane_index);
+                    
                 }
             }
+            columnsCombination()
         } else if ($(this).val() == 2) {
             if (!_top_shelves_parent[plane_index]) {
                 createTopShelves(2, plane_index);
@@ -520,18 +556,125 @@ function addHorizontalParts() {
                     updateTopShelves(plane_index);
                 }
             }
+            columnsCombination()
         };
     })
 
- 
+    
+
+
+
     $("#copyto").change(function () {
         pasetToColumn($(this).children("option:selected").val());
+        columnsCombination()
     })
     $("#removeAll").click(function(){
         removeAllInterior();
     })
 }
 
+
+function botShelfManager(){
+
+    if(wHeight == 6){
+        if(_lockers[plane_index] && !_smallIntDrawers[plane_index]){
+            $("#addIDS").addClass("disabled");
+            $("#addLocker").removeClass("disabled");
+        }else if(!_lockers[plane_index] && _smallIntDrawers[plane_index]){
+            $("#addIDS").removeClass("disabled");
+            $("#addLocker").addClass("disabled");
+        }
+        else{
+          
+            $("#addIDS").removeClass("disabled");
+            $("#addLocker").removeClass("disabled");
+        }
+        if(_largeIntDrawers[plane_index] && !_extDrawers[plane_index]){
+            $("#addED").addClass("disabled");
+            $("#addIDL").removeClass("disabled");
+        }else if(!_largeIntDrawers[plane_index] && _extDrawers[plane_index]){
+            $("#addIDL").removeClass("disabled");
+            $("#addED").addClass("disabled");
+        }
+        else{
+            $("#addED").removeClass("disabled");
+            $("#addIDL").removeClass("disabled");
+        }
+        $("#addBottomShelf").addClass("disabled");
+    }
+    else if(wHeight == 6.5){
+
+        if(!_lockers[plane_index] && !_smallIntDrawers[plane_index] && !_largeIntDrawers[plane_index] && !_extDrawers[plane_index]){
+            $("#addBottomShelf").removeClass("disabled");
+            $("#addIDS").removeClass("disabled");
+            $("#addLocker").removeClass("disabled");
+            $("#addED").removeClass("disabled");
+            $("#addIDL").removeClass("disabled");
+        }else if(!_lockers[plane_index] && !_smallIntDrawers[plane_index] && !_largeIntDrawers[plane_index] && _extDrawers[plane_index]){
+            $("#addBottomShelf").removeClass("disabled");
+            $("#addIDS").addClass("disabled");
+            $("#addLocker").addClass("disabled");
+            $("#addED").addClass("disabled");
+            $("#addIDL").addClass("disabled");
+        }else if(_lockers[plane_index] && _smallIntDrawers[plane_index] && !_largeIntDrawers[plane_index] && !_extDrawers[plane_index]){
+            $("#addBottomShelf").removeClass("disabled");
+            $("#addIDS").removeClass("disabled");
+            $("#addLocker").removeClass("disabled");
+            $("#addED").addClass("disabled");
+            $("#addIDL").addClass("disabled");
+        }else if(!_lockers[plane_index] && !_smallIntDrawers[plane_index] && _largeIntDrawers[plane_index] && !_extDrawers[plane_index]){
+            $("#addBottomShelf").removeClass("disabled");
+            $("#addIDS").removeClass("disabled");
+            $("#addLocker").removeClass("disabled");
+            $("#addED").addClass("disabled");
+            $("#addIDL").addClass("disabled");
+        }
+        else if(!_lockers[plane_index] && !_smallIntDrawers[plane_index] && !_largeIntDrawers[plane_index] && _extDrawers[plane_index]){
+            $("#addBottomShelf").removeClass("disabled");
+            $("#addIDS").addClass("disabled");
+            $("#addLocker").addClass("disabled");
+            $("#addED").addClass("disabled");
+            $("#addIDL").addClass("disabled");
+        }
+        
+    }else if(wHeight == 7){
+        // $("#addBottomShelf").removeClass("disabled");
+        //  if(!_lockers[plane_index] && !_smallIntDrawers[plane_index] && !_largeIntDrawers[plane_index] && !_extDrawers[plane_index]){
+        //     $("#addBottomShelf").removeClass("disabled");
+        //     $("#addIDS").removeClass("disabled");
+        //     $("#addLocker").removeClass("disabled");
+        //     $("#addED").removeClass("disabled");
+        //     $("#addIDL").removeClass("disabled");
+        // }else if(!_lockers[plane_index] && _smallIntDrawers[plane_index] && _largeIntDrawers[plane_index] && !_extDrawers[plane_index]){
+        //     $("#addBottomShelf").removeClass("disabled");
+        //     $("#addIDS").addClass("disabled");
+        //     $("#addLocker").addClass("disabled");
+        //     $("#addED").addClass("disabled");
+        //     $("#addIDL").addClass("disabled");
+        // }else if(!_lockers[plane_index] && _smallIntDrawers[plane_index] && _largeIntDrawers[plane_index] && _extDrawers[plane_index]){
+        //     $("#addBottomShelf").removeClass("disabled");
+        //     $("#addIDS").removeClass("disabled");
+        //     $("#addLocker").addClass("disabled");
+        //     $("#addED").removeClass("disabled");
+        //     $("#addIDL").removeClass("disabled");
+        // }else if(!_lockers[plane_index] && !_smallIntDrawers[plane_index] && _largeIntDrawers[plane_index] && !_extDrawers[plane_index]){
+        //     $("#addBottomShelf").removeClass("disabled");
+        //     $("#addIDS").removeClass("disabled");
+        //     $("#addLocker").removeClass("disabled");
+        //     $("#addED").addClass("disabled");
+        //     $("#addIDL").addClass("disabled");
+        // }
+        // else if(!_lockers[plane_index] && !_smallIntDrawers[plane_index] && !_largeIntDrawers[plane_index] && _extDrawers[plane_index]){
+        //     $("#addBottomShelf").removeClass("disabled");
+        //     $("#addIDS").addClass("disabled");
+        //     $("#addLocker").addClass("disabled");
+        //     $("#addED").addClass("disabled");
+        //     $("#addIDL").addClass("disabled");
+        // }
+    }
+    
+
+}
 function updateWardrobe() {
     if (wBottom) {
         wBottom.scale.set(wWidth * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));
@@ -848,7 +991,7 @@ function createInternalDrawerLarge(index) {
     _largeIntDrawers[index] = _large_int;
     _largeIntDrawers_group.name = "w_int_d_large";
     _largeIntDrawers_group.add(_largeIntDrawers[index]);
-
+    _largeIntDrawers[index].scale.set(offset - (thickness / 12) * ftTom, (10 / 12) * ftTom, wDepth * ftTom)
     // scene.add(_lockers[index]);
     scene.add(_largeIntDrawers_group);
     createInternalDrawerLargeSplitters(index);
@@ -882,7 +1025,7 @@ function updateInternalDrawerLarge(index) {
 
 
     if (_largeIntDrawers[index] instanceof THREE.Mesh) {
-        _largeIntDrawers[index].scale.set(offset - (thickness / 12) * ftTom, (10 / 12) * ftTom, wDepth * ftTom)
+     
 
         if (!_extDrawers[index]) {
 
@@ -1516,7 +1659,7 @@ function helpers() {
 function onClick() {
 
     if (selectedObject) {
-
+       
         for (var i = 0; i < columns; i++) {
 
             if (_columns[i] == selectedObject) {
@@ -1534,12 +1677,10 @@ function onClick() {
 
                 _columns_group.remove(_columns[i]);
                 removed.push(_columns[i]);
-
-
-
             }
 
         }
+        columnsCombination();
 
 
         for (var i = 0; i < interactivePlanes.length; i++) {
@@ -1581,7 +1722,7 @@ function onPointerMove(event) {
 
         })[0];
 
-
+        getColumnToCopy();
         if (res && res.object) {
 
             selectedObject = res.object;
@@ -1746,13 +1887,13 @@ function getColumnToCopy() {
     while (cp.firstChild) {
         cp.removeChild(cp.firstChild);
     }
-    for (var i = 0; i < columns; i++) {
+    for (var i = 0; i <= columns; i++) {
 
         var op = document.createElement("option");
-        if (i != 0) {
+        if (i != 0 ) {
             op.setAttribute("value", i);
 
-            op.innerHTML = i + 1;
+            op.innerHTML = i ;
             cp.appendChild(op);
         } else {
 
@@ -1903,26 +2044,30 @@ function reset_adjacents_removed_columns() {
 
 function onHeightChanged(plane_index) {
     var row = 1;
-    if (wHeight < 6.5) {
-        $("#addBottomShelf").addClass("disabled");
-    } else if (wHeight == 6.5) {
-        $("#addBottomShelf").removeClass("disabled");
-        $("#addLocker").removeClass("disabled");
-        $("#addIDS").removeClass("disabled");
-    } else if (wHeight > 6.5 && (!_smallIntDrawers[plane_index] && !_lockers[plane_index])) {
-        $("#addBottomShelf").removeClass("disabled");
-        $("#addIDL").removeClass("disabled");
-        $("#addED").removeClass("disabled");
-    } else if (wHeight > 6.5 && (!_extDrawers[plane_index] && !_largeIntDrawers[plane_index] && !_smallIntDrawers[plane_index])) {
-        $("#addLocker").removeClass("disabled");
+    // if (wHeight < 6.5) {
+    //     $("#addBottomShelf").addClass("disabled");
+    // } else if (wHeight == 6.5) {
+    //     $("#addBottomShelf").removeClass("disabled");
+    //     $("#addLocker").removeClass("disabled");
+    //     $("#addIDS").removeClass("disabled");
+    // } else if (wHeight > 6.5 && (!_smallIntDrawers[plane_index] && !_lockers[plane_index])) {
+    //     $("#addBottomShelf").removeClass("disabled");
+    //     $("#addIDL").removeClass("disabled");
+    //     $("#addED").removeClass("disabled");
+    // } else if (wHeight > 6.5 && (!_extDrawers[plane_index] && !_largeIntDrawers[plane_index] && !_smallIntDrawers[plane_index])) {
+    //     $("#addLocker").removeClass("disabled");
 
-    }
+    // }
 
 
 
     if (wHeight == 6.5) {
         row = 1;
-    } else if (wHeight == 7 && !_lockers[plane_index]) {
+    }else if(wHeight == 7 &&  !_lockers[plane_index] && !_largeIntDrawers[plane_index] && !_extDrawers[plane_index] && !_smallIntDrawers[plane_index]){
+        row = 2;
+    }
+    
+    else if (wHeight == 7 && !_lockers[plane_index]) {
         row = 2;
     } else if (_lockers[plane_index] && wHeight == 7 && !_largeIntDrawers[plane_index] && !_extDrawers[plane_index] && !_smallIntDrawers[plane_index]) {
         row = 2;
@@ -1943,12 +2088,280 @@ function onHeightChanged(plane_index) {
 
 }
 
-function columnsCombination(index) {
+function columnsCombination() {
+    if(removed){
+        removed.forEach(e=>{
+            if(e==_columns[removed_columns_index]){
 
-    if (index <= plane_index + 1) {
+                //IDL
+               if(_largeIntDrawers[removed_columns_index]){
+                  var a = _largeIntDrawers[removed_columns_index];
+                  var b = _largeIntDrawers_splitters[removed_columns_index];
+                  
+                  a.scale.setX(offset * 2 - thickness/12 *ftTom);
+                  b.scale.setX(a.scale.x);
+                  a.position.setX (_columns[removed_columns_index].position.x+offset/2);
+            
+                  b.position.setX(a.position.x);
+                  
+                }
+                else if(_largeIntDrawers[removed_columns_index+1]){
+                    var a = _largeIntDrawers[removed_columns_index+1];
+                    var b = _largeIntDrawers_splitters[removed_columns_index+1];
+                    a.scale.setX(offset * 2- thickness/12 *ftTom);
+                    b.scale.setX(a.scale.x);
+                    a.position.setX(_columns[removed_columns_index].position.x+offset/2);
+                  
+                    b.position.setX(a.position.x);
+                }
+                else if(_largeIntDrawers[removed_columns_index] && _largeIntDrawers[removed_columns_index+1]){
+                    var a = _largeIntDrawers[removed_columns_index];
+                    var b = _largeIntDrawers_splitters[removed_columns_index];
+                    
+                    a.scale.setX(offset * 2  - thickness/12 *ftTom);
+                    b.scale.setX(a.scale.x);
+                    a.position.setX (_columns[removed_columns_index].position.x+offset/2);
+              
+                    b.position.setX(a.position.x);
 
+                    removeInternalDrawerLarge(removed_columns_index+1);
+                    
+
+                }
+                //ED
+                if(_extDrawers[removed_columns_index]){
+                    var a = _extDrawers[removed_columns_index];
+                    var b = _extDrawers_splitters[removed_columns_index];
+                    
+                    a.scale.setX(offset * 2  - thickness/12 *ftTom);
+                    b.scale.setX(a.scale.x);
+                    a.position.setX (_columns[removed_columns_index].position.x+offset/2);
+              
+                    b.position.setX(a.position.x);
+                    
+                  }
+                  else if(_extDrawers[removed_columns_index+1]){
+                      var a = _extDrawers[removed_columns_index+1];
+                      var b = _extDrawers_splitters[removed_columns_index+1];
+                      a.scale.setX(offset * 2 - thickness/12 *ftTom);
+                      b.scale.setX(a.scale.x);
+                      a.position.setX(_columns[removed_columns_index].position.x+offset/2);
+                    
+                      b.position.setX(a.position.x);
+                  }
+                  else if(_extDrawers[removed_columns_index] && _extDrawers[removed_columns_index+1]){
+                    var a = _extDrawers[removed_columns_index];
+                    var b = _extDrawers_splitters[removed_columns_index];
+                    
+                    a.scale.setX(offset * 2  - thickness/12 *ftTom);
+                    b.scale.setX(a.scale.x);
+                    a.position.setX (_columns[removed_columns_index].position.x+offset/2);
+              
+                    b.position.setX(a.position.x);
+
+                    removeExternalDrawer(removed_columns_index+1);
+                    
+
+                }
+                //ID_S
+                if(!_lockers[removed_columns_index] && _smallIntDrawers[removed_columns_index]){
+                    var a = _smallIntDrawers[removed_columns_index];
+               
+                    
+                    a.scale.setX(offset * 2  - thickness/12 *ftTom);
+                  
+                    a.position.setX (_columns[removed_columns_index].position.x+offset/2);
+              
+                  
+                    
+                  }
+                  else if(!_lockers[removed_columns_index] &&_smallIntDrawers[removed_columns_index+1] ){
+                      var a = _smallIntDrawers[removed_columns_index+1];
+                   
+                      a.scale.setX(offset * 2 - thickness/12 *ftTom);
+                   
+                      a.position.setX(_columns[removed_columns_index].position.x+offset/2);
+                    
+                  
+                  }
+                  else if(!_lockers[removed_columns_index] && _smallIntDrawers[removed_columns_index] && _smallIntDrawers[removed_columns_index+1]){
+                    var a =_smallIntDrawers[removed_columns_index+1];
+                    
+                    a.scale.setX(offset * 2 - thickness/12 *ftTom);
+                   
+                    a.position.setX(_columns[removed_columns_index+1].position.x+offset/2);
+
+                    removeInternalDrawerSmall(removed_columns_index+1);
+                    
+
+                }else if(_lockers[removed_columns_index]  && _smallIntDrawers[removed_columns_index+1] ){
+                    
+                  
+                    var b= _lockers[removed_columns_index];
+                    var c= _locker_splitters[removed_columns_index];
+                    a.scale.setX(offset)
+                    b.scale.setX(a.scale.x);
+                    c.scale.setX(b.scale.x);
+
+                    removeInternalDrawerSmall(removed_columns_index);
+                }else if(_lockers[removed_columns_index]  && !_smallIntDrawers[removed_columns_index+1] ){
+                    
+                    createInternalDrawerSmall(removed_columns_index+1);
+                    updateInternalDrawerSmall(removed_columns_index+1)
+                    var a = _smallIntDrawers[removed_columns_index+1];
+                  
+                    var b= _lockers[removed_columns_index];
+                    var c= _locker_splitters[removed_columns_index];
+                    a.scale.setX(offset)
+                    b.scale.setX(a.scale.x);
+                    c.scale.setX(b.scale.x);
+                    
+                    
+                }
+                
+                //Hanger
+                if(_hangers[removed_columns_index]){
+                    var a = _hangers[removed_columns_index];
+               
+                    
+                    a.scale.setY(offset * 2  - thickness/12 *ftTom);
+                  
+                    a.position.setX (_columns[removed_columns_index].position.x+offset/2);
+              
+                  
+                    
+                  }
+                  else if(_hangers[removed_columns_index+1]){
+                      var a = _hangers[removed_columns_index+1];
+                   
+                      a.scale.setY(offset * 2 - thickness/12 *ftTom);
+                   
+                      a.position.setX(_columns[removed_columns_index].position.x+offset/2);
+                    
+                  
+                  }
+                  else if(_hangers[removed_columns_index] && _hangers[removed_columns_index+1]){
+                    var a = _extDrawers[removed_columns_index];
+                   
+                    
+                    a.scale.setY(offset * 2  - thickness/12 *ftTom);
+                   
+                    a.position.setX (_columns[removed_columns_index].position.x+offset/2);
+              
+               
+
+                    removeHanger(removed_columns_index+1);
+                    
+
+                }
+                //H_Spliiter
+                if(_m_splitters[removed_columns_index]){
+                    var a = _m_splitters[removed_columns_index];
+               
+                    
+                    a.scale.setX(offset * 2  - thickness/12 *ftTom);
+                  
+                    a.position.setX (_columns[removed_columns_index].position.x+offset/2);
+              
+                  
+                    
+                  }
+                  else if(_m_splitters[removed_columns_index+1]){
+                      var a = _m_splitters[removed_columns_index+1];
+                   
+                      a.scale.setX(offset * 2 - thickness/12 *ftTom);
+                   
+                      a.position.setX(_columns[removed_columns_index].position.x+offset/2);
+                    
+                  
+                  }
+                  else if(_m_splitters[removed_columns_index] && _m_splitters[removed_columns_index+1]){
+                    var a = _m_splitters[removed_columns_index];
+                   
+                    
+                    a.scale.setX(offset * 2  - thickness/12 *ftTom);
+                   
+                    a.position.setX (_columns[removed_columns_index].position.x+offset/2);
+              
+                    removeHorizontalSplitter(removed_columns_index+1);
+                    
+
+                }
+                //Top_shelf
+                if(_top_shelves_parent[removed_columns_index]){
+
+                    if(_top_shelves_parent[removed_columns_index] instanceof THREE.Group){
+                        for(var i = 0;i<_top_shelves_parent[removed_columns_index].children.length;i++){
+                            var a = _top_shelves_parent[removed_columns_index].children[i];
+                            a.scale.setX(offset*2);
+                            a.position.setX(_columns[removed_columns_index].position.x+offset/2);
+                        }
+                    }
+                    
+                    
+                  }
+                  else if(_top_shelves_parent[removed_columns_index+1]){
+                    if(_top_shelves_parent[removed_columns_index+1] instanceof THREE.Group){
+                        for(var i = 0;i<_top_shelves_parent[removed_columns_index+1].children.length;i++){
+                            var a = _top_shelves_parent[removed_columns_index+1].children[i];
+                            a.scale.setX(offset*2);
+                            a.position.setX(_columns[removed_columns_index].position.x+offset/2);
+                        }
+                    }
+                    
+                  
+                  }
+                  else if(_top_shelves_parent[removed_columns_index] && _top_shelves_parent[removed_columns_index+1]){
+                    if(_top_shelves_parent[removed_columns_index] instanceof THREE.Group){
+                        for(var i = 0;i<_top_shelves_parent[removed_columns_index].children.length;i++){
+                            var a = _top_shelves_parent[removed_columns_index].children[i];
+                            a.scale.setX(offset*2);
+                            a.position.setX(_columns[removed_columns_index].position.x+offset/2);
+                        }
+                    }
+              
+                    removeTopShelves(removed_columns_index+1);                 
+                }
+                //Bottom Shelf
+                if(_bot_shelf_parent[removed_columns_index]){
+
+                    if(_bot_shelf_parent[removed_columns_index] instanceof THREE.Group){
+                        for(var i = 0;i<_bot_shelf_parent[removed_columns_index].children.length;i++){
+                            var a = _bot_shelf_parent[removed_columns_index].children[i];
+                            a.scale.setX(offset*2- thickness/12 *ftTom);
+                            a.position.setX(_columns[removed_columns_index].position.x+offset/2);
+                        }
+                    }
+                    
+                    
+                  }
+                  else if(_bot_shelf_parent[removed_columns_index+1]){
+                    if(_bot_shelf_parent[removed_columns_index+1] instanceof THREE.Group){
+                        for(var i = 0;i<_bot_shelf_parent[removed_columns_index+1].children.length;i++){
+                            var a = _bot_shelf_parent[removed_columns_index+1].children[i];
+                            a.scale.setX(offset*2- thickness/12 *ftTom);
+                            a.position.setX(_columns[removed_columns_index].position.x+offset/2);
+                        }
+                    }
+                    
+                  
+                  }
+                  else if(_bot_shelf_parent[removed_columns_index] && _bot_shelf_parent[removed_columns_index+1]){
+                    if(_bot_shelf_parent[removed_columns_index] instanceof THREE.Group){
+                        for(var i = 0;i<_bot_shelf_parent[removed_columns_index].children.length;i++){
+                            var a = _bot_shelf_parent[removed_columns_index].children[i];
+                            a.scale.setX(offset*2 - thickness/12 *ftTom);
+                            a.position.setX(_columns[removed_columns_index].position.x+offset/2);
+                        }
+                    }
+              
+                    removeBotShelves(removed_columns_index+1);                 
+                }
+
+             
+            }
+        })
     }
-
 }
 
 function removeAllInterior(){
@@ -1959,4 +2372,6 @@ function removeAllInterior(){
     removeTopShelves();
     removeBotShelves();
     removeHanger();
+    reset_adjacents_removed_columns();
+    
 }
