@@ -41,87 +41,84 @@
                 <div class="form-control m-1">
 
 
-                    <h6>Choose Dimensions:</h6>
-
-                    <div class="form-control m-1 " id="sizeOptions">
+                    <h6 class="m-1">Choose Dimensions:</h6>
+                    <div class="form-control-lg" id="sizeOptions">
+                        <div class="form-control m-1 ">
                        
 
 
-                        <label for="width">Width: <output id="rangeoutput">2.5</output> ft</label>
-                        <input type="range" name="width" id="width" class="form-range" min="2.5" max="12" step="0.5"
-                            value="2.5" oninput="rangeoutput.value = this.value">
-
-
-
-                        <!-- <p>Verticle : <span id="columnSize"> 1in</span></p> -->
-                    </div>
-                    <div class="form-control  m-1" id="chooseColumns">
-                        <h6>Choose Columns:</h6>
-                      
-
-                        <div class="d-md-inline-block justify-content-center " id="columns-group">
+                            <label for="width">Width: <output id="rangeoutput">2.5</output> ft</label>
+                            <input type="range" name="width" id="width" class="form-range" min="2.5" max="12" step="0.5"
+                                value="2.5" oninput="rangeoutput.value = this.value">
 
                         </div>
-                       
+                        <div class="form-control m-1" id="chooseColumns">
+                            <h6>Choose Columns:</h6>
+                          
+    
+                            <div class="d-md-inline-block justify-content-center " id="columns-group">
+    
+                            </div>
+                           
+                        </div>
+                        
+                        <div class="form-control m-1 " >
+                            <p>Height:</p>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input btn-check" type="radio" name="heightOptions" id="height1"
+                                    value="6" checked>
+                                <label class="form-check-label btn btn-outline-secondary" for="height1">6 ft</label>
+                            </div>
+    
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input btn-check" type="radio" name="heightOptions" id="height2"
+                                    value="6.5">
+                                <label class="form-check-label btn btn-outline-secondary" for="height2">6.5 ft</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input btn-check" type="radio" name="heightOptions" id="height3"
+                                    value="7">
+                                <label class="form-check-label btn btn-outline-secondary" for="height3">7 ft</label>
+                            </div>
+                        </div>
+    
+                        <div class="form-control m-1" >
+                            <p>Depth:</p>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input btn-check" type="radio" name="depthOptions" id="depth1"
+                                    value="1.5" checked>
+                                <label class="form-check-label btn btn-outline-secondary" for="depth1">1.5 ft</label>
+                            </div>
+    
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input btn-check" type="radio" name="depthOptions" id="depth2"
+                                    value="1.75">
+                                <label class="form-check-label btn btn-outline-secondary" for="depth2">1.75 ft</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input btn-check" type="radio" name="depthOptions" id="depth3"
+                                    value="2">
+                                <label class="form-check-label btn btn-outline-secondary" for="depth3">2 ft</label>
+                            </div>
+                            <!-- <a class=" btn btn-outline-success float-end" id="doneDepth"><i class="fa fa-check"></i>
+                            </a> -->
+                        </div>
+    
+    
                     </div>
                     
-                    <div class="form-control m-1 " id="sizeOptions">
-                        <p>Height:</p>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input btn-check" type="radio" name="heightOptions" id="height1"
-                                value="6" checked>
-                            <label class="form-check-label btn btn-outline-secondary" for="height1">6 ft</label>
-                        </div>
 
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input btn-check" type="radio" name="heightOptions" id="height2"
-                                value="6.5">
-                            <label class="form-check-label btn btn-outline-secondary" for="height2">6.5 ft</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input btn-check" type="radio" name="heightOptions" id="height3"
-                                value="7">
-                            <label class="form-check-label btn btn-outline-secondary" for="height3">7 ft</label>
-                        </div>
-<!--                      
+                    <div class="row d-flex m-1 ">
+                        <a class="btn btn-outline-success" id="doneDimensions"><i class="fa fa-check"></i>OK</a>
 
-                            <a class=" btn btn-outline-success float-end" id="doneHeight"><i class="fa fa-check"></i>
-                            </a> -->
-                        
-                    </div>
-
-                    <div class="form-control m-1" id="sizeOptions">
-                        <p>Depth:</p>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input btn-check" type="radio" name="depthOptions" id="depth1"
-                                value="1.5" checked>
-                            <label class="form-check-label btn btn-outline-secondary" for="depth1">1.5 ft</label>
-                        </div>
-
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input btn-check" type="radio" name="depthOptions" id="depth2"
-                                value="1.75">
-                            <label class="form-check-label btn btn-outline-secondary" for="depth2">1.75 ft</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input btn-check" type="radio" name="depthOptions" id="depth3"
-                                value="2">
-                            <label class="form-check-label btn btn-outline-secondary" for="depth3">2 ft</label>
-                        </div>
-                        <!-- <a class=" btn btn-outline-success float-end" id="doneDepth"><i class="fa fa-check"></i>
-                        </a> -->
-                    </div>
-
-
-
-                    <div class="row m-1">
-                        <a class="btn btn-outline-success float-end" id="doneDimensions"><i class="fa fa-check"></i>
-                            OK</a>
+                        <a class="btn btn-outline-dark " id="editDimensions"><i class="fa fa-edit"></i>Edit</a>
                     </div>
                 </div>
-                <div class="form-control m-1">
 
-                    <h6 class="m-2">Features: </h6>
+
+                <div id="editInterior" class="form-control m-1" >
+
+                    <h6 class="m-2"  >Features: </h6>
                     <div class="form-control m-1">
                
                         <div class="form-check form-switch m-2">
