@@ -18,7 +18,7 @@ canvas{
     position: absolute;
     background-color: rgb(255, 255, 255);
     width:30%;
-    height: 100%;
+    height: auto;
    
 }
 
