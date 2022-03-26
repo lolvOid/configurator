@@ -90,19 +90,12 @@ let _lockers = [],
     _columns_group, _hDoors_parent = [];
 
 
+
 var rowCount = 0;
 var isSplitterCreated = false;
-var removed_columns_index, removed_column_id = [];
+var removed_index, removed_id = [],
+    removed_plane = [];
 
-
-let _smallIntDouble = [],
-    _largeIntDouble = [],
-    _hangerDouble = [],
-    _topShelvesDouble = [],
-    _botShelvesDouble = [],
-    _largeIntDoubleSplitter = [],
-    _topShelvesDouble_parent = [],
-    _botShelvesDouble_parent = [];
 _hDoors = [];
 
 
@@ -236,10 +229,10 @@ function getInputs() {
         wWidth = $("#width").val();
 
         chooseColumns_number();
-
         removeColumns();
         removeHorizontalSplitter();
         removeExternalDrawer();
+        removeInteractivePlane();
 
     })
 
@@ -268,11 +261,6 @@ function getInputs() {
     })
 
     $("#loftOptionsPanel").hide();
-    $("#doneLoft").click(function () {
-
-    })
-
-
 
     $("#addloft").change(function () {
         addLoft($(this).is(":checked"));
@@ -306,6 +294,7 @@ function getInputs() {
         removeHorizontalSplitter();
         removeExternalDrawer();
         removeAllInterior();
+        removeInteractivePlane();
     })
     $("#doneDimensions").click(function () {
 
@@ -316,6 +305,10 @@ function getInputs() {
         $("#editInterior").show();
 
         $(this).hide();
+
+
+        generateInteractivePlanes(customColumns);
+        updateInteractivePlane();
 
     })
     $("#export").click(function () {
@@ -345,9 +338,18 @@ function create_lights() {
 
 function render() {
 
+
+    $("input:radio[name='columnsOptions']").click(function () {
+        removeColumns();
+        updateColumns();
+
+    })
+
     updateWardrobe();
     topShelfOnSelected(plane_index);
-    botShelfManager()
+    botShelfFilter();
+    addHorizontalParts();
+    columnsCombination();
     interactivePlane_group.visible = true;
     // renderer.render(scene, camera);
     document.getElementById('column_id').innerHTML = plane_index + 1;
@@ -437,6 +439,16 @@ function updateColumns() {
             }
         }
 
+
+
+    }
+    _m_splitters_group.position.set(offset / 2 + wLeft.position.x, _m_splitters_group.position.y, _m_splitters_group.position.z);
+
+}
+
+function generateInteractivePlanes(index) {
+
+    for (var i = 0; i < index; i++) {
         if (!interactivePlanes[i]) {
             createInteractivePlane(i);
             updateInteractivePlane(i);
@@ -447,48 +459,61 @@ function updateColumns() {
         }
 
     }
-    _m_splitters_group.position.set(offset / 2 + wLeft.position.x, _locker_splitter_group.position.y, _locker_splitter_group.position.z);
 
 }
-
 
 function addHorizontalParts() {
     $("#addED").click(function () {
 
         var i = 0;
-        while (i < customColumns) {
+
+        while (i < interactivePlanes.length) {
             if (!_extDrawers[i]) {
+
                 createExternalDrawer(i);
                 updateExternalDrawer(i);
                 updateInternalDrawerLarge(i);
+                removeBotShelves(i);
+                createBotShelves(i);
                 updateBotShelves(i);
+                columnsCombination()
 
             } else {
+
                 if (_extDrawers[i] instanceof THREE.Mesh) {
                     updateExternalDrawer(i);
+                    columnsCombination()
                     updateInternalDrawerLarge(i);
+                    removeBotShelves(i);
+                    createBotShelves(i);
                     updateBotShelves(i);
-
                 }
             }
+
+            columnsCombination()
             i++;
         }
+
         columnsCombination()
+
+     
     })
 
     $("#addIDL").click(function () {
         if (!_largeIntDrawers[plane_index]) {
             createInternalDrawerLarge(plane_index);
             updateInternalDrawerLarge(plane_index);
-            updateBotShelves(plane_index);
-
+            columnsCombination()
         } else {
             if (_largeIntDrawers[plane_index] instanceof THREE.Mesh) {
                 updateInternalDrawerLarge(plane_index);
-                updateBotShelves(plane_index);
-
+                columnsCombination()
             }
         }
+        removeBotShelves(plane_index);
+        createBotShelves(onHeightChanged(plane_index), plane_index);
+        updateBotShelves(plane_index);
+        updateExternalDrawer(plane_index);
         columnsCombination()
     })
 
@@ -496,15 +521,18 @@ function addHorizontalParts() {
         if (!_smallIntDrawers[plane_index]) {
             createInternalDrawerSmall(plane_index);
             updateInternalDrawerSmall(plane_index);
-            updateBotShelves(plane_index);
-
+            columnsCombination()
         } else {
             if (_smallIntDrawers[plane_index] instanceof THREE.Mesh) {
                 updateInternalDrawerSmall(plane_index);
-                updateBotShelves(plane_index);
-
+                columnsCombination()
             }
         }
+
+        removeBotShelves(plane_index);
+        createBotShelves(onHeightChanged(plane_index), plane_index);
+        updateBotShelves(plane_index);
+        updateExternalDrawer(plane_index);
         columnsCombination()
     })
 
@@ -512,29 +540,42 @@ function addHorizontalParts() {
         if (!_lockers[plane_index]) {
             createLocker(plane_index);
             updateLocker(plane_index);
-            updateInternalDrawerSmall(plane_index);
-            updateBotShelves(plane_index);
-
+            columnsCombination()
         } else {
             if (_lockers[plane_index] instanceof THREE.Mesh) {
                 updateLocker(plane_index);
-                updateInternalDrawerSmall(plane_index);
-                updateBotShelves(plane_index);
+                columnsCombination()
             }
         }
+
+
+        updateInternalDrawerSmall(plane_index);
+        removeBotShelves(plane_index);
+        createBotShelves(onHeightChanged(plane_index), plane_index);
+        updateBotShelves(plane_index);
+        updateExternalDrawer(plane_index);
         columnsCombination()
     })
 
     $("#addBottomShelf").click(function () {
         if (!_bot_shelf_parent[plane_index]) {
+        
+            removeBotShelves(plane_index);
             createBotShelves(onHeightChanged(plane_index), plane_index);
             updateBotShelves(plane_index);
+            columnsCombination()
         } else {
-            if (_bot_shelf_parent[i] instanceof THREE.Group) {
+            if (_bot_shelf_parent[plane_index] instanceof THREE.Group) {
+                removeBotShelves(plane_index);
+                createBotShelves(onHeightChanged(plane_index), plane_index);
                 updateBotShelves(plane_index);
+                columnsCombination()
 
             }
         }
+
+        updateExternalDrawer();
+        updateInternalDrawerLarge();
         columnsCombination()
     })
 
@@ -543,11 +584,11 @@ function addHorizontalParts() {
             if (!_hangers[plane_index]) {
                 createHanger(plane_index);
                 updateHanger(plane_index);
-
+                columnsCombination()
             } else {
                 if (_hangers[plane_index] instanceof THREE.Mesh) {
                     updateHanger(plane_index);
-
+                    columnsCombination()
                 }
             }
 
@@ -557,11 +598,11 @@ function addHorizontalParts() {
             if (!_top_shelves_parent[plane_index]) {
                 createTopShelves(2, plane_index);
                 updateTopShelves(plane_index);
-
+                columnsCombination()
             } else {
                 if (_top_shelves_parent[plane_index] instanceof THREE.Group) {
                     updateTopShelves(plane_index);
-
+                    columnsCombination()
                 }
             }
 
@@ -577,7 +618,7 @@ function addHorizontalParts() {
 
 
         if (_hDoors_parent) {
-            for (var i = 0; i < customColumns - removed_column_id.length; i++) {
+            for (var i = 0; i < customColumns - removed_id.length; i++) {
 
                 createHingedDoor(i);
                 updateHingedDoor(i);
@@ -611,106 +652,93 @@ function topShelfOnSelected(index) {
     }
 }
 
-function botShelfManager() {
+function botShelfFilter() {
 
-    // if(wHeight == 6){
-    //     if(_lockers[plane_index] && !_smallIntDrawers[plane_index]){
-    //         $("#addIDS").addClass("disabled");
-    //         $("#addLocker").removeClass("disabled");
-    //     }else if(!_lockers[plane_index] && _smallIntDrawers[plane_index]){
-    //         $("#addIDS").removeClass("disabled");
-    //         $("#addLocker").addClass("disabled");
-    //     }
-    //     else{
 
-    //         $("#addIDS").removeClass("disabled");
-    //         $("#addLocker").removeClass("disabled");
-    //     }
-    //     if(_largeIntDrawers[plane_index] && !_extDrawers[plane_index]){
-    //         $("#addED").addClass("disabled");
-    //         $("#addIDL").removeClass("disabled");
-    //     }else if(!_largeIntDrawers[plane_index] && _extDrawers[plane_index]){
-    //         $("#addIDL").removeClass("disabled");
-    //         $("#addED").addClass("disabled");
-    //     }
-    //     else{
-    //         $("#addED").removeClass("disabled");
-    //         $("#addIDL").removeClass("disabled");
-    //     }
+
+    // if (wHeight < 6.5) {
     //     $("#addBottomShelf").addClass("disabled");
-    // }
-    // else if(wHeight == 6.5){
+    // } else if (wHeight == 6.5) {
+    //     $("#addBottomShelf").removeClass("disabled");
+    //     $("#addLocker").removeClass("disabled");
+    //     $("#addIDS").removeClass("disabled");
+    // } else if (wHeight > 6.5 && (!_smallIntDrawers[plane_index||removed_index||removed_index+1] && !_lockers[plane_index])) {
+    //     $("#addBottomShelf").removeClass("disabled");
+    //     $("#addIDL").removeClass("disabled");
+    //     $("#addED").removeClass("disabled");
+    // } else if (wHeight > 6.5 && (!_extDrawers[plane_index] && !_largeIntDrawers[plane_index] && !_smallIntDrawers[plane_index])) {
+    //     $("#addLocker").removeClass("disabled");
 
-    //     if(!_lockers[plane_index] && !_smallIntDrawers[plane_index] && !_largeIntDrawers[plane_index] && !_extDrawers[plane_index]){
-    //         $("#addBottomShelf").removeClass("disabled");
-    //         $("#addIDS").removeClass("disabled");
-    //         $("#addLocker").removeClass("disabled");
-    //         $("#addED").removeClass("disabled");
-    //         $("#addIDL").removeClass("disabled");
-    //     }else if(!_lockers[plane_index] && !_smallIntDrawers[plane_index] && !_largeIntDrawers[plane_index] && _extDrawers[plane_index]){
-    //         $("#addBottomShelf").removeClass("disabled");
-    //         $("#addIDS").addClass("disabled");
-    //         $("#addLocker").addClass("disabled");
-    //         $("#addED").addClass("disabled");
-    //         $("#addIDL").addClass("disabled");
-    //     }else if(_lockers[plane_index] && _smallIntDrawers[plane_index] && !_largeIntDrawers[plane_index] && !_extDrawers[plane_index]){
-    //         $("#addBottomShelf").removeClass("disabled");
-    //         $("#addIDS").removeClass("disabled");
-    //         $("#addLocker").removeClass("disabled");
-    //         $("#addED").addClass("disabled");
-    //         $("#addIDL").addClass("disabled");
-    //     }else if(!_lockers[plane_index] && !_smallIntDrawers[plane_index] && _largeIntDrawers[plane_index] && !_extDrawers[plane_index]){
-    //         $("#addBottomShelf").removeClass("disabled");
-    //         $("#addIDS").removeClass("disabled");
-    //         $("#addLocker").removeClass("disabled");
-    //         $("#addED").addClass("disabled");
-    //         $("#addIDL").addClass("disabled");
-    //     }
-    //     else if(!_lockers[plane_index] && !_smallIntDrawers[plane_index] && !_largeIntDrawers[plane_index] && _extDrawers[plane_index]){
-    //         // $("#addBottomShelf").removeClass("disabled");
-    //         $("#addIDS").addClass("disabled");
-    //         $("#addLocker").addClass("disabled");
-    //         $("#addED").addClass("disabled");
-    //         $("#addIDL").addClass("disabled");
-    //     }
-
-    // }else if(wHeight == 7){
-    //     // $("#addBottomShelf").removeClass("disabled");
-    //     //  if(!_lockers[plane_index] && !_smallIntDrawers[plane_index] && !_largeIntDrawers[plane_index] && !_extDrawers[plane_index]){
-    //     //     $("#addBottomShelf").removeClass("disabled");
-    //     //     $("#addIDS").removeClass("disabled");
-    //     //     $("#addLocker").removeClass("disabled");
-    //     //     $("#addED").removeClass("disabled");
-    //     //     $("#addIDL").removeClass("disabled");
-    //     // }else if(!_lockers[plane_index] && _smallIntDrawers[plane_index] && _largeIntDrawers[plane_index] && !_extDrawers[plane_index]){
-    //     //     $("#addBottomShelf").removeClass("disabled");
-    //     //     $("#addIDS").addClass("disabled");
-    //     //     $("#addLocker").addClass("disabled");
-    //     //     $("#addED").addClass("disabled");
-    //     //     $("#addIDL").addClass("disabled");
-    //     // }else if(!_lockers[plane_index] && _smallIntDrawers[plane_index] && _largeIntDrawers[plane_index] && _extDrawers[plane_index]){
-    //     //     $("#addBottomShelf").removeClass("disabled");
-    //     //     $("#addIDS").removeClass("disabled");
-    //     //     $("#addLocker").addClass("disabled");
-    //     //     $("#addED").removeClass("disabled");
-    //     //     $("#addIDL").removeClass("disabled");
-    //     // }else if(!_lockers[plane_index] && !_smallIntDrawers[plane_index] && _largeIntDrawers[plane_index] && !_extDrawers[plane_index]){
-    //     //     $("#addBottomShelf").removeClass("disabled");
-    //     //     $("#addIDS").removeClass("disabled");
-    //     //     $("#addLocker").removeClass("disabled");
-    //     //     $("#addED").addClass("disabled");
-    //     //     $("#addIDL").addClass("disabled");
-    //     // }
-    //     // else if(!_lockers[plane_index] && !_smallIntDrawers[plane_index] && !_largeIntDrawers[plane_index] && _extDrawers[plane_index]){
-    //     //     $("#addBottomShelf").removeClass("disabled");
-    //     //     $("#addIDS").addClass("disabled");
-    //     //     $("#addLocker").addClass("disabled");
-    //     //     $("#addED").addClass("disabled");
-    //     //     $("#addIDL").addClass("disabled");
-    //     // }
     // }
 
 
+    if (wHeight < 6.5) {
+        $("#addBottomShelf").addClass("disabled");
+        if (_smallIntDrawers[plane_index]) {
+
+            $("#addLocker").addClass("disabled");
+        } else {
+            $("#addLocker").removeClass("disabled");
+        }
+        if (_lockers[plane_index]) {
+            $("#addIDS").addClass("disabled");
+        } else {
+            $("#addIDS").removeClass("disabled");
+        }
+        if (_largeIntDrawers[plane_index]) {
+            $("#addED").addClass("disabled");
+        } else {
+            $("#addED").removeClass("disabled");
+        }
+        if (_extDrawers.length > 0) {
+            $("#addIDL").addClass("disabled");
+        } else {
+            $("#addIDL").removeClass("disabled");
+        }
+    } else if (wHeight == 6.5) {
+        $("#addBottomShelf").removeClass("disabled");
+
+        if (_extDrawers.length > 0) {
+            $("#addIDL").addClass("disabled");
+        } else {
+            $("#addIDL").removeClass("disabled");
+        }
+        if (_largeIntDrawers.length > 0) {
+            $("#addED").addClass("disabled");
+        } else {
+            $("#addED").removeClass("disabled");
+        }
+    } else if (wHeight > 6.5) {
+        $("#addBottomShelf").removeClass("disabled");
+
+        if (_lockers[plane_index] && !_smallIntDrawers[plane_index]) {
+
+            if (_largeIntDrawers[plane_index] && _extDrawers[plane_index]) {
+
+                $("#addIDS").addClass("disabled");
+            } else {
+                $("#addIDL").removeClass("disabled");
+                $("#addLocker").removeClass("disabled");
+                $("#addED").removeClass("disabled");
+            }
+        } else if (!_lockers[plane_index] && _smallIntDrawers[plane_index]) {
+            $("#addIDS").removeClass("disabled");
+            $("#addLocker").addClass("disabled");
+            $("#addIDL").removeClass("disabled");
+            $("#addED").removeClass("disabled");
+        } else if (_lockers[plane_index] && _smallIntDrawers[plane_index]) {
+            $("#addIDL").addClass("disabled");
+            $("#addED").addClass("disabled");
+            $("#addIDS").removeClass("disabled");
+            $("#addLocker").removeClass("disabled");
+        } else {
+            $("#addIDL").removeClass("disabled");
+            $("#addED").removeClass("disabled");
+            $("#addIDS").removeClass("disabled");
+            $("#addLocker").removeClass("disabled");
+        }
+
+    }
 }
 
 function updateWardrobe() {
@@ -960,7 +988,7 @@ function updateExternalDrawer(index) {
 
 
     if (_extDrawers_splitters[index] instanceof THREE.Mesh) {
-        _extDrawers_splitters[index].scale.set(_m_splitters[index].scale.x, _m_splitters[index].scale.y, _m_splitters[index].scale.z + (thickness / 12) * ftTom);
+        _extDrawers_splitters[index].scale.set(offset - thickness / 12 * ftTom, _m_splitters[index].scale.y, _m_splitters[index].scale.z + (thickness / 12) * ftTom);
         _extDrawers_splitters[index].position.set(_extDrawers[index].position.x, _extDrawers[index].position.y + _extDrawers[index].scale.y / 2 + (thickness / 24 * ftTom), _extDrawers[index].position.z);
         _extDrawers_splitters_group.position.set(offset / 2 + wLeft.position.x, _extDrawers_splitters_group.position.y, _extDrawers_splitters_group.position.z);
     }
@@ -1078,7 +1106,7 @@ function updateInternalDrawerLarge(index) {
 
 
     if (_largeIntDrawers[index] instanceof THREE.Mesh) {
-        _largeIntDrawers_splitters[index].scale.set(_m_splitters[index].scale.x, _m_splitters[index].scale.y, _m_splitters[index].scale.z);
+        _largeIntDrawers_splitters[index].scale.set(offset - thickness / 12 * ftTom, _m_splitters[index].scale.y, _m_splitters[index].scale.z);
         _largeIntDrawers_splitters[index].position.set(_largeIntDrawers[index].position.x, _largeIntDrawers[index].position.y + _largeIntDrawers[index].scale.y / 2 + (thickness / 24 * ftTom), _largeIntDrawers[index].position.z);
         _largeIntDrawers_splitters_group.position.set(offset / 2 + wLeft.position.x, _largeIntDrawers_splitters_group.position.y, _largeIntDrawers_splitters_group.position.z);
     }
@@ -1087,7 +1115,7 @@ function updateInternalDrawerLarge(index) {
 
 function removeInternalDrawerLarge(index) {
 
-    if (index != null) {
+    if (index) {
         _largeIntDrawers.forEach(e => {
             if (_largeIntDrawers[index] instanceof THREE.Mesh && _largeIntDrawers[index] == e) {
                 if (_largeIntDrawers_group instanceof THREE.Group) {
@@ -1178,7 +1206,7 @@ function updateLocker(index) {
 
 
     if (_locker_splitters[index] instanceof THREE.Mesh) {
-        _locker_splitters[index].scale.set(_m_splitters[index].scale.x, _m_splitters[index].scale.y, _m_splitters[index].scale.z);
+        _locker_splitters[index].scale.set(offset - thickness / 12 * ftTom, _m_splitters[index].scale.y, _m_splitters[index].scale.z);
         _locker_splitters[index].position.set(_lockers[index].position.x, _lockers[index].position.y - _lockers[index].scale.y / 2 - (thickness / 24 * ftTom), _lockers[index].position.z);
 
     }
@@ -1188,7 +1216,7 @@ function updateLocker(index) {
 
 function removeLocker(index) {
 
-    if (index != null) {
+    if (index) {
         _lockers.forEach(e => {
             if (_lockers[index] instanceof THREE.Mesh && _lockers[index] == e) {
                 if (_locker_group instanceof THREE.Group) {
@@ -1272,7 +1300,7 @@ function updateInternalDrawerSmall(index) {
 
 function removeInternalDrawerSmall(index) {
 
-    if (index != null) {
+    if (index) {
         _smallIntDrawers.forEach(e => {
             if (_smallIntDrawers[index] instanceof THREE.Mesh && _smallIntDrawers[index] == e) {
                 if (_smallIntDrawers_group instanceof THREE.Group) {
@@ -1352,7 +1380,7 @@ function updateHanger(index) {
 
 function removeHanger(index) {
 
-    if (index != null) {
+    if (index) {
         if (_hangers[index] instanceof THREE.Mesh) {
             if (_hanger_group instanceof THREE.Group) {
                 _hanger_group.remove(_hangers[index]);
@@ -1484,13 +1512,11 @@ function removeBotShelves(index) {
 
 function updateBotShelves(index) {
 
-
-
     var vertical_offset = 0;
     var pos = 0;
 
     vertical_offset *= -1;
-
+    
     if (_bot_shelf_parent[index] instanceof THREE.Group) {
         if (_lockers[index] instanceof THREE.Mesh || _largeIntDrawers[index] instanceof THREE.Mesh ||
             _smallIntDrawers[index] instanceof THREE.Mesh || _extDrawers[index]) {
@@ -1501,6 +1527,7 @@ function updateBotShelves(index) {
                     // No Other Parts
                     if (!_smallIntDrawers[index] && !_largeIntDrawers[index] && !_extDrawers[index]) {
                         if (wHeight > 6.5) {
+                            console.log("OK")
                             var dist = (_m_splitters[index].position.y - wBottom.position.y);
                             vertical_offset = dist / (_bot_shelf_parent[index].children.length + 1);
                             pos = _m_splitters[index].position.y - _m_splitters[index].scale.y / 2 - vertical_offset + (thickness / 24) * ftTom;
@@ -1621,6 +1648,20 @@ function updateBotShelves(index) {
                 }
             }
             vertical_offset *= -1;
+        } else {
+            if (!_lockers[index] && !_smallIntDrawers[index] && !_largeIntDrawers[index] && !_extDrawers[index]) {
+
+
+                if (wHeight > 6.5) {
+                    
+                    if(_m_splitters[index]){
+                        var dist = (_m_splitters[index].position.y - wBottom.position.y);
+                        vertical_offset = dist / (_bot_shelf_parent[index].children.length + 1);
+                        pos = _m_splitters[index].position.y - _m_splitters[index].scale.y / 2 - _bot_shelf_parent[index].children.length* vertical_offset + (thickness / 24) * ftTom;
+                    }
+                    
+                }
+            }
         }
         for (var j = 0; j < _bot_shelf_parent[index].children.length; j++) {
             if (_bot_shelf_parent[index].children[j] instanceof THREE.Mesh) {
@@ -1671,12 +1712,15 @@ function updateInteractivePlane(index) {
 
 function removeInteractivePlane(index) {
 
-    if (index != null) {
+
+    if (index) {
+
         if (interactivePlanes[index] instanceof THREE.Mesh) {
-            if (interactivePlane_group instanceof THREE.Group) {
-                interactivePlane_group.remove(interactivePlanes[index]);
-            }
+
+            interactivePlane_group.remove(interactivePlanes[index]);
+
         }
+
         interactivePlanes[index] = null;
     } else {
         interactivePlanes.forEach(e => {
@@ -1729,8 +1773,8 @@ function onClick() {
 
                     adjacentParts.push(_columns[i + 1]);
                 }
-                removed_columns_index = i;
-                removed_column_id.push(i);
+                removed_index = i;
+                removed_id.push(i);
                 _columns_group.remove(_columns[i]);
                 removed.push(_columns[i]);
             }
@@ -1971,11 +2015,13 @@ function pasetToColumn(index) {
                     updateExternalDrawer(i);
                     updateInternalDrawerLarge(i);
                     updateBotShelves(i);
+                    columnsCombination();
                 } else {
                     if (_extDrawers[i] instanceof THREE.Mesh) {
                         updateExternalDrawer(i);
                         updateInternalDrawerLarge(i);
                         updateBotShelves(i);
+                        columnsCombination();
                     }
                 }
                 i++;
@@ -2079,60 +2125,35 @@ function chooseColumns_number() {
 }
 
 function set_columns_number(value) {
-    removeColumns();
-    removeHorizontalSplitter();
-    removeExternalDrawer();
+    // removeColumns();
+    // removeHorizontalSplitter();
+    // removeExternalDrawer();
     reset_adjacents_removed_columns();
     customColumns = value;
-
 
 }
 
 function reset_adjacents_removed_columns() {
-    if (removed) {
-        removed.forEach(e => {
-            e.visible = true;
-        });
-    }
-    removed = [];
+
+
     adjacentParts = [];
 
 }
 
 function onHeightChanged(plane_index) {
     var row = 1;
-    // if (wHeight < 6.5) {
-    //     $("#addBottomShelf").addClass("disabled");
-    // } else if (wHeight == 6.5) {
-    //     $("#addBottomShelf").removeClass("disabled");
-    //     $("#addLocker").removeClass("disabled");
-    //     $("#addIDS").removeClass("disabled");
-    // } else if (wHeight > 6.5 && (!_smallIntDrawers[plane_index] && !_lockers[plane_index])) {
-    //     $("#addBottomShelf").removeClass("disabled");
-    //     $("#addIDL").removeClass("disabled");
-    //     $("#addED").removeClass("disabled");
-    // } else if (wHeight > 6.5 && (!_extDrawers[plane_index] && !_largeIntDrawers[plane_index] && !_smallIntDrawers[plane_index])) {
-    //     $("#addLocker").removeClass("disabled");
-
-    // }
 
 
 
     if (wHeight == 6.5) {
         row = 1;
     } else if (wHeight == 7 && !_lockers[plane_index] && !_largeIntDrawers[plane_index] && !_extDrawers[plane_index] && !_smallIntDrawers[plane_index]) {
-        row = 2;
+        row = 3;
     } else if (wHeight == 7 && !_lockers[plane_index]) {
+        row = 1;
+    } else if (wHeight == 7 && _lockers[plane_index] && !_smallIntDrawers[plane_index]) {
         row = 2;
-    } else if (_lockers[plane_index] && wHeight == 7 && !_largeIntDrawers[plane_index] && !_extDrawers[plane_index] && !_smallIntDrawers[plane_index]) {
-        row = 2;
-    } else if (_lockers[plane_index] && wHeight == 7 && _extDrawers[plane_index] && !_smallIntDrawers[plane_index] && !_largeIntDrawers[plane_index]) {
-        row = 2;
-    } else if (wHeight == 7 && _lockers[plane_index] && _largeIntDrawers[plane_index] && !_extDrawers[plane_index] && !_smallIntDrawers[plane_index]) {
-        row = 2;
-    } else if (wHeight == 7 && _lockers[plane_index] && _largeIntDrawers[plane_index] && _extDrawers[plane_index] && !_smallIntDrawers[plane_index]) {
-        row = 2;
-    } else if (wHeight == 7 && _lockers[plane_index] && !_largeIntDrawers[plane_index] && !_extDrawers[plane_index] && _smallIntDrawers[plane_index]) {
+    } else if (wHeight == 7 && _lockers[plane_index] && _smallIntDrawers[plane_index]) {
         row = 3;
     } else if (wHeight == 6 || (wHeight == 6.5 && !_lockers[plane_index] && !_largeIntDrawers[plane_index] && !_extDrawers[plane_index] && !_smallIntDrawers[plane_index])) {
 
@@ -2144,333 +2165,251 @@ function onHeightChanged(plane_index) {
 }
 
 function columnsCombination() {
-    if (removed) {
+    if (removed.length>0) {
         removed.forEach(e => {
 
-            if (e == _columns[removed_columns_index]) {
-                if (removed_columns_index > 0) {
+            if (e == _columns[removed_index]) {
 
+                // _columns[removed_index].position.x + offset / 2
+                var sizeToChange = offset * 2 - thickness / 12 * ftTom;
+                var posToChange = _columns[removed_index].position.x + offset / 2;
 
-                    if (_hDoors_parent[removed_columns_index]) {
-                        var a = _hDoors_parent[removed_columns_index];
-                        removeDoor(removed_columns_index);
-                        createHingedDoor(removed_columns_index - 1);
 
-                        if (_hDoors_parent[removed_columns_index - 1] instanceof THREE.Group) {
-
-
-
-                            for (var j = 0; j < _hDoors_parent[removed_columns_index - 1].children.length; j++) {
-
-                                if (_hDoors_parent[removed_columns_index - 1].children[j] instanceof THREE.Mesh) {
-                                    _hDoors_parent[removed_columns_index - 1].children[j].scale.set(offset - (thickness / 12) * ftTom, wHeight * ftTom - (2 / 12 * ftTom) + thickness / 12 * ftTom - wBottom.position.y, (thickness / 12) * ftTom);
-
-                                    _hDoors_parent[removed_columns_index - 1].children[j].position.set(_hDoors_parent[removed_columns_index - 1].position.x + offset / 2 - (thickness / 24) * ftTom, (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2, (thickness / 24) * ftTom);
-
-                                }
-
-                            }
-
-
-                            if (removed_columns_index - 1 > 0) {
-
-                                _hDoors_parent[removed_columns_index - 1].position.set(_columns_group.position.x + _columns[removed_columns_index - 1].position.x + thickness / 24 * ftTom, _hDoors_parent[removed_columns_index - 1].position.y, _hDoors_parent[removed_columns_index - 1].position.z + wLeft.scale.z / 2 - (thickness / 12) * ftTom);
-                                _hDoors_parent[removed_columns_index - 1].rotation.set(0, -60 * THREE.Math.DEG2RAD, 0);
-
-
-                            }
-
-
-                        }
-
-                    }
-                }
-                //IDL
-                if (_largeIntDrawers[removed_columns_index]) {
-                    var a = _largeIntDrawers[removed_columns_index];
-                    var b = _largeIntDrawers_splitters[removed_columns_index];
-
-                    a.scale.setX(offset * 2 - thickness / 12 * ftTom);
-                    b.scale.setX(offset * 2 - thickness / 12 * ftTom);
-                    a.position.setX(_columns[removed_columns_index].position.x + offset / 2);
-
-                    b.position.setX(a.position.x);
-
-                } else if (_largeIntDrawers[removed_columns_index + 1]) {
-                    var a = _largeIntDrawers[removed_columns_index + 1];
-                    var b = _largeIntDrawers_splitters[removed_columns_index + 1];
-                    a.scale.setX(offset * 2 - thickness / 12 * ftTom);
-                    b.scale.setX(offset * 2 - thickness / 12 * ftTom);
-                    a.position.setX(_columns[removed_columns_index].position.x + offset / 2);
-
-                    b.position.setX(a.position.x);
-                } else if (_largeIntDrawers[removed_columns_index] && _largeIntDrawers[removed_columns_index + 1]) {
-                    var a = _largeIntDrawers[removed_columns_index];
-                    var b = _largeIntDrawers_splitters[removed_columns_index];
-
-                    a.scale.setX(offset * 2 - thickness / 12 * ftTom);
-                    b.scale.setX(offset * 2 - thickness / 12 * ftTom);
-                    a.position.setX(_columns[removed_columns_index].position.x + offset / 2);
-
-                    b.position.setX(a.position.x);
-
-                    removeInternalDrawerLarge(removed_columns_index + 1);
-
-
-                }
-                //ED
-                if (_extDrawers[removed_columns_index]) {
-                    var a = _extDrawers[removed_columns_index];
-                    var b = _extDrawers_splitters[removed_columns_index];
-
-                    a.scale.setX(offset * 2 - thickness / 12 * ftTom);
-                    b.scale.setX(offset * 2 - thickness / 12 * ftTom);
-                    a.position.setX(_columns[removed_columns_index].position.x + offset / 2);
-
-                    b.position.setX(a.position.x);
-
-                } else if (_extDrawers[removed_columns_index + 1]) {
-                    var a = _extDrawers[removed_columns_index + 1];
-                    var b = _extDrawers_splitters[removed_columns_index + 1];
-                    a.scale.setX(offset * 2 - thickness / 12 * ftTom);
-                    b.scale.setX(offset * 2 - thickness / 12 * ftTom);
-                    a.position.setX(_columns[removed_columns_index].position.x + offset / 2);
-
-                    b.position.setX(a.position.x);
-                } else if (_extDrawers[removed_columns_index] && _extDrawers[removed_columns_index + 1]) {
-                    var a = _extDrawers[removed_columns_index];
-                    var b = _extDrawers_splitters[removed_columns_index];
-
-                    a.scale.setX(offset * 2 - thickness / 12 * ftTom);
-                    b.scale.setX(offset * 2 - thickness / 12 * ftTom);
-                    a.position.setX(_columns[removed_columns_index].position.x + offset / 2);
-
-                    b.position.setX(a.position.x);
-
-                    removeExternalDrawer(removed_columns_index + 1);
-
-
-                }
-                //ID_S
-                if (!_lockers[removed_columns_index] && _smallIntDrawers[removed_columns_index]) {
-                    var a = _smallIntDrawers[removed_columns_index];
-
-
-                    a.scale.setX(offset * 2 - thickness / 12 * ftTom);
-
-                    a.position.setX(_columns[removed_columns_index].position.x + offset / 2);
-
-
-
-                } else if (!_lockers[removed_columns_index] && _smallIntDrawers[removed_columns_index + 1]) {
-                    var a = _smallIntDrawers[removed_columns_index + 1];
-
-                    a.scale.setX(offset * 2 - thickness / 12 * ftTom);
-
-                    a.position.setX(_columns[removed_columns_index].position.x + offset / 2);
-
-
-                } else if (!_lockers[removed_columns_index] && _smallIntDrawers[removed_columns_index] && _smallIntDrawers[removed_columns_index + 1]) {
-                    var a = _smallIntDrawers[removed_columns_index + 1];
-
-                    a.scale.setX(offset * 2 - thickness / 12 * ftTom);
-
-                    a.position.setX(_columns[removed_columns_index + 1].position.x + offset / 2);
-
-                    removeInternalDrawerSmall(removed_columns_index + 1);
-
-
-                } else if (_lockers[removed_columns_index] && _smallIntDrawers[removed_columns_index + 1]) {
-
-
-                    var b = _lockers[removed_columns_index];
-                    var c = _locker_splitters[removed_columns_index];
-                    a.scale.setX(offset)
-                    b.scale.setX(offset * 2 - thickness / 12 * ftTom);
-                    c.scale.setX(b.scale.x);
-
-                    removeInternalDrawerSmall(removed_columns_index);
-                } else if (_lockers[removed_columns_index] && !_smallIntDrawers[removed_columns_index + 1]) {
-
-                    createInternalDrawerSmall(removed_columns_index + 1);
-                    updateInternalDrawerSmall(removed_columns_index + 1)
-                    var a = _smallIntDrawers[removed_columns_index + 1];
-
-                    var b = _lockers[removed_columns_index];
-                    var c = _locker_splitters[removed_columns_index];
-                    a.scale.setX(offset)
-                    b.scale.setX(offset * 2 - thickness / 12 * ftTom);
-                    c.scale.setX(b.scale.x);
-
-
-                }
-
-                //Hanger
-                if (_hangers[removed_columns_index]) {
-                    var a = _hangers[removed_columns_index];
-
-
-                    a.scale.setY(offset * 2 - thickness / 12 * ftTom);
-
-                    a.position.setX(_columns[removed_columns_index].position.x + offset / 2);
-
-
-
-                } else if (_hangers[removed_columns_index + 1]) {
-                    var a = _hangers[removed_columns_index + 1];
-
-                    a.scale.setY(offset * 2 - thickness / 12 * ftTom);
-
-                    a.position.setX(_columns[removed_columns_index].position.x + offset / 2);
-
-
-                } else if (_hangers[removed_columns_index] && _hangers[removed_columns_index + 1]) {
-                    var a = _extDrawers[removed_columns_index];
-
-
-                    a.scale.setY(offset * 2 - thickness / 12 * ftTom);
-
-                    a.position.setX(_columns[removed_columns_index].position.x + offset / 2);
-
-
-
-                    removeHanger(removed_columns_index + 1);
-
-
-                }
-                //H_Spliiter
-                if (_m_splitters[removed_columns_index]) {
-                    var a = _m_splitters[removed_columns_index];
-
-
-                    a.scale.setX(offset * 2 - thickness / 12 * ftTom);
-
-                    a.position.setX(_columns[removed_columns_index].position.x + offset / 2);
-
-
-
-                } else if (_m_splitters[removed_columns_index + 1]) {
-                    var a = _m_splitters[removed_columns_index + 1];
-
-                    a.scale.setX(offset * 2 - thickness / 12 * ftTom);
-
-                    a.position.setX(_columns[removed_columns_index].position.x + offset / 2);
-
-
-                } else if (_m_splitters[removed_columns_index] && _m_splitters[removed_columns_index + 1]) {
-                    var a = _m_splitters[removed_columns_index];
-
-
-                    a.scale.setX(offset * 2 - thickness / 12 * ftTom);
-
-                    a.position.setX(_columns[removed_columns_index].position.x + offset / 2);
-
-                    removeHorizontalSplitter(removed_columns_index + 1);
-
-
-                }
-                //Top_shelf
-                if (_top_shelves_parent[removed_columns_index]) {
-
-                    if (_top_shelves_parent[removed_columns_index] instanceof THREE.Group) {
-                        for (var i = 0; i < _top_shelves_parent[removed_columns_index].children.length; i++) {
-                            var a = _top_shelves_parent[removed_columns_index].children[i];
-                            a.scale.setX(offset * 2);
-                            a.position.setX(_columns[removed_columns_index].position.x + offset / 2);
-                        }
-                    }
-
-
-                } else if (_top_shelves_parent[removed_columns_index + 1]) {
-                    if (_top_shelves_parent[removed_columns_index + 1] instanceof THREE.Group) {
-                        for (var i = 0; i < _top_shelves_parent[removed_columns_index + 1].children.length; i++) {
-                            var a = _top_shelves_parent[removed_columns_index + 1].children[i];
-                            a.scale.setX(offset * 2);
-                            a.position.setX(_columns[removed_columns_index].position.x + offset / 2);
-                        }
-                    }
-
-
-                } else if (_top_shelves_parent[removed_columns_index] && _top_shelves_parent[removed_columns_index + 1]) {
-                    if (_top_shelves_parent[removed_columns_index] instanceof THREE.Group) {
-                        for (var i = 0; i < _top_shelves_parent[removed_columns_index].children.length; i++) {
-                            var a = _top_shelves_parent[removed_columns_index].children[i];
-                            a.scale.setX(offset * 2);
-                            a.position.setX(_columns[removed_columns_index].position.x + offset / 2);
-                        }
-                    }
-
-                    removeTopShelves(removed_columns_index + 1);
-                }
-                //Bottom Shelf
-                if (_bot_shelf_parent[removed_columns_index]) {
-
-                    if (_bot_shelf_parent[removed_columns_index] instanceof THREE.Group) {
-                        for (var i = 0; i < _bot_shelf_parent[removed_columns_index].children.length; i++) {
-                            var a = _bot_shelf_parent[removed_columns_index].children[i];
-                            a.scale.setX(offset * 2 - thickness / 12 * ftTom);
-                            a.position.setX(_columns[removed_columns_index].position.x + offset / 2);
-                        }
-                    }
-
-
-                } else if (_bot_shelf_parent[removed_columns_index + 1]) {
-                    if (_bot_shelf_parent[removed_columns_index + 1] instanceof THREE.Group) {
-                        for (var i = 0; i < _bot_shelf_parent[removed_columns_index + 1].children.length; i++) {
-                            var a = _bot_shelf_parent[removed_columns_index + 1].children[i];
-                            a.scale.setX(offset * 2 - thickness / 12 * ftTom);
-                            a.position.setX(_columns[removed_columns_index].position.x + offset / 2);
-                        }
-                    }
-
-
-                } else if (_bot_shelf_parent[removed_columns_index] && _bot_shelf_parent[removed_columns_index + 1]) {
-                    if (_bot_shelf_parent[removed_columns_index] instanceof THREE.Group) {
-                        for (var i = 0; i < _bot_shelf_parent[removed_columns_index].children.length; i++) {
-                            var a = _bot_shelf_parent[removed_columns_index].children[i];
-                            a.scale.setX(offset * 2 - thickness / 12 * ftTom);
-                            a.position.setX(_columns[removed_columns_index].position.x + offset / 2);
-                        }
-                    }
-
-                    removeBotShelves(removed_columns_index + 1);
-                }
                 //Interactive Plane
+                if (interactivePlanes[removed_index]) {
+                    var a = interactivePlanes[removed_index];
+                    a.scale.setX(sizeToChange);
+                    a.position.setX(posToChange);
+                    removeInteractivePlane(removed_index + 1);
+
+                } else if (interactivePlanes[removed_index + 1]) {
+                    var a = interactivePlanes[removed_index];
+                    a.scale.setX(sizeToChange);
+                    a.position.setX(posToChange);
+                    removeInteractivePlane(removed_index + 1);
+                }
+
+                //Large Internal Drawers
+                if (_largeIntDrawers[removed_index]) {
+                    var a = _largeIntDrawers[removed_index];
+                    var b = _largeIntDrawers_splitters[removed_index];
+                    a.scale.setX(sizeToChange);
+                    a.position.setX(posToChange);
+                    b.scale.setX(sizeToChange);
+                    b.position.setX(a.position.x);
+                    removeInternalDrawerLarge(removed_index + 1);
+                } else if (_largeIntDrawers[removed_index + 1]) {
+                    var a = _largeIntDrawers[removed_index + 1];
+
+                    var b = _largeIntDrawers_splitters[removed_index + 1];
+                    a.scale.setX(sizeToChange);
+                    a.position.setX(posToChange);
+                    b.scale.setX(sizeToChange);
+                    b.position.setX(a.position.x);
+
+                    removeInternalDrawerLarge(removed_index);
+                }
+
+                //Hangers
+                if (_hangers[removed_index]) {
+                    var a = _hangers[removed_index];
+                    a.scale.setY(sizeToChange);
+                    a.position.setX(posToChange);
+                    removeHanger(removed_index + 1);
+                } else if (_hangers[removed_index + 1]) {
+                    var a = _hangers[removed_index + 1];
+                    a.scale.setY(sizeToChange);
+                    a.position.setX(posToChange);
+                    removeHanger(removed_index);
+                }
+                //Top Shelves
+                if (_top_shelves_parent[removed_index]) {
+                    var a = _top_shelves_parent[removed_index];
+                    a.traverse(function (e) {
+                        if (e instanceof THREE.Mesh) {
+                            e.scale.setX(sizeToChange);
+                            e.position.setX(posToChange);
+                        }
+
+                    })
+                    removeTopShelves(removed_index + 1);
+
+                } else if (_top_shelves_parent[removed_index + 1]) {
+                    var a = _top_shelves_parent[removed_index + 1];
+                    a.traverse(function (e) {
+                        if (e instanceof THREE.Mesh) {
+                            e.scale.setX(sizeToChange);
+                            e.position.setX(posToChange);
+                        }
+
+                    })
+                    removeTopShelves(removed_index);
+                }
+
+                //Bottom Shelves
+                if (_bot_shelf_parent[removed_index]) {
+                    var a = _bot_shelf_parent[removed_index];
+                    a.traverse(function (e) {
+                        if (e instanceof THREE.Mesh) {
+                            e.scale.setX(sizeToChange);
+                            e.position.setX(posToChange);
+                        }
+
+                    })
+                    removeBotShelves(removed_index + 1);
+
+                } else if (_bot_shelf_parent[removed_index + 1]) {
+                    var a = _bot_shelf_parent[removed_index + 1];
+                    a.traverse(function (e) {
+                        if (e instanceof THREE.Mesh) {
+                            e.scale.setX(sizeToChange);
+                            e.position.setX(posToChange);
+                        }
+
+                    })
+                    removeBotShelves(removed_index);
+                }
 
 
-                if (interactivePlanes[removed_columns_index]) {
-                    var a = interactivePlanes[removed_columns_index];
+                //Horizontal Splitter
+                if (_m_splitters[removed_index]) {
+                    var a = _m_splitters[removed_index];
+                    a.scale.setX(sizeToChange);
+                    a.position.setX(posToChange);
+                    _m_splitters[removed_index + 1].visible = false;
+                    // removeHorizontalSplitter(removed_index+1);
+                } else if (_m_splitters[removed_index + 1]) {
+                    var a = _m_splitters[removed_index];
+                    a.scale.setX(sizeToChange);
+                    a.position.setX(posToChange);
+                    _m_splitters[removed_index + 1].visible = false;
+                    // removeHorizontalSplitter(removed_index+1);
+                }
+
+                //External Drawers
+                if (_extDrawers[removed_index]) {
+                    var a = _extDrawers[removed_index];
+                    var b = _extDrawers_splitters[removed_index];
+                    a.scale.setX(sizeToChange);
+                    a.position.setX(posToChange);
+                    b.scale.setX(sizeToChange);
+                    b.position.setX(posToChange);
+                    removeExternalDrawer(removed_index + 1);
+                } else if (_extDrawers[removed_index + 1]) {
+                    var a = _extDrawers[removed_index + 1];
+                    var b = _extDrawers_splitters[removed_index + 1];
+                    a.scale.setX(sizeToChange);
+                    a.position.setX(posToChange);
+                    b.scale.setX(sizeToChange);
+                    b.position.setX(posToChange);
+                    removeExternalDrawer(removed_index);
+                }
 
 
-                    a.scale.setX(offset * 2 - thickness / 12 * ftTom);
+                if (_smallIntDrawers[removed_index]) {
+                    if (_lockers[removed_index]) {
 
-                    a.position.setX(_columns[removed_columns_index].position.x + offset / 2);
+                        if (_smallIntDrawers[removed_index + 1]) {
+                            updateInternalDrawerSmall(removed_index + 1);
+
+                            var b = _smallIntDrawers[removed_index + 1];
+                            b.scale.setX(offset);
+
+                            var c = _lockers[removed_index];
+                            var d = _locker_splitters[removed_index];
+                            c.scale.setX(offset);
+                            d.scale.setX(offset);
+                        } else {
+                            createInternalDrawerSmall(removed_index + 1);
+                            updateInternalDrawerSmall(removed_index + 1);
+
+                            var b = _smallIntDrawers[removed_index + 1];
+                            b.scale.setX(offset);
+                            var c = _lockers[removed_index];
+                            var d = _locker_splitters[removed_index];
+                            c.scale.setX(offset);
+                            d.scale.setX(offset);
+                        }
 
 
+                    } else if (_lockers[removed_index + 1]) {
 
-                } else if (interactivePlanes[removed_columns_index + 1]) {
-                    var a = interactivePlanes[removed_columns_index + 1];
+                        var a = _smallIntDrawers[removed_index];
+                        a.scale.setX(sizeToChange);
+                        a.position.setX(posToChange);
+                        removeLocker(removed_index + 1);
 
-                    a.scale.setX(offset * 2 - thickness / 12 * ftTom);
+                    } else {
+                        var a = _smallIntDrawers[removed_index];
+                        a.scale.setX(sizeToChange);
+                        a.position.setX(posToChange);
+                        removeInternalDrawerSmall(removed_index + 1);
+                    }
+                } else if (_smallIntDrawers[removed_index + 1]) {
 
-                    a.position.setX(_columns[removed_columns_index].position.x + offset / 2);
+                    if (_lockers[removed_index + 1]) {
 
+                        if (_smallIntDrawers[removed_index + 1]) {
 
-                } else if (interactivePlanes[removed_columns_index] && interactivePlanes[removed_columns_index + 1]) {
-                    var a = interactivePlanes[removed_columns_index];
+                            updateInternalDrawerSmall(removed_index + 1)
 
+                            var b = _smallIntDrawers[removed_index + 1];
+                            removeLocker(removed_index + 1);
+                            b.scale.setX(offset);
+                        }
+                    } else {
+                        var b = _smallIntDrawers[removed_index + 1];
+                        updateInternalDrawerSmall(removed_index + 1)
+                        b.scale.setX(offset);
+                    }
 
-                    a.scale.setX(offset * 2 - thickness / 12 * ftTom);
+                    if (_lockers[removed_index]) {
+                        var b = _smallIntDrawers[removed_index + 1];
+                        b.scale.setX(offset);
+                        var a = _lockers[removed_index];
+                        var c = _locker_splitters[removed_index]
+                        a.scale.setX(offset);
+                        c.scale.setX(offset);
+                    } else {
+                        createLocker(removed_index);
+                        updateLocker(removed_index);
+                        var a = _lockers[removed_index];
+                        var b = _locker_splitters[removed_index]
+                        a.scale.setX(offset);
+                        b.scale.setX(offset);
+                    }
+                } else {
+                    if (_lockers[removed_index]) {
+                        createInternalDrawerSmall(removed_index + 1);
+                        updateInternalDrawerSmall(removed_index + 1);
+                        var b = _smallIntDrawers[removed_index + 1];
+                        b.scale.setX(offset);
 
-                    a.position.setX(_columns[removed_columns_index].position.x + offset / 2);
+                        var c = _lockers[removed_index];
+                        var d = _locker_splitters[removed_index];
+                        c.scale.setX(offset);
+                        d.scale.setX(offset);
+                    } else if (_lockers[removed_index + 1]) {
+                        removeLocker(removed_index + 1);
+                        createLocker(removed_index);
+                        updateLocker(removed_index);
+                        createInternalDrawerSmall(removed_index + 1);
+                        updateInternalDrawerSmall(removed_index + 1);
+                        var b = _smallIntDrawers[removed_index + 1];
+                        b.scale.setX(offset);
 
-                    removeInteractivePlane(removed_columns_index + 1);
-
-
+                        var c = _lockers[removed_index];
+                        var d = _locker_splitters[removed_index];
+                        c.scale.setX(offset);
+                        d.scale.setX(offset);
+                    }
                 }
             }
+
         })
     }
+
+    updateBotShelves();
 }
 
 function removeAllInterior() {
@@ -2483,6 +2422,7 @@ function removeAllInterior() {
     removeHanger();
     reset_adjacents_removed_columns();
     removeDoor();
+
 
 }
 
