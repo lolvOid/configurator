@@ -112,11 +112,10 @@ let wood_normal;
 let wood_roughness;
 
 let selectedSprite;
+
+var renderOptionsValue = 1;
 init();
 animate();
-var currenWidth = 2.5,
-    currentHeight = 6,
-    currentDepth = 1.5;
 
 getInputs();
 addHorizontalParts();
@@ -252,6 +251,7 @@ function render() {
     // renderer.render(scene, camera);
     document.getElementById('column_id').innerHTML = plane_index + 1;
     document.getElementById('capturedImage').src = renderer.domElement.toDataURL();
+    renderOption()
     composer.render();
     // interactivePlane_group.visible = true;
 
@@ -364,30 +364,30 @@ function getInputs() {
 
 
 function create_lights() {
-    hemiLight = new THREE.HemisphereLight(0xfdfdfd, 0x0d0d0d, 1);
-    scene.add(hemiLight);
-    light = new THREE.SpotLight(0xafafaf, 1);
-    light.position.set(-10, 50, 50);
-    light.castShadow = true;
-    scene.add(light);
-
-    light.shadow.bias = -0.0001;
-    light.shadow.mapSize.width = 1024 * 4;
-    light.shadow.mapSize.height = 1024 * 4;
-    //     directionalLight = new THREE.DirectionalLight(0xffffff, 0.4);
-    //     directionalLight.position.set(0, 0, 0.5).normalize();
-
-    //     scene.add(directionalLight);
-
-    //     var directionalLight1 = new THREE.DirectionalLight(0xffffff, 0.4);
-    //     directionalLight1.position.set(0, 0, -0.5).normalize();
-
-
-    //     scene.add(directionalLight1);
-
-
-    //     var light = new THREE.HemisphereLight(0xfdfdfd, 0xffffff, 0.6);
+    // hemiLight = new THREE.HemisphereLight(0xfdfdfd, 0x0d0d0d, 1);
+    // scene.add(hemiLight);
+    // light = new THREE.SpotLight(0xafafaf, 0.5);
+    // light.position.set(-10, 50, 50);
+    // light.castShadow = true;
     // scene.add(light);
+
+    // light.shadow.bias = -0.0001;
+    // light.shadow.mapSize.width = 1024 * 4;
+    // light.shadow.mapSize.height = 1024 * 4;
+        directionalLight = new THREE.DirectionalLight(0xffffff, 0.4);
+        directionalLight.position.set(0, 0, 0.5).normalize();
+
+        scene.add(directionalLight);
+
+        var directionalLight1 = new THREE.DirectionalLight(0xffffff, 0.4);
+        directionalLight1.position.set(0, 0, -0.5).normalize();
+
+
+        scene.add(directionalLight1);
+
+
+        var light = new THREE.HemisphereLight(0xfdfdfd, 0xffffff, 0.6);
+    scene.add(light);
 }
 
 
@@ -504,7 +504,14 @@ function generateInteractivePlanes(index) {
                 updateInteractivePlane(i);
             }
         }
-
+        if(onHeightChanged(plane_index) > 0){
+            if(_bot_shelf_parent[plane_index] instanceof THREE.Mesh){
+               removeBotShelves(plane_index);
+               createBotShelves(onHeightChanged(plane_index), plane_index);
+               updateBotShelves(plane_index); 
+                _bot_shelf_parent[plane_index].visible = false;
+            }
+        }
     }
 
 }
@@ -528,7 +535,14 @@ function addHorizontalParts() {
             return;
         }
 
-
+        if(onHeightChanged(plane_index) > 0){
+            if(_bot_shelf_parent[plane_index] instanceof THREE.Mesh){
+               removeBotShelves(plane_index);
+               createBotShelves(onHeightChanged(plane_index), plane_index);
+               updateBotShelves(plane_index); 
+                _bot_shelf_parent[plane_index].visible = false;
+            }
+        }
 
     })
 
@@ -541,7 +555,14 @@ function addHorizontalParts() {
             return;
         }
 
-
+        if(onHeightChanged(plane_index) > 0){
+            if(_bot_shelf_parent[plane_index] instanceof THREE.Mesh){
+               removeBotShelves(plane_index);
+               createBotShelves(onHeightChanged(plane_index), plane_index);
+               updateBotShelves(plane_index); 
+                _bot_shelf_parent[plane_index].visible = false;
+            }
+        }
 
     })
 
@@ -553,7 +574,14 @@ function addHorizontalParts() {
         } else {
             return;
         }
-
+        if(onHeightChanged(plane_index) > 0){
+            if(_bot_shelf_parent[plane_index] instanceof THREE.Mesh){
+               removeBotShelves(plane_index);
+               createBotShelves(onHeightChanged(plane_index), plane_index);
+               updateBotShelves(plane_index); 
+                _bot_shelf_parent[plane_index].visible = false;
+            }
+        }
 
     })
 
@@ -582,10 +610,9 @@ function addHorizontalParts() {
                 _bot_shelf_parent[plane_index].visible = true;
             } else {
                 removeBotShelves(plane_index);
-                createBotShelves(onHeightChanged(plane_index), plane_index);
-                updateBotShelves(plane_index)
-
-                _bot_shelf_parent[plane_index].visible = true;
+               createBotShelves(onHeightChanged(plane_index), plane_index);
+               updateBotShelves(plane_index); 
+               _bot_shelf_parent[plane_index].visible = true;
 
             }
         }
@@ -630,10 +657,13 @@ function addHorizontalParts() {
 
 
     $("#addHingedDoor").click(function () {
-
+        
+      
 
         if (_hDoors_parent.length == 0) {
-
+            $(this).removeClass("btn-outline-dark");
+            $(this).html("Remove Door")
+            $(this).addClass("btn-outline-danger");
             for (var i = 0; i < customColumns; i++) {
 
                 createHingedDoor(i);
@@ -641,7 +671,12 @@ function addHorizontalParts() {
 
             }
         } else {
-            return
+            $(this).removeClass("btn-outline-primary");
+            $(this).addClass("btn-outline-dark");
+            $(this).html("Add Door")
+            removeDoor();
+            
+            
         }
 
     })
@@ -692,22 +727,6 @@ function topShelfOnSelected(index) {
 
 function botShelfFilter() {
 
-
-
-    // if (wHeight < 6.5) {
-    //     $("#addBottomShelf").addClass("disabled");
-    // } else if (wHeight == 6.5) {
-    //     $("#addBottomShelf").removeClass("disabled");
-    //     $("#addLocker").removeClass("disabled");
-    //     $("#addIDS").removeClass("disabled");
-    // } else if (wHeight > 6.5 && (!_smallIntDrawers[plane_index||removed_index||removed_index+1] && !_lockers[plane_index])) {
-    //     $("#addBottomShelf").removeClass("disabled");
-    //     $("#addIDL").removeClass("disabled");
-    //     $("#addED").removeClass("disabled");
-    // } else if (wHeight > 6.5 && (!_extDrawers[plane_index] && !_largeIntDrawers[plane_index] && !_smallIntDrawers[plane_index])) {
-    //     $("#addLocker").removeClass("disabled");
-
-    // }
 
 
     if (wHeight < 6.5) {
@@ -2269,7 +2288,7 @@ function columnsCombination() {
                 removed_id.forEach(i => {
                   
 
-                    console.log("YES" + _columns[i].name);
+                
                     // _columns[i].position.x + offset / 2
                     var sizeToChange = offset * 2 - thickness / 12 * ftTom;
                     var posToChange = _columns[i].position.x + offset / 2;
@@ -2562,7 +2581,7 @@ function createHingedDoor(index) {
     var m = new THREE.MeshStandardMaterial({
         color: 0xfafa22,
         transparent: true,
-        opacity: 0.6
+        opacity: 1
     });
     m.name = "wm_hinged_door";
 
@@ -2752,12 +2771,22 @@ function removeDoor(index) {
 
         if (_hDoors_parent[index] instanceof THREE.Group) {
             _hDoors_parent_group.remove(_hDoors_parent[index]);
-
+            
         }
 
 
     } else {
 
+        _hDoors_parent.forEach(e=>{
+            if(e instanceof THREE.Group){
+              
+                    _hDoors_parent_group.remove(e);
+                    
+            }
+            
+        })
+        
+        _hDoors_parent = [];
 
 
     }
@@ -2914,4 +2943,210 @@ function removeColumnsSprite(index) {
         deleteSprites = [];
 
     }
+}
+
+renderOptionInput();
+function renderOptionInput(){
+    $("input:radio[name = 'renderOptions']").change(function(){
+       renderOptionsValue = $(this).val();
+    })
+}
+
+function renderOption(){
+    var defaultColor = "#fdfdfd";
+    var splitterColor = "#d0d0d0";
+    
+    var debug_extDrawerColor = "#ff7f50";
+    var debug_intSmallColor = "#adaffa";
+    var debug_intLargeColor = "#aa7f50";
+    var debug_splitterColor = "#22ffaa";
+    var debug_topShelfColor = "#faaaee";
+    var debug_botShelfColor = "faaaee";
+    var debug_columns_color = "#ff55dd";
+    var debug_locker_color = "#ddffdd";
+    var debug_door_color = "#fafa22"
+    var wireframeColor = "#000000";
+    if(renderOptionsValue == 0){
+        scene.traverse(function(child){
+            if(child instanceof THREE.Mesh){
+               
+                child.material.wireframe = false;
+            }
+        })
+        wBottom.material.color.set(defaultColor);
+        _columns.forEach(e=>{
+            if(e instanceof THREE.Mesh){
+            e.material.color.set(defaultColor);
+            }
+        })
+        _m_splitters.forEach(e=>{
+            if(e instanceof THREE.Mesh){
+            e.material.color.set(splitterColor);
+            }
+        })
+        _lockers.forEach(e=>{
+            if(e instanceof THREE.Mesh){
+            e.material.color.set(defaultColor);
+            }
+        })
+        _locker_splitters.forEach(e=>{
+            if(e instanceof THREE.Mesh){
+            e.material.color.set(defaultColor);
+            }
+        })
+        _bot_shelf_parent.forEach(e=>{
+            if(e instanceof THREE.Group){
+                e.traverse(function(child){
+                    if(child instanceof THREE.Mesh){
+                    child.material.color.set(splitterColor);
+                    }
+                })
+            }
+        })
+    
+        _top_shelves_parent.forEach(e=>{
+            if(e instanceof THREE.Group){
+                e.traverse(function(child){
+                    if(child instanceof THREE.Mesh){
+                    child.material.color.set(splitterColor);
+                    }
+                })
+            }
+        })
+        _extDrawers.forEach(e=>{
+            if(e instanceof THREE.Mesh){
+            e.material.color.set(defaultColor);
+            }
+        })
+        _extDrawers_splitters.forEach(e=>{
+            if(e instanceof THREE.Mesh){
+            e.material.color.set(defaultColor);
+            }
+        })
+        _smallIntDrawers.forEach(e=>{
+            if(e instanceof THREE.Mesh){
+            e.material.color.set(defaultColor);
+            }
+        })
+        _largeIntDrawers.forEach(e=>{
+            if(e instanceof THREE.Mesh){
+            e.material.color.set(defaultColor);
+            }
+        })
+        _largeIntDrawers_splitters.forEach(e=>{
+            if(e instanceof THREE.Mesh){
+            e.material.color.set(defaultColor);
+            }
+        })
+        _hDoors_parent.forEach(e=>{
+            if(e instanceof THREE.Group){
+                e.traverse(function(child){
+                    if(child instanceof THREE.Mesh){
+                        child.material.color.set(defaultColor);
+                        child.material.opacity = 1;
+                    }
+                    
+                })
+            }
+        })
+    
+    }
+    else if(renderOptionsValue == 1){
+        scene.traverse(function(child){
+            if(child instanceof THREE.Mesh){
+               
+                child.material.wireframe = false;
+            }
+        })
+        wBottom.material.color.set(defaultColor);
+        _columns.forEach(e=>{
+            if(e instanceof THREE.Mesh){
+            e.material.color.set(debug_columns_color);
+            }
+        })
+        _m_splitters.forEach(e=>{
+            if(e instanceof THREE.Mesh){
+            e.material.color.set(debug_splitterColor);
+            }
+        })
+        _lockers.forEach(e=>{
+            if(e instanceof THREE.Mesh){
+            e.material.color.set(debug_locker_color);
+            }
+        })
+        _locker_splitters.forEach(e=>{
+            if(e instanceof THREE.Mesh){
+            e.material.color.set(debug_splitterColor);
+            }
+        })
+        _bot_shelf_parent.forEach(e=>{
+            if(e instanceof THREE.Group){
+                e.traverse(function(child){
+                    if(child instanceof THREE.Mesh){
+                        child.material.color.set(debug_splitterColor);
+                    }
+                   
+                })
+            }
+        })
+    
+        _top_shelves_parent.forEach(e=>{
+            if(e instanceof THREE.Group){
+                e.traverse(function(child){
+                    if(child instanceof THREE.Mesh){
+                    child.material.color.set(debug_splitterColor);
+                    }
+                })
+            }
+        })
+        _extDrawers.forEach(e=>{
+            if(e instanceof THREE.Mesh){
+            e.material.color.set(debug_extDrawerColor);
+            }
+        })
+        _extDrawers_splitters.forEach(e=>{
+            if(e instanceof THREE.Mesh){
+            e.material.color.set(debug_splitterColor);
+            }
+        })
+        _smallIntDrawers.forEach(e=>{
+            if(e instanceof THREE.Mesh){
+            e.material.color.set(debug_intSmallColor);
+            }
+        })
+        _largeIntDrawers.forEach(e=>{
+            if(e instanceof THREE.Mesh){
+            e.material.color.set(debug_intLargeColor);
+            }
+        })
+        _largeIntDrawers_splitters.forEach(e=>{
+            if(e instanceof THREE.Mesh){
+            e.material.color.set(debug_splitterColor);
+            }
+        })
+        _hDoors_parent.forEach(e=>{
+            if(e instanceof THREE.Group){
+                e.traverse(function(child){
+                    if(child instanceof THREE.Mesh){
+                        child.material.color.set(debug_door_color);
+                        child.material.opacity = 0.5;
+                    }
+                    
+                })
+            }
+        })
+    }
+    else if(renderOptionsValue == 2){
+       
+        scene.traverse(function(child){
+            if(child instanceof THREE.Mesh){
+               
+                child.material.color.set(wireframeColor);
+                child.material.wireframe = true;
+                child.material.wireframeLinejoin = "round";
+                child.material.wireframeLinecap = "square";
+            }
+        })
+    }
+   
 }
