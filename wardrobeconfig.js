@@ -101,7 +101,17 @@ var clock;
 var delta = 0;
 _hDoors = [];
 
+let deleteSprites = [],
+    deleteSprites_group = new THREE.Group();
+let onNormalDeleteSprite = new THREE.TextureLoader().load("./assets/icons8-minus-100.png");
+let onHoverDeleteSprite = new THREE.TextureLoader().load("./assets/icons8-black-minus-100.png");
 var isDoorOpened = false;
+var texLoader = new THREE.TextureLoader();
+let wood_albedo;
+let wood_normal;
+let wood_roughness;
+
+let selectedSprite;
 init();
 animate();
 var currenWidth = 2.5,
@@ -117,6 +127,7 @@ function init() {
     window.scene = scene;
     THREE.Cache.enabled = true;
     camera = new THREE.PerspectiveCamera(25, fwidth / fheight, 0.01, 100);
+
     camera.position.set(0, 0.5, 15);
     camera.aspect = fwidth / fheight;
     camera.layers.enable(0);
@@ -225,6 +236,7 @@ function render() {
 
     $("input:radio[name='columnsOptions']").click(function () {
         removeColumns();
+        removeColumnsSprite();
         updateColumns();
 
     })
@@ -236,7 +248,7 @@ function render() {
     columnsCombination();
     delta = clock.getDelta();
     doorAction();
-    
+    paintWardrobe()
     // renderer.render(scene, camera);
     document.getElementById('column_id').innerHTML = plane_index + 1;
     document.getElementById('capturedImage').src = renderer.domElement.toDataURL();
@@ -258,6 +270,7 @@ function getInputs() {
 
         chooseColumns_number();
         removeColumns();
+        removeColumnsSprite();
         removeHorizontalSplitter();
         removeExternalDrawer();
         removeInteractivePlane();
@@ -267,6 +280,7 @@ function getInputs() {
     $("input:radio[name='heightOptions']").click(function () {
 
         removeColumns();
+        removeColumnsSprite();
         removeHorizontalSplitter();
         removeExternalDrawer();
         wHeight = $(this).val();
@@ -276,6 +290,7 @@ function getInputs() {
     $("input:radio[name='depthOptions']").click(function () {
 
         removeColumns();
+        removeColumnsSprite();
         removeHorizontalSplitter();
         removeExternalDrawer();
         wDepth = $(this).val();
@@ -319,6 +334,7 @@ function getInputs() {
         $("#editInterior").hide();
         $("#sizeOptions").show();
         removeColumns();
+        removeColumnsSprite();
         removeHorizontalSplitter();
         removeExternalDrawer();
         removeAllInterior();
@@ -334,9 +350,10 @@ function getInputs() {
 
         $(this).hide();
 
-
+        deleteSprites_group.visible = true;
         generateInteractivePlanes(customColumns);
         updateInteractivePlane();
+
 
     })
     $("#export").click(function () {
@@ -347,20 +364,30 @@ function getInputs() {
 
 
 function create_lights() {
-    directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-    directionalLight.position.set(0, 0, 0.5).normalize();
+    hemiLight = new THREE.HemisphereLight(0xfdfdfd, 0x0d0d0d, 1);
+    scene.add(hemiLight);
+    light = new THREE.SpotLight(0xafafaf, 1);
+    light.position.set(-10, 50, 50);
+    light.castShadow = true;
+    scene.add(light);
 
-    scene.add(directionalLight);
+    light.shadow.bias = -0.0001;
+    light.shadow.mapSize.width = 1024 * 4;
+    light.shadow.mapSize.height = 1024 * 4;
+    //     directionalLight = new THREE.DirectionalLight(0xffffff, 0.4);
+    //     directionalLight.position.set(0, 0, 0.5).normalize();
 
-    var directionalLight1 = new THREE.DirectionalLight(0xffffff, 0.5);
-    directionalLight1.position.set(0, 0, -0.5).normalize();
+    //     scene.add(directionalLight);
+
+    //     var directionalLight1 = new THREE.DirectionalLight(0xffffff, 0.4);
+    //     directionalLight1.position.set(0, 0, -0.5).normalize();
 
 
-    scene.add(directionalLight1);
+    //     scene.add(directionalLight1);
 
-    ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // soft white light
 
-    scene.add(ambientLight);
+    //     var light = new THREE.HemisphereLight(0xfdfdfd, 0xffffff, 0.6);
+    // scene.add(light);
 }
 
 
@@ -387,7 +414,7 @@ function createColumns(index) {
 
 function removeColumns(index) {
 
-    if (index != null) {
+    if (index) {
         _columns.forEach(e => {
             if (_columns[index] instanceof THREE.Mesh && _columns[index] == e) {
                 if (_columns_group instanceof THREE.Group) {
@@ -422,6 +449,7 @@ function updateColumns() {
 
         } else {
             if (_columns[i] instanceof THREE.Mesh) {
+
                 _columns[i].scale.set((thickness / 12) * ftTom, wHeight * ftTom - (2 / 12 * ftTom) + thickness / 12 * ftTom - wBottom.position.y, (thickness / 12) * ftTom + wDepth * ftTom);
                 _columns[i].position.set(i * offset, (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2, (((thickness / 24)) * ftTom));
             }
@@ -429,6 +457,19 @@ function updateColumns() {
     }
     _columns_group.position.set(offset + wLeft.position.x, _columns_group.position.y, _columns_group.position.z);
 
+    for (var i = 0; i < customColumns - 1; i++) {
+        if (!deleteSprites[i]) {
+            createColumnSprite(i);
+            updateColumnSprite(i);
+            deleteSprites_group.visible = false;
+        } else {
+            if (deleteSprites[i] instanceof THREE.Sprite) {
+                updateColumnSprite(i);
+                deleteSprites_group.visible = false;
+            }
+        }
+
+    }
     for (var i = 0; i < customColumns; i++) {
 
         if (!_m_splitters[i]) {
@@ -470,85 +511,86 @@ function generateInteractivePlanes(index) {
 
 function addHorizontalParts() {
 
-    
+
     $("#addED").click(function () {
-        
-        if(!_extDrawers[plane_index]){
-            for(var i =0 ; i < customColumns;i++){
+
+        if (!_extDrawers[plane_index]) {
+            for (var i = 0; i < customColumns; i++) {
                 createExternalDrawer(i);
                 updateExternalDrawer(i);
-               
+                updateInternalDrawerLarge(i);
             }
-            updateInternalDrawerLarge(plane_index);
-            
-        }else{
-              
+
+
+        } else {
+
+
             return;
         }
 
-        
-      
+
+
     })
 
     $("#addIDL").click(function () {
-        if(!_largeIntDrawers[plane_index]){
-            createInternalDrawerLarge(plane_index );
+        if (!_largeIntDrawers[plane_index]) {
+            createInternalDrawerLarge(plane_index);
             updateInternalDrawerLarge(plane_index);
-          
-        }else{
+
+        } else {
             return;
         }
-       
-      
+
+
 
     })
 
     $("#addIDS").click(function () {
-        if(!_smallIntDrawers[plane_index]){
+        if (!_smallIntDrawers[plane_index]) {
             createInternalDrawerSmall(plane_index);
             updateInternalDrawerSmall(plane_index);
             updateLocker(plane_index);
-        }else{
+        } else {
             return;
         }
-             
-        
+
+
     })
 
     $("#addLocker").click(function () {
 
-        if(!_lockers[plane_index]){
+        if (!_lockers[plane_index]) {
             createLocker(plane_index);
             updateLocker(plane_index);
             updateInternalDrawerSmall(plane_index);
-        }else{
-            
+        } else {
+
             return;
         }
-            
-       
+
+
     })
 
     $("#addBottomShelf").click(function () {
-       
-            
-        if(onHeightChanged(plane_index)>0){
-            if(!_bot_shelf_parent[plane_index] instanceof THREE.Mesh){
-                createBotShelves(onHeightChanged(plane_index),plane_index);
+
+
+        if (onHeightChanged(plane_index) > 0) {
+            if (!_bot_shelf_parent[plane_index] instanceof THREE.Mesh) {
+                createBotShelves(onHeightChanged(plane_index), plane_index);
                 updateBotShelves(plane_index)
-             
+
                 _bot_shelf_parent[plane_index].visible = true;
-            }else{
-                removeBotShelves(plane_index );
-                createBotShelves(onHeightChanged(plane_index),plane_index);
+            } else {
+                removeBotShelves(plane_index);
+                createBotShelves(onHeightChanged(plane_index), plane_index);
                 updateBotShelves(plane_index)
-                
+
                 _bot_shelf_parent[plane_index].visible = true;
-                
+
             }
         }
-       
-    
+
+
     })
 
     $("#hangerOrShelf").change(function () {
@@ -556,11 +598,11 @@ function addHorizontalParts() {
             if (!_hangers[plane_index]) {
                 createHanger(plane_index);
                 updateHanger(plane_index);
-             
+
             } else {
                 if (_hangers[plane_index] instanceof THREE.Mesh) {
                     updateHanger(plane_index);
-                  
+
                 }
             }
 
@@ -570,18 +612,18 @@ function addHorizontalParts() {
             if (!_top_shelves_parent[plane_index]) {
                 createTopShelves(2, plane_index);
                 updateTopShelves(plane_index);
-             
+
             } else {
                 if (_top_shelves_parent[plane_index] instanceof THREE.Group) {
                     updateTopShelves(plane_index);
-               
+
                 }
             }
 
 
         };
 
-     
+
     })
 
 
@@ -590,7 +632,7 @@ function addHorizontalParts() {
     $("#addHingedDoor").click(function () {
 
 
-        if (_hDoors_parent) {
+        if (_hDoors_parent.length == 0) {
 
             for (var i = 0; i < customColumns; i++) {
 
@@ -599,11 +641,9 @@ function addHorizontalParts() {
 
             }
         } else {
-            for (var i = 0; i < customColumns; i++) {
-                updateHingedDoor(i);
-            }
+            return
         }
-      
+
     })
 
 
@@ -626,15 +666,15 @@ function addHorizontalParts() {
     })
     $("#copyto").change(function () {
         pasetToColumn($(this).children("option:selected").val());
-        columnsCombination()
+
     })
     $("#removeAll").click(function () {
         removeAllInterior();
     })
 
-    $("#editDoor").click(function(){
-            
-        interactivePlane_group.visible=false;
+    $("#editDoor").click(function () {
+
+        interactivePlane_group.visible = false;
     })
 }
 
@@ -809,10 +849,20 @@ function addLoft(visible) {
 }
 
 function createWardrobe() {
+    wood_albedo = texLoader.load("./textures/Wood_ZebranoVeneer_512_albedo.jpg");
+    wood_normal = texLoader.load("./textures/Wood_ZebranoVeneer_512_normal.jpg");
+    wood_roughness = texLoader.load("./textures/Wood_ZebranoVeneer_512_roughness.jpg");
+    wood_albedo.wrapS = THREE.MirroredRepeatWrapping;
+    wood_albedo.wrapT = THREE.MirroredRepeatWrapping;
+    wood_normal.wrapS = THREE.MirroredRepeatWrapping;
+    wood_normal.wrapT = THREE.MirroredRepeatWrapping;
+    wood_roughness.wrapS = THREE.MirroredRepeatWrapping;
+    wood_roughness.wrapT = THREE.MirroredRepeatWrapping;
+    // , map:wood_albedo,normalMap:wood_normal,roughnessMap:wood_roughness,normalScale:new THREE.Vector2(1,1),roughness:1
 
     var g = new THREE.BoxGeometry(1, 1, 1);
     var m = new THREE.MeshStandardMaterial({
-        color: 0xdddddd,
+        color: 0xdddddd
     });
 
     m.name = "m_wardrobe";
@@ -1663,11 +1713,11 @@ function updateBotShelves(index) {
         }
         if (_bot_shelf_parent[index] instanceof THREE.Group) {
             for (var j = 0; j < _bot_shelf_parent[index].children.length; j++) {
-            if (_bot_shelf_parent[index].children[j] instanceof THREE.Mesh) {
-                _bot_shelf_parent[index].children[j].scale.set(offset - (thickness / 12) * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + wBack.scale.z);
-                _bot_shelf_parent[index].children[j].position.set(index * offset, (j * vertical_offset), wLeft.position.z / 2 + (thickness / 24) * ftTom);
-            }
-    
+                if (_bot_shelf_parent[index].children[j] instanceof THREE.Mesh) {
+                    _bot_shelf_parent[index].children[j].scale.set(offset - (thickness / 12) * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + wBack.scale.z);
+                    _bot_shelf_parent[index].children[j].position.set(index * offset, (j * vertical_offset), wLeft.position.z / 2 + (thickness / 24) * ftTom);
+                }
+
             }
         }
         _bot_shelf_parent[index].position.set(offset / 2 + wLeft.position.x, pos, _bot_shelf_parent[index].position.z);
@@ -1678,9 +1728,10 @@ function updateBotShelves(index) {
 
 }
 
-function updateBotShelvesScale(index,vertical_offset,){
-   
+function updateBotShelvesScale(index, vertical_offset, ) {
+
 }
+
 function createInteractivePlane(index) {
 
     var g = new THREE.PlaneGeometry(1, 1);
@@ -1769,28 +1820,38 @@ function onClick() {
 
                 if (_columns[i - 1]) {
 
-
                     adjacentParts.push(_columns[i - 1]);
+                    deleteSprites_group.remove(deleteSprites[i - 1])
                 }
                 if (_columns[i + 1]) {
-
+                    deleteSprites_group.remove(deleteSprites[i + 1])
                     adjacentParts.push(_columns[i + 1]);
                 }
                 removed_index = i;
                 removed_id.push(i);
+                deleteSprites_group.remove(deleteSprites[i])
                 _columns_group.remove(_columns[i]);
                 removed.push(_columns[i]);
             }
 
         }
-        columnsCombination();
+
         setflipDoor();
 
         for (var i = 0; i < interactivePlanes.length; i++) {
             if (interactivePlanes[i] == selectedObject) {
+
+                outlinePass.visibleEdgeColor.set("#fcbe03")
+                outlinePass.edgeStrength = 10;
+                outlinePass.edgeGlow = 0;
+                outlinePass.selectedObjects = selectedObjects;
+                addSelectedObject(selectedObject);
+
                 plane_index = i;
             }
         }
+        selectedObject = null;
+
     }
 
 
@@ -1799,6 +1860,37 @@ function onClick() {
 }
 
 function onPointerMove(event) {
+
+    if (selectedSprite) {
+        selectedSprite.material.map = onNormalDeleteSprite;
+        deleteSprites.forEach(e => {
+            if (e == selectedSprite) {
+                _columns.forEach(c => {
+                    if (_columns.indexOf(c) == deleteSprites.indexOf(e)) {
+                        selectedObject = c;
+                        adjacentParts.forEach(e => {
+                            if (e == selectedObject) {
+                                selectedSprite = null;
+                            } else {
+
+                            }
+                        });
+                    } else {
+
+                    }
+                })
+            }
+        });
+    }
+
+    if (selectedObject) {
+        for (var i = 0; i < interactivePlanes.length; i++) {
+            if (interactivePlanes[i] == selectedObject) {
+
+            }
+        }
+    }
+
     if (event.changedTouches) {
         pointer.x = event.changedTouches[0].pageX;
         pointer.y = event.changedTouches[0].pageY;
@@ -1814,9 +1906,26 @@ function onPointerMove(event) {
 
 
     const intersects = raycaster.intersectObject(_columns_group, true);
+    const removeIcons = raycaster.intersectObject(deleteSprites_group, true);
 
     const p = raycaster.intersectObject(interactivePlane_group, true);
+    if (removeIcons.length > 0) {
 
+        const res = removeIcons.filter(function (res) {
+
+            return res && res.object;
+
+        })[0];
+
+
+        if (res && res.object) {
+
+            selectedSprite = res.object;
+            selectedSprite.material.map = onHoverDeleteSprite;
+        }
+    } else {
+        selectedObject = null;
+    }
     if (p.length > 0) {
 
         const res = p.filter(function (res) {
@@ -1830,51 +1939,51 @@ function onPointerMove(event) {
 
             selectedObject = res.object;
             addSelectedObject(selectedObject);
-            outlinePass.selectedObjects = selectedObjects;
+
+            // outlinePass.visibleEdgeColor.set("#fcbe03")
+            // outlinePass.edgeStrength = 10;
+            // outlinePass.edgeGlow = 0;
+            // outlinePass.selectedObjects = selectedObjects;
         }
 
-    } else {
-        outlinePass.selectedObjects = [];
-        selectedObject = null;
     }
 
+    // if (intersects.length > 0) {
 
-    if (intersects.length > 0) {
+    //     const res = intersects.filter(function (res) {
 
-        const res = intersects.filter(function (res) {
+    //         return res && res.object;
 
-            return res && res.object;
-
-        })[0];
-
-
-        if (res && res.object) {
-
-            selectedObject = res.object;
-            addSelectedObject(selectedObject);
-
-            adjacentParts.forEach(e => {
-                if (e == selectedObject) {
-
-                    selectedObject = null;
-                    outlinePass.visibleEdgeColor.set("#ff0000");
+    //     })[0];
 
 
-                } else {
+    //     if (res && res.object) {
 
-                    outlinePass.selectedObjects = [];
-                }
+    //         selectedObject = res.object;    
+    //         addSelectedObject(selectedObject);
 
-            });
-            outlinePass.selectedObjects = selectedObjects;
+    //         adjacentParts.forEach(e => {
+    //             if (e == selectedObject) {
+
+    //                 selectedObject = null;
+    //                 outlinePass.visibleEdgeColor.set("#ff0000");
 
 
-        }
+    //             } else {
 
-    } else {
-        outlinePass.visibleEdgeColor.set("#00ffff");
-        // selectedObject = null;
-    }
+    //                 outlinePass.selectedObjects = [];
+    //             }
+
+    //         });
+    //         outlinePass.selectedObjects = selectedObjects;
+
+
+    //     }
+
+    // } else {
+    //     outlinePass.visibleEdgeColor.set("#00ffff");
+    //     // selectedObject = null;
+    // }
 
 }
 
@@ -1962,7 +2071,7 @@ function post_process() {
     ssaoPass.kernalRadius = 16;
     ssaoPass.minDistance = 0.005;
     ssaoPass.maxDistance = 0.1;
-    //    composer.addPass(ssaoPass);
+    composer.addPass(ssaoPass);
 
     outlinePass = new THREE.OutlinePass(new THREE.Vector2(fwidth, fheight), scene, camera);
     outlinePass.edgeStrength = 5;
@@ -2044,7 +2153,7 @@ function pasetToColumn(index) {
             updateInternalDrawerLarge(index);
             updateBotShelves(index);
         }
-        columnsCombination();
+
     }
 
 }
@@ -2129,12 +2238,12 @@ function onHeightChanged(plane_index) {
 
 
     if (wHeight == 6.5) {
-        if(!_largeIntDrawers[plane_index] && !_extDrawers[plane_index] && !_smallIntDrawers[plane_index] && !_lockers[plane_index]){
+        if (!_largeIntDrawers[plane_index] && !_extDrawers[plane_index] && !_smallIntDrawers[plane_index] && !_lockers[plane_index]) {
             row = 0;
-        }else{
+        } else {
             row = 1;
         }
-        
+
     } else if (wHeight == 7 && !_lockers[plane_index] && !_largeIntDrawers[plane_index] && !_extDrawers[plane_index] && !_smallIntDrawers[plane_index]) {
         row = 3;
     } else if (wHeight == 7 && !_lockers[plane_index]) {
@@ -2157,250 +2266,278 @@ function columnsCombination() {
         removed.forEach(e => {
 
             if (e == _columns[removed_index]) {
+                removed_id.forEach(i => {
+                  
 
-                // _columns[removed_index].position.x + offset / 2
-                var sizeToChange = offset * 2 - thickness / 12 * ftTom;
-                var posToChange = _columns[removed_index].position.x + offset / 2;
-
-
-                //Interactive Plane
-                if (interactivePlanes[removed_index]) {
-                    var a = interactivePlanes[removed_index];
-                    a.scale.setX(sizeToChange);
-                    a.position.setX(posToChange);
-                    removeInteractivePlane(removed_index + 1);
-
-                } else if (interactivePlanes[removed_index + 1]) {
-                    var a = interactivePlanes[removed_index + 1];
-                    a.scale.setX(sizeToChange);
-                    a.position.setX(posToChange);
-                    removeInteractivePlane(removed_index);
-                }
-
-                //Large Internal Drawers
-                if (_largeIntDrawers[removed_index]) {
-                    var a = _largeIntDrawers[removed_index];
-                    var b = _largeIntDrawers_splitters[removed_index];
-                    a.scale.setX(sizeToChange);
-                    a.position.setX(posToChange);
-                    b.scale.setX(sizeToChange);
-                    b.position.setX(a.position.x);
-                    removeInternalDrawerLarge(removed_index + 1);
-                } else if (_largeIntDrawers[removed_index + 1]) {
-                    var a = _largeIntDrawers[removed_index + 1];
-
-                    var b = _largeIntDrawers_splitters[removed_index + 1];
-                    a.scale.setX(sizeToChange);
-                    a.position.setX(posToChange);
-                    b.scale.setX(sizeToChange);
-                    b.position.setX(a.position.x);
-
-                    removeInternalDrawerLarge(removed_index);
-                }
-
-                //Hangers
-                if (_hangers[removed_index]) {
-                    var a = _hangers[removed_index];
-                    a.scale.setY(sizeToChange);
-                    a.position.setX(posToChange);
-                    removeHanger(removed_index + 1);
-                } else if (_hangers[removed_index + 1]) {
-                    var a = _hangers[removed_index + 1];
-                    a.scale.setY(sizeToChange);
-                    a.position.setX(posToChange);
-                    removeHanger(removed_index);
-                }
-                //Top Shelves
-                if (_top_shelves_parent[removed_index]) {
-                    var a = _top_shelves_parent[removed_index];
-                    a.traverse(function (e) {
-                        if (e instanceof THREE.Mesh) {
-                            e.scale.setX(sizeToChange);
-                            e.position.setX(posToChange);
-                        }
-
-                    })
-                    removeTopShelves(removed_index + 1);
-
-                } else if (_top_shelves_parent[removed_index + 1]) {
-                    var a = _top_shelves_parent[removed_index + 1];
-                    a.traverse(function (e) {
-                        if (e instanceof THREE.Mesh) {
-                            e.scale.setX(sizeToChange);
-                            e.position.setX(posToChange);
-                        }
-
-                    })
-                    removeTopShelves(removed_index);
-                }
-
-                //Bottom Shelves
-                if (_bot_shelf_parent[removed_index]) {
-                    var a = _bot_shelf_parent[removed_index];
-                    a.traverse(function (e) {
-                        if (e instanceof THREE.Mesh) {
-                            e.scale.setX(sizeToChange);
-                            e.position.setX(posToChange);
-                        }
-
-                    })
-                    removeBotShelves(removed_index + 1);
-
-                } else if (_bot_shelf_parent[removed_index + 1]) {
-                    var a = _bot_shelf_parent[removed_index + 1];
-                    a.traverse(function (e) {
-                        if (e instanceof THREE.Mesh) {
-                            e.scale.setX(sizeToChange);
-                            e.position.setX(posToChange);
-                        }
-
-                    })
-                    removeBotShelves(removed_index);
-                }
+                    console.log("YES" + _columns[i].name);
+                    // _columns[i].position.x + offset / 2
+                    var sizeToChange = offset * 2 - thickness / 12 * ftTom;
+                    var posToChange = _columns[i].position.x + offset / 2;
 
 
-                //Horizontal Splitter
-                if (_m_splitters[removed_index]) {
-                    var a = _m_splitters[removed_index];
-                    a.scale.setX(sizeToChange);
-                    a.position.setX(posToChange);
-                    _m_splitters[removed_index + 1].visible = false;
-                    // removeHorizontalSplitter(removed_index+1);
-                } else if (_m_splitters[removed_index + 1]) {
-                    var a = _m_splitters[removed_index];
-                    a.scale.setX(sizeToChange);
-                    a.position.setX(posToChange);
-                    _m_splitters[removed_index + 1].visible = false;
-                    // removeHorizontalSplitter(removed_index+1);
-                }
+                    //Interactive Plane
+                    if (interactivePlanes[i]) {
+                        var a = interactivePlanes[i];
+                        a.scale.setX(sizeToChange);
+                        a.position.setX(posToChange);
+                        removeInteractivePlane(i + 1);
 
-                //External Drawers
-                if (_extDrawers[removed_index]) {
-                    var a = _extDrawers[removed_index];
-                    var b = _extDrawers_splitters[removed_index];
-                    a.scale.setX(sizeToChange);
-                    a.position.setX(posToChange);
-                    b.scale.setX(sizeToChange);
-                    b.position.setX(posToChange);
-                    removeExternalDrawer(removed_index + 1);
-                } else if (_extDrawers[removed_index + 1]) {
-                    var a = _extDrawers[removed_index + 1];
-                    var b = _extDrawers_splitters[removed_index + 1];
-                    a.scale.setX(sizeToChange);
-                    a.position.setX(posToChange);
-                    b.scale.setX(sizeToChange);
-                    b.position.setX(posToChange);
-                    removeExternalDrawer(removed_index);
-                }
+                    } else if (interactivePlanes[i + 1]) {
+                        var a = interactivePlanes[i + 1];
+                        a.scale.setX(sizeToChange);
+                        a.position.setX(posToChange);
+                        removeInteractivePlane(i);
+                    }
+
+                    //Large Internal Drawers
+                    if (_largeIntDrawers[i]) {
+                        var a = _largeIntDrawers[i];
+                        var b = _largeIntDrawers_splitters[i];
+                        a.scale.setX(sizeToChange);
+                        a.position.setX(posToChange);
+                        b.scale.setX(sizeToChange);
+                        b.position.setX(a.position.x);
+                        removeInternalDrawerLarge(i + 1);
+                    } else if (_largeIntDrawers[i + 1]) {
+                        var a = _largeIntDrawers[i + 1];
+
+                        var b = _largeIntDrawers_splitters[i + 1];
+                        a.scale.setX(sizeToChange);
+                        a.position.setX(posToChange);
+                        b.scale.setX(sizeToChange);
+                        b.position.setX(a.position.x);
+
+                        removeInternalDrawerLarge(i);
+                    }
+
+                    //Hangers
+                    if (_hangers[i]) {
+                        var a = _hangers[i];
+                        a.scale.setY(sizeToChange);
+                        a.position.setX(posToChange);
+                        removeHanger(i + 1);
+                    } else if (_hangers[i + 1]) {
+                        var a = _hangers[i + 1];
+                        a.scale.setY(sizeToChange);
+                        a.position.setX(posToChange);
+                        removeHanger(i);
+                    }
+                    //Top Shelves
+                    if (_top_shelves_parent[i]) {
+                        var a = _top_shelves_parent[i];
+                        a.traverse(function (e) {
+                            if (e instanceof THREE.Mesh) {
+                                e.scale.setX(sizeToChange);
+                                e.position.setX(posToChange);
+                            }
+
+                        })
+                        removeTopShelves(i + 1);
+
+                    } else if (_top_shelves_parent[i + 1]) {
+                        var a = _top_shelves_parent[i + 1];
+                        a.traverse(function (e) {
+                            if (e instanceof THREE.Mesh) {
+                                e.scale.setX(sizeToChange);
+                                e.position.setX(posToChange);
+                            }
+
+                        })
+                        removeTopShelves(i);
+                    }
+
+                    //Bottom Shelves
+                    if (_bot_shelf_parent[i]) {
+                        var a = _bot_shelf_parent[i];
+                        a.traverse(function (e) {
+                            if (e instanceof THREE.Mesh) {
+                                e.scale.setX(sizeToChange);
+                                e.position.setX(posToChange);
+                            }
+
+                        })
+                        removeBotShelves(i + 1);
+
+                    } else if (_bot_shelf_parent[i + 1]) {
+                        var a = _bot_shelf_parent[i + 1];
+                        a.traverse(function (e) {
+                            if (e instanceof THREE.Mesh) {
+                                e.scale.setX(sizeToChange);
+                                e.position.setX(posToChange);
+                            }
+
+                        })
+                        removeBotShelves(i);
+                    }
 
 
-                if (_smallIntDrawers[removed_index]) {
-                    if (_lockers[removed_index]) {
+                    //Horizontal Splitter
+                    if (_m_splitters[i]) {
+                        var a = _m_splitters[i];
+                        a.scale.setX(sizeToChange);
+                        a.position.setX(posToChange);
+                        _m_splitters[i + 1].visible = false;
+                        // removeHorizontalSplitter(i+1);
+                    } else if (_m_splitters[i + 1]) {
+                        var a = _m_splitters[i];
+                        a.scale.setX(sizeToChange);
+                        a.position.setX(posToChange);
+                        _m_splitters[i + 1].visible = false;
+                        // removeHorizontalSplitter(i+1);
+                    }
 
-                        if (_smallIntDrawers[removed_index + 1]) {
-                            updateInternalDrawerSmall(removed_index + 1);
+                    //External Drawers
+                    if (_extDrawers[i]) {
+                        var a = _extDrawers[i];
+                        var b = _extDrawers_splitters[i];
+                        a.scale.setX(sizeToChange);
+                        a.position.setX(posToChange);
+                        b.scale.setX(sizeToChange);
+                        b.position.setX(posToChange);
+                        removeExternalDrawer(i + 1);
+                    } else if (_extDrawers[i + 1]) {
+                        var a = _extDrawers[i + 1];
+                        var b = _extDrawers_splitters[i + 1];
+                        a.scale.setX(sizeToChange);
+                        a.position.setX(posToChange);
+                        b.scale.setX(sizeToChange);
+                        b.position.setX(posToChange);
+                        removeExternalDrawer(i);
+                    }
 
-                            var b = _smallIntDrawers[removed_index + 1];
-                            b.scale.setX(offset);
-                            var a = _smallIntDrawers[removed_index];
+
+                    if (_smallIntDrawers[i]) {
+                        if (_lockers[i]) {
+
+                            if (_smallIntDrawers[i + 1]) {
+                                updateInternalDrawerSmall(i + 1);
+
+                                var b = _smallIntDrawers[i + 1];
+                                b.scale.setX(offset);
+                                var a = _smallIntDrawers[i];
+                                a.scale.setX(sizeToChange);
+                                a.position.setX(posToChange);
+                                var c = _lockers[i];
+                                var d = _locker_splitters[i];
+                                c.scale.setX(offset);
+                                d.scale.setX(offset);
+                            } else {
+                                createInternalDrawerSmall(i + 1);
+                                updateInternalDrawerSmall(i + 1);
+
+                                var b = _smallIntDrawers[i + 1];
+                                b.scale.setX(offset);
+                                var c = _lockers[i];
+                                var d = _locker_splitters[i];
+                                c.scale.setX(offset);
+                                d.scale.setX(offset);
+                            }
+
+
+                        } else if (_lockers[i + 1]) {
+
+                            var a = _smallIntDrawers[i];
                             a.scale.setX(sizeToChange);
                             a.position.setX(posToChange);
-                            var c = _lockers[removed_index];
-                            var d = _locker_splitters[removed_index];
-                            c.scale.setX(offset);
-                            d.scale.setX(offset);
+                            removeLocker(i + 1);
+
                         } else {
-                            createInternalDrawerSmall(removed_index + 1);
-                            updateInternalDrawerSmall(removed_index + 1);
+                            var a = _smallIntDrawers[i];
+                            a.scale.setX(sizeToChange);
+                            a.position.setX(posToChange);
+                            removeInternalDrawerSmall(i + 1);
+                        }
+                    } else if (_smallIntDrawers[i + 1]) {
 
-                            var b = _smallIntDrawers[removed_index + 1];
+                        if (_lockers[i + 1]) {
+
+                            if (_smallIntDrawers[i + 1]) {
+
+                                updateInternalDrawerSmall(i + 1)
+
+                                var b = _smallIntDrawers[i + 1];
+                                removeLocker(i + 1);
+                                b.scale.setX(offset);
+                            }
+                        } else {
+                            var b = _smallIntDrawers[i + 1];
+                            updateInternalDrawerSmall(i + 1)
                             b.scale.setX(offset);
-                            var c = _lockers[removed_index];
-                            var d = _locker_splitters[removed_index];
+                        }
+
+                        if (_lockers[i]) {
+                            var b = _smallIntDrawers[i + 1];
+                            b.scale.setX(offset);
+                            var a = _lockers[i];
+                            var c = _locker_splitters[i]
+                            a.scale.setX(offset);
+                            c.scale.setX(offset);
+                        } else {
+                            createLocker(i);
+                            updateLocker(i);
+                            var a = _lockers[i];
+                            var b = _locker_splitters[i]
+                            a.scale.setX(offset);
+                            b.scale.setX(offset);
+                        }
+                    } else {
+                        if (_lockers[i]) {
+                            createInternalDrawerSmall(i + 1);
+                            updateInternalDrawerSmall(i + 1);
+                            var b = _smallIntDrawers[i + 1];
+                            b.scale.setX(offset);
+
+                            var c = _lockers[i];
+                            var d = _locker_splitters[i];
+                            c.scale.setX(offset);
+                            d.scale.setX(offset);
+                        } else if (_lockers[i + 1]) {
+                            removeLocker(i + 1);
+                            createLocker(i);
+                            updateLocker(i);
+                            createInternalDrawerSmall(i + 1);
+                            updateInternalDrawerSmall(i + 1);
+                            var b = _smallIntDrawers[i + 1];
+                            b.scale.setX(offset);
+
+                            var c = _lockers[i];
+                            var d = _locker_splitters[i];
                             c.scale.setX(offset);
                             d.scale.setX(offset);
                         }
-
-
-                    } else if (_lockers[removed_index + 1]) {
-
-                        var a = _smallIntDrawers[removed_index];
-                        a.scale.setX(sizeToChange);
-                        a.position.setX(posToChange);
-                        removeLocker(removed_index + 1);
-
-                    } else {
-                        var a = _smallIntDrawers[removed_index];
-                        a.scale.setX(sizeToChange);
-                        a.position.setX(posToChange);
-                        removeInternalDrawerSmall(removed_index + 1);
-                    }
-                } else if (_smallIntDrawers[removed_index + 1]) {
-
-                    if (_lockers[removed_index + 1]) {
-
-                        if (_smallIntDrawers[removed_index + 1]) {
-
-                            updateInternalDrawerSmall(removed_index + 1)
-
-                            var b = _smallIntDrawers[removed_index + 1];
-                            removeLocker(removed_index + 1);
-                            b.scale.setX(offset);
-                        }
-                    } else {
-                        var b = _smallIntDrawers[removed_index + 1];
-                        updateInternalDrawerSmall(removed_index + 1)
-                        b.scale.setX(offset);
                     }
 
-                    if (_lockers[removed_index]) {
-                        var b = _smallIntDrawers[removed_index + 1];
-                        b.scale.setX(offset);
-                        var a = _lockers[removed_index];
-                        var c = _locker_splitters[removed_index]
-                        a.scale.setX(offset);
-                        c.scale.setX(offset);
-                    } else {
-                        createLocker(removed_index);
-                        updateLocker(removed_index);
-                        var a = _lockers[removed_index];
-                        var b = _locker_splitters[removed_index]
-                        a.scale.setX(offset);
-                        b.scale.setX(offset);
-                    }
-                } else {
-                    if (_lockers[removed_index]) {
-                        createInternalDrawerSmall(removed_index + 1);
-                        updateInternalDrawerSmall(removed_index + 1);
-                        var b = _smallIntDrawers[removed_index + 1];
-                        b.scale.setX(offset);
+                    updateHingedDoorOnColumnCombined();
+                })
+            } else {
+                // console.log("Not " + _columns[removed_index].name);
+                // var sizeToChange = offset * 2 - thickness / 12 * ftTom;
+                // var posToChange = _columns[removed_index + 1].position.x + offset / 2;
+                // if (_largeIntDrawers[removed_index]) {
+                //     var a = _largeIntDrawers[removed_index];
+                //     var b = _largeIntDrawers_splitters[removed_index];
+                //     a.scale.setX(sizeToChange);
+                //     a.position.setX(posToChange);
+                //     b.scale.setX(sizeToChange);
+                //     b.position.setX(a.position.x);
+                //     removeInternalDrawerLarge(removed_index + 1);
+                // } else if (_largeIntDrawers[removed_index + 1]) {
+                //     var a = _largeIntDrawers[removed_index + 1];
 
-                        var c = _lockers[removed_index];
-                        var d = _locker_splitters[removed_index];
-                        c.scale.setX(offset);
-                        d.scale.setX(offset);
-                    } else if (_lockers[removed_index + 1]) {
-                        removeLocker(removed_index + 1);
-                        createLocker(removed_index);
-                        updateLocker(removed_index);
-                        createInternalDrawerSmall(removed_index + 1);
-                        updateInternalDrawerSmall(removed_index + 1);
-                        var b = _smallIntDrawers[removed_index + 1];
-                        b.scale.setX(offset);
+                //     var b = _largeIntDrawers_splitters[removed_index + 1];
+                //     a.scale.setX(sizeToChange);
+                //     a.position.setX(posToChange);
+                //     b.scale.setX(sizeToChange);
+                //     b.position.setX(a.position.x);
 
-                        var c = _lockers[removed_index];
-                        var d = _locker_splitters[removed_index];
-                        c.scale.setX(offset);
-                        d.scale.setX(offset);
-                    }
-                }
+                //     removeInternalDrawerLarge(removed_index);
+                // }
 
-                updateHingedDoorOnColumnCombined();
             }
         })
     }
 
-    
+
 }
 
 function removeAllInterior() {
@@ -2425,7 +2562,7 @@ function createHingedDoor(index) {
     var m = new THREE.MeshStandardMaterial({
         color: 0xfafa22,
         transparent: true,
-        opacity: 1
+        opacity: 0.6
     });
     m.name = "wm_hinged_door";
 
@@ -2444,10 +2581,10 @@ function createHingedDoor(index) {
 
 function updateHingedDoor(index) {
 
-    
+
     // _columns_group.position.x + _columns[index - 1].position.x + thickness / 24 * ftTom
     if (_hDoors_parent[index] instanceof THREE.Group) {
-    
+
         _hDoors_parent_group.position.set(offset + wLeft.position.x, _hDoors_parent_group.position.y, _hDoors_parent_group.position.z);
         if (index % 2 == 0) {
 
@@ -2476,7 +2613,7 @@ function updateHingedDoor(index) {
                     _hDoors_parent[index].children[j].scale.set(offset - (thickness / 12) * ftTom, wHeight * ftTom - (2 / 12 * ftTom) + thickness / 12 * ftTom - wBottom.position.y, (thickness / 12) * ftTom);
 
                     _hDoors_parent[index].children[j].position.set(_hDoors_parent[index].children[j].scale.x / 2, (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2, (thickness / 24) * ftTom);
-                    _hDoors_parent[index].children[j].material.color.set("#34deeb");
+                    // _hDoors_parent[index].children[j].material.color.set("#34deeb");
                 }
 
             }
@@ -2486,15 +2623,15 @@ function updateHingedDoor(index) {
 
 
     }
-    
- 
+
+
 }
 
 function updateHingedDoorOnColumnCombined() {
 
     if (_hDoors_parent[removed_index + 1] || _hDoors_parent[removed_index]) {
         _columns.forEach(e => {
-        
+
             if (removed_index == 0) {
                 for (var i = 0; i < removed_id.length; i++) {
 
@@ -2517,93 +2654,96 @@ function updateHingedDoorOnColumnCombined() {
                     }
 
                 }
-            }else{
+            } else {
                 adjacentParts.forEach(a => {
 
                     if (e == a) {
-    
+
                         for (var i = 0; i < removed_id.length; i++) {
                             if (removed_id[i] % 2 != 0) {
-    
-    
+
+
                                 _hDoors_parent[removed_id[i]].position.setX(_columns[removed_id[i]].position.x + offset - thickness / 24 * ftTom);
                                 _hDoors_parent[removed_id[i] + 1].position.setX(_columns[removed_id[i]].position.x - offset + thickness / 24 * ftTom);
-    
+
                                 for (var j = 0; j < _hDoors_parent[removed_id[i]].children.length; j++) {
-    
+
                                     _hDoors_parent[removed_id[i]].children[j].scale.set(offset - thickness / 24 * ftTom, wHeight * ftTom - (2 / 12 * ftTom) + thickness / 12 * ftTom - wBottom.position.y, (thickness / 12) * ftTom);
-    
+
                                     _hDoors_parent[removed_id[i]].children[j].position.set(_hDoors_parent[removed_id[i]].children[j].scale.x / 2, (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2, (thickness / 24) * ftTom);
-    
-    
+
+
                                 }
-    
+
                                 for (var j = 0; j < _hDoors_parent[removed_id[i] + 1].children.length; j++) {
-    
+
                                     _hDoors_parent[removed_id[i] + 1].children[j].scale.set(offset - thickness / 24 * ftTom, wHeight * ftTom - (2 / 12 * ftTom) + thickness / 12 * ftTom - wBottom.position.y, (thickness / 12) * ftTom);
-    
+
                                     _hDoors_parent[removed_id[i] + 1].children[j].position.set(_hDoors_parent[removed_id[i] + 1].children[j].scale.x / 2, (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2, -(thickness / 24) * ftTom);
-    
-    
+
+
                                 }
                             }
                         }
-    
+
                     } else {
-    
+
                         for (var i = 0; i < removed_id.length; i++) {
 
                             for (var j = 0; j < _hDoors_parent[removed_id[i]].children.length; j++) {
-    
+
                                 _hDoors_parent[removed_id[i]].children[j].scale.setX(offset - thickness / 24 * ftTom);
-    
+
                                 _hDoors_parent[removed_id[i]].children[j].position.setX(_hDoors_parent[removed_id[i]].children[j].scale.x / 2);
-    
-    
+
+
                             }
-    
+
                             for (var j = 0; j < _hDoors_parent[removed_id[i] + 1].children.length; j++) {
-    
+
                                 _hDoors_parent[removed_id[i] + 1].children[j].scale.setX(offset - thickness / 24 * ftTom);
-    
+
                                 _hDoors_parent[removed_id[i] + 1].children[j].position.setX(_hDoors_parent[removed_id[i] + 1].children[j].scale.x / 2);
 
                             }
-    
+
                         }
-    
+
                     }
-    
+
                 })
             }
-           
+
         })
 
 
     }
-  
+
 }
-function setflipDoor(){
+
+function setflipDoor() {
 
 
-    for(var i = 0;i<_hDoors_parent.length;i++){
-        if(interactivePlanes[plane_index] instanceof THREE.Mesh){
+    for (var i = 0; i < _hDoors_parent.length; i++) {
+        if (interactivePlanes[plane_index] instanceof THREE.Mesh) {
 
-            if((interactivePlanes[plane_index].scale.x- _hDoors_parent[i].scale.x/2)<0){
+            if ((interactivePlanes[plane_index].scale.x - _hDoors_parent[i].scale.x / 2) < 0) {
                 flippableDoor.push(_hDoors_parent[i]);
 
-            }else{
-                flippableDoor[i]=null;
+            } else {
+                flippableDoor[i] = null;
             }
         }
-    
+
     }
 
 
 }
-function flipDoor(index){
+
+function flipDoor(index) {
 
 }
+
 function removeDoor(index) {
 
     if (index) {
@@ -2612,7 +2752,7 @@ function removeDoor(index) {
 
         if (_hDoors_parent[index] instanceof THREE.Group) {
             _hDoors_parent_group.remove(_hDoors_parent[index]);
-           
+
         }
 
 
@@ -2692,4 +2832,86 @@ function doorAction(index) {
         }
     }
 
+}
+
+
+function paintWardrobe() {
+    scene.traverse(function (child) {
+        if (child instanceof(THREE.Mesh)) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+        }
+    })
+
+    var x = wWidth * ftTom;
+    var y = wHeight * ftTom;
+    wood_albedo.repeat.set(x, y);
+    wood_roughness.repeat.set(x, y);
+    wood_normal.repeat.set(x, y);
+
+
+    // _lockers.forEach(e => {
+    //     e.material.color.set("#dadada");
+    // })
+    // _locker_splitters.forEach(e => {
+    //     e.material.color.set("#0d0d0d");
+    // })
+
+
+}
+
+function createColumnSprite(index) {
+    var tex = new THREE.TextureLoader().load("./assets/icons8-minus-100" + ".png");
+    var material = new THREE.SpriteMaterial({
+        map: tex,
+        transparent: true,
+        opacity: 0.5
+    });
+    var sprite = new THREE.Sprite(material);
+    sprite.name = "removeColumns" + index;
+    sprite.receiveShadow = false;
+    sprite.castShadow = false;
+    deleteSprites[index] = sprite;
+    deleteSprites[index].scale.set(0.15, 0.15);
+    deleteSprites_group.add(deleteSprites[index]);
+    scene.add(deleteSprites_group);
+
+}
+
+function updateColumnSprite(index) {
+
+
+    deleteSprites[index].scale.set(0.15, 0.15);
+    deleteSprites[index].position.set(index * offset, wBottom.position.y - 0.2, _columns[index].position.z);
+
+    deleteSprites_group.position.set(offset + wLeft.position.x, deleteSprites_group.position.y, deleteSprites_group.position.z);
+
+
+}
+
+
+function removeColumnsSprite(index) {
+
+    if (index) {
+        deleteSprites.forEach(e => {
+            if (deleteSprites[index] instanceof THREE.Sprite && deleteSprites[index] == e) {
+                if (deleteSprites_group instanceof THREE.Group) {
+                    deleteSprites_group.remove(e);
+                }
+            }
+        })
+        deleteSprites[index] = null;
+    } else {
+
+        deleteSprites.forEach(e => {
+            if (e instanceof THREE.Sprite) {
+                if (deleteSprites_group instanceof THREE.Group) {
+                    deleteSprites_group.remove(e);
+
+                }
+            }
+        })
+        deleteSprites = [];
+
+    }
 }
