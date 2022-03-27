@@ -232,7 +232,7 @@ function render() {
     updateWardrobe();
     topShelfOnSelected(plane_index);
     botShelfFilter();
-
+    updateBotShelves(plane_index);
     columnsCombination();
     delta = clock.getDelta();
     doorAction();
@@ -469,35 +469,50 @@ function generateInteractivePlanes(index) {
 }
 
 function addHorizontalParts() {
+
+    
     $("#addED").click(function () {
+        
         if(!_extDrawers[plane_index]){
             for(var i =0 ; i < customColumns;i++){
                 createExternalDrawer(i);
                 updateExternalDrawer(i);
+               
             }
+            updateInternalDrawerLarge(plane_index);
             
         }else{
+              
             return;
         }
 
+        
+      
     })
 
     $("#addIDL").click(function () {
         if(!_largeIntDrawers[plane_index]){
-            createInternalDrawerLarge(plane_index);
+            createInternalDrawerLarge(plane_index );
             updateInternalDrawerLarge(plane_index);
+          
         }else{
             return;
         }
+       
+      
+
     })
 
     $("#addIDS").click(function () {
         if(!_smallIntDrawers[plane_index]){
             createInternalDrawerSmall(plane_index);
             updateInternalDrawerSmall(plane_index);
+            updateLocker(plane_index);
         }else{
             return;
         }
+             
+        
     })
 
     $("#addLocker").click(function () {
@@ -505,19 +520,35 @@ function addHorizontalParts() {
         if(!_lockers[plane_index]){
             createLocker(plane_index);
             updateLocker(plane_index);
+            updateInternalDrawerSmall(plane_index);
         }else{
+            
             return;
         }
-
+            
+       
     })
 
     $("#addBottomShelf").click(function () {
-        if(!_bot_shelf_parent[plane_index]){
-            createBotShelves(onHeightChanged(plane_index),plane_index);
-            updateBotShelves(plane_index)
-        }else{
-            return;
+       
+            
+        if(onHeightChanged(plane_index)>0){
+            if(!_bot_shelf_parent[plane_index] instanceof THREE.Mesh){
+                createBotShelves(onHeightChanged(plane_index),plane_index);
+                updateBotShelves(plane_index)
+             
+                _bot_shelf_parent[plane_index].visible = true;
+            }else{
+                removeBotShelves(plane_index );
+                createBotShelves(onHeightChanged(plane_index),plane_index);
+                updateBotShelves(plane_index)
+                
+                _bot_shelf_parent[plane_index].visible = true;
+                
+            }
         }
+       
+    
     })
 
     $("#hangerOrShelf").change(function () {
@@ -1454,7 +1485,7 @@ function createBotShelves(row, index) {
     _bot_group.name = "bot_shelves_" + index;
     _bot_shelf_parent[index] = _bot_group;
     scene.add(_bot_shelf_parent[index]);
-
+    _bot_shelf_parent[index].visible = false;
 }
 
 function removeBotShelves(index) {
@@ -1630,12 +1661,14 @@ function updateBotShelves(index) {
                 }
             }
         }
-        for (var j = 0; j < _bot_shelf_parent[index].children.length; j++) {
+        if (_bot_shelf_parent[index] instanceof THREE.Group) {
+            for (var j = 0; j < _bot_shelf_parent[index].children.length; j++) {
             if (_bot_shelf_parent[index].children[j] instanceof THREE.Mesh) {
                 _bot_shelf_parent[index].children[j].scale.set(offset - (thickness / 12) * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + wBack.scale.z);
                 _bot_shelf_parent[index].children[j].position.set(index * offset, (j * vertical_offset), wLeft.position.z / 2 + (thickness / 24) * ftTom);
             }
-
+    
+            }
         }
         _bot_shelf_parent[index].position.set(offset / 2 + wLeft.position.x, pos, _bot_shelf_parent[index].position.z);
         _bot_shelf_parent[index].visible = true;
@@ -1645,6 +1678,9 @@ function updateBotShelves(index) {
 
 }
 
+function updateBotShelvesScale(index,vertical_offset,){
+   
+}
 function createInteractivePlane(index) {
 
     var g = new THREE.PlaneGeometry(1, 1);
@@ -2088,12 +2124,17 @@ function reset_adjacents_removed_columns() {
 }
 
 function onHeightChanged(plane_index) {
-    var row = 1;
+    var row = 0;
 
 
 
     if (wHeight == 6.5) {
-        row = 1;
+        if(!_largeIntDrawers[plane_index] && !_extDrawers[plane_index] && !_smallIntDrawers[plane_index] && !_lockers[plane_index]){
+            row = 0;
+        }else{
+            row = 1;
+        }
+        
     } else if (wHeight == 7 && !_lockers[plane_index] && !_largeIntDrawers[plane_index] && !_extDrawers[plane_index] && !_smallIntDrawers[plane_index]) {
         row = 3;
     } else if (wHeight == 7 && !_lockers[plane_index]) {
@@ -2261,7 +2302,9 @@ function columnsCombination() {
 
                             var b = _smallIntDrawers[removed_index + 1];
                             b.scale.setX(offset);
-
+                            var a = _smallIntDrawers[removed_index];
+                            a.scale.setX(sizeToChange);
+                            a.position.setX(posToChange);
                             var c = _lockers[removed_index];
                             var d = _locker_splitters[removed_index];
                             c.scale.setX(offset);
@@ -2357,7 +2400,7 @@ function columnsCombination() {
         })
     }
 
-    updateBotShelves();
+    
 }
 
 function removeAllInterior() {
