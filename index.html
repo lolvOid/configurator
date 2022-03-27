@@ -153,7 +153,7 @@
 
                        
                         <h6>
-                            Edit Interior Selected: <span id="column_id"></span>
+                            Edit Selected Column : <span id="column_id"></span>
                         </h6>
 
                         <select class="form-select m-1" name="hangerOrShelf" id="hangerOrShelf">
@@ -171,7 +171,7 @@
                         <a class="btn btn-outline-dark m-1" id="addED">Add E.Drawer</a>
                         <a class="btn btn-outline-dark m-1" id="addBottomShelf">Add Bottom Shelf</a>
                         
-                        <a class="btn btn-outline-danger m-1" id="removeAll">Remove All</a>
+                        <!-- <a class="btn btn-outline-danger m-1" id="removeAll">Remove All</a> -->
                     </div>
 
                     <div class="row m-2">
@@ -196,6 +196,30 @@
 
                   
                     
+                </div>
+                <div class="form-control m-1">
+               
+                    <h6 class="p-2">Render Options:</h6>
+                    <div class="form-check-inline" id="loftOptionsPanel">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input btn-check" type="radio" name="renderOptions" id="renderOption1"
+                                value="0" >
+                            <label class="form-check-label btn btn-outline-secondary" for="renderOption1">Shaded</label>
+                        </div>
+
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input btn-check" type="radio" name="renderOptions" id="renderOption2"
+                                value="1" checked>
+                            <label class="form-check-label btn btn-outline-secondary" for="renderOption2">Debug</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input btn-check" type="radio" name="renderOptions" id="renderOption3"
+                                value="2">
+                            <label class="form-check-label btn btn-outline-secondary" for="renderOption3">Wireframe</label>
+                        </div>
+                    </div>
+                  
+
                 </div>
                 <div class="row m-1">
                     <button class="btn btn-outline-success m-1"> Reset</button>
