@@ -3032,14 +3032,14 @@ function _flipDoor(index) {
                         if (index % 2 == 0) {
                            
                             if (index == _hDoors_parent.length - 1) {
-                                e.position.setX(_columns[index-1].position.x + thickness / 24 * ftTom);
+                                e.position.setX(_columns[index-1].position.x +offset- thickness / 24 * ftTom);
                                
                                
                                 e.rotation.set(0,-100* THREE.Math.DEG2RAD, 0);
                                 e.traverse(function(child){
                                     if(child instanceof THREE.Mesh){                       
                                        
-                                        child.position.setZ(-(thickness / 24) * ftTom);
+                                        child.position.setZ((thickness / 24) * ftTom);
     
                                     }
                                 })
