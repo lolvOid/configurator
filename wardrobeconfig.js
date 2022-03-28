@@ -451,13 +451,13 @@ function updateColumns() {
         if (!_columns[i]) {
             createColumns(i);
             _columns[i].scale.set((thickness / 12) * ftTom, wHeight * ftTom - (2 / 12 * ftTom) + thickness / 12 * ftTom - wBottom.position.y, (thickness / 12) * ftTom + wDepth * ftTom);
-            _columns[i].position.set(i * offset, (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2, (((thickness / 24)) * ftTom));
+            _columns[i].position.set(i * offset, (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2, ((thickness / 24) * ftTom));
 
         } else {
             if (_columns[i] instanceof THREE.Mesh) {
 
                 _columns[i].scale.set((thickness / 12) * ftTom, wHeight * ftTom - (2 / 12 * ftTom) + thickness / 12 * ftTom - wBottom.position.y, (thickness / 12) * ftTom + wDepth * ftTom);
-                _columns[i].position.set(i * offset, (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2, (((thickness / 24)) * ftTom));
+                _columns[i].position.set(i * offset, (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2, ((thickness / 24) * ftTom));
             }
         }
     }
@@ -1915,13 +1915,9 @@ function onPointerMove(event) {
                         adjacentParts.forEach(e => {
                             if (e == selectedObject) {
                                 selectedSprite = null;
-                            } else {
-
-                            }
+                            } 
                         });
-                    } else {
-
-                    }
+                    } 
                 })
             }
         });
@@ -1949,7 +1945,7 @@ function onPointerMove(event) {
     raycaster.setFromCamera(pointer, camera);
 
 
-    const intersects = raycaster.intersectObject(_columns_group, true);
+    // const intersects = raycaster.intersectObject(_columns_group, true);
     const removeIcons = raycaster.intersectObject(deleteSprites_group, true);
 
     const p = raycaster.intersectObject(interactivePlane_group, true);
@@ -2999,7 +2995,7 @@ function setflipDoor_Select() {
         }
         for (var i = 0; i <= _flippableDoor.length; i++) {
 
-            var op = document.createElement("option");
+         
             var op = document.createElement("option");
 
         
