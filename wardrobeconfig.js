@@ -1924,11 +1924,11 @@ function onPointerMove(event) {
     }
 
     if (selectedObject) {
-        for (var i = 0; i < interactivePlanes.length; i++) {
-            if (interactivePlanes[i] == selectedObject) {
+        // for (var i = 0; i < interactivePlanes.length; i++) {
+        //     if (interactivePlanes[i] == selectedObject) {
 
-            }
-        }
+        //     }
+        // }
     }
 
     if (event.changedTouches) {
