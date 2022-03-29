@@ -254,7 +254,7 @@ function render() {
         updateHingedDoorUpSize(i)
     }
     columnsCombination();
-    updateHingedDoorOnColumnCombined();
+   
     delta = clock.getDelta();
     doorAction();
 
@@ -511,14 +511,14 @@ function generateInteractivePlanes(index) {
                 updateInteractivePlane(i);
             }
         }
-        if (onHeightChanged(plane_index) > 0) {
-            if (_bot_shelf_parent[plane_index] instanceof THREE.Mesh) {
-                removeBotShelves(plane_index);
-                createBotShelves(onHeightChanged(plane_index), plane_index);
-                updateBotShelves(plane_index);
-                _bot_shelf_parent[plane_index].visible = false;
-            }
-        }
+        // if (onHeightChanged(plane_index) > 0) {
+        //     if (_bot_shelf_parent[plane_index] instanceof THREE.Mesh) {
+        //         removeBotShelves(plane_index);
+        //         createBotShelves(onHeightChanged(plane_index), plane_index);
+        //         updateBotShelves(plane_index);
+        //         _bot_shelf_parent[plane_index].visible = false;
+        //     }
+        // }
     }
 
 }
@@ -533,7 +533,6 @@ function addHorizontalParts() {
                 createExternalDrawer(i);
                 updateExternalDrawer(i);
                 updateInternalDrawerLarge(i);
-
             }
 
           
@@ -1549,10 +1548,10 @@ function removeBotShelves(index) {
 
 function updateBotShelves(index) {
 
-    var vertical_offset = 0;
+    var vertical_offset = -1;
     var pos = 0;
     var dist;
-    vertical_offset *= -1;
+    
 
     if (_bot_shelf_parent[index] instanceof THREE.Group) {
         if (_lockers[index] instanceof THREE.Mesh || _largeIntDrawers[index] instanceof THREE.Mesh ||
@@ -1684,7 +1683,7 @@ function updateBotShelves(index) {
 
                 }
             }
-            vertical_offset *= -1;
+           
         } else {
             if (!_lockers[index] && !_smallIntDrawers[index] && !_largeIntDrawers[index] && !_extDrawers[index]) {
 
@@ -1700,10 +1699,11 @@ function updateBotShelves(index) {
                 }
             }
         }
+        
         if (_bot_shelf_parent[index] instanceof THREE.Group) {
             for (var j = 0; j < _bot_shelf_parent[index].children.length; j++) {
                 if (_bot_shelf_parent[index].children[j] instanceof THREE.Mesh) {
-                    _bot_shelf_parent[index].children[j].scale.set(offset - (thickness / 12) * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + wBack.scale.z);
+                    _bot_shelf_parent[index].children[j].scale.set(offset - (thickness / 12) * ftTom, (thickness / 12) * ftTom, wDepth * ftTom );
                     _bot_shelf_parent[index].children[j].position.set(index * offset, (j * vertical_offset), wLeft.position.z / 2 + (thickness / 24) * ftTom);
                 }
 
@@ -2261,11 +2261,28 @@ function onHeightChanged(plane_index) {
         row = 3;
     } else if (wHeight == 7 && !_lockers[plane_index]) {
         row = 1;
-    } else if (wHeight == 7 && _lockers[plane_index] && !_smallIntDrawers[plane_index]) {
+    } else if (wHeight == 7 && _lockers[plane_index] && !_smallIntDrawers[plane_index]  ||  _largeIntDrawers[plane_index] && !_extDrawers[plane_index]) {
         row = 2;
-    } else if (wHeight == 7 && _lockers[plane_index] && _smallIntDrawers[plane_index]) {
+    } else if (wHeight == 7 && _lockers[plane_index] && _smallIntDrawers[plane_index]  && !_largeIntDrawers[plane_index] && !_extDrawers[plane_index] ) {
+        
         row = 3;
+
     }
+    else if (wHeight == 7 && _lockers[plane_index] && !_smallIntDrawers[plane_index]  ||  !_largeIntDrawers[plane_index] && _extDrawers[plane_index]) {
+        row = 2;
+    } 
+    else if (wHeight == 7 && !_lockers[plane_index] && !_smallIntDrawers[plane_index]  &&  _largeIntDrawers[plane_index] && _extDrawers[plane_index]) {
+        row = 2;
+    } 
+    else if (wHeight == 7 && _lockers[plane_index] && !_smallIntDrawers[plane_index]  ||  _largeIntDrawers[plane_index] && !_extDrawers[plane_index]) {
+        row = 2;
+    } 
+    else if(wHeight == 7 && _lockers[plane_index] && !_smallIntDrawers[plane_index]  ||  !_largeIntDrawers[plane_index] && _extDrawers[plane_index]){
+        row = 2;
+    }
+    else(
+        removeBotShelves(plane_index)
+    )
 
     return row;
 
@@ -2545,6 +2562,8 @@ function columnsCombination() {
 
             }
         })
+
+        updateHingedDoorOnColumnCombined();
     }
 
 
@@ -3401,7 +3420,7 @@ function renderOption() {
     var debug_intLargeColor = "#aa7f50";
     var debug_splitterColor = "#22ffaa";
     var debug_topShelfColor = "#faaaee";
-    var debug_botShelfColor = "faaaee";
+    var debug_botShelfColor = "#faaaee";
     var debug_columns_color = "#ff55dd";
     var debug_locker_color = "#ddffdd";
     var debug_door_color = "#fafa22"
