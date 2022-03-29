@@ -120,13 +120,13 @@
                 <div id="editInterior" class="form-control m-1" >
 
                     <h6 class="m-2"  >Features: </h6>
-                    <div class="form-control m-1">
+                    <div class="form-control m-1 d-md-flex">
                
                         <div class="form-check form-switch m-2">
                             <input class="form-check-input" type="checkbox" name="loftOptionsEnable" id="addloft">
                             <label class="form-check-label" for="addloft" id="loftLabel"> Add Loft</label>
                         </div>
-
+                        
                         <div class="form-check-inline" id="loftOptionsPanel">
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input btn-check" type="radio" name="loftOptions" id="loft1"
@@ -144,8 +144,11 @@
                                     value="4    ">
                                 <label class="form-check-label btn btn-outline-secondary" for="loft3">4 ft</label>
                             </div>
+                            <div class="row m-2 d-flex">
+                                <a class="btn btn-outline-dark" id="actionloftDoor"></a>
+                            </div>
                         </div>
-                      
+                       
 
                     </div>
 
@@ -186,12 +189,12 @@
                         
                         <a class="btn btn-outline-dark m-1" id="actionDoor"></a>
                         <!-- <a class="btn btn-outline-dark m-1" id="editDoor">Edit Door</a> -->
-                        <select class="form-select m-1" id="flipDoor" aria-label="flipDoor">
-                            <option selected value="0">Flip Door:</option>
+                        <!-- <select class="form-select m-1" id="flipDoor" aria-label="flipDoor">
+                            <option selected value="0">Flip Door:</option> -->
                             <!-- <option value="1">One</option>
                             <option value="2">Two</option>
                             <option value="3">Three</option> -->
-                        </select>
+                        <!-- </select> -->
                     </div>
                     
 
