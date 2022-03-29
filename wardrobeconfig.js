@@ -537,7 +537,7 @@ function createLoftColumns(index) {
 function updateLoftColumns(index) {
     if (_columnsLoft[index] != null && wpLoftBottom.visible) {
         _columnsLoft[index].scale.set((thickness / 12) * ftTom, wLoft * ftTom - wpLoftBottom.scale.y - wpLoftTop.scale.y, (3 / 12) * ftTom);
-        _columnsLoft[index].position.set(index * offset, (wpLoftBack.scale.y / 2) + wpLoftBottom.position.y - wpLoftBottom.scale.y / 2, -wpLoftBack.position.z  - thickness/12 *ftTom);
+        _columnsLoft[index].position.set(index * offset, (wpLoftBack.scale.y / 2) + wpLoftBottom.position.y - wpLoftBottom.scale.y / 2, -wpLoftBack.position.z-wpLoftBack.scale.z/2  - (thickness/12 )*ftTom);
         if (index % 2 == 0) {
             _columnsLoft[index].visible = false;
         }
