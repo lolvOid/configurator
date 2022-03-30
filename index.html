@@ -19,6 +19,7 @@
     <script src="./threejs/build/three.js"></script>
     <script src="./threejs/exporters/GLTFExporter.js"></script>
     <script src="./threejs/controls/OrbitControls.js"></script>
+    <script src="./threejs/loaders/RGBELoader.js"></script>
     <script src="./threejs/loaders/GLTFLoader.js"></script>
     <script src="./threejs/postprocessing/EffectComposer.js"></script>
     <script src="./threejs/shaders/FXAAShader.js"></script>
@@ -29,7 +30,7 @@
     <script src="./threejs/shaders/CopyShader.js"></script>
     <script src="./threejs/math/SimplexNoise.js"></script>
     <script src="./threejs/postprocessing/SSAOPass.js"></script>
-
+    <script src="./threejs/postprocessing/SSAARenderPass.js"></script>
 
 </head>
 
@@ -123,7 +124,7 @@
                     <div class="form-control m-1 d-md-flex">
                
                         <div class="form-check form-switch m-2">
-                            <input class="form-check-input" type="checkbox" name="loftOptionsEnable" id="addloft">
+                            <input class="form-check-input" type="checkbox" name="loftOptionsEnable" id="addloft" >
                             <label class="form-check-label" for="addloft" id="loftLabel"> Add Loft</label>
                         </div>
                         
@@ -207,13 +208,13 @@
                     <div class="form-check-inline" id="loftOptionsPanel">
                         <div class="form-check form-check-inline">
                             <input class="form-check-input btn-check" type="radio" name="renderOptions" id="renderOption1"
-                                value="0" >
+                                value="0" checked>
                             <label class="form-check-label btn btn-outline-secondary" for="renderOption1">Shaded</label>
                         </div>
 
                         <div class="form-check form-check-inline">
                             <input class="form-check-input btn-check" type="radio" name="renderOptions" id="renderOption2"
-                                value="1" checked>
+                                value="1" >
                             <label class="form-check-label btn btn-outline-secondary" for="renderOption2">Debug</label>
                         </div>
                         <div class="form-check form-check-inline">
