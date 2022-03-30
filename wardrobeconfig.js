@@ -181,14 +181,14 @@ function init() {
         antialias: true,
         alpha: true,
         preserveDrawingBuffer: true,
-
+        
 
 
 
     })
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(fwidth, fheight);
-
+    renderer.info.autoReset = false;
 
     // renderer.toneMapping = THREE.ACESFilmicToneMapping;
     // renderer.toneMappingExposure = 1;
@@ -197,6 +197,7 @@ function init() {
     renderer.toneMappingExposure =  0.7;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.compile(scene,camera);
     pmremGenerator = new THREE.PMREMGenerator(renderer);
     pmremGenerator.compileEquirectangularShader();
     viewer.appendChild(renderer.domElement);
@@ -268,6 +269,7 @@ function render() {
     updateBotShelves(plane_index);
     for (var i = 0; i < customColumns; i++) {
         updateHingedDoorUpSize(i)
+        updateLoftColumns(i);
         updateLoftDoorUpSize(i)
     }
     columnsCombination();
@@ -407,20 +409,16 @@ function getInputs() {
 
 function create_lights() {
 
-   
-
-    directionalLight = new THREE.DirectionalLight(0xfff3db, 0.8);
-    directionalLight.position.set(1,0.5,3);
+    directionalLight = new THREE.DirectionalLight(0xfff3db, 0.7);
+    directionalLight.position.set(0.5,1,8);
     directionalLight.castShadow = true;
- 
-    directionalLight.shadow.blurSamples = 8;
-    directionalLight.shadow.bias = 0.00001;
-    directionalLight.shadow.mapSize.width = 1024*2; // default
-    directionalLight.shadow.mapSize.height = 1024*2; // default
+    
+    directionalLight.shadow.mapSize.width = 1024; // default
+    directionalLight.shadow.mapSize.height = 1024; // default
     scene.add(directionalLight);
 
     var directionalLight1 = new THREE.DirectionalLight(0xbfe4ff, 0.5);
-    directionalLight1.position.set(-2, 8,2);
+    directionalLight1.position.set(-2, 5,2);
 
     directionalLight1.castShadow = false;
 
@@ -429,16 +427,15 @@ function create_lights() {
     scene.add(directionalLight1);
 
 
-    var directionalLight2 = new THREE.DirectionalLight(0xdedede, 0.2);
-    directionalLight2.position.set(0, 2, -3);
-
+    var directionalLight2 = new THREE.DirectionalLight(0xdedede, 0.4);
+    directionalLight2.position.set(0, 3, -3);
     directionalLight2.castShadow = false;
 
     directionalLight2.shadow.mapSize.width = 512; // default
     directionalLight2.shadow.mapSize.height = 512;
     scene.add(directionalLight2);
 
-    var hemiLight = new THREE.HemisphereLight(0xfff2e3, 0xd1ebff,0.8);
+    var hemiLight = new THREE.HemisphereLight(0xfff2e3, 0xd1ebff,0.65);
     scene.add(hemiLight);
 }
 
@@ -1163,15 +1160,7 @@ function addLoft(visible) {
 }
 
 function createWardrobe() {
-    wood_albedo = texLoader.load("./textures/Wood_ZebranoVeneer_512_albedo.jpg");
-    wood_normal = texLoader.load("./textures/Wood_ZebranoVeneer_512_normal.jpg");
-    wood_roughness = texLoader.load("./textures/Wood_ZebranoVeneer_512_roughness.jpg");
-    wood_albedo.wrapS = THREE.MirroredRepeatWrapping;
-    wood_albedo.wrapT = THREE.MirroredRepeatWrapping;
-    wood_normal.wrapS = THREE.MirroredRepeatWrapping;
-    wood_normal.wrapT = THREE.MirroredRepeatWrapping;
-    wood_roughness.wrapS = THREE.MirroredRepeatWrapping;
-    wood_roughness.wrapT = THREE.MirroredRepeatWrapping;
+  
     initMaterial();
     // , map:wood_albedo,normalMap:wood_normal,roughnessMap:wood_roughness,normalScale:new THREE.Vector2(1,1),roughness:1
 
@@ -2442,8 +2431,8 @@ function post_process() {
 
     effectFXAA = new THREE.ShaderPass(THREE.FXAAShader);
     
-    effectFXAA.material.uniforms['resolution'].value.x = 1 / (fwidth * pixelRatio);
-    effectFXAA.material.uniforms['resolution'].value.y = 1 / (fheight * pixelRatio);
+    // effectFXAA.material.uniforms['resolution'].value.x = 1 / (fwidth * pixelRatio);
+    // effectFXAA.material.uniforms['resolution'].value.y = 1 / (fheight * pixelRatio);
     // effectFXAA.uniforms['resolution'].value.set(1 / fwidth, 1 / fheight);
     composer.addPass(effectFXAA);
     
@@ -3745,7 +3734,7 @@ function createColumnSprite(index) {
     var material = new THREE.SpriteMaterial({
         map: tex,
         transparent: true,
-        opacity: 0.5
+        opacity: 0.5,
     });
     var sprite = new THREE.Sprite(material);
     sprite.name = "removeColumns" + index;
@@ -3808,7 +3797,16 @@ function renderOptionInput() {
 }
 
 function initMaterial() {
-    
+    wood_albedo = texLoader.load("./textures/Wood_ZebranoVeneer_512_albedo.jpg");
+    wood_normal = texLoader.load("./textures/Wood_ZebranoVeneer_512_normal.jpg");
+    wood_roughness = texLoader.load("./textures/Wood_ZebranoVeneer_512_roughness.jpg");
+    wood_albedo.wrapS = THREE.MirroredRepeatWrapping;
+    wood_albedo.wrapT = THREE.MirroredRepeatWrapping;
+    wood_normal.wrapS = THREE.MirroredRepeatWrapping;
+    wood_normal.wrapT = THREE.MirroredRepeatWrapping;
+    wood_roughness.wrapS = THREE.MirroredRepeatWrapping;
+    wood_roughness.wrapT = THREE.MirroredRepeatWrapping;
+
     _wardrobeMaterial = new THREE.MeshStandardMaterial({
         color: 0xdfdfdf,roughness: 0.8,
         name: "wm_wardrobe"
@@ -3928,12 +3926,21 @@ function renderOption() {
         _shelfMaterial.color.set(debug_botShelfColor);
         ssaoPass.output = THREE.SSAOPass.OUTPUT.Beauty;
     } else if (renderOptionsValue == 2) {
-
+       
         scene.traverse(function (child) {
             if (child instanceof THREE.Mesh) {
+              
+            
                 child.castShadow = false;
                 child.receiveShadow = false;
-                child.material.color.set(wireframeColor);
+                child.visible = true;
+                // const edges = new THREE.EdgesGeometry( child.geometry);
+                // const line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0xffffff } ) );
+                // scene.add( line );
+                // line.scale.set(child.scale.x,child.scale.y,child.scale.z);
+                // line.position.set(child.position.x,child.position.y,child.position.z)
+                
+                
                 child.material.wireframe = true;
                 child.material.wireframeLinejoin = "round";
                 child.material.wireframeLinecap = "square";
@@ -3952,7 +3959,7 @@ function removeSingleInterior(index) {
 }
 
 function createShadowCatcher(){
-    var geometry = new THREE.PlaneGeometry(5,5);
+    var geometry = new THREE.PlaneGeometry(100,5);
     var material = new THREE.ShadowMaterial();
     material.opacity = 0.05;
 
@@ -3961,3 +3968,4 @@ function createShadowCatcher(){
     mesh.rotation.x = -90 * THREE.Math.DEG2RAD;
     scene.add( mesh );
 }
+
