@@ -2,8 +2,8 @@ let scene, camera, renderer, directionalLight, ambientLight, controls;
 
 
 const viewer = document.getElementById("modelviewer");
-const fwidth = viewer.clientWidth;
-const fheight = viewer.clientHeight;
+const fwidth = viewer.offsetWidth;
+const fheight = viewer.offsetHeight;
 
 let wWidth = 2.5,
     wHeight = 6,
@@ -123,7 +123,10 @@ let wood_roughness;
 let selectedSprite, selectedMirror;
 
 let _splitterMaterial, _wardrobeMaterial, _lockerMaterial, _shelfMaterial, _hangerMaterial, _doorMaterial, _columnsMaterial, _extDrawerMaterial, _intSmallMaterial, _intLargeMaterial;
-var renderOptionsValue = 1;
+var renderOptionsValue = 0;
+var pmremGenerator ;
+
+let ssaoPass;
 init();
 
 animate();
@@ -190,9 +193,12 @@ function init() {
     // renderer.toneMapping = THREE.ACESFilmicToneMapping;
     // renderer.toneMappingExposure = 1;
     renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.LinearToneMapping;
+    renderer.toneMappingExposure =  0.7;
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFShadowMap;
-
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    pmremGenerator = new THREE.PMREMGenerator(renderer);
+    pmremGenerator.compileEquirectangularShader();
     viewer.appendChild(renderer.domElement);
     post_process();
 
@@ -202,11 +208,11 @@ function init() {
 
     controls.minDistance = 8;
     controls.maxDistance = 9;
-    controls.panSpeed = 1;
+    controls.panSpeed = 0;
 
     controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-    controls.target.set(0, 1.5, 0);
+    controls.dampingFactor = 0;
+    controls.target.set(0,1.35, 0);
 
 
 
@@ -256,6 +262,7 @@ function render() {
     })
 
     updateWardrobe();
+    addLoft(isLoft);
     topShelfOnSelected(plane_index);
     botShelfFilter();
     updateBotShelves(plane_index);
@@ -276,6 +283,8 @@ function render() {
     document.getElementById('column_id').innerHTML = plane_index + 1;
     document.getElementById('capturedImage').src = renderer.domElement.toDataURL();
     renderOption()
+
+
     composer.render();
     // interactivePlane_group.visible = true;
 
@@ -327,7 +336,7 @@ function getInputs() {
     $("#loftOptionsPanel").hide();
 
     $("#addloft").change(function () {
-        addLoft($(this).is(":checked"));
+        
 
         if ($(this).is(":checked")) {
 
@@ -362,8 +371,13 @@ function getInputs() {
         removeInteractivePlane();
         removeAllInterior();
         
-        removeLoftColumns();    
+        
+       $("#addloft").prop("checked",false);
+       $("#loftLabel").html("Add Loft");
+       $("#loftOptionsPanel").hide();
+        isLoft = false;
         removeLoftDoors();
+        removeLoftColumns(); 
 
     })
     $("#doneDimensions").click(function () {
@@ -392,30 +406,40 @@ function getInputs() {
 
 
 function create_lights() {
-    // hemiLight = new THREE.HemisphereLight(0xfdfdfd, 0x0d0d0d, 1);
-    // scene.add(hemiLight);
-    // light = new THREE.SpotLight(0xafafaf, 0.5);
-    // light.position.set(-10, 50, 50);
-    // light.castShadow = true;
-    // scene.add(light);
 
-    // light.shadow.bias = -0.0001;
-    // light.shadow.mapSize.width = 1024 * 4;
-    // light.shadow.mapSize.height = 1024 * 4;
-    directionalLight = new THREE.DirectionalLight(0xffffff, 0.4);
-    directionalLight.position.set(0, 0, 0.5).normalize();
+   
 
+    directionalLight = new THREE.DirectionalLight(0xfff3db, 0.8);
+    directionalLight.position.set(1,0.5,3);
+    directionalLight.castShadow = true;
+ 
+    directionalLight.shadow.blurSamples = 8;
+    directionalLight.shadow.bias = 0.00001;
+    directionalLight.shadow.mapSize.width = 1024*2; // default
+    directionalLight.shadow.mapSize.height = 1024*2; // default
     scene.add(directionalLight);
 
-    var directionalLight1 = new THREE.DirectionalLight(0xffffff, 0.4);
-    directionalLight1.position.set(0, 0, -0.5).normalize();
+    var directionalLight1 = new THREE.DirectionalLight(0xbfe4ff, 0.5);
+    directionalLight1.position.set(-2, 8,2);
 
+    directionalLight1.castShadow = false;
 
+    directionalLight1.shadow.mapSize.width = 512; // default
+    directionalLight1.shadow.mapSize.height = 512;
     scene.add(directionalLight1);
 
 
-    var light = new THREE.HemisphereLight(0xfdfdfd, 0xffffff, 0.6);
-    scene.add(light);
+    var directionalLight2 = new THREE.DirectionalLight(0xdedede, 0.2);
+    directionalLight2.position.set(0, 2, -3);
+
+    directionalLight2.castShadow = false;
+
+    directionalLight2.shadow.mapSize.width = 512; // default
+    directionalLight2.shadow.mapSize.height = 512;
+    scene.add(directionalLight2);
+
+    var hemiLight = new THREE.HemisphereLight(0xfff2e3, 0xd1ebff,0.8);
+    scene.add(hemiLight);
 }
 
 
@@ -486,7 +510,9 @@ function updateColumns() {
     _columns_group.position.set(offset + wLeft.position.x, _columns_group.position.y, _columns_group.position.z);
 
     for (var i = 0; i < customColumns - 1; i++) {
+        
         if (!deleteSprites[i]) {
+            
             createColumnSprite(i);
             updateColumnSprite(i);
             deleteSprites_group.visible = true;
@@ -600,7 +626,7 @@ function updateLoftDoorUpSize(index) {
 }
 
 function updateLoftDoors(index) {
-   
+   if(_columnsLoft.length>0){
     var posY = (wpLoftBack.scale.y / 2) + wpLoftBottom.position.y - wpLoftBottom.scale.y / 2;
     var scaleY = wLoft * ftTom - wpLoftBottom.scale.y - wpLoftTop.scale.y;
 
@@ -687,6 +713,8 @@ function updateLoftDoors(index) {
 
     }
 
+   }
+    
 
 }
 
@@ -760,8 +788,9 @@ function generateLoftColumns() {
             updateLoftDoors(i);
         }
     } else {
-        updateLoftDoors(i);
+        
         updateLoftColumns(i)
+        updateLoftDoors(i);
     }
 
 }
@@ -2140,7 +2169,7 @@ function onClick() {
         for (var i = 0; i < interactivePlanes.length; i++) {
             if (interactivePlanes[i] == selectedObject) {
 
-                outlinePass.visibleEdgeColor.set("#fcbe03")
+                outlinePass.visibleEdgeColor.set("#ff7300")
                 outlinePass.edgeStrength = 10;
                 outlinePass.edgeGlow = 0;
                 outlinePass.selectedObjects = selectedObjects;
@@ -2384,20 +2413,23 @@ function post_process() {
     composer = new THREE.EffectComposer(renderer);
 
     const renderPass = new THREE.RenderPass(scene, camera);
+    renderPass.clearColor = new THREE.Color( 0, 0, 0 );
+    renderPass.clearAlpha = 0;
     composer.addPass(renderPass);
 
 
-    const copyPass = new THREE.ShaderPass(THREE.CopyShader);
-    composer.addPass(copyPass);
 
-    const ssaoPass = new THREE.SSAOPass(scene, camera, fwidth, fheight);
-    ssaoPass.kernalRadius = 16;
+
+    
+    ssaoPass = new THREE.SSAOPass(scene, camera, fwidth, fheight);
+    ssaoPass.kernalRadius = 6;
     ssaoPass.minDistance = 0.005;
     ssaoPass.maxDistance = 0.1;
-    composer.addPass(ssaoPass);
+    // composer.addPass(ssaoPass);
 
+   
     outlinePass = new THREE.OutlinePass(new THREE.Vector2(fwidth, fheight), scene, camera);
-    outlinePass.edgeStrength = 5;
+    outlinePass.edgeStrength = 16;
     outlinePass.edgeGlow = 0;
     outlinePass.edgeThickness = 0.5;
     outlinePass.pulsePeriod = 0;
@@ -2409,10 +2441,15 @@ function post_process() {
     const pixelRatio = renderer.getPixelRatio();
 
     effectFXAA = new THREE.ShaderPass(THREE.FXAAShader);
+    
     effectFXAA.material.uniforms['resolution'].value.x = 1 / (fwidth * pixelRatio);
     effectFXAA.material.uniforms['resolution'].value.y = 1 / (fheight * pixelRatio);
     // effectFXAA.uniforms['resolution'].value.set(1 / fwidth, 1 / fheight);
     composer.addPass(effectFXAA);
+    
+    const copyPass = new THREE.ShaderPass(THREE.CopyShader);
+    composer.addPass(copyPass);
+
 }
 
 
@@ -3128,7 +3165,7 @@ function setflipDoor() {
                                     if (e instanceof THREE.Group) {
                                         e.traverse(function (child) {
                                             if (child instanceof THREE.Mesh) {
-                                                child.material.color.set("#ff0000");
+                                                // child.material.color.set("#ff0000");
                                             }
                                         })
                                     }
@@ -3461,7 +3498,7 @@ function updateFlipDoorSprite(index) {
 
 
     flipVerticalSprite[index].scale.set(0.15, 0.15);
-    flipVerticalSprite[index].position.set(index * offset, wTop.position.y + 0.2, _hDoors_parent[index].position.z);
+    flipVerticalSprite[index].position.set(index * offset, wTop.position.y + 0.2, _hDoors_parent[index].position.z+0.025);
 
     flipVertical_group.position.set(offset / 2 + wLeft.position.x, flipVertical_group.position.y, flipVertical_group.position.z);
     flipVerticalSprite[index].visible = false;
@@ -3725,9 +3762,9 @@ function updateColumnSprite(index) {
 
     if (deleteSprites.includes(deleteSprites[index])) {
         deleteSprites[index].scale.set(0.15, 0.15);
-        deleteSprites[index].position.set(index * offset, wBottom.position.y - 0.2, _columns[index].position.z);
+        deleteSprites[index].position.set(index * offset, wBottom.position.y - 0.2);
 
-        deleteSprites_group.position.set(offset + wLeft.position.x, deleteSprites_group.position.y, deleteSprites_group.position.z + 0.55);
+        deleteSprites_group.position.set(offset + wLeft.position.x, deleteSprites_group.position.y, deleteSprites_group.position.z);
     }
 
 
@@ -3765,60 +3802,74 @@ renderOptionInput();
 
 function renderOptionInput() {
     $("input:radio[name = 'renderOptions']").change(function () {
+      
         renderOptionsValue = $(this).val();
     })
 }
 
 function initMaterial() {
+    
     _wardrobeMaterial = new THREE.MeshStandardMaterial({
-        color: 0xdfdfdf,
+        color: 0xdfdfdf,roughness: 0.8,
         name: "wm_wardrobe"
     });
     _splitterMaterial = new THREE.MeshStandardMaterial({
-        color: 0x22ffaa,
+        color: 0x22ffaa,roughness: 0.8,
         name: "wm_splitter"
     });
     _lockerMaterial = new THREE.MeshStandardMaterial({
-        color: 0xddffdd,
+        color: 0xddffdd,roughness: 0.8,
         name: "wm_locker"
     });
     _doorMaterial = new THREE.MeshStandardMaterial({
-        color: 0xfafa22,
+        color: 0xfafa22,roughness: 0.8,
         name: "wm_door"
     });
     _hangerMaterial = new THREE.MeshStandardMaterial({
-        color: 0xdddddd,
+        color: 0xfdfdfd,
         name: "wm_hanger",
-        roughness: 0.5,
-        metalness: 0.6
+        roughness: 0.2,
+        metalness: 1
     });
     _shelfMaterial = new THREE.MeshStandardMaterial({
-        color: 0xfaaaee,
+        color: 0xfaaaee,roughness: 0.8,
         name: "wm_shelf"
     });
     _columnsMaterial = new THREE.MeshStandardMaterial({
-        color: 0xff55dd,
+        color: 0xff55dd,roughness: 0.8,
         name: "wm_column"
     });
     _extDrawerMaterial = new THREE.MeshStandardMaterial({
-        color: 0xff7f50,
+        color: 0xff7f50,roughness: 0.8,
         name: "wm_extDrawer"
     });
     _intSmallMaterial = new THREE.MeshStandardMaterial({
-        color: 0xadaffa,
+        color: 0xadaffa,roughness: 0.8,
         name: "wm_intSmallDrawer"
     });
     _intLargeMaterial = new THREE.MeshStandardMaterial({
-        color: 0xaa7f50,
+        color: 0xaa7f50,roughness: 0.8,
         name: "wm_intLargeDrawer"
     });
 
+    new THREE.RGBELoader()
+    .setPath('./hdri/')
+    .load('studio.hdr', function (texture) {
+
+        var envMap = pmremGenerator.fromEquirectangular(texture).texture;
+        texture.mapping = THREE.EquirectangularReflectionMapping;
+      
+        // scene.background = new THREE.Color(0xefefef);
+        // scene.environment = envMap;
+        _hangerMaterial.envMap = envMap;
+        texture.dispose();
+        pmremGenerator.dispose();
+    })
 }
 
 function renderOption() {
     var defaultColor = "#dfdfdf";
     var splitterColor = "#d0d0d0";
-
     var debug_extDrawerColor = "#ff7f50";
     var debug_intSmallColor = "#adaffa";
     var debug_intLargeColor = "#aa7f50";
@@ -3832,7 +3883,8 @@ function renderOption() {
     if (renderOptionsValue == 0) {
         scene.traverse(function (child) {
             if (child instanceof THREE.Mesh) {
-
+                child.castShadow = true;
+                child.receiveShadow = true;
                 child.material.wireframe = false;
             }
         })
@@ -3855,14 +3907,16 @@ function renderOption() {
         _lockerMaterial.color.set(defaultColor);
         _columnsMaterial.color.set(defaultColor);
         _shelfMaterial.color.set(defaultColor);
-
+        ssaoPass.output = THREE.SSAOPass.OUTPUT.Default;
     } else if (renderOptionsValue == 1) {
         scene.traverse(function (child) {
             if (child instanceof THREE.Mesh) {
-
+                child.castShadow = false;
+                child.receiveShadow = false;
                 child.material.wireframe = false;
             }
         })
+      
         _wardrobeMaterial.color.set(defaultColor);
         _extDrawerMaterial.color.set(debug_extDrawerColor);
         _splitterMaterial.color.set(debug_splitterColor);
@@ -3872,12 +3926,13 @@ function renderOption() {
         _lockerMaterial.color.set(debug_locker_color);
         _columnsMaterial.color.set(debug_columns_color);
         _shelfMaterial.color.set(debug_botShelfColor);
-
+        ssaoPass.output = THREE.SSAOPass.OUTPUT.Beauty;
     } else if (renderOptionsValue == 2) {
 
         scene.traverse(function (child) {
             if (child instanceof THREE.Mesh) {
-
+                child.castShadow = false;
+                child.receiveShadow = false;
                 child.material.color.set(wireframeColor);
                 child.material.wireframe = true;
                 child.material.wireframeLinejoin = "round";
@@ -3894,4 +3949,15 @@ function removeSingleInterior(index) {
     if (!_largeIntDrawers[index] instanceof THREE.Mesh) {
 
     }
+}
+
+function createShadowCatcher(){
+    var geometry = new THREE.PlaneGeometry(5,5);
+    var material = new THREE.ShadowMaterial();
+    material.opacity = 0.05;
+
+    var mesh = new THREE.Mesh( geometry, material );
+    mesh.receiveShadow = true;
+    mesh.rotation.x = -90 * THREE.Math.DEG2RAD;
+    scene.add( mesh );
 }
