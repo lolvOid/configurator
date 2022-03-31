@@ -47,17 +47,7 @@
 
                     <h6 class="m-1">Choose Dimensions:</h6>
                     <div class="form-control-lg" id="sizeOptions">
-                        <div class="form-control m-1 ">
-                       
 
-
-                            <label for="width">Width: <output id="rangeoutput">2.5</output> ft</label>
-                            <input type="range" name="width" id="width" class="form-range" min="2.5" max="12" step="0.5"
-                                value="2.5" oninput="rangeoutput.value = this.value">
-
-                        </div>
-                      
-                        
                         <div class="form-control m-1 " >
                             <p>Height:</p>
                             <div class="form-check form-check-inline">
@@ -77,6 +67,14 @@
                                 <label class="form-check-label btn btn-outline-secondary" for="height3">7 ft</label>
                             </div>
                         </div>
+                        <div class="form-control m-1 ">
+                            <label for="width">Width: <output id="rangeoutput">2.5</output> ft</label>
+                            <input type="range" name="width" id="width" class="form-range" min="2.5" max="12" step="0.5"
+                                value="2.5" oninput="rangeoutput.value = this.value">
+                        </div>
+
+                   
+                        
     
                         <div class="form-control m-1" >
                             <p>Depth:</p>
@@ -99,6 +97,59 @@
                             <!-- <a class=" btn btn-outline-success float-end" id="doneDepth"><i class="fa fa-check"></i>
                             </a> -->
                         </div>
+                        <div class="form-control m-1 d-md-flex">
+               
+                            <div class="form-check form-switch m-2">
+                                <input class="form-check-input" type="checkbox" name="loftOptionsEnable" id="addloft" >
+                                <label class="form-check-label" for="addloft" id="loftLabel"> Add Loft</label>
+                            </div>
+                            
+                            <div class="form-check-inline" id="loftOptionsPanel">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input btn-check" type="radio" name="loftOptions" id="loft1"
+                                        value="3" checked>
+                                    <label class="form-check-label btn btn-outline-secondary" for="loft1">3 ft</label>
+                                </div>
+    
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input btn-check" type="radio" name="loftOptions" id="loft2"
+                                        value="3.5">
+                                    <label class="form-check-label btn btn-outline-secondary" for="loft2">3.5 ft</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input btn-check" type="radio" name="loftOptions" id="loft3"
+                                        value="4    ">
+                                    <label class="form-check-label btn btn-outline-secondary" for="loft3">4 ft</label>
+                                </div>
+                                <div class="row m-2 d-flex">
+                                    <a class="btn btn-outline-dark" id="actionloftDoor"></a>
+                                </div>
+                            </div>
+                           
+    
+                        </div>
+                        <div class="form-control-lg m-1 d-inline-flex" >
+                            <h6 class="mt-0">Choose Doors Type:</h6>
+                            <div class="form-check form-check-inline ">
+                                <input class="form-check-input btn-check" type="radio" name="doorOptions" id="hingedDoor"
+                                    value="0">
+                                <label class="form-check-label btn btn-outline-secondary " for="hingedDoor">Hinged Doors</label>
+                            </div>
+                            
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input btn-check" type="radio" name="doorOptions" id="slideDoor"
+                                    value="1">
+                                <label class="form-check-label btn btn-outline-secondary" for="slideDoor">Sliding Door</label>
+                                
+                            </div>
+                            
+                            <!-- <a class=" btn btn-outline-success float-end" id="doneDepth"><i class="fa fa-check"></i>
+                            </a> -->
+                        
+                        </div>
+                        <div class="row">
+                            <a class="btn btn-outline-dark m-1" id="actionDoor"></a> 
+                           </div>
                         <div class="form-control m-1" id="chooseColumns">
                             <h6>Choose Columns:</h6>
                           
@@ -113,9 +164,9 @@
                     
 
                     <div class="row d-flex m-1 ">
-                        <a class="btn btn-outline-success" id="doneDimensions"><i class="fa fa-check"></i>OK</a>
+                        <a class="btn btn-outline-success" id="doneDimensions"><i class="fa fa-check"></i>Done</a>
 
-                        <a class="btn btn-outline-dark " id="editDimensions"><i class="fa fa-edit"></i>Edit</a>
+                        <!-- <a class="btn btn-outline-dark " id="editDimensions"><i class="fa fa-edit"></i>Edit</a> -->
                     </div>
                 </div>
 
@@ -123,38 +174,7 @@
                 <div id="editInterior" class="form-control m-1" >
 
                     <h6 class="m-2"  >Features: </h6>
-                    <div class="form-control m-1 d-md-flex">
-               
-                        <div class="form-check form-switch m-2">
-                            <input class="form-check-input" type="checkbox" name="loftOptionsEnable" id="addloft" >
-                            <label class="form-check-label" for="addloft" id="loftLabel"> Add Loft</label>
-                        </div>
-                        
-                        <div class="form-check-inline" id="loftOptionsPanel">
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input btn-check" type="radio" name="loftOptions" id="loft1"
-                                    value="3" checked>
-                                <label class="form-check-label btn btn-outline-secondary" for="loft1">3 ft</label>
-                            </div>
-
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input btn-check" type="radio" name="loftOptions" id="loft2"
-                                    value="3.5">
-                                <label class="form-check-label btn btn-outline-secondary" for="loft2">3.5 ft</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input btn-check" type="radio" name="loftOptions" id="loft3"
-                                    value="4    ">
-                                <label class="form-check-label btn btn-outline-secondary" for="loft3">4 ft</label>
-                            </div>
-                            <div class="row m-2 d-flex">
-                                <a class="btn btn-outline-dark" id="actionloftDoor"></a>
-                            </div>
-                        </div>
-                       
-
-                    </div>
-
+                  
                     <div class="row m-2">
 
                        
@@ -166,7 +186,9 @@
                             <option value="0">Select Hanger or Shelf</option>
                             <option value="1">Hanger</option>
                             <option value="2">Shelf</option>
+                           
                         </select>
+                       
                         <!-- <a class="btn btn-outline-dark m-1" style="color:#faaaee; border-color: #faaaee;"
                             data-bs-toggle="modal" data-bs-target="#optionModal" >Add Bottom Shelves</a> -->
                         <!-- <a class="btn btn-outline-dark m-1" style="color:#22ffaa; border-color: #22ffaa;"
@@ -186,11 +208,11 @@
                         <option value="2">Two</option>
                         <option value="3">Three</option> -->
                     </select>
-                    <div class="row m-2">
+                    <!-- <div class="row m-2">
                         <h6>Add Hinged Door</h6>
                         <a class="btn btn-outline-dark m-1" id="addHingedDoor">Add Hinged Door </a>
                         
-                        <a class="btn btn-outline-dark m-1" id="actionDoor"></a>
+                        <a class="btn btn-outline-dark m-1" id="actionDoor"></a> -->
                         <!-- <a class="btn btn-outline-dark m-1" id="editDoor">Edit Door</a> -->
                         <!-- <select class="form-select m-1" id="flipDoor" aria-label="flipDoor">
                             <option selected value="0">Flip Door:</option> -->
@@ -198,7 +220,7 @@
                             <option value="2">Two</option>
                             <option value="3">Three</option> -->
                         <!-- </select> -->
-                    </div>
+                    <!-- </div> -->
                     
 
                   
