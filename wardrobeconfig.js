@@ -1,3 +1,4 @@
+
 let scene, camera, renderer, directionalLight, ambientLight, controls;
 
 
@@ -14,7 +15,8 @@ let wWidth = 2.5,
 const thickness = 0.875;
 const ftTom = 0.3048;
 let isLoft = false;
-let wBottom, wTop, wLeft, wRight, wBack, wpLoftTop, wpLoftLeft, wpLoftRight, wpLoftBottom, wpLoftBack;
+let wBottom, wTop, wLeft, wRight, wBack, wpLoftTop, wpLoftLeft, wpLoftRight, wpLoftBottom, wpLoftBack, wBottomLayer, wTopLayer, wLeftLayer, wRightLayer,
+wLeftLayerTop, wLeftLayerBottom, wRightLayerTop, wRightLayerBottom;
 let segments, offset = 0,
 
     part = [],
@@ -25,7 +27,7 @@ let selectedObject = null,
 let raycaster, pointer, mouse3D, group;
 let exporter;
 
-let composer, effectFXAA, outlinePass, planeOultinePass;
+let composer, fxaaPass, outlinePass, planeOultinePass;
 
 
 let bBox;
@@ -100,7 +102,7 @@ var removed_index, removed_id = [],
     removed_plane = [];
 var clock;
 var delta = 0;
-_hDoors = [];
+let _hDoors = [];
 
 let _columnsLoft = [],
     _columnsLoft_group = [],
@@ -132,6 +134,9 @@ let ssaoPass;
 let _doorRails_parent = [],
     _doorRails_parent_group = [],
     _doorRailParent;
+
+
+ var  thicknessInmeter = 0.022225;
 init();
 
 animate();
@@ -141,6 +146,7 @@ addHorizontalParts();
 
 function init() {
 
+    
     scene = new THREE.Scene();
     window.scene = scene;
     THREE.Cache.enabled = true;
@@ -240,9 +246,11 @@ function onWindowResize() {
 
         renderer.setSize(fwidth, fheight);
         composer.setSize(fwidth, fheight);
-        effectFXAA.material.uniforms['resolution'].value.x = 1 / (fwidth * renderer.getPixelRatio());
-        effectFXAA.material.uniforms['resolution'].value.y = 1 / (fheight * renderer.getPixelRatio());
+
     }
+    const pixelRatio = renderer.getPixelRatio();
+    // fxaaPass.material.uniforms[ 'resolution' ].value.x = 1 / ( fwidth * pixelRatio );
+    // fxaaPass.material.uniforms[ 'resolution' ].value.y = 1 / (  fheight* pixelRatio );
 
 }
 
@@ -489,17 +497,18 @@ function getInputs() {
 
 
 function create_lights() {
-
-    directionalLight = new THREE.DirectionalLight(0xfff3db, 0.7);
-    directionalLight.position.set(0.5, 1, 8);
+    
+    
+    directionalLight = new THREE.DirectionalLight(0xfff3db, 0.3);
+    directionalLight.position.set(0.5, 1, 10);
     directionalLight.castShadow = true;
-
+    directionalLight.shadow.radius = 1;
     directionalLight.shadow.mapSize.width = 1024; // default
     directionalLight.shadow.mapSize.height = 1024; // default
-
+    
     scene.add(directionalLight);
 
-    var directionalLight1 = new THREE.DirectionalLight(0xbfe4ff, 0.5);
+    var directionalLight1 = new THREE.DirectionalLight(0xbfe4ff, 0.3);
     directionalLight1.position.set(-2, 5, 2);
 
     directionalLight1.castShadow = false;
@@ -507,9 +516,10 @@ function create_lights() {
     directionalLight1.shadow.mapSize.width = 512; // default
     directionalLight1.shadow.mapSize.height = 512;
     scene.add(directionalLight1);
-
-
-    var directionalLight2 = new THREE.DirectionalLight(0xdedede, 0.4);
+   
+    var ambientLight = new THREE.AmbientLight(0xffffff,0.7  );
+    scene.add(ambientLight)
+    var directionalLight2 = new THREE.DirectionalLight(0xdedede, 0.3);
     directionalLight2.position.set(0, 3, -3);
     directionalLight2.castShadow = false;
 
@@ -517,7 +527,7 @@ function create_lights() {
     directionalLight2.shadow.mapSize.height = 512;
     scene.add(directionalLight2);
 
-    var hemiLight = new THREE.HemisphereLight(0xfff2e3, 0xd1ebff, 0.65);
+    var hemiLight = new THREE.HemisphereLight(0xfff2e3, 0xd1ebff, 0.3);
     scene.add(hemiLight);
 }
 
@@ -578,37 +588,32 @@ function updateColumns() {
             if(!isHingedDoor){
                 var subtract = ftTom * 1.35 / 12
 
-                if(i!=3 && i!=7){
-                    console.log("pl")
-                    _columns[i].scale.set((thickness / 12) * ftTom, wHeight * ftTom - (2 / 12 * ftTom) + thickness / 12 * ftTom - wBottom.position.y, (thickness / 12) * ftTom + wDepth * ftTom - subtract);
-                    _columns[i].position.set(i * offset, (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2, ((thickness / 24) * ftTom) - subtract/2);
-                }else{
-                    _columns[i].scale.set((thickness / 12) * ftTom, wHeight * ftTom - (2 / 12 * ftTom) + thickness / 12 * ftTom - wBottom.position.y, (thickness / 12) * ftTom + wDepth * ftTom);
-                    _columns[i].position.set(i * offset, (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2, ((thickness / 24) * ftTom));
-                }
-                
+          
+                    _columns[i].scale.set((thickness / 12) * ftTom, wTop.position.y-wTop.scale.y - wBottom.position.y , (thickness / 12) * ftTom + wDepth * ftTom - subtract);
+                    _columns[i].position.set(i * offset, ( _columns[i].scale.y / 2)  + (wBottom.position.y)+ wBottom.scale.y/2  , ((thickness / 24) * ftTom) - subtract/2);
+           
+               
                
             }else{
-                _columns[i].scale.set((thickness / 12) * ftTom, wHeight * ftTom - (2 / 12 * ftTom) + thickness / 12 * ftTom - wBottom.position.y, (thickness / 12) * ftTom + wDepth * ftTom);
-                _columns[i].position.set(i * offset, (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2, ((thickness / 24) * ftTom));
+                _columns[i].scale.set((thickness / 12) * ftTom,  wTop.position.y-wTop.scale.y - wBottom.position.y , (thickness / 12) * ftTom + wDepth * ftTom);
+                _columns[i].position.set(i * offset, ( _columns[i].scale.y / 2)+ (wBottom.position.y)   + wBottom.scale.y/2  , ((thickness / 24) * ftTom));
             }
 
         } else {
             if (_columns[i] instanceof THREE.Mesh) {
 
                 if(!isHingedDoor){
+                    var subtract = ftTom * 1.35 / 12
 
-                    if(i!=3 || i!=7){
-                        _columns[i].scale.set((thickness / 12) * ftTom, wHeight * ftTom - (2 / 12 * ftTom) + thickness / 12 * ftTom - wBottom.position.y, (thickness / 12) * ftTom + wDepth * ftTom - subtract);
-                        _columns[i].position.set(i * offset, (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2, ((thickness / 24) * ftTom) - subtract/2);
-                    }else{
-                        _columns[i].scale.set((thickness / 12) * ftTom, wHeight * ftTom - (2 / 12 * ftTom) + thickness / 12 * ftTom - wBottom.position.y, (thickness / 12) * ftTom + wDepth * ftTom);
-                        _columns[i].position.set(i * offset, (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2, ((thickness / 24) * ftTom));
-                    }
+          
+                    _columns[i].scale.set((thickness / 12) * ftTom, wTop.position.y-wTop.scale.y - wBottom.position.y , (thickness / 12) * ftTom + wDepth * ftTom - subtract);
+                    _columns[i].position.set(i * offset, ( _columns[i].scale.y / 2)  + (wBottom.position.y)+ wBottom.scale.y/2  , ((thickness / 24) * ftTom) - subtract/2);
                 }else{
-                _columns[i].scale.set((thickness / 12) * ftTom, wHeight * ftTom - (2 / 12 * ftTom) + thickness / 12 * ftTom - wBottom.position.y, (thickness / 12) * ftTom + wDepth * ftTom);
-                _columns[i].position.set(i * offset, (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2, ((thickness / 24) * ftTom));
+                    _columns[i].scale.set((thickness / 12) * ftTom, wTop.position.y-wTop.scale.y - wBottom.position.y , (thickness / 12) * ftTom + wDepth * ftTom);
+                    _columns[i].position.set(i * offset, ( _columns[i].scale.y / 2)  + (wBottom.position.y)  + wBottom.scale.y/2   , ((thickness / 24) * ftTom));
                 }
+                
+       
             }
         }
     }
@@ -1266,6 +1271,13 @@ function createWardrobe() {
     wBottom.position.set(0, 0, 0);
     wBottom.layers.set(0);
 
+
+    
+    wBottomLayer = new THREE.Mesh(g, _wardrobeMaterial);
+    wBottomLayer.name = "wardrobe_bottom_layer";
+    wBottomLayer.position.set(0, 0, 0);
+    wBottomLayer.layers.set(0);
+
     wBack = new THREE.Mesh(g, _wardrobeMaterial);
     wBack.name = "wardrobe_back";
     wBack.position.set(0, 0, 0);
@@ -1276,15 +1288,53 @@ function createWardrobe() {
     wLeft.position.set(0, 0, 0);
     wLeft.layers.set(0);
 
+    wLeftLayer = new THREE.Mesh(g, _wardrobeMaterial);
+    wLeftLayer.name = "wardrobe_left_layer";
+    wLeftLayer.position.set(0, 0, 0);
+    wLeftLayer.layers.set(0);
+
+    
+    wLeftLayerTop = new THREE.Mesh(g, _wardrobeMaterial);
+    wLeftLayerTop.name = "wardrobe_left_layerTop";
+    wLeftLayerTop.position.set(0, 0, 0);
+    wLeftLayerTop.layers.set(0);
+    
+    wLeftLayerBottom = new THREE.Mesh(g, _wardrobeMaterial);
+    wLeftLayerBottom.name = "wardrobe_left_layerBottom";
+    wLeftLayerBottom.position.set(0, 0, 0);
+    wLeftLayerBottom.layers.set(0);
+    
+
     wRight = new THREE.Mesh(g, _wardrobeMaterial);
     wRight.name = "wardrobe_right";
     wRight.position.set(0, 0, 0);
     wRight.layers.set(0);
 
+    wRightLayer = new THREE.Mesh(g, _wardrobeMaterial);
+    wRightLayer.name = "wardrobe_right_layer";
+    wRightLayer.position.set(0, 0, 0);
+    wRightLayer.layers.set(0);
+
+    
+    wRightLayerBottom = new THREE.Mesh(g, _wardrobeMaterial);
+    wRightLayerBottom.name = "wardrobe_right_layerBottom";
+    wRightLayerBottom.position.set(0, 0, 0);
+    wRightLayerBottom.layers.set(0);
+
+    wRightLayerTop = new THREE.Mesh(g, _wardrobeMaterial);
+    wRightLayerTop.name = "wardrobe_right_layerTop";
+    wRightLayerTop.position.set(0, 0, 0);
+    wRightLayerTop.layers.set(0);
+
     wTop = new THREE.Mesh(g, _wardrobeMaterial);
     wTop.name = "wardrobe_top";
     wTop.position.set(0, 0, 0);
     wTop.layers.set(0);
+
+    wTopLayer = new THREE.Mesh(g, _wardrobeMaterial);
+    wTopLayer.name = "wardrobe_top_layer";
+    wTopLayer.position.set(0, 0, 0);
+    wTopLayer.layers.set(0);
 
     wpLoftTop = new THREE.Mesh(g, _wardrobeMaterial);
     wpLoftTop.name = "wardrobe_loft_top";
@@ -1316,12 +1366,20 @@ function createWardrobe() {
     wpLoftBack.visible = false;
     wpLoftBack.layers.set(1);
 
+    
     scene.add(wBottom);
     scene.add(wBack);
     scene.add(wLeft);
     scene.add(wRight);
     scene.add(wTop);
-
+    scene.add(wBottomLayer);
+    scene.add(wTopLayer);
+    scene.add(wLeftLayer);
+    scene.add(wRightLayer);
+    scene.add(wLeftLayerTop);
+    scene.add(wLeftLayerBottom);
+    scene.add(wRightLayerTop);
+    scene.add(wRightLayerBottom);
     scene.add(wpLoftBottom);
     scene.add(wpLoftBack);
     scene.add(wpLoftLeft);
@@ -1331,39 +1389,143 @@ function createWardrobe() {
 }
 
 function updateWardrobe() {
+
+    
     if (wBottom) {
-        wBottom.scale.set(wWidth * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));
-        wBottom.position.set(0, (2 / 12) * ftTom + (thickness / 24) * ftTom, ((thickness / 24) * ftTom));
+        if(isHingedDoor){
+            wBottom.scale.set(wWidth * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));    
+            wBottom.position.set(0, (2.5 / 12) * ftTom + (thickness / 24) * ftTom, ((thickness / 24) * ftTom));
+            wBottomLayer.visible =false;
+        }else{
+            wBottomLayer.visible =true;
+            wBottom.scale.set(wWidth * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom)- 1.35/12 * ftTom);
+            wBottom.position.set(0, (2.5 / 12) * ftTom + (thickness / 24) * ftTom, ((thickness / 24) * ftTom)- 1.35/24 * ftTom);
+        }
+        
+
+    }
+    
+    if (wBottomLayer) {
+        wBottomLayer.scale.set(wWidth * ftTom, (thickness / 24) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));
+        wBottomLayer.position.set(0, (2.5 / 12) * ftTom + (thickness / 48) * ftTom, ((thickness / 24) * ftTom));
 
     }
     if (wBack) {
-        wBack.scale.set(wWidth * ftTom, wHeight * ftTom - (2 / 12 * ftTom), (thickness / 12) * ftTom);
-        wBack.position.set(0, (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2, -wBottom.scale.z / 2);
+        wBack.scale.set(wWidth * ftTom, wHeight * ftTom - (2.5 / 12 * ftTom), (thickness / 12) * ftTom);
+        if(isHingedDoor){
+            wBack.position.set(0, (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2, -wBottom.scale.z / 2);
+        }else{
+            wBack.position.set(0, (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2, -wBottom.scale.z / 2  - 1.35/24 * ftTom);
+        }
+        
 
     }
 
+    if(wTopLayer){
+        wTopLayer.scale.set((wWidth * ftTom), (thickness / 24) * ftTom, wDepth * ftTom + (2 * thickness / 12) * ftTom );
+        wTopLayer.position.set(0,wBottom.position.y + wBack.scale.y +(thickness / 48) * ftTom  - wBottom.scale.y, 0);
+    }
+
+    
     if (wTop) {
-        wTop.scale.set((wWidth * ftTom), (thickness / 12) * ftTom, wDepth * ftTom + (2 * thickness / 12) * ftTom);
-        wTop.position.set(0, ((wBack.scale.y) + wBottom.position.y) - thickness / 14 * ftTom, 0);
+        if(isHingedDoor){
+            wTopLayer.visible = false;
+            wTop.scale.set((wWidth * ftTom), (thickness / 12) * ftTom, wDepth * ftTom + (2 * thickness / 12) * ftTom );
+            wTop.position.set(0,wBottom.position.y + wBack.scale.y  - wBottom.scale.y, 0);
+        }else{
+            wTopLayer.visible = true;
+            wTop.scale.set((wWidth * ftTom), (thickness / 12) * ftTom, wDepth * ftTom + (2 * thickness / 12) * ftTom - 1.35/12 * ftTom);
+            wTop.position.set(0,wBottom.position.y + wBack.scale.y  - wBottom.scale.y, - 1.35/24 * ftTom);
+        }
+        
 
         // ((wBack.scale.y)-wTop.scale.y/2+wBottom.position.y+wBottom.scale.y/2-(thickness/12)*ftTom)
     }
+    if (wLeftLayer) {
+        wLeftLayer.scale.set((thickness / 24) * ftTom, (wHeight) * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom);
+        wLeftLayer.position.set(-(((thickness / 12) * ftTom) - wLeftLayer.scale.x/2 + (wBack.scale.x / 2)), wLeftLayer.scale.y/2 + (wBottom.position.y)  - (2.5 / 12 * ftTom) - wBottom.scale.y/2 , 0);
 
+    }
+ 
+    if (wLeftLayerBottom) {
+        wLeftLayerBottom.scale.set((thickness / 24) * ftTom,  (thickness / 24) * ftTom + 2.5/12 * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom);
+        wLeftLayerBottom.position.set(-(((thickness / 48) * ftTom) + (wBack.scale.x / 2)), wLeftLayerBottom.scale.y/2 + (wBottom.position.y)  - (2.5 / 12 * ftTom) - wBottom.scale.y/2 , 0);
 
+    }
+ 
+
+    if (wLeftLayerTop) {
+        wLeftLayerTop.scale.set((thickness / 24) * ftTom,  (thickness / 24) * ftTom , (2 * thickness / 12) * ftTom + wDepth * ftTom);
+        wLeftLayerTop.position.set(-(((thickness / 48) * ftTom) + (wBack.scale.x / 2)), (wTopLayer.position.y) , 0);
+
+    }
     if (wLeft) {
-        wLeft.scale.set((thickness / 12) * ftTom, (wHeight) * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom);
-        wLeft.position.set(-(((thickness / 24) * ftTom) + (wBack.scale.x / 2)), (wBack.scale.y / 2) + (wBottom.position.y) - wBottom.scale.y - thickness / 24 * ftTom, 0);
+        if(isHingedDoor){
+            wLeftLayer.visible= false;
+            wLeftLayerBottom.visible = false;
+            wLeftLayerTop.visible = false;
+            wLeft.scale.set((thickness / 12) * ftTom, (wHeight) * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom);
+            wLeft.position.set(-(((thickness / 24) * ftTom) + (wBack.scale.x / 2)), wLeft.scale.y/2 + (wBottom.position.y)  - (2.5 / 12 * ftTom) - wBottom.scale.y/2 , 0);
+        }else{
+            wLeftLayer.visible= true;
+            wLeftLayerBottom.visible = true;
+            wLeftLayerTop.visible = true;
+            wLeft.scale.set((thickness / 12) * ftTom, (wHeight) * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom- 1.35/12 * ftTom);
+            wLeft.position.set(-(((thickness / 24) * ftTom) + (wBack.scale.x / 2)), wLeft.scale.y/2 + (wBottom.position.y)  - (2.5 / 12 * ftTom) - wBottom.scale.y/2 , - 1.35/24 * ftTom);
+        }
+      
+
+    }
+
+    if (wRightLayer) {
+        wRightLayer.scale.set((thickness / 24) * ftTom, (wHeight) * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom);
+        wRightLayer.position.set((((thickness / 12) * ftTom) + (wBack.scale.x / 2))- wRightLayer.scale.x/2, wRightLayer.scale.y/2 + (wBottom.position.y)  - (2.5 / 12 * ftTom) - wBottom.scale.y/2 , 0);
+
+    }
+
+    
+    if (wRightLayerTop) {
+        wRightLayerTop.scale.set((thickness / 24) * ftTom,  (thickness / 24) * ftTom , (2 * thickness / 12) * ftTom + wDepth * ftTom);
+        wRightLayerTop.position.set((((thickness / 48) * ftTom) + (wBack.scale.x / 2)), (wTopLayer.position.y) , 0);
+
+    }
+    if (wRightLayerBottom) {
+        wRightLayerBottom.scale.set((thickness / 24) * ftTom,  (thickness / 24) * ftTom + 2.5/12 * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom);
+        wRightLayerBottom.position.set((((thickness / 48) * ftTom) + (wBack.scale.x / 2))  , wRightLayerBottom.scale.y/2 + (wBottom.position.y)  - (2.5 / 12 * ftTom) - wBottom.scale.y/2 , 0);
 
     }
     if (wRight) {
-        wRight.scale.set((thickness / 12) * ftTom, (wHeight) * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom);
-        wRight.position.set((((thickness / 24) * ftTom) + (wBack.scale.x / 2)), (wBack.scale.y / 2) + (wBottom.position.y) - wBottom.scale.y - thickness / 24 * ftTom, 0);
+        if(isHingedDoor){
+            wRightLayer.visible= false;
+            wRightLayerBottom.visible= false;
+            wRightLayerTop.visible = false;
+            wRight.scale.set((thickness / 12) * ftTom, (wHeight) * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom);
+            wRight.position.set((((thickness / 24) * ftTom) + (wBack.scale.x / 2)), wRight.scale.y/2 + (wBottom.position.y)  - (2.5 / 12 * ftTom) - wBottom.scale.y/2 , 0);
+        }else{
+            wRightLayer.visible= true;
+            wRightLayerBottom.visible= true;
+            wRightLayerTop.visible = true;
+            wRight.scale.set((thickness / 12) * ftTom, (wHeight) * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom- 1.35/12 * ftTom);
+            wRight.position.set((((thickness / 24) * ftTom) + (wBack.scale.x / 2)), wRight.scale.y/2 + (wBottom.position.y)  - (2.5 / 12 * ftTom) - wBottom.scale.y/2 , - 1.35/24 * ftTom);
+        }
+      
+
     }
+    // if (wRight) {
+    //     wRight.scale.set((thickness / 12) * ftTom, (wHeight) * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom);
+    //     wRight.position.set((((thickness / 24) * ftTom) + (wBack.scale.x / 2)), wRight.scale.y/2 + (wBottom.position.y)  - (2.5 / 12 * ftTom) - wBottom.scale.y/2, 0);
+    // }
 
 
-    if (wpLoftBottom) {
-        wpLoftBottom.scale.set(wWidth * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + (2 * (thickness / 12) * ftTom));
-        wpLoftBottom.position.set(wTop.position.x, wTop.position.y + wpLoftBottom.scale.y, wTop.position.z);
+    if (wpLoftBottom) { 
+        if(!isHingedDoor){
+            wpLoftBottom.scale.set(wWidth * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + (2 * (thickness / 12) * ftTom));
+            wpLoftBottom.position.set(wTop.position.x, wTop.position.y + wpLoftBottom.scale.y, wTopLayer.position.z);
+        }
+        else{
+            wpLoftBottom.scale.set(wWidth * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + (2 * (thickness / 12) * ftTom));
+            wpLoftBottom.position.set(wTop.position.x, wTop.position.y + wpLoftBottom.scale.y, wTopLayer.position.z);
+        }
     }
 
     if (wpLoftBack) {
@@ -1381,8 +1543,10 @@ function updateWardrobe() {
         wpLoftRight.position.set((thickness / 24 * ftTom + wpLoftBottom.scale.x / 2), wpLoftBottom.position.y + wpLoftRight.scale.y / 2 - wpLoftBottom.scale.y / 2, 0);
     }
     if (wpLoftTop) {
-        wpLoftTop.scale.set(wWidth * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + (2 * (thickness / 12) * ftTom));
-        wpLoftTop.position.set(0, wpLoftBack.scale.y + wpLoftBottom.position.y - (thickness / 12) * ftTom, 0);
+       
+            wpLoftTop.scale.set(wWidth * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));
+            wpLoftTop.position.set(0, wpLoftBack.scale.y + wpLoftBottom.position.y - (thickness / 12) * ftTom, ((thickness /24) * ftTom));
+       
     }
 }
 
@@ -2168,7 +2332,7 @@ function createInteractivePlane(index) {
 function updateInteractivePlane(index) {
 
     if (interactivePlanes[index] instanceof(THREE.Mesh)) {
-        interactivePlanes[index].scale.set(offset - thickness / 12 * ftTom, wHeight * ftTom - (2 / 12 * ftTom) + thickness / 12 * ftTom - wBottom.position.y);
+        interactivePlanes[index].scale.set(offset - thickness / 12 * ftTom, wHeight * ftTom - (2.5 / 12 * ftTom) + thickness / 12 * ftTom - wBottom.position.y);
         interactivePlanes[index].position.set(index * offset, wBack.position.y, wBottom.scale.z / 2);
     }
     interactivePlane_group.position.set(offset / 2 + wLeft.position.x, interactivePlane_group.position.y, interactivePlane_group.position.z);
@@ -2520,8 +2684,15 @@ function post_process() {
     renderPass.clearColor = new THREE.Color(0, 0, 0);
     renderPass.clearAlpha = 0;
     composer.addPass(renderPass);
+    const pixelRatio = renderer.getPixelRatio();
 
-
+    const smaaPass = new THREE.SMAAPass(fwidth * pixelRatio , fheight * pixelRatio);
+    composer.addPass(smaaPass);
+    const ssaaPass=  new THREE.SSAARenderPass(scene,camera);
+    composer.addPass(ssaaPass);
+    const copyPass = new THREE.ShaderPass(THREE.CopyShader);
+    composer.addPass(copyPass);
+   
 
 
 
@@ -2548,17 +2719,16 @@ function post_process() {
     // outlinePass.hiddenEdgeColor.set("#ff0000");
     composer.addPass(outlinePass);
     composer.addPass(planeOultinePass);
-    const pixelRatio = renderer.getPixelRatio();
 
-    effectFXAA = new THREE.ShaderPass(THREE.FXAAShader);
+    // fxaaPass = new THREE.ShaderPass(THREE.FXAAShader);
+ 
 
-    // effectFXAA.material.uniforms['resolution'].value.x = 1 / (fwidth * pixelRatio);
-    // effectFXAA.material.uniforms['resolution'].value.y = 1 / (fheight * pixelRatio);
-    // effectFXAA.uniforms['resolution'].value.set(1 / fwidth, 1 / fheight);
-    composer.addPass(effectFXAA);
+    // fxaaPass.material.uniforms[ 'resolution' ].value.x = 1 / ( fwidth * pixelRatio );
+    // fxaaPass.material.uniforms[ 'resolution' ].value.y = 1 / (  fheight* pixelRatio );
+  
+    // composer.addPass(fxaaPass);
+  
 
-    const copyPass = new THREE.ShaderPass(THREE.CopyShader);
-    composer.addPass(copyPass);
 
 }
 
@@ -3073,18 +3243,18 @@ function createHingedDoor(index) {
 }
 
 function updateHingedDoorUpSize(index) {
-    var posY = (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2;
-    var scaleY = wHeight * ftTom - (2 / 12 * ftTom) + thickness / 12 * ftTom - wBottom.position.y;
-    if (_extDrawers_splitters.length > 0) {
-        posY = (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2 + ftTom / 2 + thickness / 24 * ftTom;
-        scaleY = wHeight * ftTom - (2 / 12 * ftTom) + thickness / 12 * ftTom - ((thickness / 12) * ftTom + ftTom) - wBottom.position.y;
-    } else {
-        posY = (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2;
-        scaleY = wHeight * ftTom - (2 / 12 * ftTom) + thickness / 12 * ftTom - wBottom.position.y;
-    }
-
+   
     if (_hDoors_parent[index] instanceof THREE.Group) {
-
+        var posY = (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2 ;
+        var scaleY =  wTop.position.y - wTop.scale.y/2 - wBottom.position.y - wBottom.scale.y/2;
+        if (_extDrawers_splitters.length > 0) {
+            posY = (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2 + ftTom/2  + thickness/24 * ftTom  ;
+            scaleY =  wTop.position.y - wTop.scale.y/2 - wBottom.position.y - wBottom.scale.y/2 - ftTom - thickness/12 * ftTom ;
+        } else {
+            posY = (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2;
+            scaleY =  wTop.position.y - wTop.scale.y/2 - wBottom.position.y - wBottom.scale.y/2;
+        }
+    
         _hDoors_parent_group.position.set(offset + wLeft.position.x, _hDoors_parent_group.position.y, _hDoors_parent_group.position.z);
         if (index % 2 == 0) {
 
@@ -3117,8 +3287,8 @@ function updateHingedDoorUpSize(index) {
 }
 
 function updateHingedDoor(index) {
-    var posY = (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2;
-    var scaleY = wHeight * ftTom - (2 / 12 * ftTom) + thickness / 12 * ftTom - wBottom.position.y;
+    var posY = (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2 ;
+    var scaleY =  wTop.position.y - wTop.scale.y/2 - wBottom.position.y - wBottom.scale.y/2;
     // _columns_group.position.x + _columns[index - 1].position.x + thickness / 24 * ftTom
     if (_hDoors_parent[index] instanceof THREE.Group) {
 
@@ -4180,9 +4350,9 @@ function createDoorRailMesh(index) {
 
 
     _rBottom.scale.set(ftTom * 1.35 / 12, ftTom * 0.05 / 12, 1);
-    _rLeft.scale.set(ftTom * 0.03125 / 12, ftTom * 0.5 / 12 - _rBottom.scale.y, 1);
-    _rRight.scale.set(ftTom * 0.03125 / 12, ftTom * 0.5 / 12 - _rBottom.scale.y, 1);
-    _rMiddle.scale.set(ftTom * 0.03125 / 12, ftTom * 0.5 / 12 - _rBottom.scale.y, 1);
+    _rLeft.scale.set(ftTom * 0.03125 / 12, ftTom * 0.875/ 24 - _rBottom.scale.y, 1);
+    _rRight.scale.set(ftTom * 0.03125 / 12, ftTom * 0.875 / 24 - _rBottom.scale.y, 1);
+    _rMiddle.scale.set(ftTom * 0.03125 / 12, ftTom * 0.875/ 24 - _rBottom.scale.y, 1);
 
 
     _rMiddle.position.setX(_rBottom.position.x / 2);
@@ -4231,7 +4401,7 @@ function createDoorRail(index) {
 
 function updateDoorRail() {
 
-    var posZ = wBottom.position.z + wBottom.scale.z / 2 - (ftTom * 1.35 / 12) / 2;
+    var posZ = wBottom.position.z + wBottom.scale.z / 2  + 1.35/24 * ftTom ;
 
     if(_doorRailParent instanceof THREE.Group){
         
@@ -4246,7 +4416,7 @@ function updateDoorRail() {
                 }else{
                     _doorRails_parent_group[i].position.set( _columns[9].position.x  ,   _doorRailParent.position.y,  _doorRailParent.position.z)
                 }
-                console.log(i)
+
 
 
                 for (var j = 0; j < _doorRails_parent_group[i].children.length; j++) {
@@ -4258,7 +4428,7 @@ function updateDoorRail() {
                           
                             rail.name = "rail_top"
                             rail.scale.setZ( (_columns[0].position.x - _columns[2].position.x )- 2* offset + thickness/12 *ftTom )
-                            rail.position.set (0, wTop.position.y - wTop.scale.y / 2 - ftTom * 0.05 / 24, posZ);
+                            rail.position.set (0, wTopLayer.position.y - wTopLayer.scale.y / 2 - ftTom * 0.05 / 24 , posZ);
                             rail.rotation.x=(180 * THREE.Math.DEG2RAD); 
                             rail.rotation.y = (90 * THREE.Math.DEG2RAD) 
                             // rail.rotateX(180 * THREE.Math.DEG2RAD);
@@ -4266,24 +4436,24 @@ function updateDoorRail() {
                         } 
                         else if(j==_doorRails_parent_group[i].children.length-1){
                             rail.name = "rail_bottom"
-                            rail.scale.setZ( (_columns[0].position.x - _columns[2].position.x )- 2* offset + thickness/12 *ftTom )
-                            rail.position.set (0, wBottom.scale.y/2 + wBottom.position.y + ftTom * 0.05 / 24, posZ);
+                            rail.scale.setZ( (_columns[0].position.x - _columns[2].position.x )- 2* offset + thickness/12 *ftTom)
+                            rail.position.set (0, wBottomLayer.scale.y/2 + wBottomLayer.position.y + ftTom * 0.05 / 24 , posZ);
                           
                             rail.rotation.y = (90 * THREE.Math.DEG2RAD) 
                         }
                        
                         else if(j==1){
                             rail.name = "rail_left"
-                            rail.scale.setZ(wHeight * ftTom - (2 / 12 * ftTom) + thickness / 24 * ftTom +ftTom * 0.05 / 24 - wBottom.position.y )
+                            rail.scale.setZ(wTopLayer.position.y - wTopLayer.scale.y/2  - wBottomLayer.position.y + wBottomLayer.scale.y/2 - thickness/24 * ftTom)
                             if(i!=0){
                                 if(i<2){
-                                    rail.position.set ( _doorRails_parent_group[i].position.x -_columns[5].position.x - 2*offset   + thickness/24 * ftTom  + ftTom * 0.05 / 24, wBack.scale.y/2- wBottom.scale.y/2 + wBottom.position.y, posZ);
+                                    rail.position.set ( _doorRails_parent_group[i].position.x -_columns[5].position.x - 2*offset   + ftTom * 0.05 / 24 , wBack.scale.y/2- wBottom.scale.y/2 + wBottom.position.y, posZ);
                                 }else{
-                                    rail.position.set ( _doorRails_parent_group[i].position.x -_columns[7].position.x - 4*offset    + thickness/24 * ftTom  + ftTom * 0.05 / 24, wBack.scale.y/2- wBottom.scale.y/2 + wBottom.position.y, posZ);
+                                    rail.position.set ( _doorRails_parent_group[i].position.x -_columns[7].position.x - 4*offset    + ftTom * 0.05 / 24, wBack.scale.y/2- wBottom.scale.y/2 + wBottom.position.y, posZ);
                                 }
                                 
                             }else{
-                                rail.position.set ( _doorRails_parent_group[i].position.x - 3*offset + thickness/24 * ftTom  + ftTom * 0.05 / 24, wBack.scale.y/2- wBottom.scale.y/2 + wBottom.position.y, posZ);
+                                rail.position.set ( _doorRails_parent_group[i].position.x - 3*offset + ftTom * 0.05 / 24, wBack.scale.y/2- wBottom.scale.y/2 + wBottom.position.y, posZ);
                             }
                             
                             rail.rotation.x = (90 * THREE.Math.DEG2RAD) 
@@ -4291,16 +4461,16 @@ function updateDoorRail() {
                         }
                         else {
                             rail.name = "rail_right"
-                            rail.scale.setZ(wHeight * ftTom - (2 / 12 * ftTom) + thickness / 24 * ftTom  +ftTom * 0.05 / 24- wBottom.position.y )
+                            rail.scale.setZ(wTopLayer.position.y - wTopLayer.scale.y/2  - wBottomLayer.position.y + wBottomLayer.scale.y/2 - thickness/24 * ftTom)
                             if(i!=0){
                                 if(i<2){
-                                    rail.position.set ( _doorRails_parent_group[i].position.x -_columns[5].position.x + 2*offset   - thickness/24 * ftTom - ftTom * 0.05 / 24, wBack.scale.y/2- wBottom.scale.y/2 + wBottom.position.y, posZ);
+                                    rail.position.set ( _doorRails_parent_group[i].position.x -_columns[5].position.x + 2*offset  - ftTom * 0.05 / 24, wBack.scale.y/2- wBottom.scale.y/2 + wBottom.position.y, posZ);
                                 }else{
-                                    rail.position.set ( _doorRails_parent_group[i].position.x -_columns[7].position.x - thickness/24 * ftTom - ftTom * 0.05 / 24, wBack.scale.y/2- wBottom.scale.y/2 + wBottom.position.y, posZ);
+                                    rail.position.set ( _doorRails_parent_group[i].position.x -_columns[7].position.x  - ftTom * 0.05 / 24, wBack.scale.y/2- wBottom.scale.y/2 + wBottom.position.y, posZ);
                                 }
                                 
                             }else{
-                                rail.position.set ( _doorRails_parent_group[i].position.x - thickness/24 * ftTom + offset - ftTom * 0.05 / 24, wBack.scale.y/2- wBottom.scale.y/2 + wBottom.position.y, posZ);
+                                rail.position.set ( _doorRails_parent_group[i].position.x+ offset - ftTom * 0.05 / 24, wBack.scale.y/2- wBottom.scale.y/2 + wBottom.position.y, posZ);
                             }
                             
                             rail.rotation.x = (90 * THREE.Math.DEG2RAD) 
