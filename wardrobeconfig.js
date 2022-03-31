@@ -25,7 +25,7 @@ let selectedObject = null,
 let raycaster, pointer, mouse3D, group;
 let exporter;
 
-let composer, effectFXAA, outlinePass;
+let composer, effectFXAA, outlinePass, planeOultinePass;
 
 
 let bBox;
@@ -123,11 +123,15 @@ let wood_roughness;
 
 let selectedSprite, selectedMirror;
 
-let _splitterMaterial, _wardrobeMaterial, _lockerMaterial, _shelfMaterial, _hangerMaterial, _doorMaterial, _columnsMaterial, _extDrawerMaterial, _intSmallMaterial, _intLargeMaterial;
+let _splitterMaterial, _railMaterial, _wardrobeMaterial, _lockerMaterial, _shelfMaterial, _hangerMaterial, _doorMaterial, _columnsMaterial, _extDrawerMaterial, _intSmallMaterial, _intLargeMaterial;
 var renderOptionsValue = 0;
 var pmremGenerator;
 let isHingedDoor = true;
 let ssaoPass;
+
+let _doorRails_parent = [],
+    _doorRails_parent_group = [],
+    _doorRailParent;
 init();
 
 animate();
@@ -169,7 +173,7 @@ function init() {
     _columns_group = new THREE.Group();
     interactivePlane_group = new THREE.Group();
     _loftDoors_parent_group = new THREE.Group();
-
+    _doorRailParent = new THREE.Group();
     exporter = new THREE.GLTFExporter();
 
     create_lights();
@@ -255,14 +259,14 @@ function animate() {
 function render() {
 
     $("input:radio[name='columnsOptions']").change(function () {
-        if($(this).is(":checked")){
+        if ($(this).is(":checked")) {
             isCreated = true;
-            
+
         }
-      
+
     })
 
-    
+
     updateWardrobe();
     addLoft(isLoft);
     updateColumnsDoor();
@@ -271,8 +275,11 @@ function render() {
     updateBotShelves(plane_index);
     for (var i = 0; i < customColumns; i++) {
         updateHingedDoorUpSize(i)
-        updateLoftColumns(i);
+
         updateLoftDoorUpSize(i)
+    }
+    for (var i = 0; i < _columnsLoft.length; i++) {
+        updateLoftColumns(i);
     }
     columnsCombination();
     setflipDoor();
@@ -284,46 +291,68 @@ function render() {
 
     paintWardrobe()
     // renderer.render(scene, camera);
-    document.getElementById('column_id').innerHTML = plane_index + 1;
+    if (interactivePlanes.length > 0) {
+        document.getElementById('column_id').innerHTML = plane_index + 1;
+
+    } else {
+        document.getElementById('column_id').innerHTML = "None";
+    }
     document.getElementById('capturedImage').src = renderer.domElement.toDataURL();
     renderOption()
 
 
     composer.render();
-    // interactivePlane_group.visible = true;
+
 
 }
 
 function getInputs() {
     chooseColumns_number();
 
+    $("#actionDoor").hide();
 
 
-    $("#editDimensions").hide();
-    $("#editInterior").hide();
+    // $("#editDimensions").hide();
 
-    $("#slideDoor").prop("disabled",true);
+
+    $("#slideDoor").prop("disabled", true);
     $("#chooseColumns").hide();
 
     $("#width").on("input", function () {
         wWidth = $("#width").val();
-        if(wWidth > 3){
-            $("#hingedDoor").prop("checked",false);
+
+        if (wWidth > 3) {
+            $("#hingedDoor").prop("checked", false);
             $("#chooseColumns").hide();
-            
-            $("#slideDoor").prop("checked",false);
-            $("#slideDoor").prop("disabled",false);
-        }else{
-            $("#slideDoor").prop("checked",false);
-            $("#slideDoor").prop("disabled",true);
+
+            $("#slideDoor").prop("checked", false);
+            $("#slideDoor").prop("disabled", false);
+        } else {
+            $("#slideDoor").prop("checked", false);
+            $("#slideDoor").prop("disabled", true);
         }
         chooseColumns_number();
         removeDoor();
+        removeSlideDoors();
         removeFlipDoorSprite();
         removeColumns();
         removeColumnsSprite();
         removeHorizontalSplitter();
         removeInteractivePlane();
+
+        if (isLoft) {
+
+            removeLoftDoors();
+            removeLoftColumns()
+
+
+        }
+
+
+        $("#actionDoor").hide();
+        $("#actionDoor").empty();
+        $("#actionDoor").append('<i class="m-lg-1  fa fa-door-open"></i>Open Door ');
+        isDoorOpened = false;
 
     })
 
@@ -346,19 +375,17 @@ function getInputs() {
     });
 
 
-    $("#doneWidth").click(function () {
 
-
-    })
-   
     $("input:radio[name='doorOptions']").change(function () {
         if ($(this).is(":checked")) {
+
             if ($(this).val() == 0) {
                 $("#chooseColumns").show();
                 isHingedDoor = true;
                 isCreated = true;
                 chooseColumns_number();
                 createColumns_Doors(isHingedDoor);
+                $("#actionDoor").show();
             } else {
 
                 $("#chooseColumns").hide();
@@ -366,12 +393,13 @@ function getInputs() {
                 isCreated = true;
                 chooseColumns_number();
                 createColumns_Doors(isHingedDoor);
+
             }
         }
     });
 
-    
-    
+
+
     $("#loftOptionsPanel").hide();
 
     $("#addloft").change(function () {
@@ -398,39 +426,59 @@ function getInputs() {
 
     });
 
-    $("#editDimensions").click(function () {
-        $(this).hide();
-
-        $("#doneDimensions").show();
-        $("#editInterior").hide();
-        $("#sizeOptions").show();
-        removeColumns();
-        removeColumnsSprite();
-        removeHorizontalSplitter();
-        removeInteractivePlane();
-        removeAllInterior();
 
 
-        $("#addloft").prop("checked", false);
-        $("#loftLabel").html("Add Loft");
-        $("#loftOptionsPanel").hide();
-        isLoft = false;
-        removeLoftDoors();
-        removeLoftColumns();
+
+    $("#actionDoor").append('<i class="m-lg-1  fa fa-door-open"></i>Open Door ');
+    $("#actionDoor").click(function () {
+
+
+        if (!isDoorOpened) {
+
+            $(this).empty();
+            $(this).append('<i class="m-lg-1  fa fa-door-closed"></i>Close Door ');
+            isDoorOpened = true;
+        } else {
+            $(this).empty();
+            $(this).append('<i class="m-lg-1  fa fa-door-open"></i>Open Door ');
+            isDoorOpened = false;
+
+        }
+
 
     })
+
+    // $("#editDimensions").click(function () {
+    //     $(this).hide();
+
+    //     $("#doneDimensions").show();
+    //     $("#editInterior").hide();
+    //     $("#sizeOptions").show();
+    //     removeColumns();
+    //     removeColumnsSprite();
+    //     removeHorizontalSplitter();
+    //     removeInteractivePlane();
+    //     removeAllInterior();
+
+
+    //     $("#addloft").prop("checked", false);
+    //     $("#loftLabel").html("Add Loft");
+    //     $("#loftOptionsPanel").hide();
+    //     isLoft = false;
+    //     removeLoftDoors();
+    //     removeLoftColumns();
+
+    // })
     $("#doneDimensions").click(function () {
 
 
-        $("#sizeOptions").hide();
-        $("#editDimensions").show();
-        $("#editInterior").show();
 
-        $(this).hide();
-
-
+        interactivePlane_group.visible = true;
+        deleteSprites_group.visible = false;
+        flipVertical_group.visible = false;
 
     })
+
     $("#export").click(function () {
         Export();
     })
@@ -527,14 +575,40 @@ function updateColumns() {
     for (var i = 0; i < customColumns - 1; i++) {
         if (!_columns[i]) {
             createColumns(i);
-            _columns[i].scale.set((thickness / 12) * ftTom, wHeight * ftTom - (2 / 12 * ftTom) + thickness / 12 * ftTom - wBottom.position.y, (thickness / 12) * ftTom + wDepth * ftTom);
-            _columns[i].position.set(i * offset, (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2, ((thickness / 24) * ftTom));
+            if(!isHingedDoor){
+                var subtract = ftTom * 1.35 / 12
+
+                if(i!=3 && i!=7){
+                    console.log("pl")
+                    _columns[i].scale.set((thickness / 12) * ftTom, wHeight * ftTom - (2 / 12 * ftTom) + thickness / 12 * ftTom - wBottom.position.y, (thickness / 12) * ftTom + wDepth * ftTom - subtract);
+                    _columns[i].position.set(i * offset, (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2, ((thickness / 24) * ftTom) - subtract/2);
+                }else{
+                    _columns[i].scale.set((thickness / 12) * ftTom, wHeight * ftTom - (2 / 12 * ftTom) + thickness / 12 * ftTom - wBottom.position.y, (thickness / 12) * ftTom + wDepth * ftTom);
+                    _columns[i].position.set(i * offset, (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2, ((thickness / 24) * ftTom));
+                }
+                
+               
+            }else{
+                _columns[i].scale.set((thickness / 12) * ftTom, wHeight * ftTom - (2 / 12 * ftTom) + thickness / 12 * ftTom - wBottom.position.y, (thickness / 12) * ftTom + wDepth * ftTom);
+                _columns[i].position.set(i * offset, (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2, ((thickness / 24) * ftTom));
+            }
 
         } else {
             if (_columns[i] instanceof THREE.Mesh) {
 
+                if(!isHingedDoor){
+
+                    if(i!=3 || i!=7){
+                        _columns[i].scale.set((thickness / 12) * ftTom, wHeight * ftTom - (2 / 12 * ftTom) + thickness / 12 * ftTom - wBottom.position.y, (thickness / 12) * ftTom + wDepth * ftTom - subtract);
+                        _columns[i].position.set(i * offset, (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2, ((thickness / 24) * ftTom) - subtract/2);
+                    }else{
+                        _columns[i].scale.set((thickness / 12) * ftTom, wHeight * ftTom - (2 / 12 * ftTom) + thickness / 12 * ftTom - wBottom.position.y, (thickness / 12) * ftTom + wDepth * ftTom);
+                        _columns[i].position.set(i * offset, (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2, ((thickness / 24) * ftTom));
+                    }
+                }else{
                 _columns[i].scale.set((thickness / 12) * ftTom, wHeight * ftTom - (2 / 12 * ftTom) + thickness / 12 * ftTom - wBottom.position.y, (thickness / 12) * ftTom + wDepth * ftTom);
                 _columns[i].position.set(i * offset, (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2, ((thickness / 24) * ftTom));
+                }
             }
         }
     }
@@ -546,7 +620,7 @@ function updateColumns() {
 
             createColumnSprite(i);
             updateColumnSprite(i);
-            
+
         } else {
             if (deleteSprites[i] instanceof THREE.Sprite) {
                 updateColumnSprite(i);
@@ -556,30 +630,32 @@ function updateColumns() {
 
     }
 
-    if(!isHingedDoor){
+    if (!isHingedDoor) {
+        createSlideDoors();
 
-    }else{
+
+    } else {
         for (var i = 0; i < customColumns; i++) {
-            if(!_hDoors_parent[i]){
+            if (!_hDoors_parent[i]) {
                 createHingedDoor(i);
                 updateHingedDoor(i);
                 createFlipDoorSprite(i);
                 updateFlipDoorSprite(i)
 
-            }else{
-                
+            } else {
+
                 updateHingedDoor(i);
                 updateFlipDoorSprite(i)
             }
-                
+
         }
     }
 
 
 
-    
-    for (var i = 0; i < customColumns; i++) {
 
+    for (var i = 0; i < customColumns; i++) {
+        
         if (!_m_splitters[i]) {
 
             createHorizontalSplitter(i);
@@ -596,6 +672,8 @@ function updateColumns() {
     }
     _m_splitters_group.position.set(offset / 2 + wLeft.position.x, _m_splitters_group.position.y, _m_splitters_group.position.z);
 
+
+    generateInteractivePlanes(customColumns);
 }
 
 function createLoftColumns(index) {
@@ -615,7 +693,8 @@ function createLoftColumns(index) {
 }
 
 function updateLoftColumns(index) {
-    if (_columnsLoft[index] != null && wpLoftBottom.visible) {
+    offset = Math.abs(((wLeft.position.x - wLeft.scale.x / 2) - (wRight.position.x - wRight.scale.x / 2))) / customColumns;
+    if (_columnsLoft[index] != null) {
         _columnsLoft[index].scale.set((thickness / 12) * ftTom, wLoft * ftTom - wpLoftBottom.scale.y - wpLoftTop.scale.y, (3 / 12) * ftTom);
         _columnsLoft[index].position.set(index * offset, (wpLoftBack.scale.y / 2) + wpLoftBottom.position.y - wpLoftBottom.scale.y / 2, -wpLoftBack.position.z - wpLoftBack.scale.z / 2 - (thickness / 12) * ftTom);
         if (index % 2 == 0) {
@@ -643,44 +722,48 @@ function createLoftDoors(index) {
 }
 
 function updateLoftDoorUpSize(index) {
-    var posY = (wpLoftBack.scale.y / 2) + wpLoftBottom.position.y - wpLoftBottom.scale.y / 2;
-    var scaleY = wLoft * ftTom - wpLoftBottom.scale.y - wpLoftTop.scale.y;
+    if (_loftDoors_parent[index]) {
+        var posY = (wpLoftBack.scale.y / 2) + wpLoftBottom.position.y - wpLoftBottom.scale.y / 2;
+        var scaleY = wLoft * ftTom - wpLoftBottom.scale.y - wpLoftTop.scale.y;
 
-    if (_loftDoors_parent[index] instanceof THREE.Group) {
+        if (_loftDoors_parent[index] instanceof THREE.Group) {
 
-        _loftDoors_parent_group.position.set(offset + wpLoftLeft.position.x, _loftDoors_parent_group.position.y, _loftDoors_parent_group.position.z);
-        if (index % 2 == 0) {
+            _loftDoors_parent_group.position.set(offset + wpLoftLeft.position.x, _loftDoors_parent_group.position.y, _loftDoors_parent_group.position.z);
+            if (index % 2 == 0) {
 
-            for (var j = 0; j < _loftDoors_parent[index].children.length; j++) {
+                for (var j = 0; j < _loftDoors_parent[index].children.length; j++) {
 
-                if (_loftDoors_parent[index].children[j] instanceof THREE.Mesh) {
-                    _loftDoors_parent[index].children[j].scale.setY(scaleY);
+                    if (_loftDoors_parent[index].children[j] instanceof THREE.Mesh) {
+                        _loftDoors_parent[index].children[j].scale.setY(scaleY);
 
-                    _loftDoors_parent[index].children[j].position.setY(posY);
+                        _loftDoors_parent[index].children[j].position.setY(posY);
+
+                    }
+
+                }
+
+
+            } else {
+                for (var j = 0; j < _loftDoors_parent[index].children.length; j++) {
+
+                    if (_loftDoors_parent[index].children[j] instanceof THREE.Mesh) {
+                        _loftDoors_parent[index].children[j].scale.setY(scaleY, (thickness / 12) * ftTom);
+
+                        _loftDoors_parent[index].children[j].position.setY(posY);
+
+                    }
 
                 }
 
             }
-
-
-        } else {
-            for (var j = 0; j < _loftDoors_parent[index].children.length; j++) {
-
-                if (_loftDoors_parent[index].children[j] instanceof THREE.Mesh) {
-                    _loftDoors_parent[index].children[j].scale.setY(scaleY, (thickness / 12) * ftTom);
-
-                    _loftDoors_parent[index].children[j].position.setY(posY);
-
-                }
-
-            }
-
         }
     }
 }
 
 function updateLoftDoors(index) {
-    if (_columnsLoft.length > 0) {
+
+    if (_loftDoors_parent[index]) {
+        offset = Math.abs(((wLeft.position.x - wLeft.scale.x / 2) - (wRight.position.x - wRight.scale.x / 2))) / customColumns;
         var posY = (wpLoftBack.scale.y / 2) + wpLoftBottom.position.y - wpLoftBottom.scale.y / 2;
         var scaleY = wLoft * ftTom - wpLoftBottom.scale.y - wpLoftTop.scale.y;
 
@@ -703,7 +786,7 @@ function updateLoftDoors(index) {
                             }
 
                         }
-                        _loftDoors_parent[index].position.set(_columns[index].position.x - offset + (thickness / 24) * ftTom, _loftDoors_parent[index].position.y, _loftDoors_parent[index].position.z + wpLoftLeft.scale.z / 2);
+                        _loftDoors_parent[index].position.set(_columnsLoft[index].position.x - offset + (thickness / 24) * ftTom, _loftDoors_parent[index].position.y, _loftDoors_parent[index].position.z + wpLoftLeft.scale.z / 2);
 
                     } else {
                         for (var j = 0; j < _loftDoors_parent[index].children.length; j++) {
@@ -716,7 +799,7 @@ function updateLoftDoors(index) {
                             }
 
                         }
-                        _loftDoors_parent[index].position.set(_columns[index].position.x - offset, _loftDoors_parent[index].position.y, _loftDoors_parent[index].position.z + wpLoftLeft.scale.z / 2);
+                        _loftDoors_parent[index].position.set(_columnsLoft[index].position.x - offset, _loftDoors_parent[index].position.y, _loftDoors_parent[index].position.z + wpLoftLeft.scale.z / 2);
                     }
                 } else {
                     for (var j = 0; j < _loftDoors_parent[index].children.length; j++) {
@@ -729,7 +812,7 @@ function updateLoftDoors(index) {
                         }
 
                     }
-                    _loftDoors_parent[index].position.set(_columns[index - 1].position.x, _loftDoors_parent[index].position.y, _loftDoors_parent[index].position.z + wpLoftLeft.scale.z / 2);
+                    _loftDoors_parent[index].position.set(_columnsLoft[index - 1].position.x, _loftDoors_parent[index].position.y, _loftDoors_parent[index].position.z + wpLoftLeft.scale.z / 2);
 
                 }
                 _loftDoors_parent[index].rotation.set(0, 0 * THREE.Math.DEG2RAD, 0);
@@ -746,7 +829,7 @@ function updateLoftDoors(index) {
                         }
 
                     }
-                    _loftDoors_parent[index].position.set(_columns[index - 1].position.x + offset, _loftDoors_parent[index].position.y, _loftDoors_parent[index].position.z + wpLoftLeft.scale.z / 2);
+                    _loftDoors_parent[index].position.set(_columnsLoft[index - 1].position.x + offset, _loftDoors_parent[index].position.y, _loftDoors_parent[index].position.z + wpLoftLeft.scale.z / 2);
                 } else {
                     for (var j = 0; j < _loftDoors_parent[index].children.length; j++) {
 
@@ -758,7 +841,7 @@ function updateLoftDoors(index) {
                         }
 
                     }
-                    _loftDoors_parent[index].position.set(_columns[index - 1].position.x + offset - (thickness / 24) * ftTom, _loftDoors_parent[index].position.y, _loftDoors_parent[index].position.z + wpLoftLeft.scale.z / 2);
+                    _loftDoors_parent[index].position.set(_columnsLoft[index - 1].position.x + offset - (thickness / 24) * ftTom, _loftDoors_parent[index].position.y, _loftDoors_parent[index].position.z + wpLoftLeft.scale.z / 2);
                 }
 
                 _loftDoors_parent[index].rotation.set(0, -180 * THREE.Math.DEG2RAD, 0);
@@ -829,7 +912,7 @@ function removeLoftDoors(index) {
 }
 
 function generateLoftColumns() {
-    if (_columnsLoft.length == 0 && wpLoftBottom.visible) {
+    if (_columnsLoft.length == 0) {
 
         for (var i = 0; i < customColumns - 1; i++) {
             createLoftColumns(i);
@@ -851,18 +934,32 @@ function generateLoftColumns() {
 
 
 function updateHorizontalSplitter(index) {
+    var subtract = ftTom * 1.35 / 12;
 
     if (!_m_splitters[index]) {
 
 
 
-        _m_splitters[index].scale.set(offset - thickness / 12 * ftTom, (thickness / 12) * ftTom, wDepth * ftTom);
-        _m_splitters[index].position.set(index * offset, wTop.position.y - (3 * ftTom) + wTop.scale.y / 2 + (thickness / 12) * ftTom, wLeft.position.z / 2);
-
+        if(!isHingedDoor){
+            _m_splitters[index].scale.set(offset - thickness / 12 * ftTom, (thickness / 12) * ftTom, wDepth * ftTom );
+            _m_splitters[index].position.set(index * offset, wTop.position.y - (3 * ftTom) + wTop.scale.y / 2 + (thickness / 12) * ftTom, wLeft.position.z / 2 );
+    
+        }else{
+            _m_splitters[index].scale.set(offset - thickness / 12 * ftTom, (thickness / 12) * ftTom, wDepth * ftTom);
+            _m_splitters[index].position.set(index * offset, wTop.position.y - (3 * ftTom) + wTop.scale.y / 2 + (thickness / 12) * ftTom, wLeft.position.z / 2 );
+    
+        }
+       
     } else {
         if (_m_splitters[index] instanceof THREE.Mesh) {
-            _m_splitters[index].scale.set(offset - thickness / 12 * ftTom, (thickness / 12) * ftTom, wDepth * ftTom);
-            _m_splitters[index].position.set(index * offset, wTop.position.y - (3 * ftTom) + wTop.scale.y / 2 + (thickness / 12) * ftTom, wLeft.position.z / 2);
+            if(!isHingedDoor){
+                _m_splitters[index].scale.set(offset - thickness / 12 * ftTom, (thickness / 12) * ftTom, wDepth * ftTom - subtract/2);
+                _m_splitters[index].position.set(index * offset, wTop.position.y - (3 * ftTom) + wTop.scale.y / 2 + (thickness / 12) * ftTom, wLeft.position.z / 2 );
+            }else{
+                _m_splitters[index].scale.set(offset - thickness / 12 * ftTom, (thickness / 12) * ftTom, wDepth * ftTom);
+                _m_splitters[index].position.set(index * offset, wTop.position.y - (3 * ftTom) + wTop.scale.y / 2 + (thickness / 12) * ftTom, wLeft.position.z / 2);
+            }
+           
         }
     }
 }
@@ -878,14 +975,7 @@ function generateInteractivePlanes(index) {
                 updateInteractivePlane(i);
             }
         }
-        // if (onHeightChanged(plane_index) > 0) {
-        //     if (_bot_shelf_parent[plane_index] instanceof THREE.Mesh) {
-        //         removeBotShelves(plane_index);
-        //         createBotShelves(onHeightChanged(plane_index), plane_index);
-        //         updateBotShelves(plane_index);
-        //         _bot_shelf_parent[plane_index].visible = false;
-        //     }
-        // }
+
     }
 
 }
@@ -1029,56 +1119,6 @@ function addHorizontalParts() {
 
 
 
-    $("#actionDoor").hide();
-
-    // $("#addHingedDoor").click(function () {
-
-
-
-    //     if (_hDoors_parent.length == 0) {
-    //         $(this).removeClass("btn-outline-dark");
-    //         $(this).html("Remove Door")
-    //         $(this).addClass("btn-outline-danger");
-    //         $("#actionDoor").show();
-    //         for (var i = 0; i < customColumns; i++) {
-
-    //             createHingedDoor(i);
-    //             updateHingedDoor(i);
-    //             createFlipDoorSprite(i);
-    //             updateFlipDoorSprite(i)
-
-    //         }
-
-
-    //     } else {
-
-    //         removeDoor();
-    //         $("#actionDoor").hide();
-
-    //     }
-
-    // })
-
-
-    $("#actionDoor").append('<i class="m-lg-1  fa fa-door-open"></i>Open Door ');
-    $("#actionDoor").click(function () {
-
-
-        if (!isDoorOpened) {
-
-            $(this).empty();
-            $(this).append('<i class="m-lg-1  fa fa-door-closed"></i>Close Door ');
-            isDoorOpened = true;
-        } else {
-            $(this).empty();
-            $(this).append('<i class="m-lg-1  fa fa-door-open"></i>Open Door ');
-            isDoorOpened = false;
-
-        }
-
-
-    })
-
     $("#actionloftDoor").append('<i class="fa fa-door-open"></i>Open Door ');
     $("#actionloftDoor").click(function () {
 
@@ -1106,10 +1146,7 @@ function addHorizontalParts() {
         removeAllInterior();
     })
 
-    $("#editDoor").click(function () {
 
-        interactivePlane_group.visible = false;
-    })
 }
 
 function topShelfOnSelected(index) {
@@ -1207,7 +1244,7 @@ function addLoft(visible) {
     wpLoftBack.visible = visible;
 
 
-    if (visible) {
+    if (visible && !isCreated) {
         generateLoftColumns();
 
     } else {
@@ -2213,22 +2250,33 @@ function onClick() {
         }
 
 
-        for (var i = 0; i < interactivePlanes.length; i++) {
-            if (interactivePlanes[i] == selectedObject) {
 
-                outlinePass.visibleEdgeColor.set("#ff7300")
-                outlinePass.edgeStrength = 10;
-                outlinePass.edgeGlow = 0;
-                outlinePass.selectedObjects = selectedObjects;
-                addSelectedObject(selectedObject);
-
-                plane_index = i;
-            }
-        }
 
         // setflipDoor();
         selectedObject = null;
 
+    }
+
+    if (selectedPlane) {
+
+        if (interactivePlane_group.visible) {
+            for (var i = 0; i < interactivePlanes.length; i++) {
+                if (interactivePlanes[i] == selectedPlane) {
+
+                    addSelectedObject(selectedPlane);
+                    planeOultinePass.visibleEdgeColor.set("#ff7300")
+                    planeOultinePass.edgeStrength = 10;
+                    planeOultinePass.edgeGlow = 0;
+                    planeOultinePass.selectedObjects = selectedObjects;
+
+                    plane_index = i;
+                }
+            }
+
+        } else {
+            planeOultinePass.selectedObjects = [];
+        }
+        selectedPlane = null;
     }
     if (selectedMirror) {
         if (flipVerticalSprite.includes(selectedMirror)) {
@@ -2245,7 +2293,7 @@ function onClick() {
 function onPointerMove(event) {
 
     if (selectedSprite instanceof THREE.Sprite) {
-        if(selectedSprite.visible){
+        if (selectedSprite.visible) {
             selectedSprite.material.map = onNormalDeleteSprite;
             deleteSprites.forEach(e => {
                 if (e == selectedSprite) {
@@ -2261,9 +2309,9 @@ function onPointerMove(event) {
                     })
                 }
             });
-        }else{
-            selectedObject= null;
-          
+        } else {
+            selectedObject = null;
+
         }
     }
 
@@ -2272,13 +2320,17 @@ function onPointerMove(event) {
         selectedMirror = null;
     }
 
-    if (selectedObject) {
-        // for (var i = 0; i < interactivePlanes.length; i++) {
-        //     if (interactivePlanes[i] == selectedObject) {
+    if (selectedPlane) {
+        outlinePass.visibleEdgeColor.set("#fcbe03")
+        outlinePass.edgeStrength = 10;
+        outlinePass.edgeGlow = 0;
+        outlinePass.selectedObjects = selectedObjects;
+        selectedPlane = null
+    } else {
 
-        //     }
-        // }
+        outlinePass.selectedObjects = [];
     }
+
 
     if (event.changedTouches) {
         pointer.x = event.changedTouches[0].pageX;
@@ -2330,6 +2382,8 @@ function onPointerMove(event) {
     } else {
         selectedObject = null;
     }
+
+
     if (p.length > 0) {
 
         const res = p.filter(function (res) {
@@ -2341,13 +2395,11 @@ function onPointerMove(event) {
         getColumnToCopy();
         if (res && res.object) {
 
-            selectedObject = res.object;
-            addSelectedObject(selectedObject);
+            selectedPlane = res.object;
+            addSelectedObject(selectedPlane);
 
-            // outlinePass.visibleEdgeColor.set("#fcbe03")
-            // outlinePass.edgeStrength = 10;
-            // outlinePass.edgeGlow = 0;
-            // outlinePass.selectedObjects = selectedObjects;
+
+
         }
 
     }
@@ -2485,11 +2537,17 @@ function post_process() {
     outlinePass.edgeGlow = 0;
     outlinePass.edgeThickness = 0.5;
     outlinePass.pulsePeriod = 0;
+
+    planeOultinePass = new THREE.OutlinePass(new THREE.Vector2(fwidth, fheight), scene, camera);
+    planeOultinePass.edgeStrength = 16;
+    planeOultinePass.edgeGlow = 0;
+    planeOultinePass.edgeThickness = 0.5;
+    planeOultinePass.pulsePeriod = 0;
     // outlinePass.visibleEdgeColor.set("#ff0000");
 
     // outlinePass.hiddenEdgeColor.set("#ff0000");
     composer.addPass(outlinePass);
-
+    composer.addPass(planeOultinePass);
     const pixelRatio = renderer.getPixelRatio();
 
     effectFXAA = new THREE.ShaderPass(THREE.FXAAShader);
@@ -2588,7 +2646,7 @@ function chooseColumns_number() {
         substitubale = 6;
     }
     //Set Columns
-    if(!isHingedDoor){
+    if (!isHingedDoor) {
         if (wWidth >= 3.5 && wWidth <= 6) {
             columns = 4;
         } else if (wWidth >= 6.5 && wWidth <= 9.5) {
@@ -2600,7 +2658,7 @@ function chooseColumns_number() {
         }
         customColumns = columns;
 
-    }else{
+    } else {
         if (wWidth == 9.5) {
             columns = 10;
         } else {
@@ -2611,13 +2669,13 @@ function chooseColumns_number() {
         while (columns_group.firstChild) {
             columns_group.removeChild(columns_group.firstChild);
         }
-      
-    
-    
+
+
+
         for (var i = columns - 1; i > substitubale; i--) {
             var columns_div = document.createElement("div");
             columns_div.className = "form-check form-check-inline";
-    
+
             var columns_radio = document.createElement("input");
             columns_radio.type = "radio";
             columns_radio.value = (i + 1);
@@ -2625,20 +2683,20 @@ function chooseColumns_number() {
             columns_radio.setAttribute("onclick", "set_columns_number(" + (i + 1) + ")");
             columns_radio.className = "form-check-input columns-change  btn-check";
             columns_radio.name = "columnsOptions";
-    
+
             var columns_label = document.createElement("label");
             columns_label.htmlFor = "columns_" + (i + 1);
             columns_label.className = "form-check-label btn btn-outline-secondary m-1";
             columns_label.innerHTML = i + 1;
-    
+
             columns_div.appendChild(columns_radio);
             columns_div.appendChild(columns_label);
             columns_group.appendChild(columns_div);
-    
+
         }
     }
-   
-   
+
+
 
     // columns_div.firstElementChild.setAttribute("checked", "true");
 
@@ -2647,7 +2705,7 @@ function chooseColumns_number() {
 
 
 function set_columns_number(value) {
-   
+
     customColumns = value;
 
 }
@@ -2991,6 +3049,7 @@ function removeAllInterior() {
     removeHanger();
 
     removeDoor();
+    removeSlideDoors();
     reset_adjacents_removed_columns();
 
 }
@@ -3078,7 +3137,7 @@ function updateHingedDoor(index) {
             }
             if (index != customColumns - 1) {
                 _hDoors_parent[index].position.set(_columns[index].position.x - offset + thickness / 24 * ftTom, _hDoors_parent[index].position.y, _hDoors_parent[index].position.z + wLeft.scale.z / 2);
-                _hDoors_parent[index].rotation.set(0, -80* THREE.Math.DEG2RAD, 0);
+                _hDoors_parent[index].rotation.set(0, -80 * THREE.Math.DEG2RAD, 0);
             } else {
                 _hDoors_parent[index].position.set(_columns[index - 1].position.x + thickness / 24 * ftTom, _hDoors_parent[index].position.y, _hDoors_parent[index].position.z + wLeft.scale.z / 2);
                 _hDoors_parent[index].rotation.set(0, -80 * THREE.Math.DEG2RAD, 0);
@@ -3827,20 +3886,20 @@ function createColumnSprite(index) {
 }
 
 function updateColumnSprite(index) {
-    
+
     if (deleteSprites.includes(deleteSprites[index])) {
         deleteSprites[index].scale.set(0.15, 0.15);
         deleteSprites[index].position.set(index * offset, wBottom.position.y - 0.2);
 
         deleteSprites_group.position.set(offset + wLeft.position.x, deleteSprites_group.position.y, deleteSprites_group.position.z);
-        if(!isHingedDoor){
-            if(index%2!=0){
+        if (!isHingedDoor) {
+            if (index % 2 != 0) {
                 deleteSprites[index].visible = false;
-            }else{
+            } else {
                 deleteSprites[index].visible = true;
             }
-            
-        }else{
+
+        } else {
             deleteSprites[index].visible = true;
         }
     }
@@ -3901,6 +3960,12 @@ function initMaterial() {
         roughness: 0.8,
         name: "wm_wardrobe"
     });
+    _railMaterial = new THREE.MeshStandardMaterial({
+        name: "wm_door_rail",
+        color: 0xfdfdfd,
+        roughness: 0.2,
+        metalness: 0.8
+    });
     _splitterMaterial = new THREE.MeshStandardMaterial({
         color: 0x22ffaa,
         roughness: 0.8,
@@ -3957,6 +4022,7 @@ function initMaterial() {
 
             // scene.background = new THREE.Color(0xefefef);
             // scene.environment = envMap;
+            _railMaterial.envMap = envMap;
             _hangerMaterial.envMap = envMap;
             texture.dispose();
             pmremGenerator.dispose();
@@ -4028,20 +4094,17 @@ function renderOption() {
         scene.traverse(function (child) {
             if (child instanceof THREE.Mesh) {
 
+                if (child.visible) {
+                    child.castShadow = false;
+                    child.receiveShadow = false;
+                    child.visible = true;
+                    child.material.wireframe = true;
+                    child.material.wireframeLinejoin = "round";
+                    child.material.wireframeLinecap = "square";
+                }
 
-                child.castShadow = false;
-                child.receiveShadow = false;
-                child.visible = true;
-                // const edges = new THREE.EdgesGeometry( child.geometry);
-                // const line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0xffffff } ) );
-                // scene.add( line );
-                // line.scale.set(child.scale.x,child.scale.y,child.scale.z);
-                // line.position.set(child.position.x,child.position.y,child.position.z)
 
 
-                child.material.wireframe = true;
-                child.material.wireframeLinejoin = "round";
-                child.material.wireframeLinecap = "square";
             }
         })
     }
@@ -4067,29 +4130,208 @@ function createShadowCatcher() {
     scene.add(mesh);
 }
 
-function updateColumnsDoor(){
-    if(isCreated){
-     
+function updateColumnsDoor() {
+    if (isCreated) {
+
         removeColumns();
         removeColumnsSprite();
         removeDoor();
+        removeSlideDoors();
         removeHorizontalSplitter();
-        
+        removeInteractivePlane();
+
+
+
+
         updateColumns();
         updateColumnSprite();
-
+        deleteSprites_group.visible = true;
         isCreated = false;
     }
 }
 
 function createColumns_Doors(bool) {
 
-        updateColumns();
-        deleteSprites_group.visible = true;
-        generateInteractivePlanes(customColumns);
-        updateInteractivePlane();
-        interactivePlane_group.visible = true; 
- 
+    updateColumns();
+    deleteSprites_group.visible = true;
 
 
+    updateInteractivePlane();
+    interactivePlane_group.visible = false;
+
+
+
+}
+
+
+function createDoorRailMesh(index) {
+    var g = new THREE.BoxGeometry(1, 1, 1);
+
+    var _rBottom = new THREE.Mesh(g, _railMaterial);
+    var _rLeft = new THREE.Mesh(g, _railMaterial);
+    var _rRight = new THREE.Mesh(g, _railMaterial);
+    var _rMiddle = new THREE.Mesh(g, _railMaterial)
+    var _rail = new THREE.Group();
+    _rBottom.name = "_rBottom";
+    _rLeft.name = "_rLeft";
+    _rRight.name = "_rRight";
+    _rMiddle.name = "_rMiddle";
+
+
+
+    _rBottom.scale.set(ftTom * 1.35 / 12, ftTom * 0.05 / 12, 1);
+    _rLeft.scale.set(ftTom * 0.03125 / 12, ftTom * 0.5 / 12 - _rBottom.scale.y, 1);
+    _rRight.scale.set(ftTom * 0.03125 / 12, ftTom * 0.5 / 12 - _rBottom.scale.y, 1);
+    _rMiddle.scale.set(ftTom * 0.03125 / 12, ftTom * 0.5 / 12 - _rBottom.scale.y, 1);
+
+
+    _rMiddle.position.setX(_rBottom.position.x / 2);
+    _rLeft.position.setX(_rBottom.scale.x / 2 - _rLeft.scale.x / 2);
+    _rRight.position.setX(-_rBottom.scale.x / 2 + _rRight.scale.x / 2);
+
+    _rLeft.position.setY(_rBottom.position.y + _rMiddle.scale.y / 2 + _rBottom.scale.y / 2);
+    _rRight.position.setY(_rBottom.position.y + _rMiddle.scale.y / 2 + _rBottom.scale.y / 2);
+    _rMiddle.position.setY(_rBottom.position.y + _rMiddle.scale.y / 2 + _rBottom.scale.y / 2);
+
+    _rail.add(_rBottom);
+    _rail.add(_rLeft);
+    _rail.add(_rRight);
+    _rail.add(_rMiddle);
+    _rail.name = "_rail_" + index;
+    _rail.position.setY(-_rBottom.scale.y / 2)
+    return _rail;
+
+}
+
+
+function createDoorRail(index) {
+
+    var _doorRails_group = new THREE.Group();
+
+    for (var i = 0; i < 4; i++) {
+        _doorRails_parent[i] = createDoorRailMesh(i);
+        _doorRails_group.add(_doorRails_parent[i]);
+
+    }
+
+    _doorRails_group.name = "slide_rail_" + index;
+
+
+    _doorRails_parent_group.push(_doorRails_group);
+    _doorRailParent.name = "slide_rails";
+    _doorRailParent.add(_doorRails_parent_group[index]);
+    scene.add(_doorRailParent);
+
+
+    _doorRailParent.position.set(offset + wLeft.position.x, _doorRailParent.position.y, _doorRailParent.position.z)
+
+}
+
+
+
+function updateDoorRail() {
+
+    var posZ = wBottom.position.z + wBottom.scale.z / 2 - (ftTom * 1.35 / 12) / 2;
+
+    if(_doorRailParent instanceof THREE.Group){
+        
+        for (var i = 0; i < _doorRailParent.children.length; i++) {
+       
+            if (_doorRails_parent_group[i] instanceof THREE.Group) {
+               
+                if(i==0){
+                    _doorRails_parent_group[i].position.set( _columns[1].position.x  ,   _doorRailParent.position.y,  _doorRailParent.position.z)
+                }else if(i==1){
+                    _doorRails_parent_group[i].position.set( _columns[5].position.x    ,   _doorRailParent.position.y,  _doorRailParent.position.z)
+                }else{
+                    _doorRails_parent_group[i].position.set( _columns[9].position.x  ,   _doorRailParent.position.y,  _doorRailParent.position.z)
+                }
+                console.log(i)
+
+
+                for (var j = 0; j < _doorRails_parent_group[i].children.length; j++) {
+                    if (_doorRails_parent_group[i].children[j] instanceof THREE.Group) {
+    
+                       
+                        var rail =  _doorRails_parent_group[i].children[j];
+                        if (j == 0) {
+                          
+                            rail.name = "rail_top"
+                            rail.scale.setZ( (_columns[0].position.x - _columns[2].position.x )- 2* offset + thickness/12 *ftTom )
+                            rail.position.set (0, wTop.position.y - wTop.scale.y / 2 - ftTom * 0.05 / 24, posZ);
+                            rail.rotation.x=(180 * THREE.Math.DEG2RAD); 
+                            rail.rotation.y = (90 * THREE.Math.DEG2RAD) 
+                            // rail.rotateX(180 * THREE.Math.DEG2RAD);
+                            // rail.rotateY(90 * THREE.Math.DEG2RAD);
+                        } 
+                        else if(j==_doorRails_parent_group[i].children.length-1){
+                            rail.name = "rail_bottom"
+                            rail.scale.setZ( (_columns[0].position.x - _columns[2].position.x )- 2* offset + thickness/12 *ftTom )
+                            rail.position.set (0, wBottom.scale.y/2 + wBottom.position.y + ftTom * 0.05 / 24, posZ);
+                          
+                            rail.rotation.y = (90 * THREE.Math.DEG2RAD) 
+                        }
+                       
+                        else if(j==1){
+                            rail.name = "rail_left"
+                            rail.scale.setZ(wHeight * ftTom - (2 / 12 * ftTom) + thickness / 24 * ftTom +ftTom * 0.05 / 24 - wBottom.position.y )
+                            if(i!=0){
+                                if(i<2){
+                                    rail.position.set ( _doorRails_parent_group[i].position.x -_columns[5].position.x - 2*offset   + thickness/24 * ftTom  + ftTom * 0.05 / 24, wBack.scale.y/2- wBottom.scale.y/2 + wBottom.position.y, posZ);
+                                }else{
+                                    rail.position.set ( _doorRails_parent_group[i].position.x -_columns[7].position.x - 4*offset    + thickness/24 * ftTom  + ftTom * 0.05 / 24, wBack.scale.y/2- wBottom.scale.y/2 + wBottom.position.y, posZ);
+                                }
+                                
+                            }else{
+                                rail.position.set ( _doorRails_parent_group[i].position.x - 3*offset + thickness/24 * ftTom  + ftTom * 0.05 / 24, wBack.scale.y/2- wBottom.scale.y/2 + wBottom.position.y, posZ);
+                            }
+                            
+                            rail.rotation.x = (90 * THREE.Math.DEG2RAD) 
+                            rail.rotation.z = (-90 * THREE.Math.DEG2RAD) 
+                        }
+                        else {
+                            rail.name = "rail_right"
+                            rail.scale.setZ(wHeight * ftTom - (2 / 12 * ftTom) + thickness / 24 * ftTom  +ftTom * 0.05 / 24- wBottom.position.y )
+                            if(i!=0){
+                                if(i<2){
+                                    rail.position.set ( _doorRails_parent_group[i].position.x -_columns[5].position.x + 2*offset   - thickness/24 * ftTom - ftTom * 0.05 / 24, wBack.scale.y/2- wBottom.scale.y/2 + wBottom.position.y, posZ);
+                                }else{
+                                    rail.position.set ( _doorRails_parent_group[i].position.x -_columns[7].position.x - thickness/24 * ftTom - ftTom * 0.05 / 24, wBack.scale.y/2- wBottom.scale.y/2 + wBottom.position.y, posZ);
+                                }
+                                
+                            }else{
+                                rail.position.set ( _doorRails_parent_group[i].position.x - thickness/24 * ftTom + offset - ftTom * 0.05 / 24, wBack.scale.y/2- wBottom.scale.y/2 + wBottom.position.y, posZ);
+                            }
+                            
+                            rail.rotation.x = (90 * THREE.Math.DEG2RAD) 
+                            rail.rotation.z = (90 * THREE.Math.DEG2RAD) 
+                        }
+    
+    
+                    }
+    
+                }
+            }
+            // for(var j =0; j<_doorRails_parent.length;j++){
+    
+            // }
+        }
+    }
+   
+
+}
+
+function createSlideDoors() {
+    for (var i = 0; i < customColumns / 4; i++) {
+        createDoorRail(i);
+    }
+    updateDoorRail();
+}
+
+
+function removeSlideDoors(){
+    
+    _doorRails_parent_group.forEach(e=>{
+        _doorRailParent.remove(e);
+    })
 }
