@@ -289,6 +289,14 @@ function render() {
 
         updateLoftDoorUpSize(i)
     }
+
+
+        updateDoorRailUp();
+    
+    for (var i = 0; i < customColumns / 2; i++) {
+           
+            updateSlideDoorsUp(i);
+     }
     for (var i = 0; i < _columnsLoft.length; i++) {
         updateLoftColumns(i);
     }
@@ -457,7 +465,7 @@ function getInputs() {
         if (!isSlideLeft) {
 
             $(this).empty();
-            $(this).append('<i class="m-lg-1  fa fa-door-closed"></i>Close Door ');
+            $(this).append('<i class="m-lg-1  fa fa-door-closed"></i>Close Left ');
             isSlideLeft = true;
             isSlideRight = false;
             $("#actionSlideDoorRight").empty();
@@ -482,7 +490,7 @@ function getInputs() {
         if (!isSlideRight) {
 
             $(this).empty();
-            $(this).append('<i class="m-lg-1  fa fa-door-closed"></i>Close Door ');
+            $(this).append('<i class="m-lg-1  fa fa-door-closed"></i>Close Right ');
             isSlideRight = true;
             isSlideLeft = false;
             $("#actionSlideDoorLeft").empty();
@@ -1466,8 +1474,14 @@ function updateWardrobe() {
     }
 
     if (wBottomLayer) {
-        wBottomLayer.scale.set(wWidth * ftTom, (thickness / 24) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));
-        wBottomLayer.position.set(0, (2.5 / 12) * ftTom + (thickness / 48) * ftTom, ((thickness / 24) * ftTom));
+        if(_extDrawers.length>0){
+            wBottomLayer.scale.set(wWidth * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));
+            wBottomLayer.position.set(0, (2.5 / 12) * ftTom + (thickness / 24) * ftTom, ((thickness / 24) * ftTom));
+        }else{
+            wBottomLayer.scale.set(wWidth * ftTom, (thickness / 24) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));
+            wBottomLayer.position.set(0, (2.5 / 12) * ftTom + (thickness / 48) * ftTom, ((thickness / 24) * ftTom));
+        }
+        
 
     }
     if (wBack) {
@@ -1508,8 +1522,14 @@ function updateWardrobe() {
     }
 
     if (wLeftLayerBottom) {
-        wLeftLayerBottom.scale.set((thickness / 24) * ftTom, (thickness / 24) * ftTom + 2.5 / 12 * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom);
-        wLeftLayerBottom.position.set(-(((thickness / 48) * ftTom) + (wBack.scale.x / 2)), wLeftLayerBottom.scale.y / 2 + (wBottom.position.y) - (2.5 / 12 * ftTom) - wBottom.scale.y / 2, 0);
+        if(_extDrawers.length>0){
+            wLeftLayerBottom.scale.set((thickness / 24) * ftTom, 2*(thickness / 12) * ftTom + 2.5 / 12 * ftTom + ftTom , (2 * thickness / 12) * ftTom + wDepth * ftTom);
+            wLeftLayerBottom.position.set(-(((thickness / 48) * ftTom) + (wBack.scale.x / 2)), wLeftLayerBottom.scale.y / 2 + (wBottom.position.y) - (2.5 / 12 * ftTom) - wBottom.scale.y / 2, 0);
+        }else{
+            wLeftLayerBottom.scale.set((thickness / 24) * ftTom, (thickness / 24) * ftTom + 2.5 / 12 * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom);
+            wLeftLayerBottom.position.set(-(((thickness / 48) * ftTom) + (wBack.scale.x / 2)), wLeftLayerBottom.scale.y / 2 + (wBottom.position.y) - (2.5 / 12 * ftTom) - wBottom.scale.y / 2, 0);
+        }
+     
 
     }
 
@@ -1550,8 +1570,14 @@ function updateWardrobe() {
 
     }
     if (wRightLayerBottom) {
-        wRightLayerBottom.scale.set((thickness / 24) * ftTom, (thickness / 24) * ftTom + 2.5 / 12 * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom);
-        wRightLayerBottom.position.set((((thickness / 48) * ftTom) + (wBack.scale.x / 2)), wRightLayerBottom.scale.y / 2 + (wBottom.position.y) - (2.5 / 12 * ftTom) - wBottom.scale.y / 2, 0);
+        if(_extDrawers.length>0){
+            wRightLayerBottom.scale.set((thickness / 24) * ftTom,2*(thickness / 12) * ftTom + 2.5 / 12 * ftTom + ftTom , (2 * thickness / 12) * ftTom + wDepth * ftTom);
+            wRightLayerBottom.position.set((((thickness / 48) * ftTom) + (wBack.scale.x / 2)), wRightLayerBottom.scale.y / 2 + (wBottom.position.y) - (2.5 / 12 * ftTom) - wBottom.scale.y / 2, 0);
+        }else{
+            wRightLayerBottom.scale.set((thickness / 24) * ftTom, (thickness / 24) * ftTom + 2.5 / 12 * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom);
+            wRightLayerBottom.position.set((((thickness / 48) * ftTom) + (wBack.scale.x / 2)), wRightLayerBottom.scale.y / 2 + (wBottom.position.y) - (2.5 / 12 * ftTom) - wBottom.scale.y / 2, 0);
+        }
+       
 
     }
     if (wRight) {
@@ -4457,7 +4483,99 @@ function createDoorRail(index) {
 
 }
 
+function updateDoorRailUp(){
+    var posZ = wBottom.position.z + wBottom.scale.z / 2 + 1.35 / 24 * ftTom;
+    var scaleZ = wTopLayer.position.y - wTopLayer.scale.y / 2 - wBottomLayer.position.y + wBottomLayer.scale.y / 2 - thickness / 24 * ftTom;
+    var posY = wBottomLayer.scale.y / 2 + wBottomLayer.position.y + ftTom * 0.05 / 24;
+    var posY_LR = wBack.scale.y / 2 - wBottom.scale.y / 2 + wBottom.position.y;
 
+    if(_extDrawers.length>0){
+
+        scaleZ = wTopLayer.position.y - wTopLayer.scale.y / 2 - wBottomLayer.position.y + wBottomLayer.scale.y / 2 - thickness / 24 * ftTom - ftTom - thickness / 12 * ftTom - thickness / 24 * ftTom ;
+        posY_LR = wBack.scale.y / 2 - wBottom.scale.y / 2 + wBottom.position.y  + ftTom / 2 + thickness / 12 * ftTom - thickness / 48 * ftTom
+        
+        posY = wBottomLayer.scale.y / 2 + wBottomLayer.position.y + ftTom * 0.05 / 24 + ftTom + thickness /24 * ftTom + thickness /24 * ftTom;
+        
+    }else{
+        posY = wBottomLayer.scale.y / 2 + wBottomLayer.position.y + ftTom * 0.05 / 24 ;
+        scaleZ = wTopLayer.position.y - wTopLayer.scale.y / 2 - wBottomLayer.position.y + wBottomLayer.scale.y / 2 - thickness / 24 * ftTom;
+     
+        posY_LR = wBack.scale.y / 2 - wBottom.scale.y / 2 + wBottom.position.y;
+
+    }
+        // position + ftTom / 2 + thickness / 24 * ftTom;
+        // scale - ftTom - thickness / 12 * ftTom;
+    if (_doorRailParent instanceof THREE.Group) {
+
+        for (var i = 0; i < _doorRailParent.children.length; i++) {
+
+            if (_doorRails_parent_group[i] instanceof THREE.Group) {
+
+                if (i == 0) {
+                    _doorRails_parent_group[i].position.set(_columns[1].position.x, _doorRailParent.position.y, _doorRailParent.position.z)
+                } else if (i == 1) {
+                    _doorRails_parent_group[i].position.set(_columns[5].position.x, _doorRailParent.position.y, _doorRailParent.position.z)
+                } else {
+                    _doorRails_parent_group[i].position.set(_columns[9].position.x, _doorRailParent.position.y, _doorRailParent.position.z)
+                }
+
+
+
+                for (var j = 0; j < _doorRails_parent_group[i].children.length; j++) {
+                    if (_doorRails_parent_group[i].children[j] instanceof THREE.Group) {
+
+
+                        var rail = _doorRails_parent_group[i].children[j];
+                        if (j == 0) {
+
+                         
+                        
+                            rail.position.set(0, wTopLayer.position.y - wTopLayer.scale.y / 2 - ftTom * 0.05 / 24, posZ);
+                           
+                           
+                        }
+                          //Bottom
+                        else if (j == _doorRails_parent_group[i].children.length - 1) {
+                          
+                            rail.scale.setZ((_columns[0].position.x - _columns[2].position.x) - 2 * offset + thickness / 12 * ftTom)
+                            rail.position.set(0, posY, posZ);
+
+                           
+                        }
+                        //Left
+                        else if (j == 1) {
+                          
+                            rail.scale.setZ(scaleZ)
+                           
+                               
+                            rail.position.setY( posY_LR);
+                                 
+
+                            
+
+        
+                        } 
+                        //Right
+                        else {
+                           
+                            rail.scale.setZ(scaleZ)
+                         
+                            rail.position.setY(posY_LR);
+                              
+                           
+
+                          
+                        }
+
+
+                    }
+
+                }
+            }
+           
+        }
+    }
+}
 
 function updateDoorRail() {
 
@@ -4555,6 +4673,7 @@ function createSlideDoors() {
     for (var i = 0; i < customColumns / 2; i++) {
         createSlideDoor(i);
         updateSlideDoor(i);
+        updateSlideDoorsUp(i);
     }
     updateDoorRail();
 }
@@ -4574,7 +4693,38 @@ function createSlideDoor(index) {
     _sDoors_parent_group.add(_sDoors_parent[index]);
     scene.add(_sDoors_parent_group);
 }
+function updateSlideDoorsUp(index){
+    // scaleZ = wTopLayer.position.y - wTopLayer.scale.y / 2 - wBottomLayer.position.y + wBottomLayer.scale.y / 2 - thickness / 24 * ftTom - ftTom - thickness / 12 * ftTom - thickness / 24 * ftTom ;
+        // posY_LR = wBack.scale.y / 2 - wBottom.scale.y / 2 + wBottom.position.y  + ftTom / 2 + thickness / 12 * ftTom - thickness / 48 * ftTom
+    var posY = (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2;
+    var scaleY = wTop.position.y - wBottom.position.y - 2 * ftTom * 0.05 / 12;
 
+    if(_extDrawers.length>0){
+        posY = (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2   + ftTom / 2 + thickness / 12 * ftTom - thickness / 48 * ftTom;
+        scaleY = wTop.position.y - wBottom.position.y - 2 * ftTom * 0.05 / 12   - ftTom - thickness / 12 * ftTom - thickness / 24 * ftTom  ;
+    }else{
+        posY = (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2;
+        scaleY = wTop.position.y - wBottom.position.y - 2 * ftTom * 0.05 / 12;
+    }
+    // _columns_group.position.x + _columns[index - 1].position.x + thickness / 24 * ftTom
+
+    if (_sDoors_parent[index] instanceof THREE.Group) {
+
+        _sDoors_parent_group.position.set(offset + wLeft.position.x, _sDoors_parent_group.position.y, _sDoors_parent_group.position.z);
+        for (var j = 0; j < _sDoors_parent[index].children.length; j++) {
+
+            if (_sDoors_parent[index].children[j] instanceof THREE.Mesh) {
+                _sDoors_parent[index].children[j].scale.setY(scaleY);
+
+                _sDoors_parent[index].children[j].position.setY( posY);
+               
+            }
+
+        }
+       
+
+    }
+}
 function updateSlideDoor(index) {
     var posY = (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2;
     var scaleY = wTop.position.y - wBottom.position.y - 2 * ftTom * 0.05 / 12;
