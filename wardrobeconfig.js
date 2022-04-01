@@ -90,8 +90,8 @@ let _lockers = [],
     _m_splitters_group,
     _columns = [],
     _columns_group, _hDoors_parent = [],
-    _hDoors_parent_group;
-
+    _hDoors_parent_group,
+    _sDoors_parent = [], _sDoors_parent_group;
 let _flippableDoor = [];
 var defaultRotation = new THREE.Quaternion();
 let _isDoorRight = [],
@@ -181,7 +181,7 @@ function init() {
     _loftDoors_parent_group = new THREE.Group();
     _doorRailParent = new THREE.Group();
     exporter = new THREE.GLTFExporter();
-
+    _sDoors_parent_group = new THREE.Group();
     create_lights();
     helpers();
     createWardrobe();
@@ -4369,6 +4369,7 @@ function createDoorRailMesh(index) {
     _rail.add(_rMiddle);
     _rail.name = "_rail_" + index;
     _rail.position.setY(-_rBottom.scale.y / 2)
+    // console.log((_rLeft.position.x-_rLeft.scale.x/2-_rMiddle.position.x-_rMiddle.scale.x/2 )/ftTom * 12)
     return _rail;
 
 }
@@ -4494,14 +4495,115 @@ function updateDoorRail() {
 function createSlideDoors() {
     for (var i = 0; i < customColumns / 4; i++) {
         createDoorRail(i);
+       
+    }
+    for(var i= 0;i<customColumns/2;i++){
+        createSlideDoor(i);
+        updateSlideDoor(i);
     }
     updateDoorRail();
 }
 
 
-function removeSlideDoors(){
+function createSlideDoor(index){
+    var g = new THREE.BoxGeometry(1, 1, 1);
+
+
+    var door = new THREE.Mesh(g, _doorMaterial);
+    door.name = "slide_door_" + index;
+    var _sDoor_group = new THREE.Group();
+    _sDoor_group.add(door);
+    _sDoor_group.name = "slide_door_pivot_" + index;
+    _sDoors_parent[index] = _sDoor_group;
+    _sDoors_parent_group.name = "slide_doors";
+    _sDoors_parent_group.add(_sDoors_parent[index]);
+    scene.add(_sDoors_parent_group);
+}
+
+function updateSlideDoor(index){
+    var posY = (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2 ;
+    var scaleY =  wTop.position.y - wBottom.position.y - 2*ftTom * 0.05 / 12;
+    // _columns_group.position.x + _columns[index - 1].position.x + thickness / 24 * ftTom
+    if (_sDoors_parent[index] instanceof THREE.Group) {
+
+        _sDoors_parent_group.position.set(offset + wLeft.position.x, _sDoors_parent_group.position.y, _sDoors_parent_group.position.z);
+        for (var j = 0; j < _sDoors_parent[index].children.length; j++) {
+
+            if (_sDoors_parent[index].children[j] instanceof THREE.Mesh) {
+                _sDoors_parent[index].children[j].scale.set(offset*2 + (0.5*ftTom/12) , scaleY, 0.625/12 * ftTom);
+
+                _sDoors_parent[index].children[j].position.set(_sDoors_parent[index].children[j].scale.x / 2, posY, _sDoors_parent[index].position.z);
+                _sDoors_parent[index].children[j].material.color.set("#34deeb");
+            }
+
+        }
+        if (index % 2 == 0) {
+
+            if(index == 0){
+                _sDoors_parent[index].position.set(_columns[0].position.x - offset + thickness / 48 * ftTom, _sDoors_parent[index].position.y,  wBottom.position.z + wBottomLayer.scale.z / 2 + 0.625/24 * ftTom+0.03125/24*ftTom );    
+            }
+            else if(index == 2){
+                _sDoors_parent[index].position.set(_columns[5].position.x - 2*offset + thickness / 48 * ftTom, _sDoors_parent[index].position.y,  wBottom.position.z + wBottomLayer.scale.z / 2 + 0.625/24 * ftTom+0.03125/24*ftTom );    
+            }
+            else if(index == 4){
+                _sDoors_parent[index].position.set(_columns[9].position.x - 2*offset + thickness / 48 * ftTom, _sDoors_parent[index].position.y,  wBottom.position.z + wBottomLayer.scale.z / 2 + 0.625/24 * ftTom+0.03125/24*ftTom );    
+            }
+            // if (index != customColumns - 1) {
+            
+          
+            // } else {
+            //     _sDoors_parent[index].position.set(_columns[index-1].position.x - offset + thickness / 48 * ftTom, _sDoors_parent[index].position.y,  wBottom.position.z + wBottomLayer.scale.z / 2 + 0.625/24 * ftTom+0.03125/24*ftTom );
+             
+            // }
+
+        } else {
+            if(index == 1){
+                _sDoors_parent[index].position.set(_columns[0].position.x + offset -thickness /48  * ftTom -(0.5*ftTom/12), _sDoors_parent[index].position.y,  wBottom.position.z + wBottomLayer.scale.z / 2 - 0.625/24 * ftTom-0.03125/24*ftTom  );
+            }else if(index == 3){
+                _sDoors_parent[index].position.set(_columns[5].position.x + offset/24 -thickness /48  * ftTom -(0.5*ftTom/12), _sDoors_parent[index].position.y,  wBottom.position.z + wBottomLayer.scale.z / 2 - 0.625/24 * ftTom-0.03125/24*ftTom  );
+            }else if (index == 5){
+                _sDoors_parent[index].position.set(_columns[9].position.x + offset/24 -thickness /48  * ftTom -(0.5*ftTom/12), _sDoors_parent[index].position.y,  wBottom.position.z + wBottomLayer.scale.z / 2 - 0.625/24 * ftTom-0.03125/24*ftTom  );
+            }
+            
+    
+        }
+
+
+    }
+}
+
+
+function removeSlideDoors(index){
     
     _doorRails_parent_group.forEach(e=>{
         _doorRailParent.remove(e);
     })
+
+    
+    if (index) {
+
+
+
+        if (_sDoors_parent[index] instanceof THREE.Group) {
+            _sDoors_parent_group.remove(_sDoors_parent[index]);
+
+        }
+
+
+
+    } else {
+
+        _sDoors_parent.forEach(e => {
+            if (e instanceof THREE.Group) {
+
+                _sDoors_parent_group.remove(e);
+
+            }
+
+        })
+
+        _sDoors_parent = [];
+
+
+    }
 }
