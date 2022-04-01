@@ -1,4 +1,3 @@
-
 let scene, camera, renderer, directionalLight, ambientLight, controls;
 
 
@@ -16,7 +15,7 @@ const thickness = 0.875;
 const ftTom = 0.3048;
 let isLoft = false;
 let wBottom, wTop, wLeft, wRight, wBack, wpLoftTop, wpLoftLeft, wpLoftRight, wpLoftBottom, wpLoftBack, wBottomLayer, wTopLayer, wLeftLayer, wRightLayer,
-wLeftLayerTop, wLeftLayerBottom, wRightLayerTop, wRightLayerBottom;
+    wLeftLayerTop, wLeftLayerBottom, wRightLayerTop, wRightLayerBottom;
 let segments, offset = 0,
 
     part = [],
@@ -91,7 +90,8 @@ let _lockers = [],
     _columns = [],
     _columns_group, _hDoors_parent = [],
     _hDoors_parent_group,
-    _sDoors_parent = [], _sDoors_parent_group;
+    _sDoors_parent = [],
+    _sDoors_parent_group;
 let _flippableDoor = [];
 var defaultRotation = new THREE.Quaternion();
 let _isDoorRight = [],
@@ -136,7 +136,10 @@ let _doorRails_parent = [],
     _doorRailParent;
 
 
- var  thicknessInmeter = 0.022225;
+var thicknessInmeter = 0.022225;
+
+let isSlideRight = false,
+    isSlideLeft = false;
 init();
 
 animate();
@@ -146,7 +149,7 @@ addHorizontalParts();
 
 function init() {
 
-    
+
     scene = new THREE.Scene();
     window.scene = scene;
     THREE.Cache.enabled = true;
@@ -295,6 +298,7 @@ function render() {
 
     delta = clock.getDelta();
     doorAction();
+    slideDoorAction();
     loftDoorAction();
 
     paintWardrobe()
@@ -318,7 +322,8 @@ function getInputs() {
     chooseColumns_number();
 
     $("#actionDoor").hide();
-
+    $("#actionSlideDoorLeft").hide();
+    $("#actionSlideDoorRight").hide();
 
     // $("#editDimensions").hide();
 
@@ -357,11 +362,19 @@ function getInputs() {
         }
 
 
+        $("#actionSlideDoorLeft").hide();
+        $("#actionSlideDoorRight").hide();
+        $("#actionSlideDoorLeft").empty();
+        $("#actionSlideDoorRight").empty();
+        $("#actionSlideDoorLeft").append('<i class="m-lg-1  fa fa-door-open"></i>Open Left ');
+        $("#actionSlideDoorRight").append('<i class="m-lg-1  fa fa-door-open"></i>Open Right ');
+
         $("#actionDoor").hide();
         $("#actionDoor").empty();
         $("#actionDoor").append('<i class="m-lg-1  fa fa-door-open"></i>Open Door ');
         isDoorOpened = false;
-
+        isSlideRight = false;
+        isSlideLeft = false;
     })
 
     $("input:radio[name='heightOptions']").click(function () {
@@ -401,7 +414,8 @@ function getInputs() {
                 isCreated = true;
                 chooseColumns_number();
                 createColumns_Doors(isHingedDoor);
-
+                $("#actionSlideDoorLeft").show();
+                $("#actionSlideDoorRight").show();
             }
         }
     });
@@ -434,8 +448,54 @@ function getInputs() {
 
     });
 
+    $("#actionSlideDoorLeft").append('<i class="m-lg-1  fa fa-door-open"></i>Open Left ');
+    $("#actionSlideDoorRight").append('<i class="m-lg-1  fa fa-door-open"></i>Open Right ')
+
+    $("#actionSlideDoorLeft").click(function () {
 
 
+        if (!isSlideLeft) {
+
+            $(this).empty();
+            $(this).append('<i class="m-lg-1  fa fa-door-closed"></i>Close Door ');
+            isSlideLeft = true;
+            isSlideRight = false;
+            $("#actionSlideDoorRight").empty();
+            $("#actionSlideDoorRight").append('<i class="m-lg-1  fa fa-door-open"></i>Open Right ');
+        } else {
+
+            $(this).empty();
+            $(this).append('<i class="m-lg-1  fa fa-door-open"></i>Open Left ');
+
+
+            isSlideLeft = false;
+
+        }
+
+
+    })
+
+
+    $("#actionSlideDoorRight").click(function () {
+
+
+        if (!isSlideRight) {
+
+            $(this).empty();
+            $(this).append('<i class="m-lg-1  fa fa-door-closed"></i>Close Door ');
+            isSlideRight = true;
+            isSlideLeft = false;
+            $("#actionSlideDoorLeft").empty();
+            $("#actionSlideDoorLeft").append('<i class="m-lg-1  fa fa-door-open"></i>Open Left ');
+        } else {
+            $(this).empty();
+            $(this).append('<i class="m-lg-1  fa fa-door-open"></i>Open Right ');
+            isSlideRight = false;
+
+        }
+
+
+    })
 
     $("#actionDoor").append('<i class="m-lg-1  fa fa-door-open"></i>Open Door ');
     $("#actionDoor").click(function () {
@@ -497,15 +557,15 @@ function getInputs() {
 
 
 function create_lights() {
-    
-    
+
+
     directionalLight = new THREE.DirectionalLight(0xfff3db, 0.3);
     directionalLight.position.set(0.5, 1, 10);
     directionalLight.castShadow = true;
     directionalLight.shadow.radius = 1;
     directionalLight.shadow.mapSize.width = 1024; // default
     directionalLight.shadow.mapSize.height = 1024; // default
-    
+
     scene.add(directionalLight);
 
     var directionalLight1 = new THREE.DirectionalLight(0xbfe4ff, 0.3);
@@ -516,8 +576,8 @@ function create_lights() {
     directionalLight1.shadow.mapSize.width = 512; // default
     directionalLight1.shadow.mapSize.height = 512;
     scene.add(directionalLight1);
-   
-    var ambientLight = new THREE.AmbientLight(0xffffff,0.7  );
+
+    var ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
     scene.add(ambientLight)
     var directionalLight2 = new THREE.DirectionalLight(0xdedede, 0.3);
     directionalLight2.position.set(0, 3, -3);
@@ -585,35 +645,35 @@ function updateColumns() {
     for (var i = 0; i < customColumns - 1; i++) {
         if (!_columns[i]) {
             createColumns(i);
-            if(!isHingedDoor){
+            if (!isHingedDoor) {
                 var subtract = ftTom * 1.35 / 12
 
-          
-                    _columns[i].scale.set((thickness / 12) * ftTom, wTop.position.y-wTop.scale.y - wBottom.position.y , (thickness / 12) * ftTom + wDepth * ftTom - subtract);
-                    _columns[i].position.set(i * offset, ( _columns[i].scale.y / 2)  + (wBottom.position.y)+ wBottom.scale.y/2  , ((thickness / 24) * ftTom) - subtract/2);
-           
-               
-               
-            }else{
-                _columns[i].scale.set((thickness / 12) * ftTom,  wTop.position.y-wTop.scale.y - wBottom.position.y , (thickness / 12) * ftTom + wDepth * ftTom);
-                _columns[i].position.set(i * offset, ( _columns[i].scale.y / 2)+ (wBottom.position.y)   + wBottom.scale.y/2  , ((thickness / 24) * ftTom));
+
+                _columns[i].scale.set((thickness / 12) * ftTom, wTop.position.y - wTop.scale.y - wBottom.position.y, (thickness / 12) * ftTom + wDepth * ftTom - subtract);
+                _columns[i].position.set(i * offset, (_columns[i].scale.y / 2) + (wBottom.position.y) + wBottom.scale.y / 2, ((thickness / 24) * ftTom) - subtract / 2);
+
+
+
+            } else {
+                _columns[i].scale.set((thickness / 12) * ftTom, wTop.position.y - wTop.scale.y - wBottom.position.y, (thickness / 12) * ftTom + wDepth * ftTom);
+                _columns[i].position.set(i * offset, (_columns[i].scale.y / 2) + (wBottom.position.y) + wBottom.scale.y / 2, ((thickness / 24) * ftTom));
             }
 
         } else {
             if (_columns[i] instanceof THREE.Mesh) {
 
-                if(!isHingedDoor){
+                if (!isHingedDoor) {
                     var subtract = ftTom * 1.35 / 12
 
-          
-                    _columns[i].scale.set((thickness / 12) * ftTom, wTop.position.y-wTop.scale.y - wBottom.position.y , (thickness / 12) * ftTom + wDepth * ftTom - subtract);
-                    _columns[i].position.set(i * offset, ( _columns[i].scale.y / 2)  + (wBottom.position.y)+ wBottom.scale.y/2  , ((thickness / 24) * ftTom) - subtract/2);
-                }else{
-                    _columns[i].scale.set((thickness / 12) * ftTom, wTop.position.y-wTop.scale.y - wBottom.position.y , (thickness / 12) * ftTom + wDepth * ftTom);
-                    _columns[i].position.set(i * offset, ( _columns[i].scale.y / 2)  + (wBottom.position.y)  + wBottom.scale.y/2   , ((thickness / 24) * ftTom));
+
+                    _columns[i].scale.set((thickness / 12) * ftTom, wTop.position.y - wTop.scale.y - wBottom.position.y, (thickness / 12) * ftTom + wDepth * ftTom - subtract);
+                    _columns[i].position.set(i * offset, (_columns[i].scale.y / 2) + (wBottom.position.y) + wBottom.scale.y / 2, ((thickness / 24) * ftTom) - subtract / 2);
+                } else {
+                    _columns[i].scale.set((thickness / 12) * ftTom, wTop.position.y - wTop.scale.y - wBottom.position.y, (thickness / 12) * ftTom + wDepth * ftTom);
+                    _columns[i].position.set(i * offset, (_columns[i].scale.y / 2) + (wBottom.position.y) + wBottom.scale.y / 2, ((thickness / 24) * ftTom));
                 }
-                
-       
+
+
             }
         }
     }
@@ -660,7 +720,7 @@ function updateColumns() {
 
 
     for (var i = 0; i < customColumns; i++) {
-        
+
         if (!_m_splitters[i]) {
 
             createHorizontalSplitter(i);
@@ -945,26 +1005,26 @@ function updateHorizontalSplitter(index) {
 
 
 
-        if(!isHingedDoor){
-            _m_splitters[index].scale.set(offset - thickness / 12 * ftTom, (thickness / 12) * ftTom, wDepth * ftTom );
-            _m_splitters[index].position.set(index * offset, wTop.position.y - (3 * ftTom) + wTop.scale.y / 2 + (thickness / 12) * ftTom, wLeft.position.z / 2 );
-    
-        }else{
+        if (!isHingedDoor) {
             _m_splitters[index].scale.set(offset - thickness / 12 * ftTom, (thickness / 12) * ftTom, wDepth * ftTom);
-            _m_splitters[index].position.set(index * offset, wTop.position.y - (3 * ftTom) + wTop.scale.y / 2 + (thickness / 12) * ftTom, wLeft.position.z / 2 );
-    
+            _m_splitters[index].position.set(index * offset, wTop.position.y - (3 * ftTom) + wTop.scale.y / 2 + (thickness / 12) * ftTom, wLeft.position.z / 2);
+
+        } else {
+            _m_splitters[index].scale.set(offset - thickness / 12 * ftTom, (thickness / 12) * ftTom, wDepth * ftTom);
+            _m_splitters[index].position.set(index * offset, wTop.position.y - (3 * ftTom) + wTop.scale.y / 2 + (thickness / 12) * ftTom, wLeft.position.z / 2);
+
         }
-       
+
     } else {
         if (_m_splitters[index] instanceof THREE.Mesh) {
-            if(!isHingedDoor){
-                _m_splitters[index].scale.set(offset - thickness / 12 * ftTom, (thickness / 12) * ftTom, wDepth * ftTom - subtract/2);
-                _m_splitters[index].position.set(index * offset, wTop.position.y - (3 * ftTom) + wTop.scale.y / 2 + (thickness / 12) * ftTom, wLeft.position.z / 2 );
-            }else{
+            if (!isHingedDoor) {
+                _m_splitters[index].scale.set(offset - thickness / 12 * ftTom, (thickness / 12) * ftTom, wDepth * ftTom - subtract / 2);
+                _m_splitters[index].position.set(index * offset, wTop.position.y - (3 * ftTom) + wTop.scale.y / 2 + (thickness / 12) * ftTom, wLeft.position.z / 2);
+            } else {
                 _m_splitters[index].scale.set(offset - thickness / 12 * ftTom, (thickness / 12) * ftTom, wDepth * ftTom);
                 _m_splitters[index].position.set(index * offset, wTop.position.y - (3 * ftTom) + wTop.scale.y / 2 + (thickness / 12) * ftTom, wLeft.position.z / 2);
             }
-           
+
         }
     }
 }
@@ -1272,7 +1332,7 @@ function createWardrobe() {
     wBottom.layers.set(0);
 
 
-    
+
     wBottomLayer = new THREE.Mesh(g, _wardrobeMaterial);
     wBottomLayer.name = "wardrobe_bottom_layer";
     wBottomLayer.position.set(0, 0, 0);
@@ -1293,17 +1353,17 @@ function createWardrobe() {
     wLeftLayer.position.set(0, 0, 0);
     wLeftLayer.layers.set(0);
 
-    
+
     wLeftLayerTop = new THREE.Mesh(g, _wardrobeMaterial);
     wLeftLayerTop.name = "wardrobe_left_layerTop";
     wLeftLayerTop.position.set(0, 0, 0);
     wLeftLayerTop.layers.set(0);
-    
+
     wLeftLayerBottom = new THREE.Mesh(g, _wardrobeMaterial);
     wLeftLayerBottom.name = "wardrobe_left_layerBottom";
     wLeftLayerBottom.position.set(0, 0, 0);
     wLeftLayerBottom.layers.set(0);
-    
+
 
     wRight = new THREE.Mesh(g, _wardrobeMaterial);
     wRight.name = "wardrobe_right";
@@ -1315,7 +1375,7 @@ function createWardrobe() {
     wRightLayer.position.set(0, 0, 0);
     wRightLayer.layers.set(0);
 
-    
+
     wRightLayerBottom = new THREE.Mesh(g, _wardrobeMaterial);
     wRightLayerBottom.name = "wardrobe_right_layerBottom";
     wRightLayerBottom.position.set(0, 0, 0);
@@ -1366,7 +1426,7 @@ function createWardrobe() {
     wpLoftBack.visible = false;
     wpLoftBack.layers.set(1);
 
-    
+
     scene.add(wBottom);
     scene.add(wBack);
     scene.add(wLeft);
@@ -1390,21 +1450,21 @@ function createWardrobe() {
 
 function updateWardrobe() {
 
-    
+
     if (wBottom) {
-        if(isHingedDoor){
-            wBottom.scale.set(wWidth * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));    
+        if (isHingedDoor) {
+            wBottom.scale.set(wWidth * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));
             wBottom.position.set(0, (2.5 / 12) * ftTom + (thickness / 24) * ftTom, ((thickness / 24) * ftTom));
-            wBottomLayer.visible =false;
-        }else{
-            wBottomLayer.visible =true;
-            wBottom.scale.set(wWidth * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom)- 1.35/12 * ftTom);
-            wBottom.position.set(0, (2.5 / 12) * ftTom + (thickness / 24) * ftTom, ((thickness / 24) * ftTom)- 1.35/24 * ftTom);
+            wBottomLayer.visible = false;
+        } else {
+            wBottomLayer.visible = true;
+            wBottom.scale.set(wWidth * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom) - 1.35 / 12 * ftTom);
+            wBottom.position.set(0, (2.5 / 12) * ftTom + (thickness / 24) * ftTom, ((thickness / 24) * ftTom) - 1.35 / 24 * ftTom);
         }
-        
+
 
     }
-    
+
     if (wBottomLayer) {
         wBottomLayer.scale.set(wWidth * ftTom, (thickness / 24) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));
         wBottomLayer.position.set(0, (2.5 / 12) * ftTom + (thickness / 48) * ftTom, ((thickness / 24) * ftTom));
@@ -1412,103 +1472,103 @@ function updateWardrobe() {
     }
     if (wBack) {
         wBack.scale.set(wWidth * ftTom, wHeight * ftTom - (2.5 / 12 * ftTom), (thickness / 12) * ftTom);
-        if(isHingedDoor){
+        if (isHingedDoor) {
             wBack.position.set(0, (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2, -wBottom.scale.z / 2);
-        }else{
-            wBack.position.set(0, (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2, -wBottom.scale.z / 2  - 1.35/24 * ftTom);
+        } else {
+            wBack.position.set(0, (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2, -wBottom.scale.z / 2 - 1.35 / 24 * ftTom);
         }
-        
+
 
     }
 
-    if(wTopLayer){
-        wTopLayer.scale.set((wWidth * ftTom), (thickness / 24) * ftTom, wDepth * ftTom + (2 * thickness / 12) * ftTom );
-        wTopLayer.position.set(0,wBottom.position.y + wBack.scale.y +(thickness / 48) * ftTom  - wBottom.scale.y, 0);
+    if (wTopLayer) {
+        wTopLayer.scale.set((wWidth * ftTom), (thickness / 24) * ftTom, wDepth * ftTom + (2 * thickness / 12) * ftTom);
+        wTopLayer.position.set(0, wBottom.position.y + wBack.scale.y + (thickness / 48) * ftTom - wBottom.scale.y, 0);
     }
 
-    
+
     if (wTop) {
-        if(isHingedDoor){
+        if (isHingedDoor) {
             wTopLayer.visible = false;
-            wTop.scale.set((wWidth * ftTom), (thickness / 12) * ftTom, wDepth * ftTom + (2 * thickness / 12) * ftTom );
-            wTop.position.set(0,wBottom.position.y + wBack.scale.y  - wBottom.scale.y, 0);
-        }else{
+            wTop.scale.set((wWidth * ftTom), (thickness / 12) * ftTom, wDepth * ftTom + (2 * thickness / 12) * ftTom);
+            wTop.position.set(0, wBottom.position.y + wBack.scale.y - wBottom.scale.y, 0);
+        } else {
             wTopLayer.visible = true;
-            wTop.scale.set((wWidth * ftTom), (thickness / 12) * ftTom, wDepth * ftTom + (2 * thickness / 12) * ftTom - 1.35/12 * ftTom);
-            wTop.position.set(0,wBottom.position.y + wBack.scale.y  - wBottom.scale.y, - 1.35/24 * ftTom);
+            wTop.scale.set((wWidth * ftTom), (thickness / 12) * ftTom, wDepth * ftTom + (2 * thickness / 12) * ftTom - 1.35 / 12 * ftTom);
+            wTop.position.set(0, wBottom.position.y + wBack.scale.y - wBottom.scale.y, -1.35 / 24 * ftTom);
         }
-        
+
 
         // ((wBack.scale.y)-wTop.scale.y/2+wBottom.position.y+wBottom.scale.y/2-(thickness/12)*ftTom)
     }
     if (wLeftLayer) {
         wLeftLayer.scale.set((thickness / 24) * ftTom, (wHeight) * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom);
-        wLeftLayer.position.set(-(((thickness / 12) * ftTom) - wLeftLayer.scale.x/2 + (wBack.scale.x / 2)), wLeftLayer.scale.y/2 + (wBottom.position.y)  - (2.5 / 12 * ftTom) - wBottom.scale.y/2 , 0);
+        wLeftLayer.position.set(-(((thickness / 12) * ftTom) - wLeftLayer.scale.x / 2 + (wBack.scale.x / 2)), wLeftLayer.scale.y / 2 + (wBottom.position.y) - (2.5 / 12 * ftTom) - wBottom.scale.y / 2, 0);
 
     }
- 
+
     if (wLeftLayerBottom) {
-        wLeftLayerBottom.scale.set((thickness / 24) * ftTom,  (thickness / 24) * ftTom + 2.5/12 * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom);
-        wLeftLayerBottom.position.set(-(((thickness / 48) * ftTom) + (wBack.scale.x / 2)), wLeftLayerBottom.scale.y/2 + (wBottom.position.y)  - (2.5 / 12 * ftTom) - wBottom.scale.y/2 , 0);
+        wLeftLayerBottom.scale.set((thickness / 24) * ftTom, (thickness / 24) * ftTom + 2.5 / 12 * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom);
+        wLeftLayerBottom.position.set(-(((thickness / 48) * ftTom) + (wBack.scale.x / 2)), wLeftLayerBottom.scale.y / 2 + (wBottom.position.y) - (2.5 / 12 * ftTom) - wBottom.scale.y / 2, 0);
 
     }
- 
+
 
     if (wLeftLayerTop) {
-        wLeftLayerTop.scale.set((thickness / 24) * ftTom,  (thickness / 24) * ftTom , (2 * thickness / 12) * ftTom + wDepth * ftTom);
-        wLeftLayerTop.position.set(-(((thickness / 48) * ftTom) + (wBack.scale.x / 2)), (wTopLayer.position.y) , 0);
+        wLeftLayerTop.scale.set((thickness / 24) * ftTom, (thickness / 24) * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom);
+        wLeftLayerTop.position.set(-(((thickness / 48) * ftTom) + (wBack.scale.x / 2)), (wTopLayer.position.y), 0);
 
     }
     if (wLeft) {
-        if(isHingedDoor){
-            wLeftLayer.visible= false;
+        if (isHingedDoor) {
+            wLeftLayer.visible = false;
             wLeftLayerBottom.visible = false;
             wLeftLayerTop.visible = false;
             wLeft.scale.set((thickness / 12) * ftTom, (wHeight) * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom);
-            wLeft.position.set(-(((thickness / 24) * ftTom) + (wBack.scale.x / 2)), wLeft.scale.y/2 + (wBottom.position.y)  - (2.5 / 12 * ftTom) - wBottom.scale.y/2 , 0);
-        }else{
-            wLeftLayer.visible= true;
+            wLeft.position.set(-(((thickness / 24) * ftTom) + (wBack.scale.x / 2)), wLeft.scale.y / 2 + (wBottom.position.y) - (2.5 / 12 * ftTom) - wBottom.scale.y / 2, 0);
+        } else {
+            wLeftLayer.visible = true;
             wLeftLayerBottom.visible = true;
             wLeftLayerTop.visible = true;
-            wLeft.scale.set((thickness / 12) * ftTom, (wHeight) * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom- 1.35/12 * ftTom);
-            wLeft.position.set(-(((thickness / 24) * ftTom) + (wBack.scale.x / 2)), wLeft.scale.y/2 + (wBottom.position.y)  - (2.5 / 12 * ftTom) - wBottom.scale.y/2 , - 1.35/24 * ftTom);
+            wLeft.scale.set((thickness / 12) * ftTom, (wHeight) * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom - 1.35 / 12 * ftTom);
+            wLeft.position.set(-(((thickness / 24) * ftTom) + (wBack.scale.x / 2)), wLeft.scale.y / 2 + (wBottom.position.y) - (2.5 / 12 * ftTom) - wBottom.scale.y / 2, -1.35 / 24 * ftTom);
         }
-      
+
 
     }
 
     if (wRightLayer) {
         wRightLayer.scale.set((thickness / 24) * ftTom, (wHeight) * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom);
-        wRightLayer.position.set((((thickness / 12) * ftTom) + (wBack.scale.x / 2))- wRightLayer.scale.x/2, wRightLayer.scale.y/2 + (wBottom.position.y)  - (2.5 / 12 * ftTom) - wBottom.scale.y/2 , 0);
+        wRightLayer.position.set((((thickness / 12) * ftTom) + (wBack.scale.x / 2)) - wRightLayer.scale.x / 2, wRightLayer.scale.y / 2 + (wBottom.position.y) - (2.5 / 12 * ftTom) - wBottom.scale.y / 2, 0);
 
     }
 
-    
+
     if (wRightLayerTop) {
-        wRightLayerTop.scale.set((thickness / 24) * ftTom,  (thickness / 24) * ftTom , (2 * thickness / 12) * ftTom + wDepth * ftTom);
-        wRightLayerTop.position.set((((thickness / 48) * ftTom) + (wBack.scale.x / 2)), (wTopLayer.position.y) , 0);
+        wRightLayerTop.scale.set((thickness / 24) * ftTom, (thickness / 24) * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom);
+        wRightLayerTop.position.set((((thickness / 48) * ftTom) + (wBack.scale.x / 2)), (wTopLayer.position.y), 0);
 
     }
     if (wRightLayerBottom) {
-        wRightLayerBottom.scale.set((thickness / 24) * ftTom,  (thickness / 24) * ftTom + 2.5/12 * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom);
-        wRightLayerBottom.position.set((((thickness / 48) * ftTom) + (wBack.scale.x / 2))  , wRightLayerBottom.scale.y/2 + (wBottom.position.y)  - (2.5 / 12 * ftTom) - wBottom.scale.y/2 , 0);
+        wRightLayerBottom.scale.set((thickness / 24) * ftTom, (thickness / 24) * ftTom + 2.5 / 12 * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom);
+        wRightLayerBottom.position.set((((thickness / 48) * ftTom) + (wBack.scale.x / 2)), wRightLayerBottom.scale.y / 2 + (wBottom.position.y) - (2.5 / 12 * ftTom) - wBottom.scale.y / 2, 0);
 
     }
     if (wRight) {
-        if(isHingedDoor){
-            wRightLayer.visible= false;
-            wRightLayerBottom.visible= false;
+        if (isHingedDoor) {
+            wRightLayer.visible = false;
+            wRightLayerBottom.visible = false;
             wRightLayerTop.visible = false;
             wRight.scale.set((thickness / 12) * ftTom, (wHeight) * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom);
-            wRight.position.set((((thickness / 24) * ftTom) + (wBack.scale.x / 2)), wRight.scale.y/2 + (wBottom.position.y)  - (2.5 / 12 * ftTom) - wBottom.scale.y/2 , 0);
-        }else{
-            wRightLayer.visible= true;
-            wRightLayerBottom.visible= true;
+            wRight.position.set((((thickness / 24) * ftTom) + (wBack.scale.x / 2)), wRight.scale.y / 2 + (wBottom.position.y) - (2.5 / 12 * ftTom) - wBottom.scale.y / 2, 0);
+        } else {
+            wRightLayer.visible = true;
+            wRightLayerBottom.visible = true;
             wRightLayerTop.visible = true;
-            wRight.scale.set((thickness / 12) * ftTom, (wHeight) * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom- 1.35/12 * ftTom);
-            wRight.position.set((((thickness / 24) * ftTom) + (wBack.scale.x / 2)), wRight.scale.y/2 + (wBottom.position.y)  - (2.5 / 12 * ftTom) - wBottom.scale.y/2 , - 1.35/24 * ftTom);
+            wRight.scale.set((thickness / 12) * ftTom, (wHeight) * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom - 1.35 / 12 * ftTom);
+            wRight.position.set((((thickness / 24) * ftTom) + (wBack.scale.x / 2)), wRight.scale.y / 2 + (wBottom.position.y) - (2.5 / 12 * ftTom) - wBottom.scale.y / 2, -1.35 / 24 * ftTom);
         }
-      
+
 
     }
     // if (wRight) {
@@ -1517,12 +1577,11 @@ function updateWardrobe() {
     // }
 
 
-    if (wpLoftBottom) { 
-        if(!isHingedDoor){
+    if (wpLoftBottom) {
+        if (!isHingedDoor) {
             wpLoftBottom.scale.set(wWidth * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + (2 * (thickness / 12) * ftTom));
             wpLoftBottom.position.set(wTop.position.x, wTop.position.y + wpLoftBottom.scale.y, wTopLayer.position.z);
-        }
-        else{
+        } else {
             wpLoftBottom.scale.set(wWidth * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + (2 * (thickness / 12) * ftTom));
             wpLoftBottom.position.set(wTop.position.x, wTop.position.y + wpLoftBottom.scale.y, wTopLayer.position.z);
         }
@@ -1543,10 +1602,10 @@ function updateWardrobe() {
         wpLoftRight.position.set((thickness / 24 * ftTom + wpLoftBottom.scale.x / 2), wpLoftBottom.position.y + wpLoftRight.scale.y / 2 - wpLoftBottom.scale.y / 2, 0);
     }
     if (wpLoftTop) {
-       
-            wpLoftTop.scale.set(wWidth * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));
-            wpLoftTop.position.set(0, wpLoftBack.scale.y + wpLoftBottom.position.y - (thickness / 12) * ftTom, ((thickness /24) * ftTom));
-       
+
+        wpLoftTop.scale.set(wWidth * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));
+        wpLoftTop.position.set(0, wpLoftBack.scale.y + wpLoftBottom.position.y - (thickness / 12) * ftTom, ((thickness / 24) * ftTom));
+
     }
 }
 
@@ -2686,13 +2745,13 @@ function post_process() {
     composer.addPass(renderPass);
     const pixelRatio = renderer.getPixelRatio();
 
-    const smaaPass = new THREE.SMAAPass(fwidth * pixelRatio , fheight * pixelRatio);
+    const smaaPass = new THREE.SMAAPass(fwidth * pixelRatio, fheight * pixelRatio);
     composer.addPass(smaaPass);
-    const ssaaPass=  new THREE.SSAARenderPass(scene,camera);
+    const ssaaPass = new THREE.SSAARenderPass(scene, camera);
     composer.addPass(ssaaPass);
     const copyPass = new THREE.ShaderPass(THREE.CopyShader);
     composer.addPass(copyPass);
-   
+
 
 
 
@@ -2721,13 +2780,13 @@ function post_process() {
     composer.addPass(planeOultinePass);
 
     // fxaaPass = new THREE.ShaderPass(THREE.FXAAShader);
- 
+
 
     // fxaaPass.material.uniforms[ 'resolution' ].value.x = 1 / ( fwidth * pixelRatio );
     // fxaaPass.material.uniforms[ 'resolution' ].value.y = 1 / (  fheight* pixelRatio );
-  
+
     // composer.addPass(fxaaPass);
-  
+
 
 
 }
@@ -3243,18 +3302,18 @@ function createHingedDoor(index) {
 }
 
 function updateHingedDoorUpSize(index) {
-   
+
     if (_hDoors_parent[index] instanceof THREE.Group) {
-        var posY = (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2 ;
-        var scaleY =  wTop.position.y - wTop.scale.y/2 - wBottom.position.y - wBottom.scale.y/2;
+        var posY = (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2;
+        var scaleY = wTop.position.y - wTop.scale.y / 2 - wBottom.position.y - wBottom.scale.y / 2;
         if (_extDrawers_splitters.length > 0) {
-            posY = (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2 + ftTom/2  + thickness/24 * ftTom  ;
-            scaleY =  wTop.position.y - wTop.scale.y/2 - wBottom.position.y - wBottom.scale.y/2 - ftTom - thickness/12 * ftTom ;
+            posY = (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2 + ftTom / 2 + thickness / 24 * ftTom;
+            scaleY = wTop.position.y - wTop.scale.y / 2 - wBottom.position.y - wBottom.scale.y / 2 - ftTom - thickness / 12 * ftTom;
         } else {
             posY = (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2;
-            scaleY =  wTop.position.y - wTop.scale.y/2 - wBottom.position.y - wBottom.scale.y/2;
+            scaleY = wTop.position.y - wTop.scale.y / 2 - wBottom.position.y - wBottom.scale.y / 2;
         }
-    
+
         _hDoors_parent_group.position.set(offset + wLeft.position.x, _hDoors_parent_group.position.y, _hDoors_parent_group.position.z);
         if (index % 2 == 0) {
 
@@ -3287,8 +3346,8 @@ function updateHingedDoorUpSize(index) {
 }
 
 function updateHingedDoor(index) {
-    var posY = (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2 ;
-    var scaleY =  wTop.position.y - wTop.scale.y/2 - wBottom.position.y - wBottom.scale.y/2;
+    var posY = (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2;
+    var scaleY = wTop.position.y - wTop.scale.y / 2 - wBottom.position.y - wBottom.scale.y / 2;
     // _columns_group.position.x + _columns[index - 1].position.x + thickness / 24 * ftTom
     if (_hDoors_parent[index] instanceof THREE.Group) {
 
@@ -4350,9 +4409,9 @@ function createDoorRailMesh(index) {
 
 
     _rBottom.scale.set(ftTom * 1.35 / 12, ftTom * 0.05 / 12, 1);
-    _rLeft.scale.set(ftTom * 0.03125 / 12, ftTom * 0.875/ 24 - _rBottom.scale.y, 1);
+    _rLeft.scale.set(ftTom * 0.03125 / 12, ftTom * 0.875 / 24 - _rBottom.scale.y, 1);
     _rRight.scale.set(ftTom * 0.03125 / 12, ftTom * 0.875 / 24 - _rBottom.scale.y, 1);
-    _rMiddle.scale.set(ftTom * 0.03125 / 12, ftTom * 0.875/ 24 - _rBottom.scale.y, 1);
+    _rMiddle.scale.set(ftTom * 0.03125 / 12, ftTom * 0.875 / 24 - _rBottom.scale.y, 1);
 
 
     _rMiddle.position.setX(_rBottom.position.x / 2);
@@ -4402,102 +4461,98 @@ function createDoorRail(index) {
 
 function updateDoorRail() {
 
-    var posZ = wBottom.position.z + wBottom.scale.z / 2  + 1.35/24 * ftTom ;
+    var posZ = wBottom.position.z + wBottom.scale.z / 2 + 1.35 / 24 * ftTom;
 
-    if(_doorRailParent instanceof THREE.Group){
-        
+    if (_doorRailParent instanceof THREE.Group) {
+
         for (var i = 0; i < _doorRailParent.children.length; i++) {
-       
+
             if (_doorRails_parent_group[i] instanceof THREE.Group) {
-               
-                if(i==0){
-                    _doorRails_parent_group[i].position.set( _columns[1].position.x  ,   _doorRailParent.position.y,  _doorRailParent.position.z)
-                }else if(i==1){
-                    _doorRails_parent_group[i].position.set( _columns[5].position.x    ,   _doorRailParent.position.y,  _doorRailParent.position.z)
-                }else{
-                    _doorRails_parent_group[i].position.set( _columns[9].position.x  ,   _doorRailParent.position.y,  _doorRailParent.position.z)
+
+                if (i == 0) {
+                    _doorRails_parent_group[i].position.set(_columns[1].position.x, _doorRailParent.position.y, _doorRailParent.position.z)
+                } else if (i == 1) {
+                    _doorRails_parent_group[i].position.set(_columns[5].position.x, _doorRailParent.position.y, _doorRailParent.position.z)
+                } else {
+                    _doorRails_parent_group[i].position.set(_columns[9].position.x, _doorRailParent.position.y, _doorRailParent.position.z)
                 }
 
 
 
                 for (var j = 0; j < _doorRails_parent_group[i].children.length; j++) {
                     if (_doorRails_parent_group[i].children[j] instanceof THREE.Group) {
-    
-                       
-                        var rail =  _doorRails_parent_group[i].children[j];
+
+
+                        var rail = _doorRails_parent_group[i].children[j];
                         if (j == 0) {
-                          
+
                             rail.name = "rail_top"
-                            rail.scale.setZ( (_columns[0].position.x - _columns[2].position.x )- 2* offset + thickness/12 *ftTom )
-                            rail.position.set (0, wTopLayer.position.y - wTopLayer.scale.y / 2 - ftTom * 0.05 / 24 , posZ);
-                            rail.rotation.x=(180 * THREE.Math.DEG2RAD); 
-                            rail.rotation.y = (90 * THREE.Math.DEG2RAD) 
+                            rail.scale.setZ((_columns[0].position.x - _columns[2].position.x) - 2 * offset + thickness / 12 * ftTom)
+                            rail.position.set(0, wTopLayer.position.y - wTopLayer.scale.y / 2 - ftTom * 0.05 / 24, posZ);
+                            rail.rotation.x = (180 * THREE.Math.DEG2RAD);
+                            rail.rotation.y = (90 * THREE.Math.DEG2RAD)
                             // rail.rotateX(180 * THREE.Math.DEG2RAD);
                             // rail.rotateY(90 * THREE.Math.DEG2RAD);
-                        } 
-                        else if(j==_doorRails_parent_group[i].children.length-1){
+                        } else if (j == _doorRails_parent_group[i].children.length - 1) {
                             rail.name = "rail_bottom"
-                            rail.scale.setZ( (_columns[0].position.x - _columns[2].position.x )- 2* offset + thickness/12 *ftTom)
-                            rail.position.set (0, wBottomLayer.scale.y/2 + wBottomLayer.position.y + ftTom * 0.05 / 24 , posZ);
-                          
-                            rail.rotation.y = (90 * THREE.Math.DEG2RAD) 
-                        }
-                       
-                        else if(j==1){
+                            rail.scale.setZ((_columns[0].position.x - _columns[2].position.x) - 2 * offset + thickness / 12 * ftTom)
+                            rail.position.set(0, wBottomLayer.scale.y / 2 + wBottomLayer.position.y + ftTom * 0.05 / 24, posZ);
+
+                            rail.rotation.y = (90 * THREE.Math.DEG2RAD)
+                        } else if (j == 1) {
                             rail.name = "rail_left"
-                            rail.scale.setZ(wTopLayer.position.y - wTopLayer.scale.y/2  - wBottomLayer.position.y + wBottomLayer.scale.y/2 - thickness/24 * ftTom)
-                            if(i!=0){
-                                if(i<2){
-                                    rail.position.set ( _doorRails_parent_group[i].position.x -_columns[5].position.x - 2*offset   + ftTom * 0.05 / 24 , wBack.scale.y/2- wBottom.scale.y/2 + wBottom.position.y, posZ);
-                                }else{
-                                    rail.position.set ( _doorRails_parent_group[i].position.x -_columns[7].position.x - 4*offset    + ftTom * 0.05 / 24, wBack.scale.y/2- wBottom.scale.y/2 + wBottom.position.y, posZ);
+                            rail.scale.setZ(wTopLayer.position.y - wTopLayer.scale.y / 2 - wBottomLayer.position.y + wBottomLayer.scale.y / 2 - thickness / 24 * ftTom)
+                            if (i != 0) {
+                                if (i < 2) {
+                                    rail.position.set(_doorRails_parent_group[i].position.x - _columns[5].position.x - 2 * offset + ftTom * 0.05 / 24, wBack.scale.y / 2 - wBottom.scale.y / 2 + wBottom.position.y, posZ);
+                                } else {
+                                    rail.position.set(_doorRails_parent_group[i].position.x - _columns[7].position.x - 4 * offset + ftTom * 0.05 / 24, wBack.scale.y / 2 - wBottom.scale.y / 2 + wBottom.position.y, posZ);
                                 }
-                                
-                            }else{
-                                rail.position.set ( _doorRails_parent_group[i].position.x - 3*offset + ftTom * 0.05 / 24, wBack.scale.y/2- wBottom.scale.y/2 + wBottom.position.y, posZ);
+
+                            } else {
+                                rail.position.set(_doorRails_parent_group[i].position.x - 3 * offset + ftTom * 0.05 / 24, wBack.scale.y / 2 - wBottom.scale.y / 2 + wBottom.position.y, posZ);
                             }
-                            
-                            rail.rotation.x = (90 * THREE.Math.DEG2RAD) 
-                            rail.rotation.z = (-90 * THREE.Math.DEG2RAD) 
-                        }
-                        else {
+
+                            rail.rotation.x = (90 * THREE.Math.DEG2RAD)
+                            rail.rotation.z = (-90 * THREE.Math.DEG2RAD)
+                        } else {
                             rail.name = "rail_right"
-                            rail.scale.setZ(wTopLayer.position.y - wTopLayer.scale.y/2  - wBottomLayer.position.y + wBottomLayer.scale.y/2 - thickness/24 * ftTom)
-                            if(i!=0){
-                                if(i<2){
-                                    rail.position.set ( _doorRails_parent_group[i].position.x -_columns[5].position.x + 2*offset  - ftTom * 0.05 / 24, wBack.scale.y/2- wBottom.scale.y/2 + wBottom.position.y, posZ);
-                                }else{
-                                    rail.position.set ( _doorRails_parent_group[i].position.x -_columns[7].position.x  - ftTom * 0.05 / 24, wBack.scale.y/2- wBottom.scale.y/2 + wBottom.position.y, posZ);
+                            rail.scale.setZ(wTopLayer.position.y - wTopLayer.scale.y / 2 - wBottomLayer.position.y + wBottomLayer.scale.y / 2 - thickness / 24 * ftTom)
+                            if (i != 0) {
+                                if (i < 2) {
+                                    rail.position.set(_doorRails_parent_group[i].position.x - _columns[5].position.x + 2 * offset - ftTom * 0.05 / 24, wBack.scale.y / 2 - wBottom.scale.y / 2 + wBottom.position.y, posZ);
+                                } else {
+                                    rail.position.set(_doorRails_parent_group[i].position.x - _columns[7].position.x - ftTom * 0.05 / 24, wBack.scale.y / 2 - wBottom.scale.y / 2 + wBottom.position.y, posZ);
                                 }
-                                
-                            }else{
-                                rail.position.set ( _doorRails_parent_group[i].position.x+ offset - ftTom * 0.05 / 24, wBack.scale.y/2- wBottom.scale.y/2 + wBottom.position.y, posZ);
+
+                            } else {
+                                rail.position.set(_doorRails_parent_group[i].position.x + offset - ftTom * 0.05 / 24, wBack.scale.y / 2 - wBottom.scale.y / 2 + wBottom.position.y, posZ);
                             }
-                            
-                            rail.rotation.x = (90 * THREE.Math.DEG2RAD) 
-                            rail.rotation.z = (90 * THREE.Math.DEG2RAD) 
+
+                            rail.rotation.x = (90 * THREE.Math.DEG2RAD)
+                            rail.rotation.z = (90 * THREE.Math.DEG2RAD)
                         }
-    
-    
+
+
                     }
-    
+
                 }
             }
             // for(var j =0; j<_doorRails_parent.length;j++){
-    
+
             // }
         }
     }
-   
+
 
 }
 
 function createSlideDoors() {
     for (var i = 0; i < customColumns / 4; i++) {
         createDoorRail(i);
-       
+
     }
-    for(var i= 0;i<customColumns/2;i++){
+    for (var i = 0; i < customColumns / 2; i++) {
         createSlideDoor(i);
         updateSlideDoor(i);
     }
@@ -4505,7 +4560,7 @@ function createSlideDoors() {
 }
 
 
-function createSlideDoor(index){
+function createSlideDoor(index) {
     var g = new THREE.BoxGeometry(1, 1, 1);
 
 
@@ -4520,9 +4575,9 @@ function createSlideDoor(index){
     scene.add(_sDoors_parent_group);
 }
 
-function updateSlideDoor(index){
-    var posY = (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2 ;
-    var scaleY =  wTop.position.y - wBottom.position.y - 2*ftTom * 0.05 / 12;
+function updateSlideDoor(index) {
+    var posY = (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2;
+    var scaleY = wTop.position.y - wBottom.position.y - 2 * ftTom * 0.05 / 12;
     // _columns_group.position.x + _columns[index - 1].position.x + thickness / 24 * ftTom
     if (_sDoors_parent[index] instanceof THREE.Group) {
 
@@ -4530,7 +4585,7 @@ function updateSlideDoor(index){
         for (var j = 0; j < _sDoors_parent[index].children.length; j++) {
 
             if (_sDoors_parent[index].children[j] instanceof THREE.Mesh) {
-                _sDoors_parent[index].children[j].scale.set(offset*2 + (0.5*ftTom/12) , scaleY, 0.625/12 * ftTom);
+                _sDoors_parent[index].children[j].scale.set(offset * 2 + (0.5 * ftTom / 12), scaleY, 0.625 / 12 * ftTom);
 
                 _sDoors_parent[index].children[j].position.set(_sDoors_parent[index].children[j].scale.x / 2, posY, _sDoors_parent[index].position.z);
                 _sDoors_parent[index].children[j].material.color.set("#34deeb");
@@ -4539,33 +4594,28 @@ function updateSlideDoor(index){
         }
         if (index % 2 == 0) {
 
-            if(index == 0){
-                _sDoors_parent[index].position.set(_columns[0].position.x - offset + thickness / 48 * ftTom, _sDoors_parent[index].position.y,  wBottom.position.z + wBottomLayer.scale.z / 2 + 0.625/24 * ftTom+0.03125/24*ftTom );    
+            if (index == 0) {
+                _sDoors_parent[index].position.set(_columns[0].position.x - offset + thickness / 48 * ftTom, _sDoors_parent[index].position.y, wBottom.position.z + wBottomLayer.scale.z / 2 + 0.625 / 24 * ftTom + 0.03125 / 24 * ftTom);
             }
-            else if(index == 2){
-                _sDoors_parent[index].position.set(_columns[5].position.x - 2*offset + thickness / 48 * ftTom, _sDoors_parent[index].position.y,  wBottom.position.z + wBottomLayer.scale.z / 2 + 0.625/24 * ftTom+0.03125/24*ftTom );    
+            if (index == 2) {
+                _sDoors_parent[index].position.set(_columns[5].position.x - 2 * offset + thickness / 48 * ftTom, _sDoors_parent[index].position.y, wBottom.position.z + wBottomLayer.scale.z / 2 + 0.625 / 24 * ftTom + 0.03125 / 24 * ftTom);
             }
-            else if(index == 4){
-                _sDoors_parent[index].position.set(_columns[9].position.x - 2*offset + thickness / 48 * ftTom, _sDoors_parent[index].position.y,  wBottom.position.z + wBottomLayer.scale.z / 2 + 0.625/24 * ftTom+0.03125/24*ftTom );    
+            if (index == 4) {
+                _sDoors_parent[index].position.set(_columns[9].position.x - 2 * offset + thickness / 48 * ftTom, _sDoors_parent[index].position.y, wBottom.position.z + wBottomLayer.scale.z / 2 + 0.625 / 24 * ftTom + 0.03125 / 24 * ftTom);
             }
-            // if (index != customColumns - 1) {
-            
-          
-            // } else {
-            //     _sDoors_parent[index].position.set(_columns[index-1].position.x - offset + thickness / 48 * ftTom, _sDoors_parent[index].position.y,  wBottom.position.z + wBottomLayer.scale.z / 2 + 0.625/24 * ftTom+0.03125/24*ftTom );
-             
-            // }
 
         } else {
-            if(index == 1){
-                _sDoors_parent[index].position.set(_columns[0].position.x + offset -thickness /48  * ftTom -(0.5*ftTom/12), _sDoors_parent[index].position.y,  wBottom.position.z + wBottomLayer.scale.z / 2 - 0.625/24 * ftTom-0.03125/24*ftTom  );
-            }else if(index == 3){
-                _sDoors_parent[index].position.set(_columns[5].position.x + offset/24 -thickness /48  * ftTom -(0.5*ftTom/12), _sDoors_parent[index].position.y,  wBottom.position.z + wBottomLayer.scale.z / 2 - 0.625/24 * ftTom-0.03125/24*ftTom  );
-            }else if (index == 5){
-                _sDoors_parent[index].position.set(_columns[9].position.x + offset/24 -thickness /48  * ftTom -(0.5*ftTom/12), _sDoors_parent[index].position.y,  wBottom.position.z + wBottomLayer.scale.z / 2 - 0.625/24 * ftTom-0.03125/24*ftTom  );
+            if (index == 1) {
+                _sDoors_parent[index].position.set(_columns[0].position.x + offset - thickness / 48 * ftTom - (0.5 * ftTom / 12), _sDoors_parent[index].position.y, wBottom.position.z + wBottomLayer.scale.z / 2 - 0.625 / 24 * ftTom - 0.03125 / 24 * ftTom);
             }
-            
-    
+            if (index == 3) {
+                _sDoors_parent[index].position.set(_columns[5].position.x + offset / 24 - thickness / 48 * ftTom - (1 * ftTom / 12), _sDoors_parent[index].position.y, wBottom.position.z + wBottomLayer.scale.z / 2 - 0.625 / 24 * ftTom - 0.03125 / 24 * ftTom);
+            }
+            if (index == 5) {
+                _sDoors_parent[index].position.set(_columns[9].position.x + offset / 24 - thickness / 48 * ftTom - (1 * ftTom / 12), _sDoors_parent[index].position.y, wBottom.position.z + wBottomLayer.scale.z / 2 - 0.625 / 24 * ftTom - 0.03125 / 24 * ftTom);
+            }
+
+
         }
 
 
@@ -4573,13 +4623,13 @@ function updateSlideDoor(index){
 }
 
 
-function removeSlideDoors(index){
-    
-    _doorRails_parent_group.forEach(e=>{
+function removeSlideDoors(index) {
+
+    _doorRails_parent_group.forEach(e => {
         _doorRailParent.remove(e);
     })
 
-    
+
     if (index) {
 
 
@@ -4606,4 +4656,124 @@ function removeSlideDoors(index){
 
 
     }
+}
+
+function slideDoorAction() {
+    if (_columns.length > 0 && _sDoors_parent.length > 0) {
+
+        var originalPos, originalPos2, originalPos4, originalPos1, originalPos3, originalPos5;
+        for (var i = 0; i < _columns.length; i++) {
+            if (_columns[i]) {
+                if (i == 0) {
+                    originalPos = _columns[i].position.x - offset + thickness / 48 * ftTom;
+                    originalPos1 = _columns[i].position.x + offset - thickness / 48 * ftTom - (0.5 * ftTom / 12);
+                } else if (i == 5) {
+                    originalPos2 = _columns[i].position.x - 2 * offset + thickness / 48 * ftTom;
+                    originalPos3 = _columns[i].position.x + offset / 24 - thickness / 48 * ftTom - (1 * ftTom / 12);
+                } else if (i == 9) {
+                    originalPos4 = _columns[i].position.x - 2 * offset + thickness / 48 * ftTom;
+                    originalPos5 = _columns[i].position.x + offset / 24 - thickness / 48 * ftTom - (1 * ftTom / 12);
+                }
+
+
+
+
+
+
+            }
+        }
+
+        if (isSlideLeft) {
+            for (var i = 0; i < _sDoors_parent.length; i++) {
+                if (_sDoors_parent[i] instanceof THREE.Group) {
+                    if (i % 2 == 0) {
+                        console.log(i)
+                        if (i == 0) {
+                            _sDoors_parent[i].position.setX(originalPos * (-1 + 2 * thickness / 12 * ftTom + (0.5 * ftTom / 48)));
+                        } else if (i == 2) {
+
+                            _sDoors_parent[i].position.setX(originalPos2 + (2 * offset - thickness / 12 * ftTom));
+                        } else if (i == 4) {
+                            _sDoors_parent[i].position.setX(originalPos4 + (2 * offset - thickness / 12 * ftTom));
+                        }
+
+                    } else {
+                        if (i == 1) {
+                            _sDoors_parent[i].position.setX(originalPos1);
+                        } else if (i == 3) {
+                            _sDoors_parent[i].position.setX(originalPos3);
+                        } else if (i == 5) {
+                            _sDoors_parent[i].position.setX(originalPos5);
+                        }
+
+
+                    }
+                }
+            }
+        } else {
+
+            for (var i = 0; i < _sDoors_parent.length; i++) {
+                if (_sDoors_parent[i] instanceof THREE.Group) {
+                    if (i % 2 == 0) {
+
+                        if (i == 0) {
+                            _sDoors_parent[i].position.setX(originalPos);
+                        } else if (i == 2) {
+                            _sDoors_parent[i].position.setX(originalPos2);
+                        } else if (i == 4) {
+                            _sDoors_parent[i].position.setX(originalPos4);
+                        }
+
+                    } 
+                }
+            }
+
+        }
+        if (isSlideRight) {
+            for (var i = 0; i < _sDoors_parent.length; i++) {
+                if (_sDoors_parent[i] instanceof THREE.Group) {
+                    if (i % 2 == 0) {
+
+                        if (i == 0) {
+                            _sDoors_parent[i].position.setX(originalPos);
+                        } else if (i == 2) {
+
+                            _sDoors_parent[i].position.setX(originalPos2);
+                        } else if (i == 4) {
+                            _sDoors_parent[i].position.setX(originalPos4);
+                        }
+
+                    } else {
+                        if (i == 1) {
+                            _sDoors_parent[i].position.setX(originalPos1 *  (-1 - 2 * thickness / 12 * ftTom + (0.5 * ftTom / 24)));
+                        } else if (i == 3) {
+                            _sDoors_parent[i].position.setX(originalPos3 -(2 * offset - thickness / 12 * ftTom ));
+                        } else if (i == 5) {
+                            _sDoors_parent[i].position.setX(originalPos5-(2 * offset - thickness / 12 * ftTom ));
+                        }
+
+
+                    }
+                }
+            }
+
+        } else {
+            for (var i = 0; i < _sDoors_parent.length; i++) {
+                if (_sDoors_parent[i] instanceof THREE.Group) {
+                    if(i%2!=0) {
+                        if (i == 1) {
+                            _sDoors_parent[i].position.setX(originalPos1);
+                        } else if (i == 3) {
+                            _sDoors_parent[i].position.setX(originalPos3);
+                        } else if (i == 5) {
+                            _sDoors_parent[i].position.setX(originalPos5);
+                        }
+
+
+                    }
+                }
+            }
+        }
+    }
+
 }
