@@ -116,7 +116,7 @@ let onNormalDeleteSprite = new THREE.TextureLoader().load("./assets/icons8-minus
 let onHoverDeleteSprite = new THREE.TextureLoader().load("./assets/icons8-black-minus-100.png");
 let onNormalFlipSprite = new THREE.TextureLoader().load("./assets/flipLeft.png");
 let onHoverFlipSprite = new THREE.TextureLoader().load("./assets/flipOnHover.png")
-var isDoorOpened = false,
+var isDoorOpened = true,
     isLoftOpened = false;
 var texLoader = new THREE.TextureLoader();
 let wood_albedo;
@@ -394,6 +394,7 @@ function getInputs() {
                 $("#chooseColumns").show();
                 isHingedDoor = true;
                 isCreated = true;
+                isDoorOpened = true;
                 chooseColumns_number();
                 createColumns_Doors(isHingedDoor);
                 $("#actionDoor").show();
@@ -441,24 +442,23 @@ function getInputs() {
 
     });
 
-    $("#actionSlideDoorLeft").append('<i class="m-lg-1  fa fa-door-open"></i>Open Left ');
-    $("#actionSlideDoorRight").append('<i class="m-lg-1  fa fa-door-open"></i>Open Right ')
+    $("#actionSlideDoorLeft").html('<i class="m-lg-1  fa fa-door-open"></i>Open Left ');
+    $("#actionSlideDoorRight").html('<i class="m-lg-1  fa fa-door-open"></i>Open Right ')
 
     $("#actionSlideDoorLeft").click(function () {
 
 
         if (!isSlideLeft) {
 
-            $(this).empty();
-            $(this).append('<i class="m-lg-1  fa fa-door-closed"></i>Close Left ');
+
+            $(this).html('<i class="m-lg-1  fa fa-door-closed"></i>Close Left ');
             isSlideLeft = true;
             isSlideRight = false;
-            $("#actionSlideDoorRight").empty();
-            $("#actionSlideDoorRight").append('<i class="m-lg-1  fa fa-door-open"></i>Open Right ');
+ 
+            $("#actionSlideDoorRight").html('<i class="m-lg-1  fa fa-door-open"></i>Open Right ');
         } else {
 
-            $(this).empty();
-            $(this).append('<i class="m-lg-1  fa fa-door-open"></i>Open Left ');
+            $(this).html('<i class="m-lg-1  fa fa-door-open"></i>Open Left ');
 
 
             isSlideLeft = false;
@@ -474,34 +474,33 @@ function getInputs() {
 
         if (!isSlideRight) {
 
-            $(this).empty();
-            $(this).append('<i class="m-lg-1  fa fa-door-closed"></i>Close Right ');
+            $(this).html('<i class="m-lg-1  fa fa-door-closed"></i>Close Right ');
             isSlideRight = true;
             isSlideLeft = false;
-            $("#actionSlideDoorLeft").empty();
-            $("#actionSlideDoorLeft").append('<i class="m-lg-1  fa fa-door-open"></i>Open Left ');
+   
+            $("#actionSlideDoorLeft").html('<i class="m-lg-1  fa fa-door-open"></i>Open Left ');
         } else {
-            $(this).empty();
-            $(this).append('<i class="m-lg-1  fa fa-door-open"></i>Open Right ');
+        
+            $(this).html('<i class="m-lg-1  fa fa-door-open"></i>Open Right ');
             isSlideRight = false;
 
         }
 
 
     })
-
-    $("#actionDoor").append('<i class="m-lg-1  fa fa-door-open"></i>Open Door ');
+    
+    $("#actionDoor").html('<i class="m-lg-1  fa fa-door-closed"></i>Close Door ');
     $("#actionDoor").click(function () {
 
 
         if (!isDoorOpened) {
 
-            $(this).empty();
-            $(this).append('<i class="m-lg-1  fa fa-door-closed"></i>Close Door ');
+        
+            $(this).html('<i class="m-lg-1  fa fa-door-closed"></i>Close Door ');
             isDoorOpened = true;
         } else {
-            $(this).empty();
-            $(this).append('<i class="m-lg-1  fa fa-door-open"></i>Open Door ');
+          
+            $(this).html('<i class="m-lg-1  fa fa-door-open"></i>Open Door ');
             isDoorOpened = false;
 
         }
@@ -4509,7 +4508,7 @@ function initMaterial() {
         roughness: 0.7,
         name: "wm_door",
         transparent: true,
-        opacity: 0.5
+        opacity: 0.85
     });
     _hangerMaterial = new THREE.MeshStandardMaterial({
         color: 0xbfbfbf,
@@ -5086,7 +5085,7 @@ function updateSlideDoor(index) {
                 _sDoors_parent[index].children[j].scale.set(offset * 2 + (0.5 * ftTom / 12), scaleY, 0.625 / 12 * ftTom);
 
                 _sDoors_parent[index].children[j].position.set(_sDoors_parent[index].children[j].scale.x / 2, posY, _sDoors_parent[index].position.z);
-                _sDoors_parent[index].children[j].material.color.set("#34deeb");
+         
             }
 
         }
@@ -5276,23 +5275,36 @@ function slideDoorAction() {
     }
 
     
-
+    
 }
 
 function reset() {
+    removeDoor();
+    removeSlideDoors();
+    removeFlipDoorSprite();
+    removeColumns();
+    removeColumnsSprite();
+    removeHorizontalSplitter();
+    removeInteractivePlane();
+
+    if (isLoft) {
+
+        removeLoftDoors();
+        removeLoftColumns()
+
+
+    }
 
 
     
     $("#actionSlideDoorLeft").hide();
     $("#actionSlideDoorRight").hide();
-    $("#actionSlideDoorLeft").empty();
-    $("#actionSlideDoorRight").empty();
-    $("#actionSlideDoorLeft").append('<i class="m-lg-1  fa fa-door-open"></i>Open Left ');
-    $("#actionSlideDoorRight").append('<i class="m-lg-1  fa fa-door-open"></i>Open Right ');
+
+    $("#actionSlideDoorLeft").html('<i class="m-lg-1  fa fa-door-open"></i>Open Left ');
+    $("#actionSlideDoorRight").html('<i class="m-lg-1  fa fa-door-open"></i>Open Right ');
 
     $("#actionDoor").hide();
-    $("#actionDoor").empty();
-    $("#actionDoor").append('<i class="m-lg-1  fa fa-door-open"></i>Open Door ');
+    $("#actionDoor").html('<i class="m-lg-1  fa fa-door-closed"></i>Close Door ');
     isDoorOpened = false;
     isSlideRight = false;
     isSlideLeft = false;
