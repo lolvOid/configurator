@@ -26,7 +26,7 @@ let selectedObject = null,
 let raycaster, pointer, mouse3D, group;
 let exporter;
 
-let composer, fxaaPass, outlinePass, planeOultinePass;
+let composer, fxaaPass, outlinePass, planeOultinePass, doorOutlinePass;
 
 
 let bBox;
@@ -125,8 +125,8 @@ let wood_roughness;
 
 let selectedSprite, selectedMirror;
 
-let _splitterMaterial, _railMaterial, _wardrobeMaterial, _lockerMaterial, _shelfMaterial, _hangerMaterial, _doorMaterial, _columnsMaterial, _extDrawerMaterial, _intSmallMaterial, _intLargeMaterial;
-var renderOptionsValue = 0;
+let _splitterMaterial, _railMaterial, _wardrobeMaterial, _lockerMaterial, _shelfMaterial, _hangerMaterial, _doorMaterial, _columnsMaterial, _extDrawerMaterial, _intSmallMaterial, _intLargeMaterial, _mirrorMaterial;
+var renderOptionsValue = 1;
 var pmremGenerator;
 let isHingedDoor = true;
 let ssaoPass;
@@ -140,6 +140,8 @@ var thicknessInmeter = 0.022225;
 
 let isSlideRight = false,
     isSlideLeft = false;
+
+let selectedDoor, isMirrorAdded = false;
 init();
 
 animate();
@@ -291,12 +293,12 @@ function render() {
     }
 
 
-        updateDoorRailUp();
-    
+    updateDoorRailUp();
+
     for (var i = 0; i < customColumns / 2; i++) {
-           
-            updateSlideDoorsUp(i);
-     }
+
+        updateSlideDoorsUp(i);
+    }
     for (var i = 0; i < _columnsLoft.length; i++) {
         updateLoftColumns(i);
     }
@@ -353,52 +355,19 @@ function getInputs() {
             $("#slideDoor").prop("disabled", true);
         }
         chooseColumns_number();
-        removeDoor();
-        removeSlideDoors();
-        removeFlipDoorSprite();
-        removeColumns();
-        removeColumnsSprite();
-        removeHorizontalSplitter();
-        removeInteractivePlane();
-
-        if (isLoft) {
-
-            removeLoftDoors();
-            removeLoftColumns()
-
-
-        }
-
-
-        $("#actionSlideDoorLeft").hide();
-        $("#actionSlideDoorRight").hide();
-        $("#actionSlideDoorLeft").empty();
-        $("#actionSlideDoorRight").empty();
-        $("#actionSlideDoorLeft").append('<i class="m-lg-1  fa fa-door-open"></i>Open Left ');
-        $("#actionSlideDoorRight").append('<i class="m-lg-1  fa fa-door-open"></i>Open Right ');
-
-        $("#actionDoor").hide();
-        $("#actionDoor").empty();
-        $("#actionDoor").append('<i class="m-lg-1  fa fa-door-open"></i>Open Door ');
-        isDoorOpened = false;
-        isSlideRight = false;
-        isSlideLeft = false;
+        reset();
     })
 
     $("input:radio[name='heightOptions']").click(function () {
 
-        removeColumns();
-        removeColumnsSprite();
-        removeHorizontalSplitter();
+        reset();
         wHeight = $(this).val();
 
     });
 
     $("input:radio[name='depthOptions']").click(function () {
 
-        removeColumns();
-        removeColumnsSprite();
-        removeHorizontalSplitter();
+        reset();
         wDepth = $(this).val();
 
     });
@@ -415,6 +384,8 @@ function getInputs() {
                 chooseColumns_number();
                 createColumns_Doors(isHingedDoor);
                 $("#actionDoor").show();
+                $("#actionSlideDoorLeft").hide();
+                $("#actionSlideDoorRight").hide();
             } else {
 
                 $("#chooseColumns").hide();
@@ -422,6 +393,7 @@ function getInputs() {
                 isCreated = true;
                 chooseColumns_number();
                 createColumns_Doors(isHingedDoor);
+                $("#actionDoor").hide();
                 $("#actionSlideDoorLeft").show();
                 $("#actionSlideDoorRight").show();
             }
@@ -560,6 +532,19 @@ function getInputs() {
     })
     $("#flipDoor").change(function () {
         _flipDoor($(this).children("option:selected").val());
+    })
+
+    $("#addMirror").click(function(){
+        if(!isMirrorAdded){
+     
+            $(this).html("Done");    
+            isMirrorAdded = true;
+        }else{
+            $(this).html("Add Mirror On Door");
+            isMirrorAdded = false;
+        }
+        
+
     })
 }
 
@@ -1010,12 +995,9 @@ function updateHorizontalSplitter(index) {
     var subtract = ftTom * 1.35 / 12;
 
     if (!_m_splitters[index]) {
-
-
-
         if (!isHingedDoor) {
-            _m_splitters[index].scale.set(offset - thickness / 12 * ftTom, (thickness / 12) * ftTom, wDepth * ftTom);
-            _m_splitters[index].position.set(index * offset, wTop.position.y - (3 * ftTom) + wTop.scale.y / 2 + (thickness / 12) * ftTom, wLeft.position.z / 2);
+            _m_splitters[index].scale.set(offset - thickness / 12 * ftTom, (thickness / 12) * ftTom, _columns[0].scale.z);
+            _m_splitters[index].position.set(index * offset, wTop.position.y - (3 * ftTom) + wTop.scale.y / 2 + (thickness / 12) * ftTom, _columns[0].position.z - subtract / 2);
 
         } else {
             _m_splitters[index].scale.set(offset - thickness / 12 * ftTom, (thickness / 12) * ftTom, wDepth * ftTom);
@@ -1026,8 +1008,8 @@ function updateHorizontalSplitter(index) {
     } else {
         if (_m_splitters[index] instanceof THREE.Mesh) {
             if (!isHingedDoor) {
-                _m_splitters[index].scale.set(offset - thickness / 12 * ftTom, (thickness / 12) * ftTom, wDepth * ftTom - subtract / 2);
-                _m_splitters[index].position.set(index * offset, wTop.position.y - (3 * ftTom) + wTop.scale.y / 2 + (thickness / 12) * ftTom, wLeft.position.z / 2);
+                _m_splitters[index].scale.set(offset - thickness / 12 * ftTom, (thickness / 12) * ftTom, _columns[0].scale.z);
+                _m_splitters[index].position.set(index * offset, wTop.position.y - (3 * ftTom) + wTop.scale.y / 2 + (thickness / 12) * ftTom, _columns[0].position.z);
             } else {
                 _m_splitters[index].scale.set(offset - thickness / 12 * ftTom, (thickness / 12) * ftTom, wDepth * ftTom);
                 _m_splitters[index].position.set(index * offset, wTop.position.y - (3 * ftTom) + wTop.scale.y / 2 + (thickness / 12) * ftTom, wLeft.position.z / 2);
@@ -1055,7 +1037,6 @@ function generateInteractivePlanes(index) {
 
 function addHorizontalParts() {
 
-
     $("#addED").click(function () {
 
         if (!_extDrawers[plane_index]) {
@@ -1072,14 +1053,16 @@ function addHorizontalParts() {
             return;
         }
 
-        if (onHeightChanged(plane_index) > 0) {
-            if (_bot_shelf_parent[plane_index] instanceof THREE.Mesh) {
+      
+        if ((_bot_shelf_parent[plane_index])) {
+            if (onHeightChanged(index) == 0) {
+                removeBotShelves(index);
+            }else{
                 removeBotShelves(plane_index);
                 createBotShelves(onHeightChanged(plane_index), plane_index);
-                updateBotShelves(plane_index);
-                _bot_shelf_parent[plane_index].visible = false;
+                updateBotShelves(plane_index)
             }
-        }
+        } 
 
     })
 
@@ -1092,14 +1075,15 @@ function addHorizontalParts() {
             return;
         }
 
-        if (onHeightChanged(plane_index) > 0) {
-            if (_bot_shelf_parent[plane_index] instanceof THREE.Mesh) {
+        if ((_bot_shelf_parent[plane_index])) {
+            if (onHeightChanged(index) == 0) {
+                removeBotShelves(index);
+            }else{
                 removeBotShelves(plane_index);
                 createBotShelves(onHeightChanged(plane_index), plane_index);
-                updateBotShelves(plane_index);
-                _bot_shelf_parent[plane_index].visible = false;
+                updateBotShelves(plane_index)
             }
-        }
+        } 
 
     })
 
@@ -1111,14 +1095,16 @@ function addHorizontalParts() {
         } else {
             return;
         }
-        if (onHeightChanged(plane_index) > 0) {
-            if (_bot_shelf_parent[plane_index] instanceof THREE.Mesh) {
+        if ((_bot_shelf_parent[plane_index])) {
+            if (onHeightChanged(index) == 0) {
+                removeBotShelves(index);
+            }else{
                 removeBotShelves(plane_index);
                 createBotShelves(onHeightChanged(plane_index), plane_index);
-                updateBotShelves(plane_index);
-                _bot_shelf_parent[plane_index].visible = false;
+                updateBotShelves(plane_index)
             }
-        }
+        } 
+
 
     })
 
@@ -1132,6 +1118,15 @@ function addHorizontalParts() {
 
             return;
         }
+        if ((_bot_shelf_parent[plane_index])) {
+            if (onHeightChanged(index) == 0) {
+                removeBotShelves(index);
+            }else{
+                removeBotShelves(plane_index);
+                createBotShelves(onHeightChanged(plane_index), plane_index);
+                updateBotShelves(plane_index)
+            }
+        } 
 
 
     })
@@ -1139,19 +1134,25 @@ function addHorizontalParts() {
     $("#addBottomShelf").click(function () {
 
 
+        // createBotShelves(0,plane_index);
+        // updateBotShelves(plane_index)
+
+
         if (onHeightChanged(plane_index) > 0) {
             if (!(_bot_shelf_parent[plane_index] instanceof THREE.Mesh)) {
                 createBotShelves(onHeightChanged(plane_index), plane_index);
                 updateBotShelves(plane_index)
 
-                _bot_shelf_parent[plane_index].visible = true;
+
             } else {
                 removeBotShelves(plane_index);
                 createBotShelves(onHeightChanged(plane_index), plane_index);
                 updateBotShelves(plane_index);
-                _bot_shelf_parent[plane_index].visible = true;
+
 
             }
+        }else{
+            removeBotShelves(plane_index)
         }
 
 
@@ -1235,45 +1236,80 @@ function topShelfOnSelected(index) {
 }
 
 function botShelfFilter() {
-
+    if (onHeightChanged(plane_index) > 0) {
+        $("#addBottomShelf").removeClass("disabled");
+    } else {
+        $("#addBottomShelf").addClass("disabled");
+    }
 
 
     if (wHeight < 6.5) {
-        $("#addBottomShelf").addClass("disabled");
+
+
         if (_smallIntDrawers[plane_index]) {
 
             $("#addLocker").addClass("disabled");
         } else {
             $("#addLocker").removeClass("disabled");
         }
+
         if (_lockers[plane_index]) {
             $("#addIDS").addClass("disabled");
+
         } else {
             $("#addIDS").removeClass("disabled");
         }
-        if (_largeIntDrawers[plane_index]) {
+
+        if (_largeIntDrawers.length > 0) {
             $("#addED").addClass("disabled");
+
         } else {
             $("#addED").removeClass("disabled");
         }
-        if (_extDrawers.length > 0) {
-            $("#addIDL").addClass("disabled");
-        } else {
-            $("#addIDL").removeClass("disabled");
-        }
-    } else if (wHeight == 6.5) {
-        $("#addBottomShelf").removeClass("disabled");
 
         if (_extDrawers.length > 0) {
             $("#addIDL").addClass("disabled");
+
         } else {
             $("#addIDL").removeClass("disabled");
         }
-        if (_largeIntDrawers.length > 0) {
+
+        if (_smallIntDrawers[plane_index] && _bot_shelf_parent[plane_index]) {
+
+            $("#addIDL").addClass("disabled");
+            $("#addIDS").addClass("disabled");
             $("#addED").addClass("disabled");
-        } else {
-            $("#addED").removeClass("disabled");
+            $("#addLocker").addClass("disabled");
+        } else if (_lockers[plane_index] && _bot_shelf_parent[plane_index]) {
+
+            $("#addIDS").addClass("disabled");
+            $("#addED").addClass("disabled");
+            $("#addLocker").addClass("disabled");
+            $("#addIDL").addClass("disabled");
+        } else if (_smallIntDrawers[plane_index] && !_bot_shelf_parent[plane_index]) {
+            if (_largeIntDrawers[plane_index]) {
+                $("#addIDS").addClass("disabled");
+
+            }
+
+
         }
+    } else if (wHeight == 6.5) {
+
+        if (_extDrawers.length > 0) {
+            if (_largeIntDrawers[plane_index]) {
+                $("#addIDS").addClass("disabled");
+                $("#addLocker").addClass("disabled");
+            }
+        } else {
+            if (_lockers[plane_index] && !_smallIntDrawers[plane_index]) {
+                $("#addIDS").removeClass("disabled");
+                $("#addLocker").removeClass("disabled");
+                $("#addIDL").removeClass("disabled");
+                $("#addED").addClass("disabled");
+            }
+        }
+
     } else if (wHeight > 6.5) {
         $("#addBottomShelf").removeClass("disabled");
 
@@ -1474,14 +1510,14 @@ function updateWardrobe() {
     }
 
     if (wBottomLayer) {
-        if(_extDrawers.length>0){
+        if (_extDrawers.length > 0) {
             wBottomLayer.scale.set(wWidth * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));
             wBottomLayer.position.set(0, (2.5 / 12) * ftTom + (thickness / 24) * ftTom, ((thickness / 24) * ftTom));
-        }else{
+        } else {
             wBottomLayer.scale.set(wWidth * ftTom, (thickness / 24) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));
             wBottomLayer.position.set(0, (2.5 / 12) * ftTom + (thickness / 48) * ftTom, ((thickness / 24) * ftTom));
         }
-        
+
 
     }
     if (wBack) {
@@ -1522,14 +1558,14 @@ function updateWardrobe() {
     }
 
     if (wLeftLayerBottom) {
-        if(_extDrawers.length>0){
-            wLeftLayerBottom.scale.set((thickness / 24) * ftTom, 2*(thickness / 12) * ftTom + 2.5 / 12 * ftTom + ftTom , (2 * thickness / 12) * ftTom + wDepth * ftTom);
+        if (_extDrawers.length > 0) {
+            wLeftLayerBottom.scale.set((thickness / 24) * ftTom, 2 * (thickness / 12) * ftTom + 2.5 / 12 * ftTom + ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom);
             wLeftLayerBottom.position.set(-(((thickness / 48) * ftTom) + (wBack.scale.x / 2)), wLeftLayerBottom.scale.y / 2 + (wBottom.position.y) - (2.5 / 12 * ftTom) - wBottom.scale.y / 2, 0);
-        }else{
+        } else {
             wLeftLayerBottom.scale.set((thickness / 24) * ftTom, (thickness / 24) * ftTom + 2.5 / 12 * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom);
             wLeftLayerBottom.position.set(-(((thickness / 48) * ftTom) + (wBack.scale.x / 2)), wLeftLayerBottom.scale.y / 2 + (wBottom.position.y) - (2.5 / 12 * ftTom) - wBottom.scale.y / 2, 0);
         }
-     
+
 
     }
 
@@ -1570,14 +1606,14 @@ function updateWardrobe() {
 
     }
     if (wRightLayerBottom) {
-        if(_extDrawers.length>0){
-            wRightLayerBottom.scale.set((thickness / 24) * ftTom,2*(thickness / 12) * ftTom + 2.5 / 12 * ftTom + ftTom , (2 * thickness / 12) * ftTom + wDepth * ftTom);
+        if (_extDrawers.length > 0) {
+            wRightLayerBottom.scale.set((thickness / 24) * ftTom, 2 * (thickness / 12) * ftTom + 2.5 / 12 * ftTom + ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom);
             wRightLayerBottom.position.set((((thickness / 48) * ftTom) + (wBack.scale.x / 2)), wRightLayerBottom.scale.y / 2 + (wBottom.position.y) - (2.5 / 12 * ftTom) - wBottom.scale.y / 2, 0);
-        }else{
+        } else {
             wRightLayerBottom.scale.set((thickness / 24) * ftTom, (thickness / 24) * ftTom + 2.5 / 12 * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom);
             wRightLayerBottom.position.set((((thickness / 48) * ftTom) + (wBack.scale.x / 2)), wRightLayerBottom.scale.y / 2 + (wBottom.position.y) - (2.5 / 12 * ftTom) - wBottom.scale.y / 2, 0);
         }
-       
+
 
     }
     if (wRight) {
@@ -1714,7 +1750,7 @@ function updateExternalDrawer(index) {
         _extDrawers[index].scale.set(offset - (thickness / 12) * ftTom, 1 * ftTom, wDepth * ftTom + (thickness / 12) * ftTom)
 
 
-        _extDrawers[index].position.set(index * offset, wBottom.position.y + _extDrawers[index].scale.y / 2 + (thickness / 24) * ftTom, wLeft.position.z / 2 + (thickness / 24) * ftTom);
+        _extDrawers[index].position.set(index * offset, wBottom.position.y + _extDrawers[index].scale.y / 2 + (thickness / 24) * ftTom, wDepth * ftTom - _extDrawers[index].scale.z + 2 * wBack.scale.z - thickness / 24 * ftTom);
 
 
         _extDrawers_group.position.set(offset / 2 + wLeft.position.x, _extDrawers_group.position.y, _extDrawers_group.position.z);
@@ -1723,7 +1759,7 @@ function updateExternalDrawer(index) {
 
 
     if (_extDrawers_splitters[index] instanceof THREE.Mesh) {
-        _extDrawers_splitters[index].scale.set(offset - thickness / 12 * ftTom, _m_splitters[index].scale.y, _m_splitters[index].scale.z + (thickness / 12) * ftTom);
+        _extDrawers_splitters[index].scale.set(offset - thickness / 12 * ftTom, _m_splitters[index].scale.y, wDepth * ftTom + (thickness / 12) * ftTom);
         _extDrawers_splitters[index].position.set(_extDrawers[index].position.x, _extDrawers[index].position.y + _extDrawers[index].scale.y / 2 + (thickness / 24 * ftTom), _extDrawers[index].position.z);
         _extDrawers_splitters_group.position.set(offset / 2 + wLeft.position.x, _extDrawers_splitters_group.position.y, _extDrawers_splitters_group.position.z);
     }
@@ -1789,7 +1825,7 @@ function createInternalDrawerLarge(index) {
     _largeIntDrawers[index] = _large_int;
     _largeIntDrawers_group.name = "w_int_d_large";
     _largeIntDrawers_group.add(_largeIntDrawers[index]);
-    _largeIntDrawers[index].scale.set(offset - (thickness / 12) * ftTom, (10 / 12) * ftTom, wDepth * ftTom)
+
     // scene.add(_lockers[index]);
     scene.add(_largeIntDrawers_group);
     createInternalDrawerLargeSplitters(index);
@@ -1820,14 +1856,14 @@ function updateInternalDrawerLarge(index) {
 
 
     if (_largeIntDrawers[index] instanceof THREE.Mesh) {
-
+        _largeIntDrawers[index].scale.set(_m_splitters[index].scale.x, (10 / 12) * ftTom, _m_splitters[index].scale.z);
 
         if (!_extDrawers[index]) {
 
-            _largeIntDrawers[index].position.set(index * offset, wBottom.position.y + _largeIntDrawers[index].scale.y / 2 + thickness / 24 * ftTom, wLeft.position.z / 2);
+            _largeIntDrawers[index].position.set(index * offset, wBottom.position.y + _largeIntDrawers[index].scale.y / 2 + thickness / 24 * ftTom, _m_splitters[index].position.z);
         } else {
 
-            _largeIntDrawers[index].position.set(index * offset, _extDrawers_splitters[index].position.y + _largeIntDrawers[index].scale.y / 2 + (thickness / 24) * ftTom, wLeft.position.z / 2);
+            _largeIntDrawers[index].position.set(index * offset, _extDrawers_splitters[index].position.y + _largeIntDrawers[index].scale.y / 2 + (thickness / 24) * ftTom, _m_splitters[index].position.z);
         }
         _largeIntDrawers_group.position.set(offset / 2 + wLeft.position.x, _largeIntDrawers_group.position.y, _largeIntDrawers_group.position.z);
     }
@@ -1835,8 +1871,8 @@ function updateInternalDrawerLarge(index) {
 
 
     if (_largeIntDrawers[index] instanceof THREE.Mesh) {
-        _largeIntDrawers_splitters[index].scale.set(offset - thickness / 12 * ftTom, _m_splitters[index].scale.y, _m_splitters[index].scale.z);
-        _largeIntDrawers_splitters[index].position.set(_largeIntDrawers[index].position.x, _largeIntDrawers[index].position.y + _largeIntDrawers[index].scale.y / 2 + (thickness / 24 * ftTom), _largeIntDrawers[index].position.z);
+        _largeIntDrawers_splitters[index].scale.set(_m_splitters[index].scale.x, _m_splitters[index].scale.y, _m_splitters[index].scale.z);
+        _largeIntDrawers_splitters[index].position.set(_largeIntDrawers[index].position.x, _largeIntDrawers[index].position.y + _largeIntDrawers[index].scale.y / 2 + (thickness / 24 * ftTom), _m_splitters[index].position.z);
         _largeIntDrawers_splitters_group.position.set(offset / 2 + wLeft.position.x, _largeIntDrawers_splitters_group.position.y, _largeIntDrawers_splitters_group.position.z);
     }
 
@@ -1919,8 +1955,8 @@ function updateLocker(index) {
 
 
     if (_lockers[index] instanceof THREE.Mesh) {
-        _lockers[index].scale.set(offset - (thickness / 12) * ftTom, (7.125 / 12) * ftTom, wDepth * ftTom)
-        _lockers[index].position.set(index * offset, _m_splitters[index].position.y - _lockers[index].scale.y / 2 - _m_splitters[index].scale.y / 2, wLeft.position.z / 2);
+        _lockers[index].scale.set(_m_splitters[index].scale.x, (7.125 / 12) * ftTom, _m_splitters[index].scale.z)
+        _lockers[index].position.set(index * offset, _m_splitters[index].position.y - _lockers[index].scale.y / 2 - _m_splitters[index].scale.y / 2, _m_splitters[index].position.z);
 
     }
 
@@ -1929,7 +1965,7 @@ function updateLocker(index) {
 
 
     if (_locker_splitters[index] instanceof THREE.Mesh) {
-        _locker_splitters[index].scale.set(offset - thickness / 12 * ftTom, _m_splitters[index].scale.y, _m_splitters[index].scale.z);
+        _locker_splitters[index].scale.set(_m_splitters[index].scale.x, _m_splitters[index].scale.y, _m_splitters[index].scale.z);
         _locker_splitters[index].position.set(_lockers[index].position.x, _lockers[index].position.y - _lockers[index].scale.y / 2 - (thickness / 24 * ftTom), _lockers[index].position.z);
 
     }
@@ -2005,14 +2041,14 @@ function updateInternalDrawerSmall(index) {
 
 
     if (_smallIntDrawers[index] instanceof THREE.Mesh) {
-        _smallIntDrawers[index].scale.set(offset - (thickness / 12) * ftTom, (8 / 12) * ftTom, wDepth * ftTom)
+        _smallIntDrawers[index].scale.set(_m_splitters[index].scale.x, (8 / 12) * ftTom, _m_splitters[index].scale.z)
         _smallIntDrawers_group.position.set(offset / 2 + wLeft.position.x, _smallIntDrawers_group.position.y, _smallIntDrawers_group.position.z);
         if (!_lockers[index]) {
 
-            _smallIntDrawers[index].position.set(index * offset, _m_splitters[index].position.y - _smallIntDrawers[index].scale.y / 2 - (thickness / 24) * ftTom, wLeft.position.z / 2);
+            _smallIntDrawers[index].position.set(index * offset, _m_splitters[index].position.y - _smallIntDrawers[index].scale.y / 2 - (thickness / 24) * ftTom, _m_splitters[index].position.z);
         } else {
 
-            _smallIntDrawers[index].position.set(index * offset, _lockers[index].position.y - _smallIntDrawers[index].scale.y - (thickness / 24) * ftTom, wLeft.position.z / 2);
+            _smallIntDrawers[index].position.set(index * offset, _lockers[index].position.y - _smallIntDrawers[index].scale.y - (thickness / 24) * ftTom, _m_splitters[index].position.z);
         }
     }
 
@@ -2191,11 +2227,14 @@ function createBotShelves(row, index) {
         _bot_shelves[j].name = "bot_shelf_" + j;
         _bot_shelves[j].scale.set(offset - (thickness / 12) * ftTom, (thickness / 12) * ftTom, wDepth * ftTom);
         _bot_group.add(_bot_shelves[j]);
+
     }
     _bot_group.name = "bot_shelves_" + index;
     _bot_shelf_parent[index] = _bot_group;
+  
+
     scene.add(_bot_shelf_parent[index]);
-    _bot_shelf_parent[index].visible = false;
+
 }
 
 function removeBotShelves(index) {
@@ -2225,152 +2264,172 @@ function updateBotShelves(index) {
     var dist;
 
 
+
+
     if (_bot_shelf_parent[index] instanceof THREE.Group) {
-        if (_lockers[index] instanceof THREE.Mesh || _largeIntDrawers[index] instanceof THREE.Mesh ||
-            _smallIntDrawers[index] instanceof THREE.Mesh || _extDrawers[index]) {
+     
 
-            //No Locker
-            if (!_lockers[index]) {
-                if (_bot_shelf_parent[index]) {
-                    // No Other Parts
-                    if (!_smallIntDrawers[index] && !_largeIntDrawers[index] && !_extDrawers[index]) {
-                        if (wHeight > 6.5) {
-
-                            dist = (_m_splitters[index].position.y - wBottom.position.y);
-                            vertical_offset = dist / (_bot_shelf_parent[index].children.length + 1);
-                            pos = _m_splitters[index].position.y - _m_splitters[index].scale.y / 2 - vertical_offset + (thickness / 24) * ftTom;
-                        }
-                    }
-                    //ID_L
-                    if (_largeIntDrawers[index] && !_smallIntDrawers[index] && !_extDrawers[index]) {
-                        dist = (_m_splitters[index].position.y - _m_splitters[index].scale.y / 2) - (_largeIntDrawers[index].scale.y / 2 + _largeIntDrawers[index].position.y);
-                        vertical_offset = dist / (_bot_shelf_parent[index].children.length + 1) - (thickness / 24) * ftTom;
-                        pos = (_m_splitters[index].position.y - _m_splitters[index].scale.y / 2) - vertical_offset + (thickness / (12 * _bot_shelf_parent[index].children.length)) * ftTom;
-                    }
-                    //ID_S
-                    else if (_smallIntDrawers[index] && !_largeIntDrawers[index] && !_extDrawers[index]) {
-                        dist = (_smallIntDrawers[index].position.y - wBottom.position.y);
-                        vertical_offset = dist / (_bot_shelf_parent[index].children.length + 1) - (thickness / 24) * ftTom;
-                        pos = (_smallIntDrawers[index].position.y - _smallIntDrawers[index].scale.y / 2) - vertical_offset + (2 * thickness / 12) * ftTom;
-                    }
-                    //ID_S and ED
-                    else if (_smallIntDrawers[index] && !_largeIntDrawers[index] && _extDrawers[index]) {
-                        dist = (_smallIntDrawers[index].position.y - _smallIntDrawers[index].scale.y / 2) - (_extDrawers[index].scale.y / 2 + _extDrawers[index].position.y);
-                        vertical_offset = dist / (_bot_shelf_parent[index].children.length + 1) - (_bot_shelf_parent[index].children.length * thickness / 12) * ftTom;
-                        pos = (_smallIntDrawers[index].position.y - _smallIntDrawers[index].scale.y / 2 - vertical_offset - (thickness / 12) * ftTom);
-                    }
-                    //ID_L and ID_S
-                    else if (_smallIntDrawers[index] && _largeIntDrawers[index] && !_extDrawers[index]) {
-                        dist = (_smallIntDrawers[index].position.y - _smallIntDrawers[index].scale.y / 2) - (_largeIntDrawers[index].scale.y / 2 + _largeIntDrawers[index].position.y);
-
-                        vertical_offset = dist / (_bot_shelf_parent[index].children.length + 1) - (_bot_shelf_parent[index].children.length * thickness / 12) * ftTom;
-                        pos = (_smallIntDrawers[index].position.y - _smallIntDrawers[index].scale.y / 2 - vertical_offset - (thickness / 12) * ftTom);
-                    }
-                    //ID_L and ID_S and ED
-                    else if (_smallIntDrawers[index] && _largeIntDrawers[index] && _extDrawers[index]) {
-                        dist = (_smallIntDrawers[index].position.y - _smallIntDrawers[index].scale.y / 2) - (_largeIntDrawers[index].scale.y / 2 + _largeIntDrawers[index].position.y);
-
-                        vertical_offset = dist / (_bot_shelf_parent[index].children.length + 1) - (_bot_shelf_parent[index].children.length * thickness / 12) * ftTom;
-                        pos = (_smallIntDrawers[index].position.y - _smallIntDrawers[index].scale.y / 2 - vertical_offset - (thickness / 12) * ftTom);
-                    }
-                    //ED
-                    else if (!_smallIntDrawers[index] && !_largeIntDrawers[index] && _extDrawers[index]) {
-                        dist = (_m_splitters[index].position.y - _m_splitters[index].scale.y / 2) - (_extDrawers[index].scale.y / 2 + _extDrawers[index].position.y);
-
-                        vertical_offset = dist / (_bot_shelf_parent[index].children.length + 1) + (thickness / (12 * _bot_shelf_parent[index].children.length)) * ftTom;
-                        pos = (_m_splitters[index].position.y - _m_splitters[index].scale.y / 2) - vertical_offset + (thickness / (12 * _bot_shelf_parent[index].children.length)) * ftTom;
-
-                    }
-                    //ED and ID_L
-                    else if (!_smallIntDrawers[index] && _largeIntDrawers[index] && _extDrawers[index]) {
-                        dist = (_m_splitters[index].position.y - _m_splitters[index].scale.y / 2) - (_largeIntDrawers[index].scale.y / 2 + _largeIntDrawers[index].position.y);
-
-                        vertical_offset = dist / (_bot_shelf_parent[index].children.length + 1) + (thickness / (12 * _bot_shelf_parent[index].children.length)) * ftTom;
-                        pos = (_m_splitters[index].position.y - _m_splitters[index].scale.y / 2) - vertical_offset + (thickness / (12 * _bot_shelf_parent[index].children.length + 1)) * ftTom;
-
-                    }
-                }
-            }
-            //No Locker
-            else {
-                if (_bot_shelf_parent[index]) {
-                    //Nothing
-                    if (!_smallIntDrawers[index] && !_largeIntDrawers[index] && !_extDrawers[index]) {
-
-                        if (_bot_shelf_parent[index].children.length > 1) {
-                            dist = (_lockers[index].position.y - _lockers[index].scale.y / 2) - (wBottom.scale.y / 2 - wBottom.position.y);
-                            vertical_offset = dist / (_bot_shelf_parent[index].children.length + 1) - (((_bot_shelf_parent[index].children.length * thickness / 12) * ftTom) - (thickness / 24) * ftTom);
-                            pos = _lockers[index].position.y - _lockers[index].scale.y / 2 - vertical_offset + (thickness / 24) * ftTom;
-
-                        } else {
-                            dist = (_lockers[index].position.y - _lockers[index].scale.y / 2) - (wBottom.scale.y / 2 + wBottom.position.y);
-
-                            vertical_offset = dist / (_bot_shelf_parent[index].children.length + 1) + (thickness / (12 * _bot_shelf_parent[index].children.length)) * ftTom;
-                            pos = (_lockers[index].position.y - _lockers[index].scale.y / 2) - vertical_offset + (thickness / (12 * _bot_shelf_parent[index].children.length)) * ftTom;
-                        }
-                    }
-
-                    //ID_S
-                    else if (!_largeIntDrawers[index] && !_extDrawers[index] && _smallIntDrawers[index]) {
-                        if (_bot_shelf_parent[index].children.length > 1) {
+        //No Locker
+        if (!_lockers[index]) {
+            if (_bot_shelf_parent[index]) {
 
 
-                            dist = (_smallIntDrawers[index].position.y + _smallIntDrawers[index].scale.y / 2) + (wBottom.scale.y / 2 - wBottom.position.y);
+                // No Other Parts
+                if (!_smallIntDrawers[index] && !_largeIntDrawers[index] && !_extDrawers[index]) {
 
-                            vertical_offset = dist / (_bot_shelf_parent[index].children.length + 1) - (((_bot_shelf_parent[index].children.length * thickness / 12) * ftTom) - (thickness / 24) * ftTom);
-                            pos = (_smallIntDrawers[index].position.y - _smallIntDrawers[index].scale.y / 2 - vertical_offset + (thickness / 24) * ftTom);
-                        } else {
-                            dist = (_smallIntDrawers[index].position.y - _smallIntDrawers[index].scale.y / 2) - (wBottom.scale.y / 2 + wBottom.position.y);
-
-                            vertical_offset = dist / (_bot_shelf_parent[index].children.length + 1) + (thickness / (12 * _bot_shelf_parent[index].children.length)) * ftTom;
-                            pos = (_smallIntDrawers[index].position.y - _smallIntDrawers[index].scale.y / 2) - vertical_offset + (thickness / (12 * _bot_shelf_parent[index].children.length)) * ftTom;
-                        }
-
-                    }
-                    //ED
-                    else if (!_largeIntDrawers[index] && _extDrawers[index]) {
-                        dist = (_lockers[index].position.y - _lockers[index].scale.y / 2) - (_extDrawers[index].scale.y / 2 + _extDrawers[index].position.y);
-
-                        vertical_offset = dist / (_bot_shelf_parent[index].children.length + 1) + (thickness / (12 * _bot_shelf_parent[index].children.length)) * ftTom;
-                        pos = (_lockers[index].position.y - _lockers[index].scale.y / 2) - vertical_offset + (thickness / (12 * _bot_shelf_parent[index].children.length)) * ftTom;
-
-                    }
-                    //ID_L
-                    else if (_largeIntDrawers[index] && !_smallIntDrawers[index]) {
-                        dist = (_lockers[index].position.y - _lockers[index].scale.y / 2) - (_largeIntDrawers[index].scale.y / 2 + _largeIntDrawers[index].position.y);
-
-                        vertical_offset = dist / (_bot_shelf_parent[index].children.length + 1) + (thickness / (12 * _bot_shelf_parent[index].children.length)) * ftTom;
-                        pos = (_lockers[index].position.y - _lockers[index].scale.y / 2) - vertical_offset + (thickness / (12 * _bot_shelf_parent[index].children.length)) * ftTom;
-
-                    }
-                    //ID_L
-                    else if (_largeIntDrawers[index] && _smallIntDrawers[index]) {
-                        if (_bot_shelf_parent[index].children.length < 2) {
-                            dist = (_smallIntDrawers[index].position.y - _smallIntDrawers[index].scale.y / 2) - (_largeIntDrawers[index].scale.y / 2 + _largeIntDrawers[index].position.y);
-
-                            vertical_offset = dist / (_bot_shelf_parent[index].children.length + 1) + (thickness / (12 * _bot_shelf_parent[index].children.length)) * ftTom;
-                            pos = (_smallIntDrawers[index].position.y - _smallIntDrawers[index].scale.y / 2) - vertical_offset + (thickness / (12 * _bot_shelf_parent[index].children.length)) * ftTom;
-                        }
-                    }
-
-                }
-            }
-
-        } else {
-            if (!_lockers[index] && !_smallIntDrawers[index] && !_largeIntDrawers[index] && !_extDrawers[index]) {
-
-
-                if (wHeight > 6.5) {
-
-                    if (_m_splitters[index]) {
+                    if (wHeight > 6) {
+                        
                         dist = (_m_splitters[index].position.y - wBottom.position.y);
                         vertical_offset = dist / (_bot_shelf_parent[index].children.length + 1);
                         pos = _m_splitters[index].position.y - _m_splitters[index].scale.y / 2 - _bot_shelf_parent[index].children.length * vertical_offset + (thickness / 24) * ftTom;
                     }
+                }
+                //ID_L
+                if (_largeIntDrawers[index] && !_smallIntDrawers[index] && !_extDrawers[index]) {
+                    if(_bot_shelf_parent[index].children.length>1){
+                        dist = (_m_splitters[index].position.y - _m_splitters[index].scale.y / 2) - (_largeIntDrawers[index].scale.y / 2 + _largeIntDrawers[index].position.y);
+
+                        vertical_offset = dist / (_bot_shelf_parent[index].children.length + 1)  -(thickness / 12) * ftTom;
+                        pos = (_m_splitters[index].position.y - _m_splitters[index].scale.y / 2 - _bot_shelf_parent[index].children.length * vertical_offset - thickness/12 * ftTom );
+                    }
+                    else{
+                        dist = (_m_splitters[index].position.y - _m_splitters[index].scale.y / 2) - (_largeIntDrawers[index].scale.y / 2 + _largeIntDrawers[index].position.y);
+                        vertical_offset = dist / (_bot_shelf_parent[index].children.length + 1) - (thickness / 24) * ftTom;
+                        pos = (_m_splitters[index].position.y - _m_splitters[index].scale.y / 2) - vertical_offset + (thickness / (12 * _bot_shelf_parent[index].children.length)) * ftTom;
+                    }
+                }
+                //ID_S
+                else if (_smallIntDrawers[index] && !_largeIntDrawers[index] && !_extDrawers[index]) {
+                    if(_bot_shelf_parent[index].children.length>1){
+                        dist = (_smallIntDrawers[index].position.y  - wBottom.position.y);
+
+                        vertical_offset = dist / (_bot_shelf_parent[index].children.length + 1)  -(thickness / 12) * ftTom;
+                        pos = (_smallIntDrawers[index].position.y - _smallIntDrawers[index].scale.y / 2 - _bot_shelf_parent[index].children.length * vertical_offset + thickness/12 * ftTom );
+                    }else{
+                        dist = (_smallIntDrawers[index].position.y - wBottom.position.y);
+                        vertical_offset = dist / (_bot_shelf_parent[index].children.length + 1) - (thickness / 24) * ftTom;
+                        pos = (_smallIntDrawers[index].position.y - _smallIntDrawers[index].scale.y / 2) - vertical_offset + (2 * thickness / 12) * ftTom;
+                    }
+                    
+                }
+                //ID_S and ED
+                else if (_smallIntDrawers[index] && !_largeIntDrawers[index] && _extDrawers[index]) {
+                    dist = (_smallIntDrawers[index].position.y - _smallIntDrawers[index].scale.y / 2) - (_extDrawers[index].scale.y / 2 + _extDrawers[index].position.y);
+                    vertical_offset = dist / (_bot_shelf_parent[index].children.length + 1) - (_bot_shelf_parent[index].children.length * thickness / 12) * ftTom;
+                    pos = (_smallIntDrawers[index].position.y - _smallIntDrawers[index].scale.y / 2 - vertical_offset - (thickness / 12) * ftTom);
+                }
+                //ID_L and ID_S
+                else if (_smallIntDrawers[index] && _largeIntDrawers[index] && !_extDrawers[index]) {
+                    dist = (_smallIntDrawers[index].position.y - _smallIntDrawers[index].scale.y / 2) - (_largeIntDrawers[index].scale.y / 2 + _largeIntDrawers[index].position.y);
+
+                    vertical_offset = dist / (_bot_shelf_parent[index].children.length + 1) - (_bot_shelf_parent[index].children.length * thickness / 12) * ftTom;
+                    pos = (_smallIntDrawers[index].position.y - _smallIntDrawers[index].scale.y / 2 - vertical_offset - (thickness / 12) * ftTom);
+                }
+                //ID_L and ID_S and ED
+                else if (_smallIntDrawers[index] && _largeIntDrawers[index] && _extDrawers[index]) {
+                    dist = (_smallIntDrawers[index].position.y - _smallIntDrawers[index].scale.y / 2) - (_largeIntDrawers[index].scale.y / 2 + _largeIntDrawers[index].position.y);
+
+                    vertical_offset = dist / (_bot_shelf_parent[index].children.length + 1) - (_bot_shelf_parent[index].children.length * thickness / 12) * ftTom;
+                    pos = (_smallIntDrawers[index].position.y - _smallIntDrawers[index].scale.y / 2 - vertical_offset - (thickness / 12) * ftTom);
+                }
+                //ED
+                else if (!_smallIntDrawers[index] && !_largeIntDrawers[index] && _extDrawers[index]) {
+                    dist = (_m_splitters[index].position.y - _m_splitters[index].scale.y / 2) - (_extDrawers[index].scale.y / 2 + _extDrawers[index].position.y);
+
+                    vertical_offset = dist / (_bot_shelf_parent[index].children.length + 1) + (thickness / (12 * _bot_shelf_parent[index].children.length)) * ftTom;
+                    pos = (_m_splitters[index].position.y - _m_splitters[index].scale.y / 2) - vertical_offset + (thickness / (12 * _bot_shelf_parent[index].children.length)) * ftTom;
+
+                }
+                //ED and ID_L
+                else if (!_smallIntDrawers[index] && _largeIntDrawers[index] && _extDrawers[index]) {
+                    dist = (_m_splitters[index].position.y - _m_splitters[index].scale.y / 2) - (_largeIntDrawers[index].scale.y / 2 + _largeIntDrawers[index].position.y);
+
+                    vertical_offset = dist / (_bot_shelf_parent[index].children.length + 1) + (thickness / (12 * _bot_shelf_parent[index].children.length)) * ftTom;
+                    pos = (_m_splitters[index].position.y - _m_splitters[index].scale.y / 2) - vertical_offset + (thickness / (12 * _bot_shelf_parent[index].children.length + 1)) * ftTom;
 
                 }
             }
         }
+        // Locker
+        else {
+            if (_bot_shelf_parent[index]) {
+                //Nothing
+                if (!_smallIntDrawers[index] && !_largeIntDrawers[index] && !_extDrawers[index]) {
+
+                    if(_bot_shelf_parent[index].children.length>1){
+                        dist = (_lockers[index].position.y  - wBottom.position.y);
+
+                        vertical_offset = dist / (_bot_shelf_parent[index].children.length + 1)  -(thickness / 12) * ftTom;
+                        pos = (_lockers[index].position.y - _lockers[index].scale.y / 2 - _bot_shelf_parent[index].children.length * vertical_offset + thickness/12 * ftTom );
+                    }else {
+                        dist = (_lockers[index].position.y - _lockers[index].scale.y / 2) - (wBottom.scale.y / 2 + wBottom.position.y);
+
+                        vertical_offset = dist / (_bot_shelf_parent[index].children.length + 1) + (thickness / (12 * _bot_shelf_parent[index].children.length)) * ftTom;
+                        pos = (_lockers[index].position.y - _lockers[index].scale.y / 2) - vertical_offset + (thickness / (12 * _bot_shelf_parent[index].children.length)) * ftTom;
+                    }
+                }
+
+                //ID_S
+                else if (!_largeIntDrawers[index] && !_extDrawers[index] && _smallIntDrawers[index]) {
+                    if (_bot_shelf_parent[index].children.length > 1) {
+
+
+                        dist = (_smallIntDrawers[index].position.y + _smallIntDrawers[index].scale.y / 2) + (wBottom.scale.y / 2 - wBottom.position.y);
+
+                        vertical_offset = dist / (_bot_shelf_parent[index].children.length + 1) - (((_bot_shelf_parent[index].children.length * thickness / 12) * ftTom) - (thickness / 24) * ftTom);
+                        pos = (_smallIntDrawers[index].position.y - _smallIntDrawers[index].scale.y / 2 - vertical_offset + (thickness / 24) * ftTom);
+                    } else {
+                        dist = (_smallIntDrawers[index].position.y - _smallIntDrawers[index].scale.y / 2) - (wBottom.scale.y / 2 + wBottom.position.y);
+
+                        vertical_offset = dist / (_bot_shelf_parent[index].children.length + 1) + (thickness / (12 * _bot_shelf_parent[index].children.length)) * ftTom;
+                        pos = (_smallIntDrawers[index].position.y - _smallIntDrawers[index].scale.y / 2) - vertical_offset + (thickness / (12 * _bot_shelf_parent[index].children.length)) * ftTom;
+                    }
+
+                }
+                //ED
+                else if (!_largeIntDrawers[index] && _extDrawers[index]) {
+                    dist = (_lockers[index].position.y - _lockers[index].scale.y / 2) - (_extDrawers[index].scale.y / 2 + _extDrawers[index].position.y);
+
+                    vertical_offset = dist / (_bot_shelf_parent[index].children.length + 1) + (thickness / (12 * _bot_shelf_parent[index].children.length)) * ftTom;
+                    pos = (_lockers[index].position.y - _lockers[index].scale.y / 2) - vertical_offset + (thickness / (12 * _bot_shelf_parent[index].children.length)) * ftTom;
+
+                }
+                //ID_L
+                else if (_largeIntDrawers[index] && !_smallIntDrawers[index]) {
+                    dist = (_lockers[index].position.y - _lockers[index].scale.y / 2) - (_largeIntDrawers[index].scale.y / 2 + _largeIntDrawers[index].position.y);
+
+                    vertical_offset = dist / (_bot_shelf_parent[index].children.length + 1) + (thickness / (12 * _bot_shelf_parent[index].children.length)) * ftTom;
+                    pos = (_lockers[index].position.y - _lockers[index].scale.y / 2) - vertical_offset + (thickness / (12 * _bot_shelf_parent[index].children.length)) * ftTom;
+
+                }
+                //ID_L
+                else if (_largeIntDrawers[index] && _smallIntDrawers[index]) {
+                    if (_bot_shelf_parent[index].children.length < 2) {
+                        dist = (_smallIntDrawers[index].position.y - _smallIntDrawers[index].scale.y / 2) - (_largeIntDrawers[index].scale.y / 2 + _largeIntDrawers[index].position.y);
+
+                        vertical_offset = dist / (_bot_shelf_parent[index].children.length + 1) + (thickness / (12 * _bot_shelf_parent[index].children.length)) * ftTom;
+                        pos = (_smallIntDrawers[index].position.y - _smallIntDrawers[index].scale.y / 2) - vertical_offset + (thickness / (12 * _bot_shelf_parent[index].children.length)) * ftTom;
+                    }
+                }
+
+            }
+        }
+
+
+        // if (!_lockers[index] && !_smallIntDrawers[index] && !_largeIntDrawers[index] && !_extDrawers[index]) {
+
+
+        //     if (wHeight > 6) {
+
+        //         if (_m_splitters[index]) {
+        //             dist = (_m_splitters[index].position.y - wBottom.position.y);
+        //             vertical_offset = dist / (_bot_shelf_parent[index].children.length + 1);
+        //             pos = _m_splitters[index].position.y - _m_splitters[index].scale.y / 2 - _bot_shelf_parent[index].children.length * vertical_offset + (thickness / 24) * ftTom;
+        //         }
+
+        //     }
+        // }
+
 
         if (_bot_shelf_parent[index] instanceof THREE.Group) {
             for (var j = 0; j < _bot_shelf_parent[index].children.length; j++) {
@@ -2382,7 +2441,7 @@ function updateBotShelves(index) {
             }
         }
         _bot_shelf_parent[index].position.set(offset / 2 + wLeft.position.x, pos, _bot_shelf_parent[index].position.z);
-        _bot_shelf_parent[index].visible = true;
+
     }
 
 
@@ -2507,25 +2566,30 @@ function onClick() {
     }
 
     if (selectedPlane) {
-
-        if (interactivePlane_group.visible) {
-            for (var i = 0; i < interactivePlanes.length; i++) {
-                if (interactivePlanes[i] == selectedPlane) {
-
-                    addSelectedObject(selectedPlane);
-                    planeOultinePass.visibleEdgeColor.set("#ff7300")
-                    planeOultinePass.edgeStrength = 10;
-                    planeOultinePass.edgeGlow = 0;
-                    planeOultinePass.selectedObjects = selectedObjects;
-
-                    plane_index = i;
+        if(!isMirrorAdded){
+            if (interactivePlane_group.visible) {
+                for (var i = 0; i < interactivePlanes.length; i++) {
+                    if (interactivePlanes[i] == selectedPlane) {
+    
+                        addSelectedObject(selectedPlane);
+                        planeOultinePass.visibleEdgeColor.set("#ff7300")
+                        planeOultinePass.edgeStrength = 10;
+                        planeOultinePass.edgeGlow = 0;
+                        planeOultinePass.selectedObjects = selectedObjects;
+    
+                        plane_index = i;
+                    }
                 }
+    
+            } else {
+                planeOultinePass.selectedObjects = [];
             }
-
-        } else {
+            selectedPlane = null;
+        }else{
             planeOultinePass.selectedObjects = [];
+            selectedPlane = null;
         }
-        selectedPlane = null;
+        
     }
     if (selectedMirror) {
         if (flipVerticalSprite.includes(selectedMirror)) {
@@ -2534,7 +2598,22 @@ function onClick() {
         }
 
     }
-
+    if(selectedDoor){
+        if(isMirrorAdded){
+            _hDoors_parent.forEach(e=>{
+                if(e instanceof THREE.Group){
+                   e.traverse(function(c){
+                       if(c==selectedDoor){
+                            c.material = _mirrorMaterial;
+                            c.material.needsUpdate = true;
+                       }
+                   })
+                }
+            })
+        }else{
+            
+        }
+    }
     // plane_index = interactivePlanes.findIndex(e => e === selectedObject);
 
 }
@@ -2564,22 +2643,41 @@ function onPointerMove(event) {
         }
     }
 
+    if(selectedDoor){
+        if(isMirrorAdded){
+            addSelectedObject(selectedDoor);
+            doorOutlinePass.visibleEdgeColor.set("#fcbe03")
+            doorOutlinePass.edgeStrength = 10;
+            doorOutlinePass.edgeGlow = 0;
+            doorOutlinePass.selectedObjects = selectedObjects;
+            
+        }else{
+            doorOutlinePass.selectedObjects = []
+            selectedDoor = null;
+        }
+    }
     if (selectedMirror) {
         selectedMirror.material.map = onNormalFlipSprite;
         selectedMirror = null;
     }
 
     if (selectedPlane) {
-        outlinePass.visibleEdgeColor.set("#fcbe03")
-        outlinePass.edgeStrength = 10;
-        outlinePass.edgeGlow = 0;
-        outlinePass.selectedObjects = selectedObjects;
-        selectedPlane = null
+        if(!isMirrorAdded){
+            outlinePass.visibleEdgeColor.set("#fcbe03")
+            outlinePass.edgeStrength = 10;
+            outlinePass.edgeGlow = 0;
+            outlinePass.selectedObjects = selectedObjects;
+            selectedPlane = null        
+        }else{
+            outlinePass.selectedObjects = [];    
+        }
+        
     } else {
 
         outlinePass.selectedObjects = [];
     }
 
+    
 
     if (event.changedTouches) {
         pointer.x = event.changedTouches[0].pageX;
@@ -2599,6 +2697,23 @@ function onPointerMove(event) {
     const removeIcons = raycaster.intersectObject(deleteSprites_group, true);
     const mirrorIcons = raycaster.intersectObject(flipVertical_group, true);
     const p = raycaster.intersectObject(interactivePlane_group, true);
+    const doors = raycaster.intersectObject(_hDoors_parent_group,true);
+    if (doors.length > 0) {
+
+        const res = doors.filter(function (res) {
+
+            return res && res.object;
+
+        })[0];
+
+
+        if (res && res.object) {
+
+            selectedDoor = res.object;
+           
+        }
+    }
+    
     if (mirrorIcons.length > 0) {
 
         const res = mirrorIcons.filter(function (res) {
@@ -2643,7 +2758,7 @@ function onPointerMove(event) {
 
         getColumnToCopy();
         if (res && res.object) {
-
+        
             selectedPlane = res.object;
             addSelectedObject(selectedPlane);
 
@@ -2799,12 +2914,19 @@ function post_process() {
     planeOultinePass.edgeGlow = 0;
     planeOultinePass.edgeThickness = 0.5;
     planeOultinePass.pulsePeriod = 0;
+
+    
+    doorOutlinePass = new THREE.OutlinePass(new THREE.Vector2(fwidth, fheight), scene, camera);
+    doorOutlinePass.edgeStrength = 16;
+    doorOutlinePass.edgeGlow = 0;
+    doorOutlinePass.edgeThickness = 0.5;
+    doorOutlinePass.pulsePeriod = 0;
     // outlinePass.visibleEdgeColor.set("#ff0000");
 
     // outlinePass.hiddenEdgeColor.set("#ff0000");
     composer.addPass(outlinePass);
     composer.addPass(planeOultinePass);
-
+    composer.addPass(doorOutlinePass);
     // fxaaPass = new THREE.ShaderPass(THREE.FXAAShader);
 
 
@@ -2976,32 +3098,87 @@ function onHeightChanged(plane_index) {
     var row = 0;
 
 
-
-    if (wHeight == 6.5) {
-        if (!_largeIntDrawers[plane_index] && !_extDrawers[plane_index] && !_smallIntDrawers[plane_index] && !_lockers[plane_index]) {
-            row = 0;
-        } else {
+    if (wHeight == 6) {
+        if (!_largeIntDrawers[plane_index] && !_smallIntDrawers[plane_index] && _lockers[plane_index] && !_extDrawers[plane_index]) {
             row = 1;
+
+        } else if (!_largeIntDrawers[plane_index] && _smallIntDrawers[plane_index] && !_lockers[plane_index] && !_extDrawers[plane_index]) {
+            row = 1;
+        } else {
+            row = 0;
+        }
+    } else if (wHeight == 6.5) {
+
+        if (_extDrawers[plane_index]) {
+            if (_largeIntDrawers[plane_index] && !_smallIntDrawers[plane_index] && !_lockers[plane_index]) {
+                row = 0;
+            } else {
+                row = 1;
+            }
+
+
+        } else if (!_extDrawers[plane_index]) {
+            if (!_largeIntDrawers[plane_index] && !_smallIntDrawers[plane_index] && !_lockers[plane_index]) {
+                row = 2;
+
+            } else if (_largeIntDrawers[plane_index] && _smallIntDrawers[plane_index] && _lockers[plane_index]) {
+                row = 0;
+
+            } else {
+                row = 1;
+            }
+
+
         }
 
-    } else if (wHeight == 7 && !_lockers[plane_index] && !_largeIntDrawers[plane_index] && !_extDrawers[plane_index] && !_smallIntDrawers[plane_index]) {
-        row = 3;
-    } else if (wHeight == 7 && !_lockers[plane_index]) {
-        row = 1;
-    } else if (wHeight == 7 && _lockers[plane_index] && !_smallIntDrawers[plane_index] || _largeIntDrawers[plane_index] && !_extDrawers[plane_index]) {
-        row = 2;
-    } else if (wHeight == 7 && _lockers[plane_index] && _smallIntDrawers[plane_index] && !_largeIntDrawers[plane_index] && !_extDrawers[plane_index]) {
-
-        row = 3;
-
-    } else if (wHeight == 7 && _lockers[plane_index] && !_smallIntDrawers[plane_index] || !_largeIntDrawers[plane_index] && _extDrawers[plane_index]) {
-        row = 2;
-    } else if (wHeight == 7 && !_lockers[plane_index] && !_smallIntDrawers[plane_index] && _largeIntDrawers[plane_index] && _extDrawers[plane_index]) {
-        row = 2;
-    } else if (wHeight == 7 && _lockers[plane_index] && !_smallIntDrawers[plane_index] || _largeIntDrawers[plane_index] && !_extDrawers[plane_index]) {
-        row = 2;
-    } else if (wHeight == 7 && _lockers[plane_index] && !_smallIntDrawers[plane_index] || !_largeIntDrawers[plane_index] && _extDrawers[plane_index]) {
-        row = 2;
+    } else if (wHeight == 7) {
+        if(!_lockers[plane_index]){
+            if (!_largeIntDrawers[plane_index] && !_smallIntDrawers[plane_index] && !_extDrawers[plane_index]) { 
+                row= 3;
+            }
+            else if(_smallIntDrawers[plane_index] && !_largeIntDrawers[plane_index]){
+                if(!_extDrawers[plane_index]){
+                    row = 2;
+                }else if(_extDrawers[plane_index]){
+                    row =1;
+                }else{
+                    row = 0;
+                }
+                
+            } else if(_largeIntDrawers[plane_index] && !_smallIntDrawers[plane_index]  ){
+                if(!_extDrawers[plane_index]){
+                    row = 2;
+                }else if(_extDrawers[plane_index]){
+                    row =1;
+                }
+            }else if(_smallIntDrawers[plane_index] && _largeIntDrawers[plane_index] ){
+                if(!_extDrawers[plane_index]){
+                    row = 1;
+                }else if(_extDrawers[plane_index]){
+                    row =0;
+                }else{
+                    row = 0;
+                }
+            }
+           
+        }else{
+            if (!_largeIntDrawers[plane_index] && !_smallIntDrawers[plane_index] && !_extDrawers[plane_index]) { 
+                row= 2;
+            }else if(!_largeIntDrawers[plane_index] && !_smallIntDrawers[plane_index] && _extDrawers[plane_index]){
+                row = 1;
+            }else if(_largeIntDrawers[plane_index] && !_smallIntDrawers[plane_index] && !_extDrawers[plane_index]){
+                row = 1;
+            }else if(_largeIntDrawers[plane_index] && !_smallIntDrawers[plane_index] && _extDrawers[plane_index]){
+                row = 0;
+            }else if(!_largeIntDrawers[plane_index] && _smallIntDrawers[plane_index] && !_extDrawers[plane_index]){
+                row = 1;
+            }else if(!_largeIntDrawers[plane_index] && _smallIntDrawers[plane_index] && _extDrawers[plane_index]){
+                row = 0;
+            }else{
+                row = 0;
+            }
+            
+        }
     } else(
         removeBotShelves(plane_index)
     )
@@ -3050,17 +3227,7 @@ function columnsCombination() {
                         a.position.setX(posToChange);
                         b.scale.setX(sizeToChange);
                         b.position.setX(a.position.x);
-                        removeInternalDrawerLarge(i + 1);
-                    } else if (_largeIntDrawers[i + 1]) {
-                        var a = _largeIntDrawers[i + 1];
 
-                        var b = _largeIntDrawers_splitters[i + 1];
-                        a.scale.setX(sizeToChange);
-                        a.position.setX(posToChange);
-                        b.scale.setX(sizeToChange);
-                        b.position.setX(a.position.x);
-
-                        removeInternalDrawerLarge(i);
                     }
 
                     //Hangers
@@ -3068,13 +3235,14 @@ function columnsCombination() {
                         var a = _hangers[i];
                         a.scale.setY(sizeToChange);
                         a.position.setX(posToChange);
-                        removeHanger(i + 1);
-                    } else if (_hangers[i + 1]) {
-                        var a = _hangers[i + 1];
-                        a.scale.setY(sizeToChange);
-                        a.position.setX(posToChange);
-                        removeHanger(i);
+                        // removeHanger(i + 1);
                     }
+                    // else if (_hangers[i + 1]) {
+                    //     var a = _hangers[i + 1];
+                    //     a.scale.setY(sizeToChange);
+                    //     a.position.setX(posToChange);
+                    //     removeHanger(i);
+                    // }
                     //Top Shelves
                     if (_top_shelves_parent[i]) {
                         var a = _top_shelves_parent[i];
@@ -3085,19 +3253,20 @@ function columnsCombination() {
                             }
 
                         })
-                        removeTopShelves(i + 1);
+                        // removeTopShelves(i + 1);
 
-                    } else if (_top_shelves_parent[i + 1]) {
-                        var a = _top_shelves_parent[i + 1];
-                        a.traverse(function (e) {
-                            if (e instanceof THREE.Mesh) {
-                                e.scale.setX(sizeToChange);
-                                e.position.setX(posToChange);
-                            }
-
-                        })
-                        removeTopShelves(i);
                     }
+                    //  else if (_top_shelves_parent[i + 1]) {
+                    //     var a = _top_shelves_parent[i + 1];
+                    //     a.traverse(function (e) {
+                    //         if (e instanceof THREE.Mesh) {
+                    //             e.scale.setX(sizeToChange);
+                    //             e.position.setX(posToChange);
+                    //         }
+
+                    //     })
+                    //     removeTopShelves(i);
+                    // }
 
                     //Bottom Shelves
                     if (_bot_shelf_parent[i]) {
@@ -3109,19 +3278,20 @@ function columnsCombination() {
                             }
 
                         })
-                        removeBotShelves(i + 1);
+                        // removeBotShelves(i + 1);
 
-                    } else if (_bot_shelf_parent[i + 1]) {
-                        var a = _bot_shelf_parent[i + 1];
-                        a.traverse(function (e) {
-                            if (e instanceof THREE.Mesh) {
-                                e.scale.setX(sizeToChange);
-                                e.position.setX(posToChange);
-                            }
-
-                        })
-                        removeBotShelves(i);
                     }
+                    // else if (_bot_shelf_parent[i + 1]) {
+                    //     var a = _bot_shelf_parent[i + 1];
+                    //     a.traverse(function (e) {
+                    //         if (e instanceof THREE.Mesh) {
+                    //             e.scale.setX(sizeToChange);
+                    //             e.position.setX(posToChange);
+                    //         }
+
+                    //     })
+                    //     removeBotShelves(i);
+                    // }
 
 
                     //Horizontal Splitter
@@ -4267,10 +4437,15 @@ function initMaterial() {
         roughness: 0.8,
         name: "wm_intLargeDrawer"
     });
-
+    _mirrorMaterial = new THREE.MeshStandardMaterial({
+        name: "wm_door_mirror",
+        color: 0xffffff,
+        roughness: 0,
+        metalness: 0.5
+    })
     new THREE.RGBELoader()
         .setPath('./hdri/')
-        .load('studio.hdr', function (texture) {
+        .load('photo_studio_loft_hall_1k.hdr', function (texture) {
 
             var envMap = pmremGenerator.fromEquirectangular(texture).texture;
             texture.mapping = THREE.EquirectangularReflectionMapping;
@@ -4278,6 +4453,7 @@ function initMaterial() {
             // scene.background = new THREE.Color(0xefefef);
             // scene.environment = envMap;
             _railMaterial.envMap = envMap;
+            _mirrorMaterial.envMap = envMap;
             _hangerMaterial.envMap = envMap;
             texture.dispose();
             pmremGenerator.dispose();
@@ -4483,28 +4659,28 @@ function createDoorRail(index) {
 
 }
 
-function updateDoorRailUp(){
+function updateDoorRailUp() {
     var posZ = wBottom.position.z + wBottom.scale.z / 2 + 1.35 / 24 * ftTom;
     var scaleZ = wTopLayer.position.y - wTopLayer.scale.y / 2 - wBottomLayer.position.y + wBottomLayer.scale.y / 2 - thickness / 24 * ftTom;
     var posY = wBottomLayer.scale.y / 2 + wBottomLayer.position.y + ftTom * 0.05 / 24;
     var posY_LR = wBack.scale.y / 2 - wBottom.scale.y / 2 + wBottom.position.y;
 
-    if(_extDrawers.length>0){
+    if (_extDrawers.length > 0) {
 
-        scaleZ = wTopLayer.position.y - wTopLayer.scale.y / 2 - wBottomLayer.position.y + wBottomLayer.scale.y / 2 - thickness / 24 * ftTom - ftTom - thickness / 12 * ftTom - thickness / 24 * ftTom ;
-        posY_LR = wBack.scale.y / 2 - wBottom.scale.y / 2 + wBottom.position.y  + ftTom / 2 + thickness / 12 * ftTom - thickness / 48 * ftTom
-        
-        posY = wBottomLayer.scale.y / 2 + wBottomLayer.position.y + ftTom * 0.05 / 24 + ftTom + thickness /24 * ftTom + thickness /24 * ftTom;
-        
-    }else{
-        posY = wBottomLayer.scale.y / 2 + wBottomLayer.position.y + ftTom * 0.05 / 24 ;
+        scaleZ = wTopLayer.position.y - wTopLayer.scale.y / 2 - wBottomLayer.position.y + wBottomLayer.scale.y / 2 - thickness / 24 * ftTom - ftTom - thickness / 12 * ftTom - thickness / 24 * ftTom;
+        posY_LR = wBack.scale.y / 2 - wBottom.scale.y / 2 + wBottom.position.y + ftTom / 2 + thickness / 12 * ftTom - thickness / 48 * ftTom
+
+        posY = wBottomLayer.scale.y / 2 + wBottomLayer.position.y + ftTom * 0.05 / 24 + ftTom + thickness / 24 * ftTom + thickness / 24 * ftTom;
+
+    } else {
+        posY = wBottomLayer.scale.y / 2 + wBottomLayer.position.y + ftTom * 0.05 / 24;
         scaleZ = wTopLayer.position.y - wTopLayer.scale.y / 2 - wBottomLayer.position.y + wBottomLayer.scale.y / 2 - thickness / 24 * ftTom;
-     
+
         posY_LR = wBack.scale.y / 2 - wBottom.scale.y / 2 + wBottom.position.y;
 
     }
-        // position + ftTom / 2 + thickness / 24 * ftTom;
-        // scale - ftTom - thickness / 12 * ftTom;
+    // position + ftTom / 2 + thickness / 24 * ftTom;
+    // scale - ftTom - thickness / 12 * ftTom;
     if (_doorRailParent instanceof THREE.Group) {
 
         for (var i = 0; i < _doorRailParent.children.length; i++) {
@@ -4528,43 +4704,43 @@ function updateDoorRailUp(){
                         var rail = _doorRails_parent_group[i].children[j];
                         if (j == 0) {
 
-                         
-                        
+
+
                             rail.position.set(0, wTopLayer.position.y - wTopLayer.scale.y / 2 - ftTom * 0.05 / 24, posZ);
-                           
-                           
+
+
                         }
-                          //Bottom
+                        //Bottom
                         else if (j == _doorRails_parent_group[i].children.length - 1) {
-                          
+
                             rail.scale.setZ((_columns[0].position.x - _columns[2].position.x) - 2 * offset + thickness / 12 * ftTom)
                             rail.position.set(0, posY, posZ);
 
-                           
+
                         }
                         //Left
                         else if (j == 1) {
-                          
+
                             rail.scale.setZ(scaleZ)
-                           
-                               
-                            rail.position.setY( posY_LR);
-                                 
 
-                            
 
-        
-                        } 
+                            rail.position.setY(posY_LR);
+
+
+
+
+
+                        }
                         //Right
                         else {
-                           
-                            rail.scale.setZ(scaleZ)
-                         
-                            rail.position.setY(posY_LR);
-                              
-                           
 
-                          
+                            rail.scale.setZ(scaleZ)
+
+                            rail.position.setY(posY_LR);
+
+
+
+
                         }
 
 
@@ -4572,7 +4748,7 @@ function updateDoorRailUp(){
 
                 }
             }
-           
+
         }
     }
 }
@@ -4693,16 +4869,17 @@ function createSlideDoor(index) {
     _sDoors_parent_group.add(_sDoors_parent[index]);
     scene.add(_sDoors_parent_group);
 }
-function updateSlideDoorsUp(index){
+
+function updateSlideDoorsUp(index) {
     // scaleZ = wTopLayer.position.y - wTopLayer.scale.y / 2 - wBottomLayer.position.y + wBottomLayer.scale.y / 2 - thickness / 24 * ftTom - ftTom - thickness / 12 * ftTom - thickness / 24 * ftTom ;
-        // posY_LR = wBack.scale.y / 2 - wBottom.scale.y / 2 + wBottom.position.y  + ftTom / 2 + thickness / 12 * ftTom - thickness / 48 * ftTom
+    // posY_LR = wBack.scale.y / 2 - wBottom.scale.y / 2 + wBottom.position.y  + ftTom / 2 + thickness / 12 * ftTom - thickness / 48 * ftTom
     var posY = (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2;
     var scaleY = wTop.position.y - wBottom.position.y - 2 * ftTom * 0.05 / 12;
 
-    if(_extDrawers.length>0){
-        posY = (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2   + ftTom / 2 + thickness / 12 * ftTom - thickness / 48 * ftTom;
-        scaleY = wTop.position.y - wBottom.position.y - 2 * ftTom * 0.05 / 12   - ftTom - thickness / 12 * ftTom - thickness / 24 * ftTom  ;
-    }else{
+    if (_extDrawers.length > 0) {
+        posY = (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2 + ftTom / 2 + thickness / 12 * ftTom - thickness / 48 * ftTom;
+        scaleY = wTop.position.y - wBottom.position.y - 2 * ftTom * 0.05 / 12 - ftTom - thickness / 12 * ftTom - thickness / 24 * ftTom;
+    } else {
         posY = (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2;
         scaleY = wTop.position.y - wBottom.position.y - 2 * ftTom * 0.05 / 12;
     }
@@ -4716,15 +4893,16 @@ function updateSlideDoorsUp(index){
             if (_sDoors_parent[index].children[j] instanceof THREE.Mesh) {
                 _sDoors_parent[index].children[j].scale.setY(scaleY);
 
-                _sDoors_parent[index].children[j].position.setY( posY);
-               
+                _sDoors_parent[index].children[j].position.setY(posY);
+
             }
 
         }
-       
+
 
     }
 }
+
 function updateSlideDoor(index) {
     var posY = (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2;
     var scaleY = wTop.position.y - wBottom.position.y - 2 * ftTom * 0.05 / 12;
@@ -4874,7 +5052,7 @@ function slideDoorAction() {
                             _sDoors_parent[i].position.setX(originalPos4);
                         }
 
-                    } 
+                    }
                 }
             }
 
@@ -4895,11 +5073,11 @@ function slideDoorAction() {
 
                     } else {
                         if (i == 1) {
-                            _sDoors_parent[i].position.setX(originalPos1 *  (-1 - 2 * thickness / 12 * ftTom + (0.5 * ftTom / 24)));
+                            _sDoors_parent[i].position.setX(originalPos1 * (-1 - 2 * thickness / 12 * ftTom + (0.5 * ftTom / 24)));
                         } else if (i == 3) {
-                            _sDoors_parent[i].position.setX(originalPos3 -(2 * offset - thickness / 12 * ftTom ));
+                            _sDoors_parent[i].position.setX(originalPos3 - (2 * offset - thickness / 12 * ftTom));
                         } else if (i == 5) {
-                            _sDoors_parent[i].position.setX(originalPos5-(2 * offset - thickness / 12 * ftTom ));
+                            _sDoors_parent[i].position.setX(originalPos5 - (2 * offset - thickness / 12 * ftTom));
                         }
 
 
@@ -4910,7 +5088,7 @@ function slideDoorAction() {
         } else {
             for (var i = 0; i < _sDoors_parent.length; i++) {
                 if (_sDoors_parent[i] instanceof THREE.Group) {
-                    if(i%2!=0) {
+                    if (i % 2 != 0) {
                         if (i == 1) {
                             _sDoors_parent[i].position.setX(originalPos1);
                         } else if (i == 3) {
@@ -4926,4 +5104,50 @@ function slideDoorAction() {
         }
     }
 
+}
+
+function reset(){
+    removeDoor();
+    removeSlideDoors();
+    removeFlipDoorSprite();
+    removeColumns();
+    removeColumnsSprite();
+    removeHorizontalSplitter();
+    removeInteractivePlane();
+
+    if (isLoft) {
+
+        removeLoftDoors();
+        removeLoftColumns()
+
+
+    }
+
+
+    $("#actionSlideDoorLeft").hide();
+    $("#actionSlideDoorRight").hide();
+    $("#actionSlideDoorLeft").empty();
+    $("#actionSlideDoorRight").empty();
+    $("#actionSlideDoorLeft").append('<i class="m-lg-1  fa fa-door-open"></i>Open Left ');
+    $("#actionSlideDoorRight").append('<i class="m-lg-1  fa fa-door-open"></i>Open Right ');
+
+    $("#actionDoor").hide();
+    $("#actionDoor").empty();
+    $("#actionDoor").append('<i class="m-lg-1  fa fa-door-open"></i>Open Door ');
+    isDoorOpened = false;
+    isSlideRight = false;
+    isSlideLeft = false;
+    removeAllInterior();
+}
+
+function addMirror(index){
+    
+    
+    if(_hDoors_parent[index] instanceof THREE.Group){
+        _hDoors_parent[index].traverse(function (child){
+
+            child.material = _mirrorMaterial;
+            child.material.needsUpdate = true;
+        })
+    }
 }
