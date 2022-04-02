@@ -2682,35 +2682,55 @@ function onClick() {
                 if (e instanceof THREE.Group) {
                     e.traverse(function (child) {
                         if (child instanceof THREE.Mesh) {
+                            if (child == selectedDoor) {
+                                 if(_isDoorRight.includes(e)){
+                                    child.material = _mirrorMaterials;
+                                    child.material.needsUpdate = true;
+                                }else if(_isDoorLeft.includes(e)){
+                                    child.material = _flipMirrorMaterials;
+                                    child.material.needsUpdate = true;
+                                }else{
+                                    if (_hDoors_parent.indexOf(e) % 2 != 0) {
 
-                            swappedDoors.forEach(s => {
-
-                                for (let i = 0; i < s.length; s++) {
-                                    if (s[i] instanceof THREE.Group || s[i + 1] instanceof THREE.Group) {
-                                        s[i].traverse(function (child) {
-                                            if (child == selectedDoor) {
-                                                selectedDoor.material = _mirrorMaterials;
-                                                selectedDoor.material.needsUpdate = true;
-                                            } else {
-                                                selectedDoor.material = _flipMirrorMaterials;
-                                                selectedDoor.material.needsUpdate = true;
-                                            }
-                                        })
-
-                                        s[i + 1].traverse(function (child) {
-                                            if (child == selectedDoor) {
-                                                selectedDoor.material = _flipMirrorMaterials;
-                                                selectedDoor.material.needsUpdate = true;
-                                            } else {
-                                                selectedDoor.material = _mirrorMaterials;
-                                                selectedDoor.material.needsUpdate = true;
-                                            }
-                                        })
+                                        child.material = _mirrorMaterials;
+                                        child.material.needsUpdate = true;
+                                    }else if(_hDoors_parent.indexOf(e) % 2 == 0) {
+    
+                                        child.material = _flipMirrorMaterials;
+                                        child.material.needsUpdate = true;
+        
                                     }
                                 }
+                            } 
+
+                            // swappedDoors.forEach(s => {
+
+                            //     for (let i = 0; i < s.length; s++) {
+                            //         if (s[i] instanceof THREE.Group || s[i + 1] instanceof THREE.Group) {
+                            //             s[i].traverse(function (child) {
+                            //                 if (child == selectedDoor) {
+                            //                     selectedDoor.material = _mirrorMaterials;
+                            //                     selectedDoor.material.needsUpdate = true;
+                            //                 } else {
+                            //                     selectedDoor.material = _flipMirrorMaterials;
+                            //                     selectedDoor.material.needsUpdate = true;
+                            //                 }
+                            //             })
+
+                            //             s[i + 1].traverse(function (child) {
+                            //                 if (child == selectedDoor) {
+                            //                     selectedDoor.material = _flipMirrorMaterials;
+                            //                     selectedDoor.material.needsUpdate = true;
+                            //                 } else {
+                            //                     selectedDoor.material = _mirrorMaterials;
+                            //                     selectedDoor.material.needsUpdate = true;
+                            //                 }
+                            //             })
+                            //         }
+                            //     }
 
 
-                            })
+                            // })
 
                         }
 
