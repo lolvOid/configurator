@@ -61,7 +61,7 @@ let ext_drawer = [],
     m_locker = [],
     splitters = [],
     m_splitters = [];
-
+let swappedDoors = [];
 var selectedColumn = 0;
 var interactivePlanes = [],
     selectedPlanes = [],
@@ -263,8 +263,8 @@ function onWindowResize() {
 
     }
     const pixelRatio = renderer.getPixelRatio();
-    // fxaaPass.material.uniforms[ 'resolution' ].value.x = 1 / ( fwidth * pixelRatio );
-    // fxaaPass.material.uniforms[ 'resolution' ].value.y = 1 / (  fheight* pixelRatio );
+    fxaaPass.material.uniforms[ 'resolution' ].value.x = 1 / ( fwidth * pixelRatio );
+    fxaaPass.material.uniforms[ 'resolution' ].value.y = 1 / (  fheight* pixelRatio );
 
 }
 
@@ -2677,12 +2677,49 @@ function onClick() {
     }
     if (selectedDoor) {
         if (isMirrorAdded) {
+         
             _hDoors_parent.forEach(e=>{
-                e.traverse(function(child){
-                    child.material = _mirrorMaterials;
-                    child.material.needsUpdate = true;
-                })
+                if(e instanceof THREE.Group){
+                    e.traverse(function(child){
+                        if(child instanceof THREE.Mesh){
+
+                            swappedDoors.forEach(s=>{
+                                
+                                    for(let i =0;i<s.length;s++){
+                                        if(s[i] instanceof THREE.Group || s[i+1] instanceof THREE.Group){
+                                            s[i].traverse(function(child){
+                                                if(child == selectedDoor){
+                                                    selectedDoor.material = _mirrorMaterials;
+                                                    selectedDoor.material.needsUpdate = true;
+                                                }else{
+                                                    selectedDoor.material = _flipMirrorMaterials;
+                                                    selectedDoor.material.needsUpdate = true;
+                                                }
+                                            })
+
+                                            s[i+1].traverse(function(child){
+                                                if(child == selectedDoor){
+                                                    selectedDoor.material = _flipMirrorMaterials;
+                                                    selectedDoor.material.needsUpdate = true;
+                                                }else{
+                                                    selectedDoor.material = _mirrorMaterials;
+                                                    selectedDoor.material.needsUpdate = true;
+                                                }
+                                            })
+                                        }
+                                    }
+                                
+                                
+                            })
+                            
+                        }
+                       
+                    })
+                }
+               
             })
+               
+            
         } else {
 
         }
@@ -2896,11 +2933,31 @@ function save(blob, filename) {
     link.href = URL.createObjectURL(blob);
     link.download = filename;
     link.click();
-
-    // URL.revokeObjectURL( url ); breaks Firefox...
+    sendFileToBackend(blob,filename);
+    
+    
 
 }
 
+function sendFileToBackend(blob, filename){
+    const endpoint = "./";
+    const formData = new FormData();
+
+    let sceneFile= new File([blob], "wardrobe.gltf");
+    console.log(sceneFile)
+    formData.append("file", sceneFile);
+
+    const options = {
+        method:'POST',
+        mode: 'no-cors',
+        body: formData,
+    }
+
+    fetch(endpoint,options)
+        .then(response => console.log(JSON.stringify(response)))
+        .catch(error => console.error('Error:', error))
+
+}
 function saveString(text, filename) {
 
     save(new Blob([text], {
@@ -2937,7 +2994,7 @@ function Export() {
             } else {
 
                 const output = JSON.stringify(gltf, null, 2);
-                console.log(output);
+                // console.log(output);
                 saveString(output, 'wardrobe.gltf');
                 floor.visible = true;
                 wall.visible = true;
@@ -2969,7 +3026,7 @@ function post_process() {
     const smaaPass = new THREE.SMAAPass(fwidth * pixelRatio, fheight * pixelRatio);
     composer.addPass(smaaPass);
     const ssaaPass = new THREE.SSAARenderPass(scene, camera);
-    composer.addPass(ssaaPass);
+    // composer.addPass(ssaaPass);
     const copyPass = new THREE.ShaderPass(THREE.CopyShader);
     composer.addPass(copyPass);
 
@@ -3007,13 +3064,13 @@ function post_process() {
     composer.addPass(outlinePass);
     composer.addPass(planeOultinePass);
     composer.addPass(doorOutlinePass);
-    // fxaaPass = new THREE.ShaderPass(THREE.FXAAShader);
+    fxaaPass = new THREE.ShaderPass(THREE.FXAAShader);
 
+  
+    fxaaPass.material.uniforms[ 'resolution' ].value.x = 1 / ( fwidth * pixelRatio );
+    fxaaPass.material.uniforms[ 'resolution' ].value.y = 1 / (  fheight* pixelRatio );
 
-    // fxaaPass.material.uniforms[ 'resolution' ].value.x = 1 / ( fwidth * pixelRatio );
-    // fxaaPass.material.uniforms[ 'resolution' ].value.y = 1 / (  fheight* pixelRatio );
-
-    // composer.addPass(fxaaPass);
+    composer.addPass(fxaaPass);
 
 
 
@@ -3700,7 +3757,7 @@ function updateHingedDoorOnColumnCombined() {
                         _hDoors_parent[removed_id[i] + 1].children[j].position.setX(_hDoors_parent[removed_id[i] + 1].children[j].scale.x / 2);
 
                     }
-
+                   
                 }
             } else {
                 adjacentParts.forEach(a => {
@@ -3716,7 +3773,12 @@ function updateHingedDoorOnColumnCombined() {
 
                                 _hDoors_parent[removed_id[i]].position.setX(_columns[removed_id[i]].position.x + offset - thickness / 24 * ftTom);
                                 _hDoors_parent[removed_id[i] + 1].position.setX(_columns[removed_id[i]].position.x - offset + thickness / 24 * ftTom);
-
+                                if(!swappedDoors.includes(_hDoors_parent[removed_id[i]]) && !swappedDoors.includes(_hDoors_parent[removed_id[i]+1])){
+                                    swappedDoors[i] = [_hDoors_parent[removed_id[i]], _hDoors_parent[removed_id[i] + 1]]; 
+                                }
+                                
+                                
+                                
                                 for (var j = 0; j < _hDoors_parent[removed_id[i]].children.length; j++) {
 
                                     _hDoors_parent[removed_id[i]].children[j].scale.setX(offset - thickness / 24 * ftTom);
@@ -3741,7 +3803,7 @@ function updateHingedDoorOnColumnCombined() {
                     } else {
 
                         for (var i = 0; i < removed_id.length; i++) {
-
+                          
                             for (var j = 0; j < _hDoors_parent[removed_id[i]].children.length; j++) {
 
                                 _hDoors_parent[removed_id[i]].children[j].scale.setX(offset - thickness / 24 * ftTom);
@@ -4358,11 +4420,11 @@ function paintWardrobe() {
         }
     })
 
-    var x = wWidth * ftTom;
-    var y = wHeight * ftTom;
-    wood_albedo.repeat.set(x, y);
-    wood_roughness.repeat.set(x, y);
-    wood_normal.repeat.set(x, y);
+    // var x = wWidth * ftTom;
+    // var y = wHeight * ftTom;
+    // wood_albedo.repeat.set(x, y);
+    // wood_roughness.repeat.set(x, y);
+    // wood_normal.repeat.set(x, y);
 
 
     // _lockers.forEach(e => {
@@ -4455,15 +4517,15 @@ function renderOptionInput() {
 }
 
 function initMaterial() {
-    wood_albedo = texLoader.load("./textures/Wood_ZebranoVeneer_512_albedo.jpg");
-    wood_normal = texLoader.load("./textures/Wood_ZebranoVeneer_512_normal.jpg");
-    wood_roughness = texLoader.load("./textures/Wood_ZebranoVeneer_512_roughness.jpg");
-    wood_albedo.wrapS = THREE.RepeatWrapping;
-    wood_albedo.wrapT = THREE.RepeatWrapping;
-    wood_normal.wrapS = THREE.RepeatWrapping;
-    wood_normal.wrapT = THREE.RepeatWrapping;
-    wood_roughness.wrapS = THREE.RepeatWrapping;
-    wood_roughness.wrapT = THREE.RepeatWrapping;
+    // wood_albedo = texLoader.load("./textures/Wood_ZebranoVeneer_512_albedo.jpg");
+    // wood_normal = texLoader.load("./textures/Wood_ZebranoVeneer_512_normal.jpg");
+    // wood_roughness = texLoader.load("./textures/Wood_ZebranoVeneer_512_roughness.jpg");
+    // wood_albedo.wrapS = THREE.RepeatWrapping;
+    // wood_albedo.wrapT = THREE.RepeatWrapping;
+    // wood_normal.wrapS = THREE.RepeatWrapping;
+    // wood_normal.wrapT = THREE.RepeatWrapping;
+    // wood_roughness.wrapS = THREE.RepeatWrapping;
+    // wood_roughness.wrapT = THREE.RepeatWrapping;
 
     var hdr = new THREE.RGBELoader()
         .setPath('./hdri/')
@@ -4582,43 +4644,44 @@ function initMaterial() {
         
     }), ]
     _flipMirrorMaterials = [new THREE.MeshStandardMaterial({
-        color: 0xfd00fd,
+        color: 0xdfdfdf,
         roughness: 0.7,
         name: "wm_door_0",
         transparent: true,
         opacity: 1
     }), new THREE.MeshStandardMaterial({
-        color: 0xff00ff,
+        color: 0xdfdfdf,
         roughness: 0.7,
         name: "wm_door_1",
         transparent: true,
         opacity: 1
     }), new THREE.MeshStandardMaterial({
-        color: 0xfafa22,
+        color: 0xdfdfdf,
         roughness: 0.7,
         name: "wm_door_2",
         transparent: true,
         opacity: 1
     }), new THREE.MeshStandardMaterial({
-        color: 0xdd55dd,
+        color: 0xdfdfdf,
         roughness: 0.7,
         name: "wm_door_3",
         transparent: true,
         opacity: 1
-    }), new THREE.MeshStandardMaterial({
-        color: 0xaaddee,
-        roughness: 0.7,
-        name: "wm_door_4",
-        transparent: true,
-        opacity: 1
-    }), new THREE.MeshStandardMaterial({
+    }), 
+    new THREE.MeshStandardMaterial({
         name: "wm_door_mirror",
 
         roughness: 0,
         metalness: 0.5,
         envMap: hdr
         
-    }), ]
+    }),new THREE.MeshStandardMaterial({
+        color: 0xdfdfdf,
+        roughness: 0.7,
+        name: "wm_door_4",
+        transparent: true,
+        opacity: 1
+    }),  ]
 }
 
 function renderOption() {
