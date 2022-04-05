@@ -133,8 +133,8 @@ let ssaoPass;
 
 let _doorRails_parent = [],
     _doorRails_parent_group = [],
-    _doorRailParent;
-
+    _doorRailParent,
+    _doorsVisible = true;
 
 var thicknessInmeter = 0.022225;
 
@@ -143,7 +143,7 @@ let isSlideRight = false,
 
 let selectedDoor, isMirrorAdded = false;
 let wall, wallRight, wallLeft, floor;
-
+let _columns_bottom = [], _columns_bottom_group;
 let shadowPlane;
 init();
 
@@ -173,6 +173,7 @@ function init() {
     group = new THREE.Group();
 
     _columnsLoft_group = new THREE.Group();
+    _columns_bottom_group = new THREE.Group();
     _locker_group = new THREE.Group();
     _locker_splitter_group = new THREE.Group();
     _largeIntDrawers_group = new THREE.Group();
@@ -280,6 +281,7 @@ function animate() {
 
 function render() {
 
+
     $("input:radio[name='columnsOptions']").change(function () {
         if ($(this).is(":checked")) {
             isCreated = true;
@@ -335,6 +337,10 @@ function render() {
     document.getElementById('capturedImage').src = renderer.domElement.toDataURL();
     renderOption()
 
+    doorVisiblity(_hDoors_parent_group,_doorsVisible);
+    doorVisiblity(_sDoors_parent_group,_doorsVisible);
+    // doorVisiblity(_doorRailParent,_doorsVisible);
+
 
     composer.render();
 
@@ -345,9 +351,12 @@ function getInputs() {
     chooseColumns_number();
 
     $("#actionDoor").hide();
+    $("#actionDoorVisibilty").hide();
     $("#actionSlideDoorLeft").hide();
     $("#actionSlideDoorRight").hide();
-
+    $("#sizeOptions").show();
+    $("#columnDoorOptions").hide();
+    $("#editInterior").hide();
     // $("#editDimensions").hide();
 
 
@@ -386,15 +395,16 @@ function getInputs() {
     });
 
 
-
+    
     $("input:radio[name='doorOptions']").change(function () {
         if ($(this).is(":checked")) {
-
+            $("#actionDoorVisibilty").html('<i class="fa fa-eye-slash"></i> Hide Doors');
             if ($(this).val() == 0) {
                 $("#chooseColumns").show();
                 isHingedDoor = true;
                 isCreated = true;
-                isDoorOpened = true;
+                isDoorOpened = false;
+                _doorsVisible = true;
                 chooseColumns_number();
                 createColumns_Doors(isHingedDoor);
                 $("#actionDoor").show();
@@ -405,6 +415,7 @@ function getInputs() {
                 $("#chooseColumns").hide();
                 isHingedDoor = false;
                 isCreated = true;
+                _doorsVisible = true;
                 chooseColumns_number();
                 createColumns_Doors(isHingedDoor);
                 $("#actionDoor").hide();
@@ -414,8 +425,18 @@ function getInputs() {
         }
     });
 
-
-
+    $("#actionDoorVisibility").html(('<i class="fa fa-eye-slash"></i> Hide Doors'));
+    $("#actionDoorVisibility").click(function(){
+        if(!_doorsVisible){
+           
+            _doorsVisible = true;
+        }else{
+          
+            _doorsVisible = false;
+        }
+        
+        
+    })
     $("#loftOptionsPanel").hide();
 
     $("#addloft").change(function () {
@@ -489,7 +510,7 @@ function getInputs() {
 
     })
 
-    $("#actionDoor").html('<i class="m-lg-1  fa fa-door-closed"></i>Close Door ');
+    $("#actionDoor").html('<i class="m-lg-1  fa fa-door-open"></i>Open Door ');
     $("#actionDoor").click(function () {
 
 
@@ -530,15 +551,53 @@ function getInputs() {
 
     // })
     $("#doneDimensions").click(function () {
+        $("#sizeOptions").hide();
+        $("#columnDoorOptions").show();
+        // $("editInteriors").show();
 
-        $("editInteriors").show();
-
-        interactivePlane_group.visible = true;
-        deleteSprites_group.visible = false;
-        flipVertical_group.visible = false;
+        // interactivePlane_group.visible = true;
+        // deleteSprites_group.visible = false;
+        // flipVertical_group.visible = false;
 
     })
 
+    $("#doneColumns").click(function(){
+        if(_columns.length>0){
+            $("#editInterior").show();
+            $("#columnDoorOptions").hide();
+            
+            interactivePlane_group.visible = true;
+            deleteSprites_group.visible = false;
+            flipVertical_group.visible = false;  
+        }else{
+            alert("Add Doors and Columns");
+        }
+      
+    })
+
+
+    $("#backToDoors").click(function(){
+        $("#columnDoorOptions").show();
+        $("#editInterior").hide();
+        interactivePlane_group.visible = false;
+        deleteSprites_group.visible = true;
+        flipVertical_group.visible = true; 
+     
+        if($("input:radio[name='doorOptions']").is(":checked")){
+            $("input:radio[name='doorOptions']").prop("checked",false);
+        }
+        reset();
+    })
+
+
+    $("#backToDimensions").click(function(){
+        $("#sizeOptions").show();
+        $("#columnDoorOptions").hide();
+        if($("input:radio[name='doorOptions']").is(":checked")){
+            $("input:radio[name='doorOptions']").prop("checked",false);
+        }
+        reset();
+    })
     $("#export").click(function () {
         Export();
     })
@@ -561,11 +620,11 @@ function getInputs() {
 }
 
 function featuresControl() {
-    if (_columns.length > 0) {
-        $("#editInterior").show();
-    } else {
-        $("#editInterior").hide();
-    }
+    // if (_columns.length > 0) {
+    //     $("#editInterior").show();
+    // } else {
+    //     $("#editInterior").hide();
+    // }
 }
 
 function create_lights() {
@@ -662,17 +721,30 @@ function updateWall() {
 function createColumns(index) {
     var g = new THREE.BoxGeometry(1, 1, 1);
     var mesh = new THREE.Mesh(g, _columnsMaterial);
+   
     mesh.name = "w_columns_" + index;
+
 
 
     _columns[index] = mesh;
     _columns_group.name = "w_columns";
     _columns_group.add(_columns[index]);
 
+   
     // scene.add(_lockers[index]);
-    scene.add(_columns_group);
-    return _columns[index];
 
+    scene.add(_columns_group);
+  
+}
+
+function createColumnsBottom(index){
+    var g = new THREE.BoxGeometry(1, 1, 1);
+    var m = new THREE.Mesh(g, _columnsMaterial);
+    m.name=  "w_columns_bottom"+ index;
+    _columns_bottom[index] = m;
+    _columns_bottom_group.name= "w_columns_bottoms";
+    _columns_bottom_group.add(_columns_bottom[index]);
+    scene.add(_columns_bottom_group);
 }
 
 
@@ -703,8 +775,50 @@ function removeColumns(index) {
             adjacentParts = [];
         }
     }
+
+  
 }
 
+function removeColumnsBottom(index){
+    if (index) {
+        _columns_bottom.forEach(e => {
+            if (_columns_bottom[index] instanceof THREE.Mesh && _columns_bottom[index] == e) {
+                if (_columns_bottom_group instanceof THREE.Group) {
+                    _columns_bottom_group.remove(e);
+                }
+            }
+        })
+        _columns_bottom[index] = null;
+    } else {
+        if (_columns_bottom) {
+            _columns_bottom.forEach(e => {
+                if (e instanceof THREE.Mesh) {
+                    if (_columns_bottom_group instanceof THREE.Group) {
+                        _columns_bottom_group.remove(e);
+                        scene.remove(_columns_bottom_group);
+                    }
+                }
+            })
+            _columns_bottom = [];
+
+        }
+    }
+}
+function updateColumnsBottom(i){
+
+    offset = Math.abs(((wLeft.position.x - wLeft.scale.x / 2) - (wRight.position.x - wRight.scale.x / 2))) / customColumns;
+    _columns_bottom_group.position.set(_columns_group.position.x,_columns_group.position.y,_columns_group.position.z);
+
+  
+ 
+        if (_columns_bottom[i]) {
+
+                _columns_bottom[i].scale.set((thickness / 12) * ftTom,_extDrawers[0].scale.y + _extDrawers_splitters[0].scale.y, ftTom * 1.35 / 12);
+                _columns_bottom[i].position.set(i * offset, (_columns_bottom[i].scale.y / 2) + (wBottom.position.y) + wBottom.scale.y / 2, _columns_bottom[i].scale.z/2+_columns[i].position.z+_columns[i].scale.z/2);
+
+        }
+
+}
 function updateColumns() {
 
     offset = Math.abs(((wLeft.position.x - wLeft.scale.x / 2) - (wRight.position.x - wRight.scale.x / 2))) / customColumns;
@@ -714,8 +828,7 @@ function updateColumns() {
 
             if (!isHingedDoor) {
                 var subtract = ftTom * 1.35 / 12
-
-
+               
                 _columns[i].scale.set((thickness / 12) * ftTom, wTop.position.y - wTop.scale.y - wBottom.position.y, (thickness / 12) * ftTom + wDepth * ftTom - subtract);
                 _columns[i].position.set(i * offset, (_columns[i].scale.y / 2) + (wBottom.position.y) + wBottom.scale.y / 2, ((thickness / 24) * ftTom) - subtract / 2);
 
@@ -747,8 +860,9 @@ function updateColumns() {
             }
         }
     }
+    
     _columns_group.position.set(offset + wLeft.position.x, _columns_group.position.y, _columns_group.position.z);
-
+   
     for (var i = 0; i < customColumns - 1; i++) {
 
         if (!deleteSprites[i]) {
@@ -1123,8 +1237,19 @@ function addHorizontalParts() {
                 updateExternalDrawer(i);
                 updateInternalDrawerLarge(i);
             }
-
-
+            if(!isHingedDoor){
+                
+                for (var i = 0; i < _columns.length; i++) {
+                    if(!removed.includes(_columns[i])){
+                        createColumnsBottom(i);
+                        updateColumnsBottom(i);
+                    }
+                }
+            }else{
+                return;
+            }
+            
+            
         } else {
 
 
@@ -2625,10 +2750,12 @@ function onClick() {
                     deleteSprites_group.remove(deleteSprites[i + 1])
                     adjacentParts.push(_columns[i + 1]);
                 }
+
                 removed_index = i;
                 removed_id.push(i);
                 deleteSprites_group.remove(deleteSprites[i])
                 _columns_group.remove(_columns[i]);
+           
                 removed.push(_columns[i]);
             }
 
@@ -3630,8 +3757,8 @@ function removeAllInterior() {
     removeBotShelves();
     removeHanger();
 
-    removeDoor();
-    removeSlideDoors();
+    // removeDoor();
+    // removeSlideDoors();
     reset_adjacents_removed_columns();
 
 }
@@ -4591,8 +4718,8 @@ function initMaterial() {
         color: 0xfafa22,
         roughness: 0.7,
         name: "wm_door",
-        transparent: true,
-        opacity: 0.85
+        transparent: false,
+        opacity: 1
     });
     _hangerMaterial = new THREE.MeshStandardMaterial({
         color: 0xbfbfbf,
@@ -4815,6 +4942,7 @@ function updateColumnsDoor() {
         removeSlideDoors();
         removeFlipDoorSprite();
         removeColumns();
+        removeColumnsBottom();
         removeColumnsSprite();
         removeHorizontalSplitter();
         removeInteractivePlane();
@@ -5369,6 +5497,7 @@ function reset() {
     removeSlideDoors();
     removeFlipDoorSprite();
     removeColumns();
+    removeColumnsBottom();
     removeColumnsSprite();
     removeHorizontalSplitter();
     removeInteractivePlane();
@@ -5385,16 +5514,33 @@ function reset() {
 
     $("#actionSlideDoorLeft").hide();
     $("#actionSlideDoorRight").hide();
-
+    $("#actionDoorVisiblity").hide();
+    $("#actionDoorVisibilty").html('<i class="fa fa-eye-slash"></i> Hide Doors');
     $("#actionSlideDoorLeft").html('<i class="m-lg-1  fa fa-door-open"></i>Open Left ');
     $("#actionSlideDoorRight").html('<i class="m-lg-1  fa fa-door-open"></i>Open Right ');
 
     $("#actionDoor").hide();
-    $("#actionDoor").html('<i class="m-lg-1  fa fa-door-closed"></i>Close Door ');
+    $("#actionDoor").html('<i class="m-lg-1  fa fa-door-open"></i>Open Door ');
     isDoorOpened = false;
     isSlideRight = false;
     isSlideLeft = false;
     removeAllInterior();
+}
 
 
+function doorVisiblity(object,visibility){
+    if(object instanceof THREE.Group){       
+        object.visible = visibility;   
+        if(!visibility){
+            $("#actionDoorVisibility").html(('<i class="fa fa-eye"></i> Unhide Doors'));
+           $("#actionSlideDoorRight").addClass("disabled");
+           $("#actionSlideDoorLeft").addClass("disabled");
+           $("#actionDoor").addClass("disabled");
+        }else{
+            $("#actionDoorVisibility").html(('<i class="fa fa-eye-slash"></i> Hide Doors'));
+            $("#actionSlideDoorRight").removeClass("disabled");
+            $("#actionSlideDoorLeft").removeClass("disabled");
+            $("#actionDoor").removeClass("disabled");
+        }
+    }
 }
