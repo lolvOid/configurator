@@ -2748,8 +2748,8 @@ function helpers() {
 function onClick() {
     //setflipDoor_Select()
 
-    if (selectedObject && selectedSprite.visible) {
-
+    if (selectedObject ) {
+        if(deleteSprites_group.visible){
         for (var i = 0; i < columns; i++) {
 
             if (_columns[i] == selectedObject) {
@@ -2772,13 +2772,12 @@ function onClick() {
                 removed.push(_columns[i]);
             }
 
-        }
-
-
-
-
-        // setflipDoor();
-        selectedObject = null;
+        }}
+        
+            selectedObject = null;
+        
+        
+       
 
     }
 
@@ -2891,7 +2890,7 @@ function onClick() {
 function onPointerMove(event) {
 
     if (selectedSprite instanceof THREE.Sprite) {
-        if (selectedSprite.visible) {
+        if (deleteSprites_group.visible) {
             selectedSprite.material.map = onNormalDeleteSprite;
             deleteSprites.forEach(e => {
                 if (e == selectedSprite) {
