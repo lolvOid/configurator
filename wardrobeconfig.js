@@ -5698,8 +5698,22 @@ function setPrice(){
     var splitterPrice = 5 * splitterSingleSize.length  ;
     
     // console.log((12*offset/ftTom)-thickness/2)
-
+    var intDrawer = _intDrawers_parent.filter(e=>e instanceof THREE.Group);
+    var dCount = 0; dDoubleCount = 0;
+    
+    intDrawer.forEach(function(e){
+    
+        if(e.children[0].scale.x> offset){
+            dDoubleCount += e.children.length;
+        }else{
+            dCount += e.children.length;
+        }
+   
+    })
+    var intDrawerPrice = 35 * dCount;
+    var intDrawerDoublePrice = 70 * dDoubleCount;
   
+
     var ts = _top_shelves_parent.filter(e=>e instanceof THREE.Group);
     var tsCount = 0;tsDoubleCount = 0;
     
@@ -5736,7 +5750,7 @@ function setPrice(){
     var columnsPrice = 8 *(_columns.length-removed.length) ;
  
     var totalInteriorCost =   smallDrawerDoublePrice + smallDrawerPrice + largeDrawerPrice + largeDrawerDoublePrice + externalDrawerDoublePrice + externalDrawerPrice + lockerPrice + hangerPrice + hangerDoublePrice
-     + topShelfPrice + topShelfDoublePrice + botShelfPrice + botShelfDoublePrice  ;
+     + topShelfPrice + topShelfDoublePrice + botShelfPrice + botShelfDoublePrice + intDrawerDoublePrice + intDrawerPrice ;
    totalPrice =( calculateWardrobeVolume() * initialPrice) + splitterPrice + splitterDoublePrice + slideDoorPrice + hingedDoorPrice + totalInteriorCost + columnsPrice;
   
  
