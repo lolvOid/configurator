@@ -42,15 +42,14 @@
 <body>
     <div class="rightnavigator shadow">
         <div class="col-12">
-            <form action="" class="p-2 ">
+            <form action="POST" class="p-2 ">
                 
                 <h5 class="text-center">Wardrobe Options <span style="color:chartreuse">Door Added!</span></h5>
-                <div class="form-control m-1">
+                <div class="form-control m-1" id="sizeOptions">
 
 
-                    <h6 class="m-1">Choose Dimensions:</h6>
-                    <div class="form-control-lg" id="sizeOptions">
-
+                   
+                        <h6 class="m-2">Choose Dimensions:</h6>
                         <div class="form-control m-1 " >
                             <p>Height:</p>
                             <div class="form-check form-check-inline">
@@ -124,61 +123,78 @@
                                         value="4    ">
                                     <label class="form-check-label btn btn-outline-secondary" for="loft3">4 ft</label>
                                 </div>
-                                <div class="row m-2 d-flex">
+                                <!-- <div class="row m-2 d-flex">
                                     <a class="btn btn-outline-dark" id="actionloftDoor"></a>
-                                </div>
+                                </div> -->
                             </div>
                            
     
                         </div>
-                        <div class="form-control-lg m-1 d-inline-flex" >
-                            <h6 class="mt-0">Choose Doors Type:</h6>
-                            <div class="form-check form-check-inline ">
-                                <input class="form-check-input btn-check" type="radio" name="doorOptions" id="hingedDoor"
-                                    value="0">
-                                <label class="form-check-label btn btn-outline-secondary " for="hingedDoor">Hinged Doors</label>
-                            </div>
-                            
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input btn-check" type="radio" name="doorOptions" id="slideDoor"
-                                    value="1">
-                                <label class="form-check-label btn btn-outline-secondary" for="slideDoor">Sliding Door</label>
-                                
-                            </div>
-                            
-                            <!-- <a class=" btn btn-outline-success float-end" id="doneDepth"><i class="fa fa-check"></i>
-                            </a> -->
                         
+                        <div class="row d-flex m-1 ">
+                            <a class="btn btn-outline-success" id="doneDimensions"><i class="fa fa-check"></i>Done</a>
+    
+                         
                         </div>
-                        <div class="row">
+    
+                  
+                  
+                </div>  
+
+
+                <div class="form-control" id="columnDoorOptions">
+                    <a class="btn btn-outline-dark" id="backToDimensions" ><i class="fa fa-arrow-left"></i></a>
+                    <div class="form-control-lg m-1 d-inline-flex" >
+                        <h6 class="mt-0">Choose Doors Type:</h6>
+                        <div class="form-check form-check-inline ">
+                            <input class="form-check-input btn-check" type="radio" name="doorOptions" id="hingedDoor"
+                                value="0">
+                            <label class="form-check-label btn btn-outline-secondary " for="hingedDoor">Hinged Doors</label>
+                        </div>
+                        
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input btn-check" type="radio" name="doorOptions" id="slideDoor"
+                                value="1">
+                            <label class="form-check-label btn btn-outline-secondary" for="slideDoor">Sliding Door</label>
+                            
+                        </div>
+                        
+                
+                    </div>
+                    
+                    <div class="row m-1" id="chooseColumns">
+                        <h6>Choose Columns:</h6>
+                      
+
+                        <div class="d-md-inline-block justify-content-center " id="columns-group">
+
+                        </div>
+                       
+                    </div>
+                    
+                <div class="row d-flex m-1">
+                    <a class="btn btn-outline-success" id="doneColumns"><i class="fa fa-check"></i>Done</a>
+
+                 
+                </div>
+                </div>                    
+
+                <div id="editInterior" class="form-control m-1" >
+                    <a class="btn btn-outline-dark" id="backToDoors" ><i class="fa fa-arrow-left"></i></a>
+                    <h6 class="m-2"  >Features: </h6>
+                  
+                    <div class="form-control m-1">
+                        <h6>Doors Actions:</h6>
+                        <div class="row m-1">
+                            <a class="btn btn-outline-dark m-1" id="actionDoorVisibility"></a> 
                             <a class="btn btn-outline-dark m-1" id="actionDoor"></a> 
                             <a class="btn btn-outline-dark m-1" id="actionSlideDoorLeft"></a> 
                             <a class="btn btn-outline-dark m-1" id="actionSlideDoorRight"></a> 
-                           </div>
-                        <div class="form-control m-1" id="chooseColumns">
-                            <h6>Choose Columns:</h6>
-                          
-    
-                            <div class="d-md-inline-block justify-content-center " id="columns-group">
-    
-                            </div>
                            
+                        
                         </div>
-    
                     </div>
-                    
-
-                    <div class="row d-flex m-1 ">
-                        <a class="btn btn-outline-success" id="doneDimensions"><i class="fa fa-check"></i>Done</a>
-
-                        <!-- <a class="btn btn-outline-dark " id="editDimensions"><i class="fa fa-edit"></i>Edit</a> -->
-                    </div>
-                </div>
-
-
-                <div id="editInterior" class="form-control m-1" >
-
-                    <h6 class="m-2"  >Features: </h6>
+                   
                   
                     <div class="row m-2">
 
@@ -231,8 +247,6 @@
                         <!-- </select> -->
                     <!-- </div> -->
                     
-
-                  
                     
                 </div>
                 <div class="form-control m-1">
@@ -278,10 +292,14 @@
         </div>
     </div>
 
+  
 
-
-
-    <div id="modelviewer"></div>
+   
+    <div id="modelviewer">
+        <div class="price">
+            $ 100
+        </div>
+    </div>
     <!-- Small modal -->
 
 
@@ -298,8 +316,6 @@
         integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous">
     </script>
 
-    <script src="./Splitter.js"></script>
-    <script src="./Drawer.js"></script>
     <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script> -->
     <script src="./wardrobeconfig.js"></script>
 </body>
