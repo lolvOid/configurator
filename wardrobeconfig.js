@@ -125,6 +125,7 @@ let wood_roughness;
 
 let selectedSprite, selectedMirror;
 
+let _intDrawers = [], _intDrawers_group,_intDrawers_parent=[];
 let _splitterMaterial, _railMaterial, _wardrobeMaterial, _lockerMaterial, _shelfMaterial, _hangerMaterial, _doorMaterial, _columnsMaterial, _extDrawerMaterial, _intSmallMaterial, _intLargeMaterial, _flipMirrorMaterials, _mirrorMaterials;
 var renderOptionsValue = 0;
 var pmremGenerator;
@@ -194,6 +195,7 @@ function init() {
     _doorRailParent = new THREE.Group();
     exporter = new THREE.GLTFExporter();
     _sDoors_parent_group = new THREE.Group();
+    _intDrawers_group = new THREE.Group();
     create_lights();
     createFloor();
     createWall();
@@ -1239,7 +1241,14 @@ function generateInteractivePlanes(index) {
 }
 
 function addHorizontalParts() {
-
+    $("#addID").click(function(){
+        if(!_intDrawers_parent[plane_index]){
+            createInternalDrawers(plane_index,4);
+            updateInternalDrawers(plane_index);
+        }else{
+            return;
+        }
+    })
 
     $("#addED").click(function () {
 
@@ -1457,64 +1466,108 @@ function botShelfFilter() {
         $("#addBottomShelf").addClass("disabled");
     }
 
+   
 
     if (wHeight < 6.5) {
-
-
-        if (_smallIntDrawers[plane_index]) {
-
-            $("#addLocker").addClass("disabled");
-        } else {
-            $("#addLocker").removeClass("disabled");
-        }
-
-        if (_lockers[plane_index]) {
-            $("#addIDS").addClass("disabled");
-
-        } else {
-            $("#addIDS").removeClass("disabled");
-        }
-
-        if (_largeIntDrawers.length > 0) {
+        if(_intDrawers_parent.length>0){
+            row = 0;
             $("#addED").addClass("disabled");
-
-        } else {
-            $("#addED").removeClass("disabled");
-        }
-
-        if (_extDrawers.length > 0) {
-            $("#addIDL").addClass("disabled");
-
-        } else {
-            $("#addIDL").removeClass("disabled");
-        }
-
-        if (_smallIntDrawers[plane_index] && _bot_shelf_parent[plane_index]) {
-
-            $("#addIDL").addClass("disabled");
-            $("#addIDS").addClass("disabled");
-            $("#addED").addClass("disabled");
-            $("#addLocker").addClass("disabled");
-        } else if (_lockers[plane_index] && _bot_shelf_parent[plane_index]) {
-
-            $("#addIDS").addClass("disabled");
-            $("#addED").addClass("disabled");
-            $("#addLocker").addClass("disabled");
-            $("#addIDL").addClass("disabled");
-        } else if (_smallIntDrawers[plane_index] && !_bot_shelf_parent[plane_index]) {
-            if (_largeIntDrawers[plane_index]) {
-                $("#addIDS").addClass("disabled");
-
+            
+           
+          
+        }else{
+            if (_largeIntDrawers.length > 0) {
+            
+                $("#addED").addClass("disabled");
+    
+            } else {
+                $("#addED").removeClass("disabled");
             }
-
-
+            
         }
-    } else if (wHeight == 6.5) {
+          
 
+        if(_intDrawers_parent[plane_index]){
+            row = 0;
+            $("#addIDL").addClass("disabled");
+            $("#addLocker").addClass("disabled");
+            $("#addIDS").addClass("disabled");
+            
+        }
+        else{
+            if (_smallIntDrawers[plane_index]) {
+
+                $("#addLocker").addClass("disabled");
+            } else {
+                $("#addLocker").removeClass("disabled");
+            }
+    
+            if (_lockers[plane_index]) {
+                $("#addIDS").addClass("disabled");
+    
+            } else {
+                $("#addIDS").removeClass("disabled");
+            }
+    
+         
+            if (_extDrawers.length > 0) {
+                $("#addID").addClass("disabled");
+                $("#addIDL").addClass("disabled");
+    
+            } else {
+                $("#addID").removeClass("disabled");
+                $("#addIDL").removeClass("disabled");
+            }
+    
+            if (_smallIntDrawers[plane_index] && _bot_shelf_parent[plane_index]) {
+    
+                $("#addIDL").addClass("disabled");
+                $("#addIDS").addClass("disabled");
+                $("#addED").addClass("disabled");
+                $("#addLocker").addClass("disabled");
+            } else if (_lockers[plane_index] && _bot_shelf_parent[plane_index]) {
+    
+                $("#addIDS").addClass("disabled");
+                $("#addED").addClass("disabled");
+                $("#addLocker").addClass("disabled");
+                $("#addIDL").addClass("disabled");
+            } else if (_smallIntDrawers[plane_index] && !_bot_shelf_parent[plane_index]) {
+                if (_largeIntDrawers[plane_index]) {
+                    $("#addIDS").addClass("disabled");
+    
+                }
+    
+    
+            }
+        }
+     
+    } else if (wHeight == 6.5) {
+       
+        if(_intDrawers_parent.length>0){
+         
+            $("#addED").addClass("disabled");
+            
+           
+          
+        }
+         if(_intDrawers_parent[plane_index]){
+            row = 0;
+            $("#addIDL").addClass("disabled");
+            $("#addLocker").addClass("disabled");
+            $("#addIDS").addClass("disabled");
+            
+            
+        }
+        if(_extDrawers[plane_index] || _smallIntDrawers[plane_index] || _largeIntDrawers[plane_index] || _lockers[plane_index]){
+            $("#addID").addClass("disabled");
+        }else{
+            $("#addID").removeClass("disabled");
+        }
         if (_extDrawers.length > 0) {
             if (_largeIntDrawers[plane_index]) {
                 $("#addIDS").addClass("disabled");
                 $("#addLocker").addClass("disabled");
+                $("#addID").addClass("disabled");
             }
         } else {
             if (_lockers[plane_index] && !_smallIntDrawers[plane_index]) {
@@ -1522,10 +1575,30 @@ function botShelfFilter() {
                 $("#addLocker").removeClass("disabled");
                 $("#addIDL").removeClass("disabled");
                 $("#addED").addClass("disabled");
+               
             }
         }
-
     } else if (wHeight > 6.5) {
+        if(_intDrawers_parent.length>0){
+         
+            $("#addED").addClass("disabled");
+            
+           
+          
+        }
+         if(_intDrawers_parent[plane_index]){
+            row = 0;
+            $("#addIDL").addClass("disabled");
+            $("#addLocker").addClass("disabled");
+            $("#addIDS").addClass("disabled");
+            
+            
+        }
+        if(_extDrawers[plane_index] || _smallIntDrawers[plane_index] || _largeIntDrawers[plane_index] || _lockers[plane_index]){
+            $("#addID").addClass("disabled");
+        }else{
+            $("#addID").removeClass("disabled");
+        }
         $("#addBottomShelf").removeClass("disabled");
 
         if (_lockers[plane_index] && !_smallIntDrawers[plane_index]) {
@@ -3198,7 +3271,7 @@ function post_process() {
     ssaoPass.minDistance = 0.005;
     ssaoPass.maxDistance = 0.1;
 
-
+    // composer.addPass(ssaoPass);
 
     outlinePass = new THREE.OutlinePass(new THREE.Vector2(fwidth, fheight), scene, camera);
     outlinePass.edgeStrength = 16;
@@ -3552,6 +3625,16 @@ function columnsCombination() {
                         // removeTopShelves(i + 1);
 
                     }
+
+                    if(_intDrawers_parent[i]){
+                        var a = _intDrawers_parent[i];
+                        a.traverse(function (e){
+                            if (e instanceof THREE.Mesh) {
+                                e.scale.setX(sizeToChange);
+                                e.position.setX(posToChange);
+                            }
+                        })
+                    }
                     //  else if (_top_shelves_parent[i + 1]) {
                     //     var a = _top_shelves_parent[i + 1];
                     //     a.traverse(function (e) {
@@ -3773,7 +3856,7 @@ function removeAllInterior() {
     removeTopShelves();
     removeBotShelves();
     removeHanger();
-
+    removeInternalDrawers();
     // removeDoor();
     // removeSlideDoors();
     reset_adjacents_removed_columns();
@@ -4719,7 +4802,8 @@ function initMaterial() {
         color: 0xfdfdfd,
         roughness: 0.2,
         metalness: 0.8,
-        envMap: hdr
+        envMap: hdr,
+        map: new THREE.TextureLoader().load("./Textures/metal.jpg")
     });
     _splitterMaterial = new THREE.MeshStandardMaterial({
         color: 0x22ffaa,
@@ -4729,14 +4813,16 @@ function initMaterial() {
     _lockerMaterial = new THREE.MeshStandardMaterial({
         color: 0xddffdd,
         roughness: 0.8,
-        name: "wm_locker"
+        name: "wm_locker",
+        map: new THREE.TextureLoader().load("./Textures/whiteGrad2.jpg")
     });
     _doorMaterial = new THREE.MeshStandardMaterial({
         color: 0xfafa22,
         roughness: 0.7,
         name: "wm_door",
         transparent: false,
-        opacity: 1
+        opacity: 1,
+        map:new THREE.TextureLoader().load("./Textures/whiteGrad.jpg"),
     });
     _hangerMaterial = new THREE.MeshStandardMaterial({
         color: 0xbfbfbf,
@@ -4753,22 +4839,27 @@ function initMaterial() {
     _columnsMaterial = new THREE.MeshStandardMaterial({
         color: 0xff55dd,
         roughness: 0.8,
-        name: "wm_column"
+        name: "wm_column",
+        map:new THREE.TextureLoader().load("./Textures/whiteGrad4.jpg"),
     });
     _extDrawerMaterial = new THREE.MeshStandardMaterial({
         color: 0xff7f50,
         roughness: 0.8,
-        name: "wm_extDrawer"
+        name: "wm_extDrawer",
+        map:new THREE.TextureLoader().load("./Textures/whiteGrad3.jpg"),
     });
     _intSmallMaterial = new THREE.MeshStandardMaterial({
         color: 0xadaffa,
         roughness: 0.8,
-        name: "wm_intSmallDrawer"
+        name: "wm_intSmallDrawer",
+        map:new THREE.TextureLoader().load("./Textures/whiteGrad.jpg"),
+     
     });
     _intLargeMaterial = new THREE.MeshStandardMaterial({
         color: 0xaa7f50,
         roughness: 0.8,
-        name: "wm_intLargeDrawer"
+        name: "wm_intLargeDrawer",
+        map:new THREE.TextureLoader().load("./Textures/whiteGrad4.jpg"),
     });
 
     _mirrorMaterials = [new THREE.MeshStandardMaterial({
@@ -4852,8 +4943,9 @@ function initMaterial() {
 }
 
 function renderOption() {
-    var defaultColor = "#dfdfdf";
-    var splitterColor = "#d0d0d0";
+    var defaultColor = "#d4d4d4";
+    var defaultColor2 = "#d9d9d9";
+    var defaultColor3 = "#d9d9d9";
     var debug_extDrawerColor = "#ff7f50";
     var debug_intSmallColor = "#adaffa";
     var debug_intLargeColor = "#aa7f50";
@@ -4888,10 +4980,11 @@ function renderOption() {
         _splitterMaterial.color.set(defaultColor);
         _doorMaterial.color.set(defaultColor);
         _intLargeMaterial.color.set(defaultColor);
-        _intSmallMaterial.color.set(defaultColor);
+        _intSmallMaterial.color.set(defaultColor3);
         _lockerMaterial.color.set(defaultColor);
-        _columnsMaterial.color.set(defaultColor);
+        _columnsMaterial.color.set(defaultColor2);
         _shelfMaterial.color.set(defaultColor);
+        
         // ssaoPass.output = THREE.SSAOPass.OUTPUT.Default;
     } else if (renderOptionsValue == 1) {
         scene.traverse(function (child) {
@@ -5562,14 +5655,12 @@ function doorVisiblity(object,visibility){
     }
 }
 
-function calculatePrice(){
-    
-}
+
 
 function setPrice(){    
 
     var initialPrice = 10; //1.25 sqft price onlyWardrobe
-    var widthMeasure = offset - thickness/12 * ftTom;
+    // var widthMeasure = offset - thickness/12 * ftTom;
 
     var slideDoorPrice = 30 * _sDoors_parent_group.children.length; //One Pair+rail
     var hingedDoorPrice = 20 * _hDoors_parent_group.children.length; //One Door
@@ -5605,6 +5696,7 @@ function setPrice(){
     var splitterDoublePrice = 10 * splitterDoubleSize.length;
     var splitterSingleSize = _m_splitters.filter(e=>e instanceof THREE.Mesh &&  e.scale.x <= offset);
     var splitterPrice = 5 * splitterSingleSize.length  ;
+    
     // console.log((12*offset/ftTom)-thickness/2)
 
   
@@ -5639,13 +5731,18 @@ function setPrice(){
     var botShelfPrice = 2 * bsCount;
     var botShelfDoublePrice = 4* bsDoubleCount;
 
-    var columnsPrice = 5*_columns_group.children.length;
-  
-    var totalInteriorCost =   smallDrawerDoublePrice + smallDrawerPrice + largeDrawerPrice + largeDrawerDoublePrice + externalDrawerDoublePrice + externalDrawerPrice + lockerPrice + hangerPrice + hangerDoublePrice
-     + topShelfPrice + topShelfDoublePrice + botShelfPrice + botShelfDoublePrice;
-    totalPrice = calculateWardrobeVolume() * initialPrice + (columnsPrice + splitterPrice + splitterDoublePrice + slideDoorPrice + hingedDoorPrice + totalInteriorCost);
-    totalPrice = Math.ceil(totalPrice);
     
+    
+    var columnsPrice = 8 *(_columns.length-removed.length) ;
+ 
+    var totalInteriorCost =   smallDrawerDoublePrice + smallDrawerPrice + largeDrawerPrice + largeDrawerDoublePrice + externalDrawerDoublePrice + externalDrawerPrice + lockerPrice + hangerPrice + hangerDoublePrice
+     + topShelfPrice + topShelfDoublePrice + botShelfPrice + botShelfDoublePrice  ;
+   totalPrice =( calculateWardrobeVolume() * initialPrice) + splitterPrice + splitterDoublePrice + slideDoorPrice + hingedDoorPrice + totalInteriorCost + columnsPrice;
+  
+ 
+    // totalPrice = Math.ceil(totalPrice);
+   
+   
     $(".price").html("$ "+totalPrice);
 
 }
@@ -5675,5 +5772,79 @@ function createMeshInbetweenLockerSmallDrawer(locker,drawer){
     mesh.scale.setY(drawer.scale.y);
     // mesh.scale.setZ(_columns[0].s)
     scene.add(mesh);
+
+}
+
+function createInternalDrawers(index,row){
+    var g = new THREE.BoxGeometry(1, 1, 1);
+
+    let _drawers_group = new THREE.Group();
+
+    if(_m_splitters.length>0){
+        for (var j = 0; j < row; j++) { 
+            _intDrawers[j] = new THREE.Mesh(g, _intSmallMaterial);
+            _intDrawers[j].name = "_drawer_" + j;
+            _intDrawers[j].scale.set(_m_splitters[index].scale.x,1,_m_splitters[index].scale.z);
+            _drawers_group.add(_intDrawers[j]);
+    
+        }
+    }
+  
+    _drawers_group.name = "_drawers_" + index;
+    _intDrawers_parent[index] = _drawers_group;
+
+
+    scene.add(_intDrawers_parent[index]);
+    
+}
+
+function updateInternalDrawers(index){
+
+    
+   
+    var pos = (wBottom.position.y+wBottom.scale.y/2);
+
+
+    
+
+    if (_intDrawers_parent[index] instanceof THREE.Group) {
+        
+       var vertical_offset = ((_m_splitters[index].position.y- _m_splitters[index].scale.y/2)-(wBottom.position.y+wBottom.scale.y/2))/_intDrawers_parent[index].children.length;
+
+        
+            for (var j = 0; j < _intDrawers_parent[index].children.length; j++) {
+                if (_intDrawers_parent[index].children[j] instanceof THREE.Mesh) {
+                    _intDrawers_parent[index].children[j].scale.set(_m_splitters[index].scale.x,vertical_offset,_m_splitters[index].scale.z);
+                    _intDrawers_parent[index].children[j].position.set(index * offset,  j*_intDrawers_parent[index].children[j].scale.y,
+                      _m_splitters[index].position.z);
+                }
+
+            }
+        
+      
+
+    }
+    _intDrawers_parent[index].position.set(offset / 2 + wLeft.position.x, pos+vertical_offset/2, _intDrawers_parent[index].position.z);
+}
+
+
+
+function removeInternalDrawers(index) {
+
+    if (!index) {
+        _intDrawers_parent.forEach(e => {
+            if (e instanceof THREE.Group) {
+                scene.remove(e);
+            }
+        })
+        _intDrawers_parent = [];
+    } else {
+        _intDrawers_parent.forEach(e => {
+            if (e instanceof THREE.Group && index == _intDrawers_parent.indexOf(e)) {
+                scene.remove(e);
+            }
+        })
+        _intDrawers_parent[index] = null;
+    }
 
 }
