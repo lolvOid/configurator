@@ -145,6 +145,9 @@ let selectedDoor, isMirrorAdded = false;
 let wall, wallRight, wallLeft, floor;
 let _columns_bottom = [], _columns_bottom_group;
 let shadowPlane;
+
+
+var totalPrice = 0;
 init();
 
 animate();
@@ -301,6 +304,8 @@ function render() {
     botShelfFilter();
 
     updateBotShelves(plane_index);
+
+    
     for (var i = 0; i < customColumns; i++) {
         updateHingedDoorUpSize(i)
 
@@ -327,6 +332,7 @@ function render() {
     loftDoorAction();
 
     paintWardrobe()
+    setPrice();
     // renderer.render(scene, camera);
     if (interactivePlanes.length > 0) {
         document.getElementById('column_id').innerHTML = plane_index + 1;
@@ -335,13 +341,15 @@ function render() {
         document.getElementById('column_id').innerHTML = "None";
     }
     document.getElementById('capturedImage').src = renderer.domElement.toDataURL();
+
+
     renderOption()
 
     doorVisiblity(_hDoors_parent_group,_doorsVisible);
     doorVisiblity(_sDoors_parent_group,_doorsVisible);
     // doorVisiblity(_doorRailParent,_doorsVisible);
-
-
+    
+    
     composer.render();
 
 
@@ -365,7 +373,7 @@ function getInputs() {
 
     $("#width").on("input", function () {
         wWidth = $("#width").val();
-
+       
         if (wWidth > 3) {
             $("#hingedDoor").prop("checked", false);
             $("#chooseColumns").hide();
@@ -377,7 +385,10 @@ function getInputs() {
             $("#slideDoor").prop("disabled", true);
         }
         chooseColumns_number();
+
+       
         reset();
+        
     })
 
     $("input:radio[name='heightOptions']").click(function () {
@@ -596,6 +607,7 @@ function getInputs() {
         if($("input:radio[name='doorOptions']").is(":checked")){
             $("input:radio[name='doorOptions']").prop("checked",false);
         }
+        isHingedDoor = true;
         reset();
     })
     $("#export").click(function () {
@@ -2372,6 +2384,7 @@ function createTopShelves(row, index) {
     _top_shelves_parent[index] = _top_shelves_group;
 
     scene.add(_top_shelves_parent[index]);
+
     removeHanger(index);
 
 }
@@ -2735,7 +2748,7 @@ function helpers() {
 function onClick() {
     //setflipDoor_Select()
 
-    if (selectedObject) {
+    if (selectedObject && selectedSprite.visible) {
 
         for (var i = 0; i < columns; i++) {
 
@@ -3620,24 +3633,27 @@ function columnsCombination() {
                                 updateInternalDrawerSmall(i + 1);
 
                                 var b = _smallIntDrawers[i + 1];
-                                b.scale.setX(offset);
+                                b.scale.setX(offset - thickness/12 *ftTom);
                                 var a = _smallIntDrawers[i];
                                 a.scale.setX(sizeToChange);
                                 a.position.setX(posToChange);
                                 var c = _lockers[i];
                                 var d = _locker_splitters[i];
-                                c.scale.setX(offset);
-                                d.scale.setX(offset);
+                                c.scale.setX(offset - thickness/12 *ftTom);
+                                d.scale.setX(offset - thickness/12 *ftTom);
+                               
+                                // createMeshInbetweenLockerSmallDrawer(c,b);
                             } else {
                                 createInternalDrawerSmall(i + 1);
                                 updateInternalDrawerSmall(i + 1);
 
                                 var b = _smallIntDrawers[i + 1];
-                                b.scale.setX(offset);
+                                b.scale.setX(offset - thickness/12 *ftTom);
                                 var c = _lockers[i];
                                 var d = _locker_splitters[i];
-                                c.scale.setX(offset);
-                                d.scale.setX(offset);
+                                
+                                c.scale.setX(offset - thickness/12 *ftTom);
+                                d.scale.setX(offset - thickness/12 *ftTom);
                             }
 
 
@@ -3664,40 +3680,42 @@ function columnsCombination() {
 
                                 var b = _smallIntDrawers[i + 1];
                                 removeLocker(i + 1);
-                                b.scale.setX(offset);
+                                b.scale.setX(offset - thickness/12 *ftTom);
                             }
                         } else {
                             var b = _smallIntDrawers[i + 1];
                             updateInternalDrawerSmall(i + 1)
-                            b.scale.setX(offset);
+                            b.scale.setX(offset - thickness/12 *ftTom);
                         }
 
                         if (_lockers[i]) {
                             var b = _smallIntDrawers[i + 1];
-                            b.scale.setX(offset);
+                            b.scale.setX(offset - thickness/12 *ftTom);
                             var a = _lockers[i];
                             var c = _locker_splitters[i]
-                            a.scale.setX(offset);
-                            c.scale.setX(offset);
+                            a.scale.setX(offset - thickness/12 *ftTom);
+                            c.scale.setX(offset - thickness/12 *ftTom);
                         } else {
                             createLocker(i);
                             updateLocker(i);
                             var a = _lockers[i];
                             var b = _locker_splitters[i]
-                            a.scale.setX(offset);
-                            b.scale.setX(offset);
+                            a.scale.setX(offset - thickness/12 *ftTom);
+                            b.scale.setX(offset - thickness/12 *ftTom);
                         }
                     } else {
+                     
                         if (_lockers[i]) {
                             createInternalDrawerSmall(i + 1);
                             updateInternalDrawerSmall(i + 1);
                             var b = _smallIntDrawers[i + 1];
-                            b.scale.setX(offset);
+                            b.scale.setX(offset - thickness/12 *ftTom);
 
                             var c = _lockers[i];
                             var d = _locker_splitters[i];
-                            c.scale.setX(offset);
-                            d.scale.setX(offset);
+                            c.scale.setX(offset-thickness/6 *ftTom);
+                            d.scale.setX(offset - thickness/12 *ftTom);
+                            //  createMeshInbetweenLockerSmallDrawer(c,b);
                         } else if (_lockers[i + 1]) {
                             removeLocker(i + 1);
                             createLocker(i);
@@ -3705,12 +3723,12 @@ function columnsCombination() {
                             createInternalDrawerSmall(i + 1);
                             updateInternalDrawerSmall(i + 1);
                             var b = _smallIntDrawers[i + 1];
-                            b.scale.setX(offset);
+                            b.scale.setX(offset - thickness/12 *ftTom);
 
                             var c = _lockers[i];
                             var d = _locker_splitters[i];
-                            c.scale.setX(offset);
-                            d.scale.setX(offset);
+                            c.scale.setX(offset - thickness/12 * ftTom);
+                            d.scale.setX(offset - thickness/12 * ftTom) ;
                         }
                     }
 
@@ -5543,4 +5561,120 @@ function doorVisiblity(object,visibility){
             $("#actionDoor").removeClass("disabled");
         }
     }
+}
+
+function calculatePrice(){
+    
+}
+
+function setPrice(){    
+
+    var initialPrice = 10; //1.25 sqft price onlyWardrobe
+    var widthMeasure = offset - thickness/12 * ftTom;
+
+    var slideDoorPrice = 30 * _sDoors_parent_group.children.length; //One Pair+rail
+    var hingedDoorPrice = 20 * _hDoors_parent_group.children.length; //One Door
+
+    var lockerPrice = 15 * _locker_group.children.length;
+    
+
+    var smallDrawersDoubleSize = _smallIntDrawers.filter(e=>e instanceof THREE.Mesh && e.scale.x > offset);
+    var smallDrawerDoublePrice = 70 * smallDrawersDoubleSize.length;
+    var smallDrawersSingleSize = _smallIntDrawers.filter(e=>e instanceof THREE.Mesh && e.scale.x <= offset);
+    var smallDrawerPrice = 35 * smallDrawersSingleSize.length ;
+
+ 
+    var largeDrawersDoubleSize = _largeIntDrawers.filter(e=>e instanceof THREE.Mesh && e.scale.x > offset);
+    var largeDrawerDoublePrice = 80 * largeDrawersDoubleSize.length;
+    var largeDrawersSingleSize = _largeIntDrawers.filter(e=>e instanceof THREE.Mesh && e.scale.x <= offset);
+    var largeDrawerPrice = 40 * largeDrawersSingleSize.length;
+    
+   
+    var externalDrawerDoubleSize = _extDrawers.filter(e=>e instanceof THREE.Mesh && e.scale.x > offset )
+    var externalDrawerDoublePrice = 70 * externalDrawerDoubleSize.length;
+    var externalDrawerSingleSize = _extDrawers.filter(e=>e instanceof THREE.Mesh &&  e.scale.x <= offset);
+    var externalDrawerPrice = 35 * externalDrawerSingleSize.length;
+    
+    var hangerDoubleSize = _hangers.filter(e=>e instanceof THREE.Mesh && e.scale.y > offset);
+    var hangerDoublePrice = 10 * hangerDoubleSize.length;
+    var hangerSingleSize = _hangers.filter(e=>e instanceof THREE.Mesh && e.scale.y <= offset);
+    var hangerPrice = 5 * hangerSingleSize.length;
+
+   
+    
+    var splitterDoubleSize = _m_splitters.filter(e=>e instanceof THREE.Mesh && e.scale.x > offset )
+    var splitterDoublePrice = 10 * splitterDoubleSize.length;
+    var splitterSingleSize = _m_splitters.filter(e=>e instanceof THREE.Mesh &&  e.scale.x <= offset);
+    var splitterPrice = 5 * splitterSingleSize.length  ;
+    // console.log((12*offset/ftTom)-thickness/2)
+
+  
+    var ts = _top_shelves_parent.filter(e=>e instanceof THREE.Group);
+    var tsCount = 0;tsDoubleCount = 0;
+    
+    ts.forEach(function(e){
+    
+        if(e.children[0].scale.x> offset){
+            tsDoubleCount += e.children.length;
+        }else{
+            tsCount += e.children.length;
+        }
+   
+    })
+    var topShelfPrice = 2 * tsCount;
+    var topShelfDoublePrice = 4 * tsDoubleCount;
+    
+    var bs = _bot_shelf_parent.filter(e=>e!=null);
+    var bsCount = 0; var bsDoubleCount = 0;
+    bs.forEach(function(e){
+    
+            if(e.children[0].scale.x> offset){
+                bsDoubleCount += e.children.length;
+            }else{
+                bsCount += e.children.length;
+            }
+       
+    })
+
+  
+    var botShelfPrice = 2 * bsCount;
+    var botShelfDoublePrice = 4* bsDoubleCount;
+
+    var columnsPrice = 5*_columns_group.children.length;
+  
+    var totalInteriorCost =   smallDrawerDoublePrice + smallDrawerPrice + largeDrawerPrice + largeDrawerDoublePrice + externalDrawerDoublePrice + externalDrawerPrice + lockerPrice + hangerPrice + hangerDoublePrice
+     + topShelfPrice + topShelfDoublePrice + botShelfPrice + botShelfDoublePrice;
+    totalPrice = calculateWardrobeVolume() * initialPrice + (columnsPrice + splitterPrice + splitterDoublePrice + slideDoorPrice + hingedDoorPrice + totalInteriorCost);
+    totalPrice = Math.ceil(totalPrice);
+    
+    $(".price").html("$ "+totalPrice);
+
+}
+
+
+
+function calculateWardrobeVolume(object){
+    let volume;
+    if(isLoft){
+       volume =  (wWidth*((Math.abs(wHeight) + Math.abs(wLoft)))*wDepth)*ftTom;
+    }else{
+        volume =  (wWidth*wHeight*wDepth)*ftTom;
+    }
+  
+
+    return volume.toFixed(1);
+}
+
+function createMeshInbetweenLockerSmallDrawer(locker,drawer){
+    var g= new THREE.BoxGeometry(1,1,1);
+    var mesh = new THREE.Mesh(g,_columnsMaterial);
+    mesh.name = "inbetweenLS";
+    mesh.position.setX( (locker.position.x) );
+    mesh.position.setY(drawer.position.y);
+    mesh.position.setZ(drawer.position.z);
+    mesh.scale.copy(_columns[0].scale);
+    mesh.scale.setY(drawer.scale.y);
+    // mesh.scale.setZ(_columns[0].s)
+    scene.add(mesh);
+
 }
