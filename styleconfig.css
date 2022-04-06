@@ -30,11 +30,17 @@ canvas{
 .price{
   position: absolute;
   z-index: 99;
-  right: 5%;
-  bottom: 5%;
+  right: 35%;
+  bottom: 8%;
   font-size: 2em;
   text-align: right;
   color: rgb(74, 74, 74);
   font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 }
 
+.dimension{
+  position: absolute;
+  z-index: 99;
+  right: 35%;
+  bottom: 15%;
+}

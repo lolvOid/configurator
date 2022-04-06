@@ -1,9 +1,12 @@
-let scene, camera, renderer, directionalLight, ambientLight, controls;
+let scene, camera , orthoCamera , dimensionScene, dimensionRenderer, renderer, directionalLight, ambientLight, controls;
 
 
 const viewer = document.getElementById("modelviewer");
-const fwidth = viewer.offsetWidth;
-const fheight = viewer.offsetHeight;
+const dimensionviewer = document.getElementById("dimensionviewer");
+
+
+const fwidth = viewer.offsetWidth || dimensionviewer.offsetWidth;
+const fheight = viewer.offsetHeight || dimensionviewer.offsetHeight;
 
 let wWidth = 2.5,
     wHeight = 6,
@@ -16,10 +19,7 @@ const ftTom = 0.3048;
 let isLoft = false;
 let wBottom, wTop, wLeft, wRight, wBack, wpLoftTop, wpLoftLeft, wpLoftRight, wpLoftBottom, wpLoftBack, wBottomLayer, wTopLayer, wLeftLayer, wRightLayer,
     wLeftLayerTop, wLeftLayerBottom, wRightLayerTop, wRightLayerBottom;
-let segments, offset = 0,
-
-    part = [],
-    setColumns = false;
+let segments, offset = 0;
 
 let selectedObject = null,
     selectedObjects = [];
@@ -27,9 +27,6 @@ let raycaster, pointer, mouse3D, group;
 let exporter;
 
 let composer, fxaaPass, outlinePass, planeOultinePass, doorOutlinePass;
-
-
-let bBox;
 let isCreated = false;
 var removed = [];
 var adjacentParts = [];
@@ -104,6 +101,8 @@ var clock;
 var delta = 0;
 let _hDoors = [];
 
+let _lineColumns =[], _lineColumns_group ;
+
 let _columnsLoft = [],
     _columnsLoft_group = [],
     _loftDoors_parent = [],
@@ -148,6 +147,11 @@ let _columns_bottom = [], _columns_bottom_group;
 let shadowPlane;
 
 
+let _columnsEdges =[], _columnsEdges_group;
+let _splitterEdges = [], _splitterEdges_group;
+let _loftEdges = [], _loftEdges_group;
+let edgeBottom,edgeTop,edgeLeft,edgeRight,edgeBack,edgeLoftBottom,edgeLoftTop,edgeLoftBack,edgeLoftRight,edgeLoftLeft;
+let edgeBottomLayer, edgeTopLayer,edgeRightLayer,edgeLeftLayer, edgeLeftLayerTop,edgeLeftLayerBottom,edgeRightLayerBottom, edgeRightLayerTop;
 var totalPrice = 0;
 init();
 
@@ -169,6 +173,8 @@ function init() {
     camera.layers.enable(0);
     camera.layers.enable(1);
     camera.layers.enable(2);
+
+    orthoCamera = new THREE.PerspectiveCamera()
     // camera.lookAt(wBottom.position);
 
     raycaster = new THREE.Raycaster();
@@ -582,6 +588,7 @@ function getInputs() {
             interactivePlane_group.visible = true;
             deleteSprites_group.visible = false;
             flipVertical_group.visible = false;  
+            _doorsVisible = false;
         }else{
             alert("Add Doors and Columns");
         }
@@ -592,6 +599,7 @@ function getInputs() {
     $("#backToDoors").click(function(){
         $("#columnDoorOptions").show();
         $("#editInterior").hide();
+        $("#chooseColumns").hide();
         interactivePlane_group.visible = false;
         deleteSprites_group.visible = true;
         flipVertical_group.visible = true; 
@@ -606,6 +614,7 @@ function getInputs() {
     $("#backToDimensions").click(function(){
         $("#sizeOptions").show();
         $("#columnDoorOptions").hide();
+        $("#chooseColumns").hide();
         if($("input:radio[name='doorOptions']").is(":checked")){
             $("input:radio[name='doorOptions']").prop("checked",false);
         }
@@ -839,7 +848,7 @@ function updateColumns() {
     for (var i = 0; i < customColumns - 1; i++) {
         if (!_columns[i]) {
             createColumns(i);
-
+            
             if (!isHingedDoor) {
                 var subtract = ftTom * 1.35 / 12
                
@@ -1243,7 +1252,7 @@ function generateInteractivePlanes(index) {
 function addHorizontalParts() {
     $("#addID").click(function(){
         if(!_intDrawers_parent[plane_index]){
-            createInternalDrawers(plane_index,4);
+            createInternalDrawers(plane_index,3);
             updateInternalDrawers(plane_index);
         }else{
             return;
@@ -1557,6 +1566,10 @@ function botShelfFilter() {
             $("#addIDS").addClass("disabled");
             
             
+        }else{
+            $("#addIDL").removeClass("disabled");
+            $("#addLocker").removeClass("disabled");
+            $("#addIDS").removeClass("disabled");
         }
         if(_extDrawers[plane_index] || _smallIntDrawers[plane_index] || _largeIntDrawers[plane_index] || _lockers[plane_index]){
             $("#addID").addClass("disabled");
@@ -1579,6 +1592,7 @@ function botShelfFilter() {
             }
         }
     } else if (wHeight > 6.5) {
+        
         if(_intDrawers_parent.length>0){
          
             $("#addED").addClass("disabled");
@@ -1593,6 +1607,10 @@ function botShelfFilter() {
             $("#addIDS").addClass("disabled");
             
             
+        }else{
+            $("#addIDL").removeClass("disabled");
+            $("#addLocker").removeClass("disabled");
+            $("#addIDS").removeClass("disabled");
         }
         if(_extDrawers[plane_index] || _smallIntDrawers[plane_index] || _largeIntDrawers[plane_index] || _lockers[plane_index]){
             $("#addID").addClass("disabled");
@@ -1661,8 +1679,10 @@ function createWardrobe() {
     wBottom = new THREE.Mesh(g, _wardrobeMaterial);
     wBottom.name = "wardrobe_bottom";
     wBottom.position.set(0, 0, 0);
+   
     wBottom.layers.set(0);
-
+  
+    
 
 
     wBottomLayer = new THREE.Mesh(g, _wardrobeMaterial);
@@ -1777,24 +1797,54 @@ function createWardrobe() {
     scene.add(wpLoftLeft);
     scene.add(wpLoftRight);
     scene.add(wpLoftTop);
+    
+    edgeBottom = createWardrobeEdges(wBottom);
+    edgeBack = createWardrobeEdges(wBack);
+    edgeLeft = createWardrobeEdges(wLeft);
+    edgeRight = createWardrobeEdges(wRight);
+    edgeTop = createWardrobeEdges(wTop);
+    edgeTopLayer = createWardrobeEdges(wTopLayer);
+    edgeBottomLayer = createWardrobeEdges(wBottomLayer);
 
+    edgeLeftLayer = createWardrobeEdges(wLeftLayer);
+    edgeLeftLayerTop = createWardrobeEdges(wLeftLayerTop);
+    edgeLeftLayerBottom = createWardrobeEdges(wLeftLayerBottom);
+
+
+    edgeRightLayer = createWardrobeEdges(wRightLayer);
+    edgeRightLayerTop = createWardrobeEdges(wRightLayerTop);
+    edgeRightLayerBottom = createWardrobeEdges(wRightLayerBottom);
+
+    
+    edgeLoftBottom = createWardrobeEdges(wpLoftBottom);
+    edgeLoftBack = createWardrobeEdges(wpLoftBack);
+    edgeLoftLeft = createWardrobeEdges(wpLoftLeft);
+    edgeLoftRight = createWardrobeEdges(wpLoftRight);
+    edgeLoftTop = createWardrobeEdges(wpLoftTop);
 }
+
 
 function updateWardrobe() {
 
 
     if (wBottom) {
+        
         if (isHingedDoor) {
             wBottom.scale.set(wWidth * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));
             wBottom.position.set(0, (2.5 / 12) * ftTom + (thickness / 24) * ftTom, ((thickness / 24) * ftTom));
             wBottomLayer.visible = false;
+            
         } else {
             wBottomLayer.visible = true;
             wBottom.scale.set(wWidth * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom) - 1.35 / 12 * ftTom);
             wBottom.position.set(0, (2.5 / 12) * ftTom + (thickness / 24) * ftTom, ((thickness / 24) * ftTom) - 1.35 / 24 * ftTom);
         }
-
-
+        
+            updateWardrobeEdges(edgeBottom, wBottom)
+        
+           
+        
+       
     }
 
     if (wBottomLayer) {
@@ -1806,7 +1856,7 @@ function updateWardrobe() {
             wBottomLayer.position.set(0, (2.5 / 12) * ftTom + (thickness / 48) * ftTom, ((thickness / 24) * ftTom));
         }
 
-
+        updateWardrobeEdges(edgeBottomLayer, wBottomLayer)
     }
     if (wBack) {
         wBack.scale.set(wWidth * ftTom, wHeight * ftTom - (2.5 / 12 * ftTom), (thickness / 12) * ftTom);
@@ -1816,12 +1866,13 @@ function updateWardrobe() {
             wBack.position.set(0, (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2, -wBottom.scale.z / 2 - 1.35 / 24 * ftTom);
         }
 
-
+        updateWardrobeEdges(edgeBack, wBack)
     }
 
     if (wTopLayer) {
         wTopLayer.scale.set((wWidth * ftTom), (thickness / 24) * ftTom, wDepth * ftTom + (2 * thickness / 12) * ftTom);
         wTopLayer.position.set(0, wBottom.position.y + wBack.scale.y + (thickness / 48) * ftTom - wBottom.scale.y, 0);
+        updateWardrobeEdges(edgeTopLayer, wTopLayer)
     }
 
 
@@ -1835,14 +1886,14 @@ function updateWardrobe() {
             wTop.scale.set((wWidth * ftTom), (thickness / 12) * ftTom, wDepth * ftTom + (2 * thickness / 12) * ftTom - 1.35 / 12 * ftTom);
             wTop.position.set(0, wBottom.position.y + wBack.scale.y - wBottom.scale.y, -1.35 / 24 * ftTom);
         }
-
+        updateWardrobeEdges(edgeTop, wTop)
 
         // ((wBack.scale.y)-wTop.scale.y/2+wBottom.position.y+wBottom.scale.y/2-(thickness/12)*ftTom)
     }
     if (wLeftLayer) {
         wLeftLayer.scale.set((thickness / 24) * ftTom, (wHeight) * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom);
         wLeftLayer.position.set(-(((thickness / 12) * ftTom) - wLeftLayer.scale.x / 2 + (wBack.scale.x / 2)), wLeftLayer.scale.y / 2 + (wBottom.position.y) - (2.5 / 12 * ftTom) - wBottom.scale.y / 2, 0);
-
+        updateWardrobeEdges(edgeLeftLayer, wLeftLayer)
     }
 
     if (wLeftLayerBottom) {
@@ -1853,7 +1904,7 @@ function updateWardrobe() {
             wLeftLayerBottom.scale.set((thickness / 24) * ftTom, (thickness / 24) * ftTom + 2.5 / 12 * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom);
             wLeftLayerBottom.position.set(-(((thickness / 48) * ftTom) + (wBack.scale.x / 2)), wLeftLayerBottom.scale.y / 2 + (wBottom.position.y) - (2.5 / 12 * ftTom) - wBottom.scale.y / 2, 0);
         }
-
+        updateWardrobeEdges(edgeLeftLayerBottom, wLeftLayerBottom)
 
     }
 
@@ -1861,7 +1912,7 @@ function updateWardrobe() {
     if (wLeftLayerTop) {
         wLeftLayerTop.scale.set((thickness / 24) * ftTom, (thickness / 24) * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom);
         wLeftLayerTop.position.set(-(((thickness / 48) * ftTom) + (wBack.scale.x / 2)), (wTopLayer.position.y), 0);
-
+        updateWardrobeEdges(edgeLeftLayerTop, wLeftLayerTop)
     }
     if (wLeft) {
         if (isHingedDoor) {
@@ -1878,20 +1929,20 @@ function updateWardrobe() {
             wLeft.position.set(-(((thickness / 24) * ftTom) + (wBack.scale.x / 2)), wLeft.scale.y / 2 + (wBottom.position.y) - (2.5 / 12 * ftTom) - wBottom.scale.y / 2, -1.35 / 24 * ftTom);
         }
 
-
+        updateWardrobeEdges(edgeLeft, wLeft)
     }
 
     if (wRightLayer) {
         wRightLayer.scale.set((thickness / 24) * ftTom, (wHeight) * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom);
         wRightLayer.position.set((((thickness / 12) * ftTom) + (wBack.scale.x / 2)) - wRightLayer.scale.x / 2, wRightLayer.scale.y / 2 + (wBottom.position.y) - (2.5 / 12 * ftTom) - wBottom.scale.y / 2, 0);
-
+        updateWardrobeEdges(edgeRightLayer, wRightLayer)
     }
 
 
     if (wRightLayerTop) {
         wRightLayerTop.scale.set((thickness / 24) * ftTom, (thickness / 24) * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom);
         wRightLayerTop.position.set((((thickness / 48) * ftTom) + (wBack.scale.x / 2)), (wTopLayer.position.y), 0);
-
+        updateWardrobeEdges(edgeRightLayerTop, wRightLayerTop)
     }
     if (wRightLayerBottom) {
         if (_extDrawers.length > 0) {
@@ -1902,7 +1953,7 @@ function updateWardrobe() {
             wRightLayerBottom.position.set((((thickness / 48) * ftTom) + (wBack.scale.x / 2)), wRightLayerBottom.scale.y / 2 + (wBottom.position.y) - (2.5 / 12 * ftTom) - wBottom.scale.y / 2, 0);
         }
 
-
+        updateWardrobeEdges(edgeRightLayerBottom, wRightLayerBottom)
     }
     if (wRight) {
         if (isHingedDoor) {
@@ -1919,7 +1970,7 @@ function updateWardrobe() {
             wRight.position.set((((thickness / 24) * ftTom) + (wBack.scale.x / 2)), wRight.scale.y / 2 + (wBottom.position.y) - (2.5 / 12 * ftTom) - wBottom.scale.y / 2, -1.35 / 24 * ftTom);
         }
 
-
+        updateWardrobeEdges(edgeRight, wRight)
     }
     // if (wRight) {
     //     wRight.scale.set((thickness / 12) * ftTom, (wHeight) * ftTom, (2 * thickness / 12) * ftTom + wDepth * ftTom);
@@ -1935,28 +1986,35 @@ function updateWardrobe() {
             wpLoftBottom.scale.set(wWidth * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + (2 * (thickness / 12) * ftTom));
             wpLoftBottom.position.set(wTop.position.x, wTop.position.y + wpLoftBottom.scale.y, wTopLayer.position.z);
         }
+        updateWardrobeEdges(edgeLoftBottom, wpLoftBottom)
     }
 
     if (wpLoftBack) {
         wpLoftBack.scale.set(wWidth * ftTom + (wpLoftLeft.scale.x + wpLoftRight.scale.x), wLoft * ftTom, (thickness / 12) * ftTom);
         wpLoftBack.position.set(0, wpLoftBottom.position.y + wpLoftBack.scale.y / 2 - wpLoftBottom.scale.y / 2, -wpLoftBottom.scale.z / 2 + (thickness / 24) * ftTom);
+
+        updateWardrobeEdges(edgeLoftBack, wpLoftBack)
     }
     if (wpLoftLeft) {
         wpLoftLeft.scale.set(thickness / 12 * ftTom, wLoft * ftTom, wDepth * ftTom + (2 * thickness / 12) * ftTom);
         wpLoftLeft.position.set(-(thickness / 24 * ftTom + wpLoftBottom.scale.x / 2), wpLoftBottom.position.y + wpLoftLeft.scale.y / 2 - wpLoftBottom.scale.y / 2, 0);
+        updateWardrobeEdges(edgeLoftLeft, wpLoftLeft)
     }
 
 
     if (wpLoftRight) {
         wpLoftRight.scale.set(thickness / 12 * ftTom, wLoft * ftTom, wDepth * ftTom + (2 * thickness / 12) * ftTom);
         wpLoftRight.position.set((thickness / 24 * ftTom + wpLoftBottom.scale.x / 2), wpLoftBottom.position.y + wpLoftRight.scale.y / 2 - wpLoftBottom.scale.y / 2, 0);
+        updateWardrobeEdges(edgeLoftRight, wpLoftRight)
     }
     if (wpLoftTop) {
 
         wpLoftTop.scale.set(wWidth * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));
         wpLoftTop.position.set(0, wpLoftBack.scale.y + wpLoftBottom.position.y - (thickness / 12) * ftTom, ((thickness / 24) * ftTom));
-
+        updateWardrobeEdges(edgeLoftTop, wpLoftTop)
     }
+    
+
 }
 
 function createHorizontalSplitter(index) {
@@ -5006,17 +5064,23 @@ function renderOption() {
         _shelfMaterial.color.set(debug_botShelfColor);
         ssaoPass.output = THREE.SSAOPass.OUTPUT.Beauty;
     } else if (renderOptionsValue == 2) {
-
+        var mat = new THREE.LineBasicMaterial( { color: 0xffffff, linewidth: 2 } );
+       
         scene.traverse(function (child) {
             if (child instanceof THREE.Mesh) {
 
                 if (child.visible) {
-                    child.castShadow = false;
-                    child.receiveShadow = false;
-                    child.visible = true;
-                    child.material.wireframe = true;
-                    child.material.wireframeLinejoin = "round";
-                    child.material.wireframeLinecap = "square";
+                    
+
+                    
+
+                    
+                    // child.castShadow = false;
+                    // child.receiveShadow = false;
+                    // child.visible = true;
+                    // child.material.wireframe = true;
+                    // child.material.wireframeLinejoin = "round";
+                    // child.material.wireframeLinecap = "square";
                 }
 
 
@@ -5028,6 +5092,8 @@ function renderOption() {
 
 
 }
+
+
 
 function removeSingleInterior(index) {
     if (!_largeIntDrawers[index] instanceof THREE.Mesh) {
@@ -5861,4 +5927,57 @@ function removeInternalDrawers(index) {
         _intDrawers_parent[index] = null;
     }
 
+}
+
+
+function createColumnsEdgeGeometry(index){
+    const edges = new THREE.EdgesGeometry(_columns[index].geometry.clone());
+    _columnsEdges_group = new THREE.Group();
+                    
+    _columnsEdges[index] = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0x000000 } ) );
+
+    _columnsEdges_group.add(_columnsEdges[index]);
+    scene.add( _columnsEdges_group );
+
+}
+
+function updateColumnsEdgeGeometry(index){
+    if(_columnsEdges.length>0){
+        _columnsEdges.forEach(e=>{
+            e.scale.set(_columns[index].scale.x, _columns[index].scale.y,_columns[index].scale.z)
+            e.position.set(_columns[index].position.x,_columns[index].position.y,_columns[index].position.z);
+            e.visible = _columns[index].visible;
+        })
+    }
+}
+
+function createWardrobeEdges(object){
+    let edges = new THREE.EdgesGeometry(object.geometry.clone());
+                  
+    var subject = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0x000000 } ) );
+    // if(subject instanceof THREE.Mesh){
+    //     subject.scale.set(object.scale.x,object.scale.y,object.scale.z);
+    //     subject.position.set(object.position.x,object.position.y,object.position.z);
+    // }
+    
+    scene.add( subject );
+    return subject;
+}
+function updateWardrobeEdges(subject,object){
+    
+  if(subject!=null){
+    subject.scale.copy(object.scale);
+    subject.position.copy(object.position);
+    subject.visible = object.visible;
+  }
+ 
+    
+}
+
+function removeWardrobeEdges(subject){
+    scene.traverse(function(child){
+        if(child == subject){
+            scene.remove(subject);
+        }
+    })
 }
