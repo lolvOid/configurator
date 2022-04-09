@@ -1,5 +1,5 @@
 let scene, camera , orthoCamera , dimensionScene, dimensionRenderer, renderer, directionalLight, ambientLight, controls;
-
+let css3DRenderer;
 
 const viewer = document.getElementById("modelviewer");
 const dimensionviewer = document.getElementById("dimensionviewer");
@@ -32,7 +32,7 @@ var removed = [];
 var adjacentParts = [];
 var substitubale = 0;
 var columns_group = document.getElementById("columns-group");
-
+var body = document.body;
 let plane;
 let selectedPlane;
 let hangerRod;
@@ -153,6 +153,8 @@ let _loftEdges = [], _loftEdges_group;
 let edgeBottom,edgeTop,edgeLeft,edgeRight,edgeBack,edgeLoftBottom,edgeLoftTop,edgeLoftBack,edgeLoftRight,edgeLoftLeft;
 let edgeBottomLayer, edgeTopLayer,edgeRightLayer,edgeLeftLayer, edgeLeftLayerTop,edgeLeftLayerBottom,edgeRightLayerBottom, edgeRightLayerTop;
 var totalPrice = 0;
+var wvArrowUp,wvArrowDown, wlArrowUp, wlArrowDown, whArrowL, whArrowR;
+var hValue, heightLabel, hLoftValue, loftLabel, widthLabel, wValue;
 init();
 
 animate();
@@ -164,17 +166,26 @@ function init() {
 
 
     scene = new THREE.Scene();
+    dimensionScene = new THREE.Scene();
+  
+    
     window.scene = scene;
     THREE.Cache.enabled = true;
     camera = new THREE.PerspectiveCamera(25, fwidth / fheight, 0.01, 100);
 
-    camera.position.set(0, 0., 15);
+    camera.position.set(0, 0, 15);
     camera.aspect = fwidth / fheight;
     camera.layers.enable(0);
     camera.layers.enable(1);
     camera.layers.enable(2);
 
-    orthoCamera = new THREE.PerspectiveCamera()
+    orthoCamera = new THREE.OrthographicCamera(fwidth/-2,fwidth/2,fheight/2,fheight/-2,.001,1000);
+   
+    orthoCamera.position.setY(1.65);
+    orthoCamera.zoom = 250;
+    orthoCamera.updateProjectionMatrix();
+    dimensionScene.add(orthoCamera);
+    
     // camera.lookAt(wBottom.position);
 
     raycaster = new THREE.Raycaster();
@@ -202,6 +213,8 @@ function init() {
     exporter = new THREE.GLTFExporter();
     _sDoors_parent_group = new THREE.Group();
     _intDrawers_group = new THREE.Group();
+    _columnsEdges_group = new THREE.Group();
+
     create_lights();
     createFloor();
     createWall();
@@ -209,19 +222,16 @@ function init() {
     createWardrobe();
 
     clock = new THREE.Clock();
-
+    
     renderer = new THREE.WebGLRenderer({
         antialias: true,
         alpha: true,
         preserveDrawingBuffer: true,
-
-
-
-
     })
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(fwidth, fheight);
     renderer.info.autoReset = false;
+    renderer.setClearColor(0xFFFFFF, 1);
 
     // renderer.toneMapping = THREE.ACESFilmicToneMapping;
     // renderer.toneMappingExposure = 1;
@@ -231,13 +241,40 @@ function init() {
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.compile(scene, camera);
+    
     pmremGenerator = new THREE.PMREMGenerator(renderer);
     pmremGenerator.compileEquirectangularShader();
-    viewer.appendChild(renderer.domElement);
+
+    dimensionRenderer = new THREE.WebGLRenderer({
+        antialias : true,
+        alpha: true,
+        preserveDrawingBuffer: true,
+       
+    })
+    dimensionRenderer.setPixelRatio(window.devicePixelRatio);
+    dimensionRenderer.setSize(fwidth,fheight);
+    dimensionRenderer.compile(dimensionScene, orthoCamera)
+
+
+    css3DRenderer = new THREE.CSS3DRenderer({
+        
+    });
+    css3DRenderer.setSize(fwidth,fheight);
+    css3DRenderer.domElement.style.position = 'fixed';
+    // css3DRenderer.domElement.style.fontFamily = "Arial"
+    css3DRenderer.domElement.style.color= '#000000';
+    css3DRenderer.domElement.style.top = '0px';
+    css3DRenderer.domElement.style.left = '0px';
+    css3DRenderer.domElement.style.zIndex = -1
+    
+    // viewer.appendChild(renderer.domElement);
+ 
+    dimensionviewer.appendChild(css3DRenderer.domElement);
+    dimensionviewer.appendChild(dimensionRenderer.domElement);
     post_process();
 
     controls = new THREE.OrbitControls(camera, renderer.domElement);
-
+    
     //controls.addEventListener('change', render); // use if there is no animation loop
     controls.enableDamping = true;
 
@@ -247,7 +284,7 @@ function init() {
 
     controls.enableDamping = true;
     controls.dampingFactor = 1;
-    controls.target.set(0, 1.45, 0);
+    controls.target.set(0,1.6, 0);
 
 
     controls.minPolarAngle = 0; // radians
@@ -259,20 +296,27 @@ function init() {
     document.addEventListener('click', onClick);
 
     controls.saveState();
+
+
+    
 }
 
 function onWindowResize() {
     const canvas = renderer.domElement;
+    
     const width = canvas.clientWidth;
     const height = canvas.clientHeight;
     if (canvas.width !== width || canvas.height !== height) {
 
         camera.aspect = fwidth / fheight;
         camera.updateProjectionMatrix();
-
-        renderer.setSize(fwidth, fheight);
+        css3DRenderer.setSize(fwidth,fheight);
+        // renderer.setSize(fwidth, fheight);
         composer.setSize(fwidth, fheight);
 
+        dimensionRenderer.setSize(fwidth,fheight);
+        orthoCamera.updateProjectionMatrix();
+        
     }
     const pixelRatio = renderer.getPixelRatio();
     fxaaPass.material.uniforms['resolution'].value.x = 1 / (fwidth * pixelRatio);
@@ -284,15 +328,14 @@ function animate() {
     requestAnimationFrame(animate);
 
     controls.update();
-
+  
 
     render();
-
+  
 }
 
 function render() {
-
-
+    
     $("input:radio[name='columnsOptions']").change(function () {
         if ($(this).is(":checked")) {
             isCreated = true;
@@ -305,6 +348,7 @@ function render() {
     featuresControl()
 
     updateWardrobe();
+    
     addLoft(isLoft);
     updateWall();
     updateColumnsDoor();
@@ -348,7 +392,8 @@ function render() {
     } else {
         document.getElementById('column_id').innerHTML = "None";
     }
-    document.getElementById('capturedImage').src = renderer.domElement.toDataURL();
+  
+
 
 
     renderOption()
@@ -357,7 +402,11 @@ function render() {
     doorVisiblity(_sDoors_parent_group,_doorsVisible);
     // doorVisiblity(_doorRailParent,_doorsVisible);
     
-    
+    dimensionRenderer.render(dimensionScene,orthoCamera);
+    css3DRenderer.render(dimensionScene,orthoCamera);
+    // css3DRenderer.render(scene,camera);
+    document.getElementById('capturedImage').src = dimensionRenderer.domElement.toDataURL();
+    // document.getElementById('capturedImage').src = css3DRenderer.domElement.toDataURL();
     composer.render();
 
 
@@ -548,27 +597,7 @@ function getInputs() {
 
     })
 
-    // $("#editDimensions").click(function () {
-    //     $(this).hide();
 
-    //     $("#doneDimensions").show();
-    //     $("#editInterior").hide();
-    //     $("#sizeOptions").show();
-    //     removeColumns();
-    //     removeColumnsSprite();
-    //     removeHorizontalSplitter();
-    //     removeInteractivePlane();
-    //     removeAllInterior();
-
-
-    //     $("#addloft").prop("checked", false);
-    //     $("#loftLabel").html("Add Loft");
-    //     $("#loftOptionsPanel").hide();
-    //     isLoft = false;
-    //     removeLoftDoors();
-    //     removeLoftColumns();
-
-    // })
     $("#doneDimensions").click(function () {
         $("#sizeOptions").hide();
         $("#columnDoorOptions").show();
@@ -659,8 +688,11 @@ function create_lights() {
 
     directionalLight.shadow.mapSize.width = 512; // default
     directionalLight.shadow.mapSize.height = 512; // default
-
+    
     scene.add(directionalLight);
+    
+
+
 
     var directionalLight1 = new THREE.DirectionalLight(0xbfe4ff, 0.3);
     directionalLight1.position.set(0, 5, 0);
@@ -672,17 +704,20 @@ function create_lights() {
     scene.add(directionalLight1);
 
     var ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-    scene.add(ambientLight)
+    scene.add(ambientLight);
+    
+
     var directionalLight2 = new THREE.DirectionalLight(0xdedede, 0.3);
     directionalLight2.position.set(0, 3, -3);
     directionalLight2.castShadow = false;
-
+    
     directionalLight2.shadow.mapSize.width = 512; // default
     directionalLight2.shadow.mapSize.height = 512;
     scene.add(directionalLight2);
 
     var hemiLight = new THREE.HemisphereLight(0xfff2e3, 0xd1ebff, 0.3);
     scene.add(hemiLight);
+    
 }
 
 function createFloor() {
@@ -698,6 +733,7 @@ function createFloor() {
 
     floor.rotateX(-90 * THREE.Math.DEG2RAD);
     scene.add(floor)
+    
 }
 
 function createWall() {
@@ -712,7 +748,7 @@ function createWall() {
     wall.receiveShadow = true;
     wall.rotateX(0 * THREE.Math.DEG2RAD);
     scene.add(wall)
-
+    
 
     wallLeft = new THREE.Mesh(g, m);
     wallLeft.name = "wallleft";
@@ -848,7 +884,7 @@ function updateColumns() {
     for (var i = 0; i < customColumns - 1; i++) {
         if (!_columns[i]) {
             createColumns(i);
-            
+
             if (!isHingedDoor) {
                 var subtract = ftTom * 1.35 / 12
                
@@ -864,10 +900,11 @@ function updateColumns() {
 
 
             }
-
+      
+            
         } else {
             if (_columns[i] instanceof THREE.Mesh) {
-
+createColumnsEdgeGeometry(i);
                 if (!isHingedDoor) {
                     var subtract = ftTom * 1.35 / 12
 
@@ -879,13 +916,15 @@ function updateColumns() {
                     _columns[i].position.set(i * offset, (_columns[i].scale.y / 2) + (wBottom.position.y) + wBottom.scale.y / 2, ((thickness / 24) * ftTom));
                 }
 
-
+                
             }
+            
         }
+        
     }
     
     _columns_group.position.set(offset + wLeft.position.x, _columns_group.position.y, _columns_group.position.z);
-   
+    _columnsEdges_group.position.copy(_columns_group.position)
     for (var i = 0; i < customColumns - 1; i++) {
 
         if (!deleteSprites[i]) {
@@ -1825,7 +1864,7 @@ function createWardrobe() {
 
 
 function updateWardrobe() {
-
+    
 
     if (wBottom) {
         
@@ -2013,8 +2052,8 @@ function updateWardrobe() {
         wpLoftTop.position.set(0, wpLoftBack.scale.y + wpLoftBottom.position.y - (thickness / 12) * ftTom, ((thickness / 24) * ftTom));
         updateWardrobeEdges(edgeLoftTop, wpLoftTop)
     }
-    
-
+    createVerticalArrow();
+    createHorizontalArrow();
 }
 
 function createHorizontalSplitter(index) {
@@ -2897,9 +2936,14 @@ function onClick() {
 
                 removed_index = i;
                 removed_id.push(i);
+         
+                
+               
+                
                 deleteSprites_group.remove(deleteSprites[i])
                 _columns_group.remove(_columns[i]);
-           
+                // _columnsEdges_group.remove(_columnsEdges[i]);
+               
                 removed.push(_columns[i]);
             }
 
@@ -5118,6 +5162,7 @@ function updateColumnsDoor() {
         removeSlideDoors();
         removeFlipDoorSprite();
         removeColumns();
+        removeColumnsEdges();
         removeColumnsBottom();
         removeColumnsSprite();
         removeHorizontalSplitter();
@@ -5673,6 +5718,7 @@ function reset() {
     removeSlideDoors();
     removeFlipDoorSprite();
     removeColumns();
+    removeColumnsEdges();
     removeColumnsBottom();
     removeColumnsSprite();
     removeHorizontalSplitter();
@@ -5931,26 +5977,56 @@ function removeInternalDrawers(index) {
 
 
 function createColumnsEdgeGeometry(index){
-    const edges = new THREE.EdgesGeometry(_columns[index].geometry.clone());
-    _columnsEdges_group = new THREE.Group();
-                    
-    _columnsEdges[index] = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0x000000 } ) );
+         
 
+    var g = new THREE.EdgesGeometry(_columns[index].geometry.clone());
+    var mesh = new THREE.LineSegments( g, new THREE.LineBasicMaterial( { color: 0x000000 , name:"_m_columns_line"+index} ) );
+   
+    mesh.name = "w_columns_line_" + index;
+    _columnsEdges[index] = mesh;
+    _columnsEdges_group.name = "w_columns_lines";
     _columnsEdges_group.add(_columnsEdges[index]);
-    scene.add( _columnsEdges_group );
 
+    dimensionScene.add(_columnsEdges_group);
 }
 
 function updateColumnsEdgeGeometry(index){
-    if(_columnsEdges.length>0){
+    
         _columnsEdges.forEach(e=>{
-            e.scale.set(_columns[index].scale.x, _columns[index].scale.y,_columns[index].scale.z)
-            e.position.set(_columns[index].position.x,_columns[index].position.y,_columns[index].position.z);
-            e.visible = _columns[index].visible;
-        })
-    }
+            e.scale.copy(_columns[index].scale);
+            e.position.copy(_columns[index].position)
+        })     
+    
 }
 
+function removeColumnsEdges(index) {
+
+    if (index) {
+        _columnsEdges.forEach(e => {
+            if (_columnsEdges[index] instanceof THREE.Mesh && _columnsEdges[index] == e) {
+                if (_columnsEdges_group instanceof THREE.Group) {
+                    _columnsEdges_group.remove(e);
+                }
+            }
+        })
+        _columnsEdges[index] = null;
+    } else {
+        if (_columnsEdges) {
+            _columnsEdges.forEach(e => {
+                if (e instanceof THREE.Mesh) {
+                    if (_columnsEdges_group instanceof THREE.Group) {
+                        _columnsEdges_group.remove(e);
+                        dimensionScene.remove(_columnsEdges_group);
+                    }
+                }
+            })
+            _columnsEdges = [];
+       
+        }
+    }
+
+  
+}
 function createWardrobeEdges(object){
     let edges = new THREE.EdgesGeometry(object.geometry.clone());
                   
@@ -5960,7 +6036,7 @@ function createWardrobeEdges(object){
     //     subject.position.set(object.position.x,object.position.y,object.position.z);
     // }
     
-    scene.add( subject );
+    dimensionScene.add( subject );
     return subject;
 }
 function updateWardrobeEdges(subject,object){
@@ -5980,4 +6056,172 @@ function removeWardrobeEdges(subject){
             scene.remove(subject);
         }
     })
+}
+
+function createVerticalArrow(){
+    
+    if(edgeLeft){
+        
+     
+        // if(isLoft){
+        //     from = new THREE.Vector3( edgeLeft.position.x - 0.1,( edgeLeft.scale.y + edgeLoftLeft.scale.y )/2 ,  edgeLeft.position.z - edgeLeft.scale.z/2 );
+        //     to = new THREE.Vector3( edgeLeft.position.x - 0.1, edgeLoftTop.position.y + thickness/24*ftTom, edgeLeft.position.z- edgeLeft.scale.z/2 );
+        // }else{
+           
+        // }
+        var from = new THREE.Vector3( edgeLeft.position.x - 0.1,edgeLeft.position.y,  edgeLeft.position.z - edgeLeft.scale.z/2 );
+        var to = new THREE.Vector3( edgeLeft.position.x - 0.1, edgeTop.position.y + thickness/24*ftTom, edgeLeft.position.z- edgeLeft.scale.z/2 );
+        var direction = to.clone().sub(from);
+        
+        var length =  direction.manhattanLength();
+        
+        if(wvArrowUp == null){
+            
+            wvArrowUp = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000 , 0.05,0.05);
+            wvArrowDown = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000 , 0.05,0.05);
+            
+            
+            dimensionScene.add( wvArrowUp );
+            dimensionScene.add( wvArrowDown );
+
+            hValue = document.createElement('div');
+            hValue.innerHTML =  (wHeight) + "ft";
+            hValue.style.top = 0;
+            hValue.style.left = 0;
+            hValue.style.fontSize = "0.5px";
+            hValue.style.textAlign = "right";
+            
+            
+           
+             heightLabel = new THREE.CSS3DObject( hValue );
+           
+            dimensionScene.add( heightLabel );
+        
+            
+        }else{
+            hValue.innerHTML =  (wHeight ) + "ft";
+            wvArrowUp.setDirection(direction.normalize());
+            wvArrowUp.setLength(length,0.05,0.05);
+            wvArrowUp.position.copy(from.clone());
+
+            wvArrowDown.setDirection(direction.negate().normalize());
+            wvArrowDown.setLength(length,0.05,0.05);
+            wvArrowDown.position.copy(from.clone());
+            heightLabel.position.set( wvArrowUp.position.x - 0.15, edgeLeft.position.y -0.2, 0 );
+            heightLabel.scale.set(0.2,0.2,0.2)
+            // wHeightText.position.set(0,0.5,0.4);
+        }
+        
+        
+        
+       
+        if(isLoft){
+            var from = new THREE.Vector3( edgeLoftLeft.position.x - 0.1,edgeLoftLeft.position.y,  edgeLeft.position.z - edgeLeft.scale.z/2 );
+            var to = new THREE.Vector3( edgeLoftLeft.position.x - 0.1, edgeLoftTop.position.y + thickness/24*ftTom, edgeLeft.position.z- edgeLeft.scale.z/2 );
+            var direction = to.clone().sub(from);
+            
+            var length =  direction.manhattanLength();
+            if(wlArrowUp == null){
+                wlArrowUp = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000 , 0.05,0.05);
+                wlArrowDown = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000 , 0.05,0.05);
+              
+                dimensionScene.add( wlArrowUp );
+                dimensionScene.add( wlArrowDown );
+
+                wlArrowUp.visible = true;
+                wlArrowDown.visible= true;
+
+                hLoftValue = document.createElement('div');
+                hLoftValue.innerHTML =  (wLoft) + "ft";
+                hLoftValue.style.top = 0;
+                hLoftValue.style.left = 0;
+                hLoftValue.style.fontSize = "0.5px";
+                hLoftValue.style.textAlign = "right";
+            
+            
+           
+             loftLabel = new THREE.CSS3DObject( hLoftValue );
+           
+                dimensionScene.add( loftLabel );
+            }else{
+                wlArrowUp.setDirection(direction.normalize());
+                wlArrowUp.setLength(length,0.05,0.05);
+                wlArrowUp.position.copy(from.clone());
+    
+                wlArrowDown.setDirection(direction.negate().normalize());
+                wlArrowDown.setLength(length,0.05,0.05);
+                wlArrowDown.position.copy(from.clone());
+                wlArrowUp.visible = true;
+                wlArrowDown.visible= true;
+
+              
+                loftLabel.visible = true;
+
+                hLoftValue.innerHTML =  (wLoft) + "ft";
+                loftLabel.position.set( wlArrowUp.position.x - 0.15, edgeLoftLeft.position.y -0.1, 0 );
+                loftLabel.scale.set(0.2,0.2,0.2)
+            }
+        }else{
+            if(wlArrowUp){
+                wlArrowUp.visible = false;
+                wlArrowDown.visible= false;
+                loftLabel.visible = false;
+            }
+        }
+        
+    }
+    
+
+}
+
+
+function createHorizontalArrow(){
+    
+    if(edgeLeft){
+        
+        var from = new THREE.Vector3( edgeBottom.position.x ,edgeBottom.position.y - 0.15,  edgeLeft.position.z - edgeLeft.scale.z/2 );
+        var to = new THREE.Vector3( edgeLeft.position.x - thickness/12 * ftTom, edgeBottom.position.y-0.15, edgeLeft.position.z- edgeLeft.scale.z/2 );
+        var direction = to.clone().sub(from);
+        
+        var length =  direction.manhattanLength();
+        
+        
+        
+       
+        if(whArrowL == null){
+            whArrowL = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000 , 0.05,0.05);
+            whArrowR = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000 , 0.05,0.05);
+          
+            dimensionScene.add( whArrowL );
+           dimensionScene.add( whArrowR );
+
+           wValue = document.createElement('div');
+           wValue.innerHTML =  (wWidth) + "ft";
+           wValue.style.top = 0;
+           wValue.style.left = 0;
+           wValue.style.fontSize = "0.5px";
+           wValue.style.textAlign = "right";
+
+           widthLabel = new THREE.CSS3DObject( wValue );
+           
+           dimensionScene.add( widthLabel );
+            
+        }else{
+            whArrowL.setDirection(direction.normalize());
+            whArrowL.setLength(length,0.05,0.05);
+            whArrowL.position.copy(from.clone());
+
+            whArrowR.setDirection(direction.negate().normalize());
+            whArrowR.setLength(length,0.05,0.05);
+            whArrowR.position.copy(from.clone());
+
+            
+            wValue.innerHTML =  (wWidth) + "ft";
+            widthLabel.position.set(  0, whArrowR.position.y - 0.2, 0 );
+            widthLabel.scale.set(0.2,0.2,0.2)
+        }
+        
+    }
+    
+
 }

@@ -10,6 +10,8 @@ canvas{
   width: 100%;
   height: 100%;
   margin: 0;
+  z-index: 0;
+  position: fixed;
 }
 .rightnavigator{
    z-index: 999;
@@ -28,7 +30,7 @@ canvas{
 }
 
 .price{
-  position: absolute;
+  position: fixed;
   z-index: 99;
   right: 35%;
   bottom: 8%;
