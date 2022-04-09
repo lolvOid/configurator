@@ -155,13 +155,15 @@ let edgeBottomLayer, edgeTopLayer,edgeRightLayer,edgeLeftLayer, edgeLeftLayerTop
 var totalPrice = 0;
 var wvArrowUp,wvArrowDown, wlArrowUp, wlArrowDown, whArrowL, whArrowR;
 var hValue, heightLabel, hLoftValue, loftLabel, widthLabel, wValue;
+
+var isMeasured = false;
 init();
 
 animate();
 
 getInputs();
 addHorizontalParts();
-
+dimensionviewer.hidden=  true;
 function init() {
 
 
@@ -267,7 +269,7 @@ function init() {
     css3DRenderer.domElement.style.left = '0px';
     css3DRenderer.domElement.style.zIndex = -1
     
-    // viewer.appendChild(renderer.domElement);
+    viewer.appendChild(renderer.domElement);
  
     dimensionviewer.appendChild(css3DRenderer.domElement);
     dimensionviewer.appendChild(dimensionRenderer.domElement);
@@ -405,11 +407,17 @@ function render() {
     dimensionRenderer.render(dimensionScene,orthoCamera);
     css3DRenderer.render(dimensionScene,orthoCamera);
     // css3DRenderer.render(scene,camera);
-    document.getElementById('capturedImage').src = dimensionRenderer.domElement.toDataURL();
+    // document.getElementById('capturedImage').src = dimensionRenderer.domElement.toDataURL();
     // document.getElementById('capturedImage').src = css3DRenderer.domElement.toDataURL();
     composer.render();
 
-
+    if(isMeasured){
+        viewer.hidden= true;
+        dimensionviewer.hidden = false;
+    }else{
+        viewer.hidden= false;
+        dimensionviewer.hidden = true;
+    }
 }
 
 function getInputs() {
@@ -6224,4 +6232,8 @@ function createHorizontalArrow(){
     }
     
 
+}
+
+function swaprender(){
+    isMeasured  = !isMeasured;
 }
