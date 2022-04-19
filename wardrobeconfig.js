@@ -1,8 +1,11 @@
+$(document).ready(function () {
+
+})
 let scene, camera, orthoCamera, dimensionScene, dimensionRenderer, renderer, directionalLight, ambientLight, controls;
-let css3DRenderer;
+let css2DRenderer;
 
 const viewer = document.getElementById("modelviewer");
-const dimensionviewer = document.getElementById("dimensionviewer");
+const dimensionviewer = document.getElementById("dimensionViewer");
 
 
 const fwidth = viewer.offsetWidth || dimensionviewer.offsetWidth;
@@ -92,7 +95,8 @@ let _lockers = [],
     _sDoors_parent = [],
     _sDoors_parent_group;
 
-let _cLeftArrow_parent = [], _cRightArrow_parent = [];
+let _cLeftArrow_parent = [],
+    _cRightArrow_parent = [];
 let _flippableDoor = [];
 var defaultRotation = new THREE.Quaternion();
 let _isDoorRight = [],
@@ -171,12 +175,18 @@ var isMeasured = false;
 var depthSideMesh, depthSideMeshLoft;
 
 var _cLeftArrow_group = new THREE.Group();
-var _cRightArrow_group= new THREE.Group();
-var _cLabels = [], _cLabel_group = new THREE.Group();
+var _cRightArrow_group = new THREE.Group();
+var _cLabels = [],
+    _cLabel_group = new THREE.Group();
 
-var _cUpperArrowUps_parent = [], _cUpperArrowDowns_parent=[], _cLowerArrowUps_parent = [], _cLowerArrowDowns_parent= [];
-var _cUpperLabels =[], _cUpperLabels_group = new THREE.Group();
-var _cLowerLabels=[], _cLowerLabels_group = new THREE.Group();  
+var _cUpperArrowUps_parent = [],
+    _cUpperArrowDowns_parent = [],
+    _cLowerArrowUps_parent = [],
+    _cLowerArrowDowns_parent = [];
+var _cUpperLabels = [],
+    _cUpperLabels_group = new THREE.Group();
+var _cLowerLabels = [],
+    _cLowerLabels_group = new THREE.Group();
 var _cUpperArrowUp_group = new THREE.Group();
 var _cUpperArrowDown_group = new THREE.Group();
 var _cLowerArrowUp_group = new THREE.Group();
@@ -213,8 +223,8 @@ function init() {
 
     orthoCamera = new THREE.OrthographicCamera(fwidth / -2, fwidth / 2, fheight / 2, fheight / -2, .001, 1000);
 
-    
-   // orthoCamera.zoom = 250;
+
+    // orthoCamera.zoom = 250;
     orthoCamera.updateProjectionMatrix();
     dimensionScene.add(orthoCamera);
 
@@ -288,20 +298,20 @@ function init() {
     dimensionRenderer.compile(dimensionScene, orthoCamera)
 
 
-    css3DRenderer = new THREE.CSS3DRenderer({
+    css2DRenderer = new THREE.CSS2DRenderer({
 
     });
-    css3DRenderer.setSize(fwidth, fheight);
-    css3DRenderer.domElement.style.position = 'fixed';
-    // css3DRenderer.domElement.style.fontFamily = "Arial"
-    css3DRenderer.domElement.style.color = '#000000';
-    css3DRenderer.domElement.style.top = '0px';
-    css3DRenderer.domElement.style.left = '0px';
-    css3DRenderer.domElement.style.zIndex = -1
+    css2DRenderer.setSize(fwidth, fheight);
+    css2DRenderer.domElement.style.position = 'fixed';
+    // css2DRenderer.domElement.style.fontFamily = "Arial"
+    css2DRenderer.domElement.style.color = '#000000';
+    css2DRenderer.domElement.style.top = '0px';
+    css2DRenderer.domElement.style.left = '0px';
+    css2DRenderer.domElement.style.zIndex = 1
 
     viewer.appendChild(renderer.domElement);
 
-    dimensionviewer.appendChild(css3DRenderer.domElement);
+    dimensionviewer.appendChild(css2DRenderer.domElement);
     dimensionviewer.appendChild(dimensionRenderer.domElement);
     dimensionCanvas = document.querySelector('#dimensionviewer :nth-child(2)')
 
@@ -344,7 +354,7 @@ function onWindowResize() {
 
         camera.aspect = fwidth / fheight;
         camera.updateProjectionMatrix();
-        css3DRenderer.setSize(fwidth, fheight);
+        css2DRenderer.setSize(fwidth, fheight);
         // renderer.setSize(fwidth, fheight);
         composer.setSize(fwidth, fheight);
 
@@ -384,10 +394,10 @@ function render() {
     updateWardrobe();
 
     addLoft(isLoft);
-    if(isLoft){
+    if (isLoft) {
         orthoCamera.position.setY(1.55);
-        
-    }else{
+
+    } else {
         orthoCamera.position.setY(1);
     }
 
@@ -402,16 +412,7 @@ function render() {
 
     updateBotShelves(plane_index);
 
-    for (var i = 0; i < customColumns; i++) {
-
-        if (_cLeftArrow_parent.length > 0) {
-            updateColumnsArrow(i)
-            updateUpperArrows(i);
-            updateLowerArrows(i);
-        }
-        
-        
-    }
+ 
 
     for (var i = 0; i < customColumns; i++) {
         updateHingedDoorUpSize(i)
@@ -450,7 +451,6 @@ function render() {
 
 
 
-
     renderOption()
 
     doorVisiblity(_hDoors_parent_group, _doorsVisible);
@@ -458,24 +458,24 @@ function render() {
     // doorVisiblity(_doorRailParent,_doorsVisible);
 
     dimensionRenderer.render(dimensionScene, orthoCamera);
-    css3DRenderer.render(dimensionScene, orthoCamera);
-    // css3DRenderer.render(scene,camera);
+    css2DRenderer.render(dimensionScene, orthoCamera);
+    // css2DRenderer.render(scene,camera);
 
 
     // document.getElementById('capturedImage').src = dimensionRenderer.domElement.toDataURL();
-    // document.getElementById('capturedImage').src = css3DRenderer.domElement.toDataURL();
+    // document.getElementById('capturedImage').src = css2DRenderer.domElement.toDataURL();
     composer.render();
 
     if (isMeasured) {
         viewer.hidden = true;
         dimensionviewer.hidden = false;
-        $(".downloadDimension").show();
+        // $(".downloadDimension").show();
         $("input:radio[name='renderOptions']").prop("disabled", true);
 
     } else {
         viewer.hidden = false;
         dimensionviewer.hidden = true;
-        $(".downloadDimension").hide();
+        // $(".downloadDimension").hide();
         $("input:radio[name='renderOptions']").prop("disabled", false);
 
     }
@@ -936,7 +936,7 @@ function removeColumnsBottom(index) {
 function updateColumnsBottom(i) {
 
     offset = Math.abs(((wLeft.position.x - wLeft.scale.x / 2) - (wRight.position.x - wRight.scale.x / 2))) / customColumns;
-    
+
     _columns_bottom_group.position.set(_columns_group.position.x, _columns_group.position.y, _columns_group.position.z);
 
 
@@ -953,7 +953,7 @@ function updateColumnsBottom(i) {
 function updateColumns() {
 
     offset = Math.abs(((wLeft.position.x - wLeft.scale.x / 2) - (wRight.position.x - wRight.scale.x / 2))) / customColumns;
-    
+
     for (var i = 0; i < customColumns - 1; i++) {
         if (!_columns[i]) {
             createColumns(i);
@@ -997,12 +997,7 @@ function updateColumns() {
         }
 
     }
-    for (var i = 0; i < customColumns; i++) {
-
-        createColumnsArrows(i);
-        createUpperArrows(i);
-        createLowerArrows(i);
-    }
+  
 
     _columns_group.position.set(offset + wLeft.position.x, _columns_group.position.y, _columns_group.position.z);
     _columnsEdges_group.position.copy(_columns_group.position);
@@ -1052,20 +1047,35 @@ function updateColumns() {
         if (!_m_splitters[i]) {
 
             createHorizontalSplitter(i);
-            updateHorizontalSplitter(i);
             createSplitterEdges(i);
+
+            updateHorizontalSplitter(i);
+
             updateSplitterEdges(i);
         } else {
             updateHorizontalSplitter(i);
             updateSplitterEdges(i);
 
         }
-
+      
 
 
     }
-    _m_splitters_group.position.set(offset / 2 + wLeft.position.x, _m_splitters_group.position.y, _m_splitters_group.position.z);
+  
+    for (var i = 0; i < customColumns; i++) {
 
+        createColumnsArrows(i);
+        createUpperArrows(i);
+        createLowerArrows(i);
+   
+        updateColumnsArrow(i)
+        updateUpperArrows(i);
+        updateLowerArrows(i);
+        
+
+
+    
+    }
 
     generateInteractivePlanes(customColumns);
 }
@@ -1330,10 +1340,10 @@ function generateLoftColumns() {
 function updateHorizontalSplitter(index) {
     var subtract = ftTom * 1.35 / 12;
 
-    var fromTop = wTop.position.y - wTop.scale.y- (3 * ftTom) ;
+    var fromTop = wTop.position.y - wTop.scale.y - (3 * ftTom);
     if (!_m_splitters[index]) {
         if (!isHingedDoor) {
-            
+
             _m_splitters[index].scale.set(offset - thickness / 12 * ftTom, (thickness / 12) * ftTom, _columns[0].scale.z);
             _m_splitters[index].position.set(index * offset, fromTop, _columns[0].position.z - subtract / 2);
 
@@ -1347,14 +1357,15 @@ function updateHorizontalSplitter(index) {
         if (_m_splitters[index] instanceof THREE.Mesh) {
             if (!isHingedDoor) {
                 _m_splitters[index].scale.set(offset - thickness / 12 * ftTom, (thickness / 12) * ftTom, _columns[0].scale.z);
-                _m_splitters[index].position.set(index * offset,fromTop, _columns[0].position.z);
+                _m_splitters[index].position.set(index * offset, fromTop, _columns[0].position.z);
             } else {
                 _m_splitters[index].scale.set(offset - thickness / 12 * ftTom, (thickness / 12) * ftTom, wDepth * ftTom);
-                _m_splitters[index].position.set(index * offset,fromTop, wLeft.position.z / 2);
+                _m_splitters[index].position.set(index * offset, fromTop, wLeft.position.z / 2);
             }
 
         }
     }
+    _m_splitters_group.position.set(offset / 2 + wLeft.position.x, _m_splitters_group.position.y, _m_splitters_group.position.z);
 }
 
 function generateInteractivePlanes(index) {
@@ -1946,8 +1957,8 @@ function createWardrobe() {
     edgeLoftTop = createWardrobeEdges(wpLoftTop);
 
 
-    depthSideMesh = createWardrobeEdges(wLeft);
-    depthSideMeshLoft = createWardrobeEdges(wpLoftLeft);
+    depthSideMesh = createWardrobeEdgesDepth(wLeft);
+    depthSideMeshLoft = createWardrobeEdgesDepth(wpLoftLeft);
 
 
 }
@@ -1959,13 +1970,13 @@ function updateWardrobe() {
     if (wBottom) {
 
         if (isHingedDoor) {
-            wBottom.scale.set(wWidth * ftTom - (2*thickness/12) * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));
+            wBottom.scale.set(wWidth * ftTom - (2 * thickness / 12) * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));
             wBottom.position.set(0, (2.5 / 12) * ftTom + (thickness / 24) * ftTom, ((thickness / 24) * ftTom));
             wBottomLayer.visible = false;
 
         } else {
             wBottomLayer.visible = true;
-            wBottom.scale.set(wWidth * ftTom - (2*thickness/12) * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom) - 1.35 / 12 * ftTom);
+            wBottom.scale.set(wWidth * ftTom - (2 * thickness / 12) * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom) - 1.35 / 12 * ftTom);
             wBottom.position.set(0, (2.5 / 12) * ftTom + (thickness / 24) * ftTom, ((thickness / 24) * ftTom) - 1.35 / 24 * ftTom);
         }
 
@@ -1978,17 +1989,17 @@ function updateWardrobe() {
 
     if (wBottomLayer) {
         if (_extDrawers.length > 0) {
-            wBottomLayer.scale.set(wWidth * ftTom - (2*thickness/12) * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));
+            wBottomLayer.scale.set(wWidth * ftTom - (2 * thickness / 12) * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));
             wBottomLayer.position.set(0, (2.5 / 12) * ftTom + (thickness / 24) * ftTom, ((thickness / 24) * ftTom));
         } else {
-            wBottomLayer.scale.set(wWidth * ftTom - (2*thickness/12) * ftTom, (thickness / 24) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));
+            wBottomLayer.scale.set(wWidth * ftTom - (2 * thickness / 12) * ftTom, (thickness / 24) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));
             wBottomLayer.position.set(0, (2.5 / 12) * ftTom + (thickness / 48) * ftTom, ((thickness / 24) * ftTom));
         }
 
         updateWardrobeEdges(edgeBottomLayer, wBottomLayer)
-    }   
+    }
     if (wBack) {
-        wBack.scale.set(wWidth * ftTom - (2*thickness/12) * ftTom, wHeight * ftTom - (2.5 / 12 * ftTom), (thickness / 12) * ftTom);
+        wBack.scale.set(wWidth * ftTom - (2 * thickness / 12) * ftTom, wHeight * ftTom - (2.5 / 12 * ftTom), (thickness / 12) * ftTom);
         if (isHingedDoor) {
             wBack.position.set(0, (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2, -wBottom.scale.z / 2);
         } else {
@@ -1999,7 +2010,7 @@ function updateWardrobe() {
     }
 
     if (wTopLayer) {
-        wTopLayer.scale.set((wWidth * ftTom) - (2*thickness/12) * ftTom, (thickness / 24) * ftTom, wDepth * ftTom + (2 * thickness / 12) * ftTom);
+        wTopLayer.scale.set((wWidth * ftTom) - (2 * thickness / 12) * ftTom, (thickness / 24) * ftTom, wDepth * ftTom + (2 * thickness / 12) * ftTom);
         wTopLayer.position.set(0, wBottom.position.y + wBack.scale.y + (thickness / 48) * ftTom - wBottom.scale.y, 0);
         updateWardrobeEdges(edgeTopLayer, wTopLayer)
     }
@@ -2008,11 +2019,11 @@ function updateWardrobe() {
     if (wTop) {
         if (isHingedDoor) {
             wTopLayer.visible = false;
-            wTop.scale.set((wWidth * ftTom) - (2*thickness/12) * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + (2 * thickness / 12) * ftTom);
+            wTop.scale.set((wWidth * ftTom) - (2 * thickness / 12) * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + (2 * thickness / 12) * ftTom);
             wTop.position.set(0, wBottom.position.y + wBack.scale.y - wBottom.scale.y, 0);
         } else {
             wTopLayer.visible = true;
-            wTop.scale.set((wWidth * ftTom) - (2*thickness/12) * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + (2 * thickness / 12) * ftTom - 1.35 / 12 * ftTom);
+            wTop.scale.set((wWidth * ftTom) - (2 * thickness / 12) * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + (2 * thickness / 12) * ftTom - 1.35 / 12 * ftTom);
             wTop.position.set(0, wBottom.position.y + wBack.scale.y - wBottom.scale.y, -1.35 / 24 * ftTom);
         }
         updateWardrobeEdges(edgeTop, wTop)
@@ -2109,17 +2120,17 @@ function updateWardrobe() {
 
     if (wpLoftBottom) {
         if (!isHingedDoor) {
-            wpLoftBottom.scale.set(wWidth * ftTom - (2*thickness/12) * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + (2 * (thickness / 12) * ftTom));
+            wpLoftBottom.scale.set(wWidth * ftTom - (2 * thickness / 12) * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + (2 * (thickness / 12) * ftTom));
             wpLoftBottom.position.set(wTop.position.x, wTop.position.y + wpLoftBottom.scale.y, wTopLayer.position.z);
         } else {
-            wpLoftBottom.scale.set(wWidth * ftTom - (2*thickness/12) * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + (2 * (thickness / 12) * ftTom));
+            wpLoftBottom.scale.set(wWidth * ftTom - (2 * thickness / 12) * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + (2 * (thickness / 12) * ftTom));
             wpLoftBottom.position.set(wTop.position.x, wTop.position.y + wpLoftBottom.scale.y, wTopLayer.position.z);
         }
         updateWardrobeEdges(edgeLoftBottom, wpLoftBottom)
     }
 
     if (wpLoftBack) {
-        wpLoftBack.scale.set(wWidth * ftTom - (2*thickness/12) * ftTom, wLoft * ftTom, (thickness / 12) * ftTom);
+        wpLoftBack.scale.set(wWidth * ftTom - (2 * thickness / 12) * ftTom, wLoft * ftTom, (thickness / 12) * ftTom);
         wpLoftBack.position.set(0, wpLoftBottom.position.y + wpLoftBack.scale.y / 2 - wpLoftBottom.scale.y / 2, -wpLoftBottom.scale.z / 2 + (thickness / 24) * ftTom);
 
         updateWardrobeEdges(edgeLoftBack, wpLoftBack)
@@ -2138,7 +2149,7 @@ function updateWardrobe() {
     }
     if (wpLoftTop) {
 
-        wpLoftTop.scale.set(wWidth * ftTom - (2*thickness/12) * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));
+        wpLoftTop.scale.set(wWidth * ftTom - (2 * thickness / 12) * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));
         wpLoftTop.position.set(0, wpLoftBack.scale.y + wpLoftBottom.position.y - (thickness / 12) * ftTom, ((thickness / 24) * ftTom));
         updateWardrobeEdges(edgeLoftTop, wpLoftTop)
     }
@@ -2666,7 +2677,7 @@ function createTopShelves(row, index) {
 function updateTopShelves(index) {
 
 
-    var vertical_offset = (wTop.position.y - wTop.scale.y - _m_splitters[index].position.y + thickness/24*ftTom)/3;
+    var vertical_offset = (wTop.position.y - wTop.scale.y - _m_splitters[index].position.y + thickness / 24 * ftTom) / 3;
 
 
     if (_top_shelves_parent[index] instanceof THREE.Group) {
@@ -2681,7 +2692,7 @@ function updateTopShelves(index) {
             }
 
         }
-        _top_shelves_parent[index].position.set(offset / 2 + wLeft.position.x, wTop.position.y - (2 * ftTom) - wTop.scale.y , _top_shelves_parent[index].position.z);
+        _top_shelves_parent[index].position.set(offset / 2 + wLeft.position.x, wTop.position.y - (2 * ftTom) - wTop.scale.y, _top_shelves_parent[index].position.z);
     }
 }
 
@@ -3041,7 +3052,9 @@ function onClick() {
                     removed_id.push(i);
 
 
-
+                    updateColumnsArrow(i)
+                    updateUpperArrows(i);
+                    updateLowerArrows(i);
 
                     deleteSprites_group.remove(deleteSprites[i])
                     _columns_group.remove(_columns[i]);
@@ -3049,10 +3062,20 @@ function onClick() {
 
                     removed.push(_columns[i]);
                 }
+              
 
+                   
+                    
+            
+            
+                
+                
+            
             }
         }
 
+        
+   
         selectedObject = null;
 
 
@@ -6105,19 +6128,19 @@ function createColumnsArrows(index) {
 
     var direction = to.clone().sub(from);
     var length = direction.manhattanLength();
-    
 
-  
+
+
     var ArrowL = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000, 0.05, 0.05);
     var ArrowR = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000, 0.05, 0.05);
 
     if (!_cLeftArrow_parent.includes(ArrowL)) {
         _cLeftArrow_parent.push(ArrowL);
     }
-    if(!_cRightArrow_parent.includes(ArrowR)){
+    if (!_cRightArrow_parent.includes(ArrowR)) {
         _cRightArrow_parent.push(ArrowR);
     }
-    
+
 
     _cLeftArrow_group.add(_cLeftArrow_parent[index]);
     _cRightArrow_group.add(_cRightArrow_parent[index]);
@@ -6125,22 +6148,20 @@ function createColumnsArrows(index) {
     dimensionScene.add(_cLeftArrow_group);
     dimensionScene.add(_cRightArrow_group);
 
-    
+
     var cLabelValue = document.createElement('div');
     cLabelValue.className = "columnLabel";
     cLabelValue.innerHTML = "";
-    cLabelValue.style.top = 0;
-    cLabelValue.style.left = 0;
-    cLabelValue.style.fontSize = "0.5px";
-    cLabelValue.style.textAlign = "right";
-    
-    var cLabel = new THREE.CSS3DObject(cLabelValue);
-    
+    cLabelValue.style.fontSize = "13px";
+
+
+    var cLabel = new THREE.CSS2DObject(cLabelValue);
+
     if (!_cLabels.includes(cLabel)) {
         _cLabels.push(cLabel);
     }
-    _cLabel_group.add(_cLabels[index])
-    dimensionScene.add(_cLabel_group);
+
+    _cLeftArrow_parent[index].add(_cLabels[index]);
 }
 
 function updateColumnsArrow(index) {
@@ -6148,17 +6169,17 @@ function updateColumnsArrow(index) {
     var to;
     _cLeftArrow_group.position.copy(_columns_group.position.clone());
     _cRightArrow_group.position.copy(_columns_group.position.clone());
-    _cLabel_group.position.copy(_columns_group.position.clone());
+
     if (index == 0) {
-        from = new THREE.Vector3(_columns[0].position.x-offset/2, edgeBottom.position.y - 0.2, edgeLeft.position.z - edgeLeft.scale.z / 2);
-        to = new THREE.Vector3(_columns[0].position.x-offset + thickness/24 * ftTom , edgeBottom.position.y - 0.2, edgeLeft.position.z - edgeLeft.scale.z / 2);
+        from = new THREE.Vector3(_columns[0].position.x - offset / 2, edgeBottom.position.y - 0.2, edgeLeft.position.z - edgeLeft.scale.z / 2);
+        to = new THREE.Vector3(_columns[0].position.x - offset + thickness / 24 * ftTom, edgeBottom.position.y - 0.2, edgeLeft.position.z - edgeLeft.scale.z / 2);
     } else {
         if (index == customColumns - 1) {
-            from = new THREE.Vector3(_columns[index - 1].position.x+offset/2 , edgeBottom.position.y- 0.2, edgeLeft.position.z - edgeLeft.scale.z / 2);
-            to = new THREE.Vector3(_columns[index - 1].position.x+ thickness/24 * ftTom , edgeBottom.position.y - 0.2, edgeLeft.position.z - edgeLeft.scale.z / 2);
+            from = new THREE.Vector3(_columns[index - 1].position.x + offset / 2, edgeBottom.position.y - 0.2, edgeLeft.position.z - edgeLeft.scale.z / 2);
+            to = new THREE.Vector3(_columns[index - 1].position.x + thickness / 24 * ftTom, edgeBottom.position.y - 0.2, edgeLeft.position.z - edgeLeft.scale.z / 2);
         } else {
             from = new THREE.Vector3(_columns[index - 1].position.x + offset / 2, edgeBottom.position.y - 0.2, edgeLeft.position.z - edgeLeft.scale.z / 2);
-            to = new THREE.Vector3(_columns[index - 1].position.x+ thickness/24 * ftTom , edgeBottom.position.y - 0.2, edgeLeft.position.z - edgeLeft.scale.z / 2);
+            to = new THREE.Vector3(_columns[index - 1].position.x + thickness / 24 * ftTom, edgeBottom.position.y - 0.2, edgeLeft.position.z - edgeLeft.scale.z / 2);
         }
     }
 
@@ -6173,66 +6194,59 @@ function updateColumnsArrow(index) {
     _cRightArrow_parent[index].setDirection(direction.negate().normalize());
     _cRightArrow_parent[index].setLength(length, 0.05, 0.05);
     _cRightArrow_parent[index].position.copy(from.clone());
-   
 
-   
-    var lengthOffset =12*(( _columns_group.position.x - _columns[0].scale.x/2) - (wLeft.position.x + wLeft.scale.x/2))/ftTom;
-    
-    
-    
+
+
+    var lengthOffset = 12 * ((_columns_group.position.x - _columns[0].scale.x / 2) - (wLeft.position.x + wLeft.scale.x / 2)) / ftTom;
+
+
+
     _cLabels[index].element.innerHTML = (lengthOffset).toFixed(4) + " in";
-    _cLabels[index].position.set(_cLeftArrow_parent[index].position.x,_cLeftArrow_parent[index].position.y + 0.01 , _cLeftArrow_parent[index].position.z);
-    _cLabels[index].scale.set(0.125, 0.125, 0.125);
+    _cLabels[index].position.set(0.065, 0, 0);
+    // _cLabels[index].scale.set(0.125, 0.125, 0.125);
 }
 
 function removeColumnsArrow(index) {
     if (index) {
         if (_cLeftArrow_parent.includes(_cLeftArrow_parent[index])) {
-            dimensionScene.remove(_cLeftArrow_group);
+            _cLeftArrow_group.remove(_cLeftArrow_parent[index]);
             _cLeftArrow_parent[index] = null;
 
         }
         if (_cRightArrow_parent.includes(_cRightArrow_parent[index])) {
-            dimensionScene.remove(_cRightArrow_group);
+            _cRightArrow_group.remove(_cRightArrow_parent[index]);
             _cRightArrow_parent[index] = null;
 
         }
-        
-        if (_cLabels.includes(_cLabels[index])) {
-            dimensionScene.remove(_cLabel_group);
-            _cLabels[index] = null;
 
-        }
 
     } else {
-        _cLeftArrow_parent.forEach(e => {
-            if (e instanceof THREE.ArrowHelper) {
-                _cLeftArrow_group.remove(e);
-            }
 
+        _cLeftArrow_parent.forEach(e => {
+            _cLabels.forEach(a => {
+                e.remove(a);
+            })
         })
+
+        _cLeftArrow_parent.forEach(e => {
+            _cLeftArrow_group.remove(e);
+        })
+        dimensionScene.remove(_cLeftArrow_group)
         _cLeftArrow_parent = [];
 
         _cRightArrow_parent.forEach(e => {
-            if (e instanceof THREE.ArrowHelper) {
-                _cRightArrow_group.remove(e);
-            }
-
+            _cRightArrow_group.remove(e);
         })
+        dimensionScene.remove(_cRightArrow_group)
         _cRightArrow_parent = [];
 
-        _cLabels.forEach(e => {
-            if (e!=null) {
-                _cLabel_group.remove(e);
-            }
 
-        })
-        _cLabels = [];
 
 
     }
 }
-function createUpperArrows(index){
+
+function createUpperArrows(index) {
     var from = new THREE.Vector3(0, 0, 0);
     var to = new THREE.Vector3(0, 0, 0);
 
@@ -6240,19 +6254,19 @@ function createUpperArrows(index){
 
     var direction = to.clone().sub(from);
     var length = direction.manhattanLength();
-    
 
-  
+
+
     var ArrowUp = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000, 0.05, 0.05);
     var ArrowDown = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000, 0.05, 0.05);
 
     if (!_cUpperArrowUps_parent.includes(ArrowUp)) {
         _cUpperArrowUps_parent.push(ArrowUp);
     }
-    if(!_cUpperArrowDowns_parent.includes(ArrowDown)){
+    if (!_cUpperArrowDowns_parent.includes(ArrowDown)) {
         _cUpperArrowDowns_parent.push(ArrowDown);
     }
-    
+
 
     _cUpperArrowUp_group.add(_cUpperArrowUps_parent[index]);
     _cUpperArrowDown_group.add(_cUpperArrowDowns_parent[index]);
@@ -6264,49 +6278,49 @@ function createUpperArrows(index){
     var cLabelValue = document.createElement('div');
     cLabelValue.className = "columnsUpperLabel";
     cLabelValue.innerHTML = "10";
+    cLabelValue.style.margin = 0;
     cLabelValue.style.top = 0;
-    cLabelValue.style.left = 0;
-    cLabelValue.style.fontSize = "0.5px";
-    cLabelValue.style.textAlign = "right";
-    
-    var cLabel = new THREE.CSS3DObject(cLabelValue);
-    
+    cLabelValue.style.textAlign = "center";
+    cLabelValue.style.fontSize = "15px";
+
+
+    var cLabel = new THREE.CSS2DObject(cLabelValue);
+
     if (!_cUpperLabels.includes(cLabel)) {
         _cUpperLabels.push(cLabel);
     }
-    _cUpperLabels_group.add(_cUpperLabels[index])
-    dimensionScene.add(_cUpperLabels_group);
+    // _cUpperLabels_group.add(_cUpperLabels[index])
+    _cUpperArrowUps_parent[index].add(_cUpperLabels[index]);
 }
-function updateUpperArrows(index){
-    var from,fromDown;
-    var to,toDown;
-    _cUpperArrowUp_group.position.copy(_columns_group.position.clone());
-    _cUpperArrowDown_group.position.copy(_columns_group.position.clone());
-    _cUpperLabels_group.position.copy(_columns_group.position.clone());
-    var midpoint = (wTop.position.y - _m_splitters[index].position.y/2  + 0.05 );
-    var midpointdown = (wTop.position.y - _m_splitters[index].position.y/2  - 0.05  );
-    if (index == 0) {
-        from = new THREE.Vector3(_columns[0].position.x-offset/2, midpoint, edgeLeft.position.z - edgeLeft.scale.z / 2);
-        to = new THREE.Vector3(_columns[0].position.x-offset/2 , wTop.position.y - wTop.scale.y/2, edgeLeft.position.z - edgeLeft.scale.z / 2);
 
-        fromDown = new THREE.Vector3(_columns[0].position.x-offset/2, midpointdown, edgeLeft.position.z - edgeLeft.scale.z / 2);
-        toDown = new THREE.Vector3(_columns[0].position.x-offset/2 , _m_splitters[index].position.y + _m_splitters[index].scale.y/2, edgeLeft.position.z - edgeLeft.scale.z / 2);
+function updateUpperArrows(index) {
+    var from, fromDown;
+    var to, toDown;
+
+    var midpoint = (wTop.position.y - _m_splitters[index].position.y / 2 + 0.05);
+    var midpointdown = (wTop.position.y - _m_splitters[index].position.y / 2 - 0.05);
+    if (index == 0) {
+        from = new THREE.Vector3(_columns[0].position.x - offset / 2, midpoint, edgeLeft.position.z - edgeLeft.scale.z / 2);
+        to = new THREE.Vector3(_columns[0].position.x - offset / 2, wTop.position.y - wTop.scale.y / 2, edgeLeft.position.z - edgeLeft.scale.z / 2);
+
+        fromDown = new THREE.Vector3(_columns[0].position.x - offset / 2, midpointdown, edgeLeft.position.z - edgeLeft.scale.z / 2);
+        toDown = new THREE.Vector3(_columns[0].position.x - offset / 2, _m_splitters[index].position.y + _m_splitters[index].scale.y / 2, edgeLeft.position.z - edgeLeft.scale.z / 2);
     } else {
         if (index == customColumns - 1) {
-            from = new THREE.Vector3(_columns[index - 1].position.x+offset/2 , midpoint, edgeLeft.position.z - edgeLeft.scale.z / 2);
-            to = new THREE.Vector3(_columns[index - 1].position.x+offset/2, wTop.position.y - wTop.scale.y/2, edgeLeft.position.z - edgeLeft.scale.z / 2);
+            from = new THREE.Vector3(_columns[index - 1].position.x + offset / 2, midpoint, edgeLeft.position.z - edgeLeft.scale.z / 2);
+            to = new THREE.Vector3(_columns[index - 1].position.x + offset / 2, wTop.position.y - wTop.scale.y / 2, edgeLeft.position.z - edgeLeft.scale.z / 2);
 
-            fromDown = new THREE.Vector3(_columns[index - 1].position.x+offset/2 , midpointdown, edgeLeft.position.z - edgeLeft.scale.z / 2);
-            toDown = new THREE.Vector3(_columns[index - 1].position.x+offset/2, _m_splitters[index].position.y + _m_splitters[index].scale.y/2, edgeLeft.position.z - edgeLeft.scale.z / 2);
+            fromDown = new THREE.Vector3(_columns[index - 1].position.x + offset / 2, midpointdown, edgeLeft.position.z - edgeLeft.scale.z / 2);
+            toDown = new THREE.Vector3(_columns[index - 1].position.x + offset / 2, _m_splitters[index].position.y + _m_splitters[index].scale.y / 2, edgeLeft.position.z - edgeLeft.scale.z / 2);
         } else {
             from = new THREE.Vector3(_columns[index - 1].position.x + offset / 2, midpoint, edgeLeft.position.z - edgeLeft.scale.z / 2);
-            to = new THREE.Vector3(_columns[index - 1].position.x + offset / 2 ,wTop.position.y - wTop.scale.y/2, edgeLeft.position.z - edgeLeft.scale.z / 2);
+            to = new THREE.Vector3(_columns[index - 1].position.x + offset / 2, wTop.position.y - wTop.scale.y / 2, edgeLeft.position.z - edgeLeft.scale.z / 2);
 
-            fromDown = new THREE.Vector3(_columns[index - 1].position.x + offset / 2,midpointdown, edgeLeft.position.z - edgeLeft.scale.z / 2);
-            toDown = new THREE.Vector3(_columns[index - 1].position.x + offset / 2 ,_m_splitters[index].position.y + _m_splitters[index].scale.y/2, edgeLeft.position.z - edgeLeft.scale.z / 2);
+            fromDown = new THREE.Vector3(_columns[index - 1].position.x + offset / 2, midpointdown, edgeLeft.position.z - edgeLeft.scale.z / 2);
+            toDown = new THREE.Vector3(_columns[index - 1].position.x + offset / 2, _m_splitters[index].position.y + _m_splitters[index].scale.y / 2, edgeLeft.position.z - edgeLeft.scale.z / 2);
         }
     }
-   
+
 
     var direction = to.clone().sub(from);
     var directionDown = toDown.clone().sub(fromDown);
@@ -6321,63 +6335,79 @@ function updateUpperArrows(index){
     _cUpperArrowDowns_parent[index].position.copy(fromDown.clone());
 
     var lengthToSplitter = wTop.position.y - _m_splitters[index].position.y - wTop.scale.y;
-    
-    
-    _cUpperLabels[index].element.innerHTML = (12*lengthToSplitter/ftTom).toFixed(1)+ " in";
-    _cUpperLabels[index].position.set(_cUpperArrowUps_parent[index].position.x, midpoint-0.125, _cUpperArrowUps_parent[index].position.z);
-    _cUpperLabels[index].scale.set(0.135, 0.135, 0.135);
+
+
+    _cUpperLabels[index].element.innerHTML = (12 * lengthToSplitter / ftTom).toFixed(1) + " in";
+    _cUpperLabels[index].position.set(0, -0.05, 0);
+    // _cUpperLabels[index].scale.set(0.135, 0.135, 0.135);
+    _cUpperArrowUp_group.position.copy(_columns_group.position.clone());
+    _cUpperArrowDown_group.position.copy(_columns_group.position.clone());
+
 
 }
-function removeUpperArrows(index){
+
+function removeUpperArrows(index) {
     if (index) {
         if (_cUpperArrowUps_parent.includes(_cUpperArrowUps_parent[index])) {
-            dimensionScene.remove(_cUpperArrowUp_group);
+            _cUpperArrowUps_parent[index].remove(_cUpperLabels[index]);
+            dimensionScene.remove(_cUpperArrowUps_parent[index]);
+
+
+            _cUpperLabels[index] = null;
             _cUpperArrowUps_parent[index] = null;
 
         }
         if (_cUpperArrowDowns_parent.includes(_cUpperArrowDowns_parent[index])) {
-            dimensionScene.remove(_cUpperArrowDown_group);
+            dimensionScene.remove(_cUpperArrowDowns_parent[index]);
             _cUpperArrowDowns_parent[index] = null;
 
         }
 
-         
-        if (_cUpperLabels.includes(_cUpperLabels[index])) {
-            dimensionScene.remove(_cUpperLabels_group);
-            _cUpperLabels[index] = null;
 
-        }
+        // if (_cUpperLabels.includes(_cUpperLabels[index])) {
+        //     dimensionScene.remove(_cUpperLabels_group);
+        //     _cUpperLabels[index] = null;
+
+        // }
     } else {
-        _cUpperArrowUps_parent.forEach(e => {
-            if (e instanceof THREE.ArrowHelper) {
-                _cUpperArrowUp_group.remove(e);
-            }
 
+
+        _cUpperArrowUps_parent.forEach(e => {
+            _cUpperLabels.forEach(a => {
+                e.remove(a);
+            })
         })
+
+        _cUpperLabels = [];
+
+
+        _cUpperArrowUps_parent.forEach(e => {
+            _cUpperArrowUp_group.remove(e);
+        })
+        dimensionScene.remove(_cUpperArrowUp_group);
         _cUpperArrowUps_parent = [];
 
-        _cUpperArrowDowns_parent.forEach(e => {
-            if (e instanceof THREE.ArrowHelper) {
-                _cUpperArrowDown_group.remove(e);
-            }
 
+        _cUpperArrowDowns_parent.forEach(e => {
+            _cUpperArrowDown_group.remove(e);
         })
+        dimensionScene.remove(_cUpperArrowDown_group);
         _cUpperArrowDowns_parent = [];
 
-        _cUpperLabels.forEach(e => {
-            if (e!=null) {
-                _cUpperLabels_group.remove(e);
-            }
+        // _cUpperLabels.forEach(e => {
+        //     if (e!=null) {
+        //         _cUpperLabels_group.remove(e);
+        //     }
 
-        })
-        _cUpperLabels = [];
+        // })
+        // _cUpperLabels = [];
 
 
     }
 }
 
 
-function createLowerArrows(index){
+function createLowerArrows(index) {
     var from = new THREE.Vector3(0, 0, 0);
     var to = new THREE.Vector3(0, 0, 0);
 
@@ -6385,19 +6415,19 @@ function createLowerArrows(index){
 
     var direction = to.clone().sub(from);
     var length = direction.manhattanLength();
-    
 
-  
+
+
     var ArrowUp = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000, 0.05, 0.05);
     var ArrowDown = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000, 0.05, 0.05);
 
     if (!_cLowerArrowUps_parent.includes(ArrowUp)) {
         _cLowerArrowUps_parent.push(ArrowUp);
     }
-    if(!_cLowerArrowDowns_parent.includes(ArrowDown)){
+    if (!_cLowerArrowDowns_parent.includes(ArrowDown)) {
         _cLowerArrowDowns_parent.push(ArrowDown);
     }
-    
+
 
     _cLowerArrowUp_group.add(_cLowerArrowUps_parent[index]);
     _cLowerArrowDown_group.add(_cLowerArrowDowns_parent[index]);
@@ -6408,133 +6438,152 @@ function createLowerArrows(index){
 
     var cLabelValue = document.createElement('div');
     cLabelValue.className = "columnsLowerLabel";
-    cLabelValue.innerHTML = "10";
-    cLabelValue.style.top = 0;
-    cLabelValue.style.left = 0;
-    cLabelValue.style.fontSize = "0.5px";
-    cLabelValue.style.textAlign = "right";
-    
-    var cLabel = new THREE.CSS3DObject(cLabelValue);
-    
+    cLabelValue.style.fontSize = "15px";
+
+
+    var cLabel = new THREE.CSS2DObject(cLabelValue);
+
     if (!_cLowerLabels.includes(cLabel)) {
         _cLowerLabels.push(cLabel);
     }
-    _cLowerLabels_group.add(_cLowerLabels[index])
-    dimensionScene.add(_cLowerLabels_group);
+
+    _cLowerArrowUps_parent[index].add(_cLowerLabels[index]);
 }
-function updateLowerArrows(index){
-    var from,fromDown;
-    var to,toDown;
+
+function updateLowerArrows(index) {
+    var from, fromDown;
+    var to, toDown;
     _cLowerArrowDown_group.position.copy(_columns_group.position.clone());
     _cLowerArrowUp_group.position.copy(_columns_group.position.clone());
     _cLowerLabels_group.position.copy(_columns_group.position.clone());
-    var midpoint = (_m_splitters[index].position.y/2 - wBottom.position.y  + 0.05 );
-    var midpointdown = (_m_splitters[index].position.y/2 - wBottom.position.y  - 0.05  );
+    var midpoint = (_m_splitters[index].position.y / 2 - wBottom.position.y + 0.05);
+    var midpointdown = (_m_splitters[index].position.y / 2 - wBottom.position.y - 0.05);
     if (index == 0) {
-        from = new THREE.Vector3(_columns[0].position.x-offset/2, midpoint, edgeLeft.position.z - edgeLeft.scale.z / 2);
-        to = new THREE.Vector3(_columns[0].position.x-offset/2 , _m_splitters[index].position.y - _m_splitters[index].scale.y/2, edgeLeft.position.z - edgeLeft.scale.z / 2);
+        from = new THREE.Vector3(_columns[0].position.x - offset / 2, midpoint, edgeLeft.position.z - edgeLeft.scale.z / 2);
+        to = new THREE.Vector3(_columns[0].position.x - offset / 2, _m_splitters[index].position.y - _m_splitters[index].scale.y / 2, edgeLeft.position.z - edgeLeft.scale.z / 2);
 
-        fromDown = new THREE.Vector3(_columns[0].position.x-offset/2, midpointdown, edgeLeft.position.z - edgeLeft.scale.z / 2);
-        toDown = new THREE.Vector3(_columns[0].position.x-offset/2 , wBottom.position.y+wBottom.scale.y/2, edgeLeft.position.z - edgeLeft.scale.z / 2);
+        fromDown = new THREE.Vector3(_columns[0].position.x - offset / 2, midpointdown, edgeLeft.position.z - edgeLeft.scale.z / 2);
+        toDown = new THREE.Vector3(_columns[0].position.x - offset / 2, wBottom.position.y + wBottom.scale.y / 2, edgeLeft.position.z - edgeLeft.scale.z / 2);
     } else {
         if (index == customColumns - 1) {
-            from = new THREE.Vector3(_columns[index - 1].position.x+offset/2 , midpoint, edgeLeft.position.z - edgeLeft.scale.z / 2);
-            to = new THREE.Vector3(_columns[index - 1].position.x+offset/2, _m_splitters[index].position.y - _m_splitters[index].scale.y/2, edgeLeft.position.z - edgeLeft.scale.z / 2);
+            from = new THREE.Vector3(_columns[index - 1].position.x + offset / 2, midpoint, edgeLeft.position.z - edgeLeft.scale.z / 2);
+            to = new THREE.Vector3(_columns[index - 1].position.x + offset / 2, _m_splitters[index].position.y - _m_splitters[index].scale.y / 2, edgeLeft.position.z - edgeLeft.scale.z / 2);
 
-            fromDown = new THREE.Vector3(_columns[index - 1].position.x+offset/2 , midpointdown, edgeLeft.position.z - edgeLeft.scale.z / 2);
-            toDown = new THREE.Vector3(_columns[index - 1].position.x+offset/2,wBottom.position.y+wBottom.scale.y/2, edgeLeft.position.z - edgeLeft.scale.z / 2);
+            fromDown = new THREE.Vector3(_columns[index - 1].position.x + offset / 2, midpointdown, edgeLeft.position.z - edgeLeft.scale.z / 2);
+            toDown = new THREE.Vector3(_columns[index - 1].position.x + offset / 2, wBottom.position.y + wBottom.scale.y / 2, edgeLeft.position.z - edgeLeft.scale.z / 2);
         } else {
             from = new THREE.Vector3(_columns[index - 1].position.x + offset / 2, midpoint, edgeLeft.position.z - edgeLeft.scale.z / 2);
-            to = new THREE.Vector3(_columns[index - 1].position.x + offset / 2 , _m_splitters[index].position.y - _m_splitters[index].scale.y/2, edgeLeft.position.z - edgeLeft.scale.z / 2);
+            to = new THREE.Vector3(_columns[index - 1].position.x + offset / 2, _m_splitters[index].position.y - _m_splitters[index].scale.y / 2, edgeLeft.position.z - edgeLeft.scale.z / 2);
 
-            fromDown = new THREE.Vector3(_columns[index - 1].position.x + offset / 2,midpointdown, edgeLeft.position.z - edgeLeft.scale.z / 2);
-            toDown = new THREE.Vector3(_columns[index - 1].position.x + offset / 2 ,wBottom.position.y+wBottom.scale.y/2, edgeLeft.position.z - edgeLeft.scale.z / 2);
+            fromDown = new THREE.Vector3(_columns[index - 1].position.x + offset / 2, midpointdown, edgeLeft.position.z - edgeLeft.scale.z / 2);
+            toDown = new THREE.Vector3(_columns[index - 1].position.x + offset / 2, wBottom.position.y + wBottom.scale.y / 2, edgeLeft.position.z - edgeLeft.scale.z / 2);
         }
     }
-   
+
 
     var direction = to.clone().sub(from);
     var directionDown = toDown.clone().sub(fromDown);
     var length = direction.manhattanLength();
     var lengthDown = directionDown.manhattanLength();
-    _cLowerArrowUps_parent[index].setDirection(direction.normalize());
-    _cLowerArrowUps_parent[index].setLength(length, 0.05, 0.05);
-    _cLowerArrowUps_parent[index].position.copy(from.clone());
 
-    _cLowerArrowDowns_parent[index].setDirection(directionDown.normalize());
-    _cLowerArrowDowns_parent[index].setLength(lengthDown, 0.05, 0.05);
-    _cLowerArrowDowns_parent[index].position.copy(fromDown.clone());
+   
 
-    var lengthToSplitter =  _m_splitters[index].position.y - _m_splitters[index].scale.y  - wBottom.position.y ;
+    if(index == removed_index){
+        removeLowerArrows(index);
+        if(_cLowerArrowDowns_parent[index+1] instanceof THREE.ArrowHelper){
+            
+            var from =  new THREE.Vector3(_columns[removed_index].position.x , midpointdown, edgeLeft.position.z - edgeLeft.scale.z / 2);
+            var to = new THREE.Vector3(_columns[removed_index].position.x, wBottom.position.y + wBottom.scale.y / 2, edgeLeft.position.z - edgeLeft.scale.z / 2);
+            var direction = to.clone().sub(from);
+            var length = direction.manhattanLength();
+
+
+            _cLowerArrowDowns_parent[index+1].setDirection(direction.normalize());
+           _cLowerArrowDowns_parent[index+1].setLength(length, 0.05, 0.05);
+            _cLowerArrowDowns_parent[index+1].position.copy(from.clone());
+        }
+       
+    }else{
+        if (_cLowerArrowUps_parent[index] instanceof THREE.ArrowHelper) {
+            _cLowerArrowUps_parent[index].setDirection(direction.normalize());
+            _cLowerArrowUps_parent[index].setLength(length, 0.05, 0.05);
+            _cLowerArrowUps_parent[index].position.copy(from.clone());
+        }
     
+        if (_cLowerArrowDowns_parent[index] instanceof THREE.ArrowHelper) {
+            _cLowerArrowDowns_parent[index].setDirection(directionDown.normalize());
+            _cLowerArrowDowns_parent[index].setLength(lengthDown, 0.05, 0.05);
+            _cLowerArrowDowns_parent[index].position.copy(fromDown.clone());
+        }
     
-    _cLowerLabels[index].element.innerHTML = (12*lengthToSplitter/ftTom).toFixed(3)+ " in";
-    _cLowerLabels[index].position.set(_cLowerArrowUps_parent[index].position.x, midpoint-0.125, _cLowerArrowUps_parent[index].position.z);
-    _cLowerLabels[index].scale.set(0.135, 0.135, 0.135);
+    }
+    var lengthToSplitter = _m_splitters[index].position.y - _m_splitters[index].scale.y - wBottom.position.y;
+
+
+    _cLowerLabels[index].element.innerHTML = (12 * lengthToSplitter / ftTom).toFixed(3) + " in";
+    _cLowerLabels[index].position.set(0, -0.05, 0);
+    // _cLowerLabels[index].scale.set(0.135, 0.135, 0.135);
 
 }
-function removeLowerArrows(index){
+
+function removeLowerArrows(index) {
     if (index) {
         if (_cLowerArrowUps_parent.includes(_cLowerArrowUps_parent[index])) {
-            dimensionScene.remove(_cLowerArrowUp_group);
+            _cLowerArrowUp_group.remove(_cLowerArrowUps_parent[index]);
             _cLowerArrowUps_parent[index] = null;
 
         }
         if (_cLowerArrowDowns_parent.includes(_cLowerArrowDowns_parent[index])) {
-            dimensionScene.remove(_cLowerArrowDown_group);
+            _cLowerArrowDown_group.remove(_cLowerArrowDowns_parent[index]);
             _cLowerArrowDowns_parent[index] = null;
 
         }
 
-         
-        if (_cLowerLabels.includes(_cLowerLabels[index])) {
-            dimensionScene.remove(_cLowerLabels_group);
-            _cLowerLabels[index] = null;
 
-        }
     } else {
         _cLowerArrowUps_parent.forEach(e => {
-            if (e instanceof THREE.ArrowHelper) {
-                _cLowerArrowUp_group.remove(e);
-            }
-
+            _cLowerLabels.forEach(a => {
+                e.remove(a);
+            })
         })
+
+        _cLowerLabels = [];
+
+        _cLowerArrowUps_parent.forEach(e => {
+            _cLowerArrowUp_group.remove(e);
+        })
+        dimensionScene.remove(_cLowerArrowUp_group);
         _cLowerArrowUps_parent = [];
 
-        _cLowerArrowDowns_parent.forEach(e => {
-            if (e instanceof THREE.ArrowHelper) {
-                _cLowerArrowDown_group.remove(e);
-            }
 
+        _cLowerArrowDowns_parent.forEach(e => {
+            _cLowerArrowDown_group.remove(e);
         })
+        dimensionScene.remove(_cLowerArrowDown_group);
+
         _cLowerArrowDowns_parent = [];
 
-        _cLowerLabels.forEach(e => {
-            if (e!=null) {
-                _cLowerLabels_group.remove(e);
-            }
 
-        })
-        _cLowerLabels = [];
 
 
     }
 }
-function createSplitterEdges(index){
+
+function createSplitterEdges(index) {
     var g = new THREE.EdgesGeometry(_columns[0].geometry.clone());
     var m = new THREE.LineBasicMaterial({
         color: 0x000000,
-        name: "_m_splitters_edge_" + index
+        name: "_m_splitters_edge" + index
     });
     var mesh = new THREE.LineSegments(g, m);
 
 
-    mesh.name = "_m_splitters_edges" + index;
+    mesh.name = "w_splitters_edge_" + index;
 
 
 
     _splitterEdges[index] = mesh;
-    _splitterEdges_group.name = "w_columns_lines";
+    _splitterEdges_group.name = "w_splitters_edges";
     _splitterEdges_group.add(_splitterEdges[index]);
 
 
@@ -6544,15 +6593,15 @@ function createSplitterEdges(index){
 
 }
 
-function updateSplitterEdges(index){
-    
+function updateSplitterEdges(index) {
+
     _splitterEdges[index].scale.copy(_m_splitters[index].scale);
     _splitterEdges[index].position.copy(_m_splitters[index].position);
     _splitterEdges_group.position.copy(_m_splitters_group.position)
 }
 
-function removeSplitterEdges(index){
-    
+function removeSplitterEdges(index) {
+
     if (index) {
         _splitterEdges.forEach(e => {
             if (_splitterEdges[index] instanceof THREE.Mesh && _splitterEdges[index] == e) {
@@ -6673,6 +6722,31 @@ function createWardrobeEdges(object) {
     return subject;
 }
 
+function createWardrobeEdgesDepth(object) {
+    var texture = new THREE.TextureLoader().load("./Textures/diagonal.jpg");
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.setX(1);
+    texture.repeat.setY(1);
+    let edges = new THREE.EdgesGeometry(object.geometry.clone());
+
+    var subject = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({
+
+
+
+        color: 0x000000,
+
+
+    }));
+    // if(subject instanceof THREE.Mesh){
+    //     subject.scale.set(object.scale.x,object.scale.y,object.scale.z);
+    //     subject.position.set(object.position.x,object.position.y,object.position.z);
+    // }
+
+    dimensionScene.add(subject);
+    return subject;
+}
+
 function updateWardrobeEdges(subject, object) {
 
     if (subject != null) {
@@ -6722,20 +6796,18 @@ function createVerticalArrow() {
 
             hValue = document.createElement('div');
             hValue.innerHTML = (wHeight) + " ft (" + wHeight * 12 + " in)";
-            hValue.style.top = 0;
-            hValue.style.left = 0;
-            hValue.style.fontSize = "0.5px";
-            hValue.style.textAlign = "right";
+            hValue.style.fontSize = "20px";
 
 
 
-            heightLabel = new THREE.CSS3DObject(hValue);
 
-            dimensionScene.add(heightLabel);
+            heightLabel = new THREE.CSS2DObject(hValue);
+
+            wvArrowUp.add(heightLabel);
 
 
         } else {
-          
+
             wvArrowUp.setDirection(direction.normalize());
             wvArrowUp.setLength(length, 0.05, 0.05);
             wvArrowUp.position.copy(from.clone());
@@ -6745,8 +6817,9 @@ function createVerticalArrow() {
             wvArrowDown.position.copy(from.clone());
 
             hValue.innerHTML = (wHeight) + " ft (" + wHeight * 12 + " in)";
-            heightLabel.position.set(wvArrowUp.position.x - 0.3, edgeLeft.position.y - 0.2, 0);
-            heightLabel.scale.set(0.15, 0.15, 0.15)
+            heightLabel.position.set(-0.3, 0, 0);
+            // heightLabel.scale.set(0.15, 0.15, 0.15)
+
             // wHeightText.position.set(0,0.5,0.4);
         }
 
@@ -6771,16 +6844,15 @@ function createVerticalArrow() {
 
                 hLoftValue = document.createElement('div');
                 hLoftValue.innerHTML = (wLoft) + " ft";
-                hLoftValue.style.top = 0;
-                hLoftValue.style.left = 0;
-                hLoftValue.style.fontSize = "0.5px";
-                hLoftValue.style.textAlign = "right";
+
+                hLoftValue.style.fontSize = "20px";
 
 
 
-                loftLabel = new THREE.CSS3DObject(hLoftValue);
 
-                dimensionScene.add(loftLabel);
+                loftLabel = new THREE.CSS2DObject(hLoftValue);
+
+                wlArrowUp.add(loftLabel);
             } else {
                 wlArrowUp.setDirection(direction.normalize());
                 wlArrowUp.setLength(length, 0.05, 0.05);
@@ -6796,8 +6868,8 @@ function createVerticalArrow() {
                 loftLabel.visible = true;
 
                 hLoftValue.innerHTML = (wLoft) + " ft (" + wLoft * 12 + " in)";
-                loftLabel.position.set(wlArrowUp.position.x - 0.3, edgeLoftLeft.position.y - 0.1, 0);
-                loftLabel.scale.set(0.15, 0.15, 0.15)
+                loftLabel.position.set(-0.3, 0, 0);
+                // loftLabel.scale.set(0.15, 0.15, 0.15)
             }
         } else {
             if (wlArrowUp) {
@@ -6830,14 +6902,13 @@ function createDepthArrow() {
 
             depthLabelValue = document.createElement('div');
             depthLabelValue.innerHTML = (wDepth) + " ft";
-            depthLabelValue.style.top = 0;
-            depthLabelValue.style.left = 0;
-            depthLabelValue.style.fontSize = "0.5px";
-            depthLabelValue.style.textAlign = "right";
 
-            depthLabel = new THREE.CSS3DObject(depthLabelValue);
+            depthLabelValue.style.fontSize = "20px";
 
-            dimensionScene.add(depthLabel);
+
+            depthLabel = new THREE.CSS2DObject(depthLabelValue);
+
+            wdArrowL.add(depthLabel);
         } else {
             wdArrowL.setDirection(direction.normalize());
             wdArrowL.setLength(length, 0.05, 0.05);
@@ -6849,9 +6920,9 @@ function createDepthArrow() {
             wdArrowR.position.copy(from.clone());
 
 
-            depthLabelValue.innerHTML = (wDepth)  + " ft(" + wDepth*12 + " in)";
-            depthLabel.position.set(wdArrowL.position.x, wdArrowL.position.y - 0.3, 0);
-            depthLabel.scale.set(0.15, 0.15, 0.15)
+            depthLabelValue.innerHTML = (wDepth) + " ft(" + wDepth * 12 + " in)";
+            depthLabel.position.set(-0.1, 0, 0);
+            // depthLabel.scale.set(0.15, 0.15, 0.15)
         }
     }
 }
@@ -6878,14 +6949,13 @@ function createHorizontalArrow() {
 
             wValue = document.createElement('div');
             wValue.innerHTML = (wWidth) + " ft";
-            wValue.style.top = 0;
-            wValue.style.left = 0;
-            wValue.style.fontSize = "0.5px";
-            wValue.style.textAlign = "right";
 
-            widthLabel = new THREE.CSS3DObject(wValue);
+            wValue.style.fontSize = "20px";
 
-            dimensionScene.add(widthLabel);
+
+            widthLabel = new THREE.CSS2DObject(wValue);
+
+            whArrowL.add(widthLabel);
 
         } else {
             whArrowL.setDirection(direction.normalize());
@@ -6897,9 +6967,9 @@ function createHorizontalArrow() {
             whArrowR.position.copy(from.clone());
 
 
-            wValue.innerHTML = (wWidth) + " ft(" + wWidth*12 + " in)" ;
-            widthLabel.position.set(0, whArrowR.position.y - 0.3, 0);
-            widthLabel.scale.set(0.15, 0.15, 0.15)
+            wValue.innerHTML = (wWidth) + " ft(" + wWidth * 12 + " in)";
+            widthLabel.position.set(-0.1, 0, 0);
+            // widthLabel.scale.set(0.15, 0.15, 0.15)
         }
 
     }
@@ -6914,12 +6984,20 @@ function swaprender() {
 
 
 function downloadImage() {
-    html2canvas(document.body).then(canvas => {
 
-        // document.getElementById('capturedImage').src = canvas.toDataURL();     
-        // window.open(canvas.toDataURL())
 
+    html2canvas(dimensionviewer).then(canvas => {
+        canvas.style.display = 'none'
+
+        document.body.appendChild(canvas)
+        return canvas
+    }).then(canvas => {
+        const image = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream')
+        const a = document.createElement('a')
+        a.setAttribute('download', 'wardrobe_dimension.png')
+        a.setAttribute('href', image)
+        a.click()
+        canvas.remove()
     });
-
 
 }
