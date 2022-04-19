@@ -6,7 +6,7 @@
   
 }
 
-canvas{
+#modelviewer canvas, #dimensionviewer canvas{
   width: 100%;
   height: 100%;
   margin: 0;
@@ -32,9 +32,9 @@ canvas{
 .price{
   position: fixed;
   z-index: 99;
-  right: 35%;
-  bottom: 8%;
-  font-size: 2em;
+  right: 32%;
+  top : 2%;
+  font-size: 2.5em;
   text-align: right;
   color: rgb(74, 74, 74);
   font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
@@ -43,6 +43,13 @@ canvas{
 .dimension{
   position: absolute;
   z-index: 99;
-  right: 35%;
-  bottom: 15%;
+  right: 32%;
+  top: 10%;
+}
+
+.downloadDimension{
+  position: absolute;
+  z-index: 99;
+  right: 32%;
+  top: 16%;
 }

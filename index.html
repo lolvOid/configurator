@@ -36,9 +36,10 @@
     <script src="./threejs/shaders/VerticalBlurShader.js"></script>
     <script src="./threejs/shaders/SMAAShader.js"></script>
     <script src="./threejs/postprocessing/SMAAPass.js"></script>
+    <script src="./threejs/loaders/FontLoader.js"></script>
     <script src="./threejs/geometries/TextGeometry.js"></script>
     <script src="./threejs/renderers/CSS3DRenderer.js"></script>
-    
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 </head>
 
 <body>
@@ -182,7 +183,7 @@
                 </div>                    
 
                 <div id="editInterior" class="form-control m-1" >
-                    <a class="btn btn-outline-dark" id="backToDoors" ><i class="fa-chevron-left"></i></a>
+                    <a class="btn btn-outline-dark" id="backToDoors" ><i class="fa fa-chevron-left"></i></a>
                     <h6 class="m-2"  >Features: </h6>
                   
                     <div class="form-control m-1">
@@ -279,6 +280,7 @@
                 <div class="row m-1">
                     <a class="btn btn-outline-success m-1" onclick="reset()"> Reset</a>
                     <a class="btn btn-outline-dark m-1" id="export"> Export</a>
+                    
                 </div>
 
 
@@ -301,10 +303,14 @@
     <div id="modelviewer">
         
     </div>
-    <div id="dimensionviewer">
+  
+        <div id="dimensionviewer">
         
-    </div>
+        </div>
+    
+  
     <a class="btn btn-outline-dark dimension" onclick="swaprender()"> <i class="fa fa-2x fa-ruler-combined"></i></a>
+    <!-- <a class="btn btn-outline-dark downloadDimension" onclick="downloadImage()"> <i class="fa fa-2x fa-download"></i></a> -->
     <div class="price">
         
     </div>

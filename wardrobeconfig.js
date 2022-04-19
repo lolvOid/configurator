@@ -1,4 +1,4 @@
-let scene, camera , orthoCamera , dimensionScene, dimensionRenderer, renderer, directionalLight, ambientLight, controls;
+let scene, camera, orthoCamera, dimensionScene, dimensionRenderer, renderer, directionalLight, ambientLight, controls;
 let css3DRenderer;
 
 const viewer = document.getElementById("modelviewer");
@@ -7,6 +7,8 @@ const dimensionviewer = document.getElementById("dimensionviewer");
 
 const fwidth = viewer.offsetWidth || dimensionviewer.offsetWidth;
 const fheight = viewer.offsetHeight || dimensionviewer.offsetHeight;
+let dimensionCanvas;
+var dimensionImage;
 
 let wWidth = 2.5,
     wHeight = 6,
@@ -89,6 +91,8 @@ let _lockers = [],
     _hDoors_parent_group,
     _sDoors_parent = [],
     _sDoors_parent_group;
+
+let _cLeftArrow_parent = [], _cRightArrow_parent = [];
 let _flippableDoor = [];
 var defaultRotation = new THREE.Quaternion();
 let _isDoorRight = [],
@@ -101,7 +105,8 @@ var clock;
 var delta = 0;
 let _hDoors = [];
 
-let _lineColumns =[], _lineColumns_group ;
+let _lineColumns = [],
+    _lineColumns_group;
 
 let _columnsLoft = [],
     _columnsLoft_group = [],
@@ -124,7 +129,8 @@ let wood_roughness;
 
 let selectedSprite, selectedMirror;
 
-let _intDrawers = [], _intDrawers_group,_intDrawers_parent=[];
+let _intDrawers = [],
+    _intDrawers_group, _intDrawers_parent = [];
 let _splitterMaterial, _railMaterial, _wardrobeMaterial, _lockerMaterial, _shelfMaterial, _hangerMaterial, _doorMaterial, _columnsMaterial, _extDrawerMaterial, _intSmallMaterial, _intLargeMaterial, _flipMirrorMaterials, _mirrorMaterials;
 var renderOptionsValue = 0;
 var pmremGenerator;
@@ -143,36 +149,60 @@ let isSlideRight = false,
 
 let selectedDoor, isMirrorAdded = false;
 let wall, wallRight, wallLeft, floor;
-let _columns_bottom = [], _columns_bottom_group;
+let _columns_bottom = [],
+    _columns_bottom_group;
 let shadowPlane;
 
 
-let _columnsEdges =[], _columnsEdges_group;
-let _splitterEdges = [], _splitterEdges_group;
-let _loftEdges = [], _loftEdges_group;
-let edgeBottom,edgeTop,edgeLeft,edgeRight,edgeBack,edgeLoftBottom,edgeLoftTop,edgeLoftBack,edgeLoftRight,edgeLoftLeft;
-let edgeBottomLayer, edgeTopLayer,edgeRightLayer,edgeLeftLayer, edgeLeftLayerTop,edgeLeftLayerBottom,edgeRightLayerBottom, edgeRightLayerTop;
+let _columnsEdges = [],
+    _columnsEdges_group;
+let _splitterEdges = [],
+    _splitterEdges_group = new THREE.Group();
+let _loftEdges = [],
+    _loftEdges_group;
+let edgeBottom, edgeTop, edgeLeft, edgeRight, edgeBack, edgeLoftBottom, edgeLoftTop, edgeLoftBack, edgeLoftRight, edgeLoftLeft;
+let edgeBottomLayer, edgeTopLayer, edgeRightLayer, edgeLeftLayer, edgeLeftLayerTop, edgeLeftLayerBottom, edgeRightLayerBottom, edgeRightLayerTop;
 var totalPrice = 0;
-var wvArrowUp,wvArrowDown, wlArrowUp, wlArrowDown, whArrowL, whArrowR;
-var hValue, heightLabel, hLoftValue, loftLabel, widthLabel, wValue;
+var wvArrowUp, wvArrowDown, wlArrowUp, wlArrowDown, whArrowL, whArrowR, wdArrowL, wdArrowR;
+var hValue, heightLabel, hLoftValue, loftLabel, widthLabel, wValue, depthLabel, depthLabelValue;
 
 var isMeasured = false;
+
+var depthSideMesh, depthSideMeshLoft;
+
+var _cLeftArrow_group = new THREE.Group();
+var _cRightArrow_group= new THREE.Group();
+var _cLabels = [], _cLabel_group = new THREE.Group();
+
+var _cUpperArrowUps_parent = [], _cUpperArrowDowns_parent=[], _cLowerArrowUps_parent = [], _cLowerArrowDowns_parent= [];
+var _cUpperLabels =[], _cUpperLabels_group = new THREE.Group();
+var _cLowerLabels=[], _cLowerLabels_group = new THREE.Group();  
+var _cUpperArrowUp_group = new THREE.Group();
+var _cUpperArrowDown_group = new THREE.Group();
+var _cLowerArrowUp_group = new THREE.Group();
+var _cLowerArrowDown_group = new THREE.Group();
+
+
+var font;
 init();
 
 animate();
 
 getInputs();
 addHorizontalParts();
-dimensionviewer.hidden=  true;
+dimensionviewer.hidden = true;
+
 function init() {
 
 
     scene = new THREE.Scene();
     dimensionScene = new THREE.Scene();
-  
-    
+
+
     window.scene = scene;
     THREE.Cache.enabled = true;
+
+    font = new THREE.FontLoader().load('./assets/fonts/helvetiker_regular.typeface.json');
     camera = new THREE.PerspectiveCamera(25, fwidth / fheight, 0.01, 100);
 
     camera.position.set(0, 0, 15);
@@ -181,13 +211,13 @@ function init() {
     camera.layers.enable(1);
     camera.layers.enable(2);
 
-    orthoCamera = new THREE.OrthographicCamera(fwidth/-2,fwidth/2,fheight/2,fheight/-2,.001,1000);
-   
-    orthoCamera.position.setY(1.65);
-    orthoCamera.zoom = 250;
+    orthoCamera = new THREE.OrthographicCamera(fwidth / -2, fwidth / 2, fheight / 2, fheight / -2, .001, 1000);
+
+    
+   // orthoCamera.zoom = 250;
     orthoCamera.updateProjectionMatrix();
     dimensionScene.add(orthoCamera);
-    
+
     // camera.lookAt(wBottom.position);
 
     raycaster = new THREE.Raycaster();
@@ -224,7 +254,7 @@ function init() {
     createWardrobe();
 
     clock = new THREE.Clock();
-    
+
     renderer = new THREE.WebGLRenderer({
         antialias: true,
         alpha: true,
@@ -243,40 +273,42 @@ function init() {
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.compile(scene, camera);
-    
+
     pmremGenerator = new THREE.PMREMGenerator(renderer);
     pmremGenerator.compileEquirectangularShader();
 
     dimensionRenderer = new THREE.WebGLRenderer({
-        antialias : true,
+        antialias: true,
         alpha: true,
         preserveDrawingBuffer: true,
-       
+
     })
     dimensionRenderer.setPixelRatio(window.devicePixelRatio);
-    dimensionRenderer.setSize(fwidth,fheight);
+    dimensionRenderer.setSize(fwidth, fheight);
     dimensionRenderer.compile(dimensionScene, orthoCamera)
 
 
     css3DRenderer = new THREE.CSS3DRenderer({
-        
+
     });
-    css3DRenderer.setSize(fwidth,fheight);
+    css3DRenderer.setSize(fwidth, fheight);
     css3DRenderer.domElement.style.position = 'fixed';
     // css3DRenderer.domElement.style.fontFamily = "Arial"
-    css3DRenderer.domElement.style.color= '#000000';
+    css3DRenderer.domElement.style.color = '#000000';
     css3DRenderer.domElement.style.top = '0px';
     css3DRenderer.domElement.style.left = '0px';
     css3DRenderer.domElement.style.zIndex = -1
-    
+
     viewer.appendChild(renderer.domElement);
- 
+
     dimensionviewer.appendChild(css3DRenderer.domElement);
     dimensionviewer.appendChild(dimensionRenderer.domElement);
+    dimensionCanvas = document.querySelector('#dimensionviewer :nth-child(2)')
+
     post_process();
 
     controls = new THREE.OrbitControls(camera, renderer.domElement);
-    
+
     //controls.addEventListener('change', render); // use if there is no animation loop
     controls.enableDamping = true;
 
@@ -286,7 +318,7 @@ function init() {
 
     controls.enableDamping = true;
     controls.dampingFactor = 1;
-    controls.target.set(0,1.6, 0);
+    controls.target.set(0, 1.6, 0);
 
 
     controls.minPolarAngle = 0; // radians
@@ -300,44 +332,44 @@ function init() {
     controls.saveState();
 
 
-    
+
 }
 
 function onWindowResize() {
     const canvas = renderer.domElement;
-    
+
     const width = canvas.clientWidth;
     const height = canvas.clientHeight;
     if (canvas.width !== width || canvas.height !== height) {
 
         camera.aspect = fwidth / fheight;
         camera.updateProjectionMatrix();
-        css3DRenderer.setSize(fwidth,fheight);
+        css3DRenderer.setSize(fwidth, fheight);
         // renderer.setSize(fwidth, fheight);
         composer.setSize(fwidth, fheight);
 
-        dimensionRenderer.setSize(fwidth,fheight);
+        dimensionRenderer.setSize(fwidth, fheight);
         orthoCamera.updateProjectionMatrix();
-        
+
     }
     const pixelRatio = renderer.getPixelRatio();
     fxaaPass.material.uniforms['resolution'].value.x = 1 / (fwidth * pixelRatio);
     fxaaPass.material.uniforms['resolution'].value.y = 1 / (fheight * pixelRatio);
-
+    render();
 }
 
 function animate() {
     requestAnimationFrame(animate);
 
     controls.update();
-  
+
 
     render();
-  
+
 }
 
 function render() {
-    
+
     $("input:radio[name='columnsOptions']").change(function () {
         if ($(this).is(":checked")) {
             isCreated = true;
@@ -350,8 +382,19 @@ function render() {
     featuresControl()
 
     updateWardrobe();
-    
+
     addLoft(isLoft);
+    if(isLoft){
+        orthoCamera.position.setY(1.55);
+        
+    }else{
+        orthoCamera.position.setY(1);
+    }
+
+    orthoCamera.zoom = 225;
+    orthoCamera.updateProjectionMatrix();
+
+
     updateWall();
     updateColumnsDoor();
     topShelfOnSelected(plane_index);
@@ -359,7 +402,16 @@ function render() {
 
     updateBotShelves(plane_index);
 
-    
+    for (var i = 0; i < customColumns; i++) {
+
+        if (_cLeftArrow_parent.length > 0) {
+            updateColumnsArrow(i)
+            updateUpperArrows(i);
+        }
+        
+        
+    }
+
     for (var i = 0; i < customColumns; i++) {
         updateHingedDoorUpSize(i)
 
@@ -394,29 +446,37 @@ function render() {
     } else {
         document.getElementById('column_id').innerHTML = "None";
     }
-  
+
 
 
 
     renderOption()
 
-    doorVisiblity(_hDoors_parent_group,_doorsVisible);
-    doorVisiblity(_sDoors_parent_group,_doorsVisible);
+    doorVisiblity(_hDoors_parent_group, _doorsVisible);
+    doorVisiblity(_sDoors_parent_group, _doorsVisible);
     // doorVisiblity(_doorRailParent,_doorsVisible);
-    
-    dimensionRenderer.render(dimensionScene,orthoCamera);
-    css3DRenderer.render(dimensionScene,orthoCamera);
+
+    dimensionRenderer.render(dimensionScene, orthoCamera);
+    css3DRenderer.render(dimensionScene, orthoCamera);
     // css3DRenderer.render(scene,camera);
+
+
     // document.getElementById('capturedImage').src = dimensionRenderer.domElement.toDataURL();
     // document.getElementById('capturedImage').src = css3DRenderer.domElement.toDataURL();
     composer.render();
 
-    if(isMeasured){
-        viewer.hidden= true;
+    if (isMeasured) {
+        viewer.hidden = true;
         dimensionviewer.hidden = false;
-    }else{
-        viewer.hidden= false;
+        $(".downloadDimension").show();
+        $("input:radio[name='renderOptions']").prop("disabled", true);
+
+    } else {
+        viewer.hidden = false;
         dimensionviewer.hidden = true;
+        $(".downloadDimension").hide();
+        $("input:radio[name='renderOptions']").prop("disabled", false);
+
     }
 }
 
@@ -438,7 +498,7 @@ function getInputs() {
 
     $("#width").on("input", function () {
         wWidth = $("#width").val();
-       
+
         if (wWidth > 3) {
             $("#hingedDoor").prop("checked", false);
             $("#chooseColumns").hide();
@@ -451,9 +511,9 @@ function getInputs() {
         }
         chooseColumns_number();
 
-       
+
         reset();
-        
+
     })
 
     $("input:radio[name='heightOptions']").click(function () {
@@ -471,7 +531,7 @@ function getInputs() {
     });
 
 
-    
+
     $("input:radio[name='doorOptions']").change(function () {
         if ($(this).is(":checked")) {
             $("#actionDoorVisibilty").html('<i class="fa fa-eye-slash"></i> Hide Doors');
@@ -502,16 +562,16 @@ function getInputs() {
     });
 
     $("#actionDoorVisibility").html(('<i class="fa fa-eye-slash"></i> Hide Doors'));
-    $("#actionDoorVisibility").click(function(){
-        if(!_doorsVisible){
-           
+    $("#actionDoorVisibility").click(function () {
+        if (!_doorsVisible) {
+
             _doorsVisible = true;
-        }else{
-          
+        } else {
+
             _doorsVisible = false;
         }
-        
-        
+
+
     })
     $("#loftOptionsPanel").hide();
 
@@ -617,43 +677,43 @@ function getInputs() {
 
     })
 
-    $("#doneColumns").click(function(){
-        if(_columns.length>0){
+    $("#doneColumns").click(function () {
+        if (_columns.length > 0) {
             $("#editInterior").show();
             $("#columnDoorOptions").hide();
-            
+
             interactivePlane_group.visible = true;
             deleteSprites_group.visible = false;
-            flipVertical_group.visible = false;  
+            flipVertical_group.visible = false;
             _doorsVisible = false;
-        }else{
+        } else {
             alert("Add Doors and Columns");
         }
-      
+
     })
 
 
-    $("#backToDoors").click(function(){
+    $("#backToDoors").click(function () {
         $("#columnDoorOptions").show();
         $("#editInterior").hide();
         $("#chooseColumns").hide();
         interactivePlane_group.visible = false;
         deleteSprites_group.visible = true;
-        flipVertical_group.visible = true; 
-     
-        if($("input:radio[name='doorOptions']").is(":checked")){
-            $("input:radio[name='doorOptions']").prop("checked",false);
+        flipVertical_group.visible = true;
+
+        if ($("input:radio[name='doorOptions']").is(":checked")) {
+            $("input:radio[name='doorOptions']").prop("checked", false);
         }
         reset();
     })
 
 
-    $("#backToDimensions").click(function(){
+    $("#backToDimensions").click(function () {
         $("#sizeOptions").show();
         $("#columnDoorOptions").hide();
         $("#chooseColumns").hide();
-        if($("input:radio[name='doorOptions']").is(":checked")){
-            $("input:radio[name='doorOptions']").prop("checked",false);
+        if ($("input:radio[name='doorOptions']").is(":checked")) {
+            $("input:radio[name='doorOptions']").prop("checked", false);
         }
         isHingedDoor = true;
         reset();
@@ -696,9 +756,9 @@ function create_lights() {
 
     directionalLight.shadow.mapSize.width = 512; // default
     directionalLight.shadow.mapSize.height = 512; // default
-    
+
     scene.add(directionalLight);
-    
+
 
 
 
@@ -713,19 +773,19 @@ function create_lights() {
 
     var ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
     scene.add(ambientLight);
-    
+
 
     var directionalLight2 = new THREE.DirectionalLight(0xdedede, 0.3);
     directionalLight2.position.set(0, 3, -3);
     directionalLight2.castShadow = false;
-    
+
     directionalLight2.shadow.mapSize.width = 512; // default
     directionalLight2.shadow.mapSize.height = 512;
     scene.add(directionalLight2);
 
     var hemiLight = new THREE.HemisphereLight(0xfff2e3, 0xd1ebff, 0.3);
     scene.add(hemiLight);
-    
+
 }
 
 function createFloor() {
@@ -741,7 +801,7 @@ function createFloor() {
 
     floor.rotateX(-90 * THREE.Math.DEG2RAD);
     scene.add(floor)
-    
+
 }
 
 function createWall() {
@@ -756,7 +816,7 @@ function createWall() {
     wall.receiveShadow = true;
     wall.rotateX(0 * THREE.Math.DEG2RAD);
     scene.add(wall)
-    
+
 
     wallLeft = new THREE.Mesh(g, m);
     wallLeft.name = "wallleft";
@@ -788,7 +848,7 @@ function updateWall() {
 function createColumns(index) {
     var g = new THREE.BoxGeometry(1, 1, 1);
     var mesh = new THREE.Mesh(g, _columnsMaterial);
-   
+
     mesh.name = "w_columns_" + index;
 
 
@@ -797,19 +857,19 @@ function createColumns(index) {
     _columns_group.name = "w_columns";
     _columns_group.add(_columns[index]);
 
-   
+
     // scene.add(_lockers[index]);
 
     scene.add(_columns_group);
-  
+
 }
 
-function createColumnsBottom(index){
+function createColumnsBottom(index) {
     var g = new THREE.BoxGeometry(1, 1, 1);
     var m = new THREE.Mesh(g, _columnsMaterial);
-    m.name=  "w_columns_bottom"+ index;
+    m.name = "w_columns_bottom" + index;
     _columns_bottom[index] = m;
-    _columns_bottom_group.name= "w_columns_bottoms";
+    _columns_bottom_group.name = "w_columns_bottoms";
     _columns_bottom_group.add(_columns_bottom[index]);
     scene.add(_columns_bottom_group);
 }
@@ -843,10 +903,10 @@ function removeColumns(index) {
         }
     }
 
-  
+
 }
 
-function removeColumnsBottom(index){
+function removeColumnsBottom(index) {
     if (index) {
         _columns_bottom.forEach(e => {
             if (_columns_bottom[index] instanceof THREE.Mesh && _columns_bottom[index] == e) {
@@ -871,31 +931,36 @@ function removeColumnsBottom(index){
         }
     }
 }
-function updateColumnsBottom(i){
+
+function updateColumnsBottom(i) {
 
     offset = Math.abs(((wLeft.position.x - wLeft.scale.x / 2) - (wRight.position.x - wRight.scale.x / 2))) / customColumns;
-    _columns_bottom_group.position.set(_columns_group.position.x,_columns_group.position.y,_columns_group.position.z);
+    
+    _columns_bottom_group.position.set(_columns_group.position.x, _columns_group.position.y, _columns_group.position.z);
 
-  
- 
-        if (_columns_bottom[i]) {
 
-                _columns_bottom[i].scale.set((thickness / 12) * ftTom,_extDrawers[0].scale.y + _extDrawers_splitters[0].scale.y, ftTom * 1.35 / 12);
-                _columns_bottom[i].position.set(i * offset, (_columns_bottom[i].scale.y / 2) + (wBottom.position.y) + wBottom.scale.y / 2, _columns_bottom[i].scale.z/2+_columns[i].position.z+_columns[i].scale.z/2);
 
-        }
+    if (_columns_bottom[i]) {
+
+        _columns_bottom[i].scale.set((thickness / 12) * ftTom, _extDrawers[0].scale.y + _extDrawers_splitters[0].scale.y, ftTom * 1.35 / 12);
+        _columns_bottom[i].position.set(i * offset, (_columns_bottom[i].scale.y / 2) + (wBottom.position.y) + wBottom.scale.y / 2, _columns_bottom[i].scale.z / 2 + _columns[i].position.z + _columns[i].scale.z / 2);
+
+    }
 
 }
+
 function updateColumns() {
 
     offset = Math.abs(((wLeft.position.x - wLeft.scale.x / 2) - (wRight.position.x - wRight.scale.x / 2))) / customColumns;
+    
     for (var i = 0; i < customColumns - 1; i++) {
         if (!_columns[i]) {
             createColumns(i);
+            createColumnsEdgeGeometry(i);
 
             if (!isHingedDoor) {
                 var subtract = ftTom * 1.35 / 12
-               
+
                 _columns[i].scale.set((thickness / 12) * ftTom, wTop.position.y - wTop.scale.y - wBottom.position.y, (thickness / 12) * ftTom + wDepth * ftTom - subtract);
                 _columns[i].position.set(i * offset, (_columns[i].scale.y / 2) + (wBottom.position.y) + wBottom.scale.y / 2, ((thickness / 24) * ftTom) - subtract / 2);
 
@@ -907,12 +972,13 @@ function updateColumns() {
                 _columns[i].position.set(i * offset, (_columns[i].scale.y / 2) + (wBottom.position.y) + wBottom.scale.y / 2, ((thickness / 24) * ftTom));
 
 
+
             }
-      
-            
+
+            updateColumnsEdgeGeometry(i);
         } else {
             if (_columns[i] instanceof THREE.Mesh) {
-createColumnsEdgeGeometry(i);
+
                 if (!isHingedDoor) {
                     var subtract = ftTom * 1.35 / 12
 
@@ -924,15 +990,21 @@ createColumnsEdgeGeometry(i);
                     _columns[i].position.set(i * offset, (_columns[i].scale.y / 2) + (wBottom.position.y) + wBottom.scale.y / 2, ((thickness / 24) * ftTom));
                 }
 
-                
+
             }
-            
+            updateColumnsEdgeGeometry(i);
         }
-        
+
     }
-    
+    for (var i = 0; i < customColumns; i++) {
+
+        createColumnsArrows(i);
+        createUpperArrows(i);
+    }
+
     _columns_group.position.set(offset + wLeft.position.x, _columns_group.position.y, _columns_group.position.z);
-    _columnsEdges_group.position.copy(_columns_group.position)
+    _columnsEdges_group.position.copy(_columns_group.position);
+
     for (var i = 0; i < customColumns - 1; i++) {
 
         if (!deleteSprites[i]) {
@@ -979,10 +1051,11 @@ createColumnsEdgeGeometry(i);
 
             createHorizontalSplitter(i);
             updateHorizontalSplitter(i);
-
-
+            createSplitterEdges(i);
+            updateSplitterEdges(i);
         } else {
             updateHorizontalSplitter(i);
+            updateSplitterEdges(i);
 
         }
 
@@ -1297,11 +1370,11 @@ function generateInteractivePlanes(index) {
 }
 
 function addHorizontalParts() {
-    $("#addID").click(function(){
-        if(!_intDrawers_parent[plane_index]){
-            createInternalDrawers(plane_index,3);
+    $("#addID").click(function () {
+        if (!_intDrawers_parent[plane_index]) {
+            createInternalDrawers(plane_index, 3);
             updateInternalDrawers(plane_index);
-        }else{
+        } else {
             return;
         }
     })
@@ -1314,19 +1387,19 @@ function addHorizontalParts() {
                 updateExternalDrawer(i);
                 updateInternalDrawerLarge(i);
             }
-            if(!isHingedDoor){
-                
+            if (!isHingedDoor) {
+
                 for (var i = 0; i < _columns.length; i++) {
-                    if(!removed.includes(_columns[i])){
+                    if (!removed.includes(_columns[i])) {
                         createColumnsBottom(i);
                         updateColumnsBottom(i);
                     }
                 }
-            }else{
+            } else {
                 return;
             }
-            
-            
+
+
         } else {
 
 
@@ -1522,67 +1595,66 @@ function botShelfFilter() {
         $("#addBottomShelf").addClass("disabled");
     }
 
-   
+
 
     if (wHeight < 6.5) {
-        if(_intDrawers_parent.length>0){
+        if (_intDrawers_parent.length > 0) {
             row = 0;
             $("#addED").addClass("disabled");
-            
-           
-          
-        }else{
+
+
+
+        } else {
             if (_largeIntDrawers.length > 0) {
-            
+
                 $("#addED").addClass("disabled");
-    
+
             } else {
                 $("#addED").removeClass("disabled");
             }
-            
-        }
-          
 
-        if(_intDrawers_parent[plane_index]){
+        }
+
+
+        if (_intDrawers_parent[plane_index]) {
             row = 0;
             $("#addIDL").addClass("disabled");
             $("#addLocker").addClass("disabled");
             $("#addIDS").addClass("disabled");
-            
-        }
-        else{
+
+        } else {
             if (_smallIntDrawers[plane_index]) {
 
                 $("#addLocker").addClass("disabled");
             } else {
                 $("#addLocker").removeClass("disabled");
             }
-    
+
             if (_lockers[plane_index]) {
                 $("#addIDS").addClass("disabled");
-    
+
             } else {
                 $("#addIDS").removeClass("disabled");
             }
-    
-         
+
+
             if (_extDrawers.length > 0) {
                 $("#addID").addClass("disabled");
                 $("#addIDL").addClass("disabled");
-    
+
             } else {
                 $("#addID").removeClass("disabled");
                 $("#addIDL").removeClass("disabled");
             }
-    
+
             if (_smallIntDrawers[plane_index] && _bot_shelf_parent[plane_index]) {
-    
+
                 $("#addIDL").addClass("disabled");
                 $("#addIDS").addClass("disabled");
                 $("#addED").addClass("disabled");
                 $("#addLocker").addClass("disabled");
             } else if (_lockers[plane_index] && _bot_shelf_parent[plane_index]) {
-    
+
                 $("#addIDS").addClass("disabled");
                 $("#addED").addClass("disabled");
                 $("#addLocker").addClass("disabled");
@@ -1590,37 +1662,37 @@ function botShelfFilter() {
             } else if (_smallIntDrawers[plane_index] && !_bot_shelf_parent[plane_index]) {
                 if (_largeIntDrawers[plane_index]) {
                     $("#addIDS").addClass("disabled");
-    
+
                 }
-    
-    
+
+
             }
         }
-     
+
     } else if (wHeight == 6.5) {
-       
-        if(_intDrawers_parent.length>0){
-         
+
+        if (_intDrawers_parent.length > 0) {
+
             $("#addED").addClass("disabled");
-            
-           
-          
+
+
+
         }
-         if(_intDrawers_parent[plane_index]){
+        if (_intDrawers_parent[plane_index]) {
             row = 0;
             $("#addIDL").addClass("disabled");
             $("#addLocker").addClass("disabled");
             $("#addIDS").addClass("disabled");
-            
-            
-        }else{
+
+
+        } else {
             $("#addIDL").removeClass("disabled");
             $("#addLocker").removeClass("disabled");
             $("#addIDS").removeClass("disabled");
         }
-        if(_extDrawers[plane_index] || _smallIntDrawers[plane_index] || _largeIntDrawers[plane_index] || _lockers[plane_index]){
+        if (_extDrawers[plane_index] || _smallIntDrawers[plane_index] || _largeIntDrawers[plane_index] || _lockers[plane_index]) {
             $("#addID").addClass("disabled");
-        }else{
+        } else {
             $("#addID").removeClass("disabled");
         }
         if (_extDrawers.length > 0) {
@@ -1635,33 +1707,33 @@ function botShelfFilter() {
                 $("#addLocker").removeClass("disabled");
                 $("#addIDL").removeClass("disabled");
                 $("#addED").addClass("disabled");
-               
+
             }
         }
     } else if (wHeight > 6.5) {
-        
-        if(_intDrawers_parent.length>0){
-         
+
+        if (_intDrawers_parent.length > 0) {
+
             $("#addED").addClass("disabled");
-            
-           
-          
+
+
+
         }
-         if(_intDrawers_parent[plane_index]){
+        if (_intDrawers_parent[plane_index]) {
             row = 0;
             $("#addIDL").addClass("disabled");
             $("#addLocker").addClass("disabled");
             $("#addIDS").addClass("disabled");
-            
-            
-        }else{
+
+
+        } else {
             $("#addIDL").removeClass("disabled");
             $("#addLocker").removeClass("disabled");
             $("#addIDS").removeClass("disabled");
         }
-        if(_extDrawers[plane_index] || _smallIntDrawers[plane_index] || _largeIntDrawers[plane_index] || _lockers[plane_index]){
+        if (_extDrawers[plane_index] || _smallIntDrawers[plane_index] || _largeIntDrawers[plane_index] || _lockers[plane_index]) {
             $("#addID").addClass("disabled");
-        }else{
+        } else {
             $("#addID").removeClass("disabled");
         }
         $("#addBottomShelf").removeClass("disabled");
@@ -1726,10 +1798,10 @@ function createWardrobe() {
     wBottom = new THREE.Mesh(g, _wardrobeMaterial);
     wBottom.name = "wardrobe_bottom";
     wBottom.position.set(0, 0, 0);
-   
+
     wBottom.layers.set(0);
-  
-    
+
+
 
 
     wBottomLayer = new THREE.Mesh(g, _wardrobeMaterial);
@@ -1844,7 +1916,7 @@ function createWardrobe() {
     scene.add(wpLoftLeft);
     scene.add(wpLoftRight);
     scene.add(wpLoftTop);
-    
+
     edgeBottom = createWardrobeEdges(wBottom);
     edgeBack = createWardrobeEdges(wBack);
     edgeLeft = createWardrobeEdges(wLeft);
@@ -1862,51 +1934,57 @@ function createWardrobe() {
     edgeRightLayerTop = createWardrobeEdges(wRightLayerTop);
     edgeRightLayerBottom = createWardrobeEdges(wRightLayerBottom);
 
-    
+
     edgeLoftBottom = createWardrobeEdges(wpLoftBottom);
     edgeLoftBack = createWardrobeEdges(wpLoftBack);
     edgeLoftLeft = createWardrobeEdges(wpLoftLeft);
     edgeLoftRight = createWardrobeEdges(wpLoftRight);
     edgeLoftTop = createWardrobeEdges(wpLoftTop);
+
+
+    depthSideMesh = createWardrobeEdges(wLeft);
+    depthSideMeshLoft = createWardrobeEdges(wpLoftLeft);
+
+
 }
 
 
 function updateWardrobe() {
-    
+
 
     if (wBottom) {
-        
+
         if (isHingedDoor) {
-            wBottom.scale.set(wWidth * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));
+            wBottom.scale.set(wWidth * ftTom - (2*thickness/12) * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));
             wBottom.position.set(0, (2.5 / 12) * ftTom + (thickness / 24) * ftTom, ((thickness / 24) * ftTom));
             wBottomLayer.visible = false;
-            
+
         } else {
             wBottomLayer.visible = true;
-            wBottom.scale.set(wWidth * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom) - 1.35 / 12 * ftTom);
+            wBottom.scale.set(wWidth * ftTom - (2*thickness/12) * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom) - 1.35 / 12 * ftTom);
             wBottom.position.set(0, (2.5 / 12) * ftTom + (thickness / 24) * ftTom, ((thickness / 24) * ftTom) - 1.35 / 24 * ftTom);
         }
-        
-            updateWardrobeEdges(edgeBottom, wBottom)
-        
-           
-        
-       
+
+        updateWardrobeEdges(edgeBottom, wBottom)
+
+
+
+
     }
 
     if (wBottomLayer) {
         if (_extDrawers.length > 0) {
-            wBottomLayer.scale.set(wWidth * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));
+            wBottomLayer.scale.set(wWidth * ftTom - (2*thickness/12) * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));
             wBottomLayer.position.set(0, (2.5 / 12) * ftTom + (thickness / 24) * ftTom, ((thickness / 24) * ftTom));
         } else {
-            wBottomLayer.scale.set(wWidth * ftTom, (thickness / 24) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));
+            wBottomLayer.scale.set(wWidth * ftTom - (2*thickness/12) * ftTom, (thickness / 24) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));
             wBottomLayer.position.set(0, (2.5 / 12) * ftTom + (thickness / 48) * ftTom, ((thickness / 24) * ftTom));
         }
 
         updateWardrobeEdges(edgeBottomLayer, wBottomLayer)
-    }
+    }   
     if (wBack) {
-        wBack.scale.set(wWidth * ftTom, wHeight * ftTom - (2.5 / 12 * ftTom), (thickness / 12) * ftTom);
+        wBack.scale.set(wWidth * ftTom - (2*thickness/12) * ftTom, wHeight * ftTom - (2.5 / 12 * ftTom), (thickness / 12) * ftTom);
         if (isHingedDoor) {
             wBack.position.set(0, (wBack.scale.y / 2) + wBottom.position.y - wBottom.scale.y / 2, -wBottom.scale.z / 2);
         } else {
@@ -1917,7 +1995,7 @@ function updateWardrobe() {
     }
 
     if (wTopLayer) {
-        wTopLayer.scale.set((wWidth * ftTom), (thickness / 24) * ftTom, wDepth * ftTom + (2 * thickness / 12) * ftTom);
+        wTopLayer.scale.set((wWidth * ftTom) - (2*thickness/12) * ftTom, (thickness / 24) * ftTom, wDepth * ftTom + (2 * thickness / 12) * ftTom);
         wTopLayer.position.set(0, wBottom.position.y + wBack.scale.y + (thickness / 48) * ftTom - wBottom.scale.y, 0);
         updateWardrobeEdges(edgeTopLayer, wTopLayer)
     }
@@ -1926,11 +2004,11 @@ function updateWardrobe() {
     if (wTop) {
         if (isHingedDoor) {
             wTopLayer.visible = false;
-            wTop.scale.set((wWidth * ftTom), (thickness / 12) * ftTom, wDepth * ftTom + (2 * thickness / 12) * ftTom);
+            wTop.scale.set((wWidth * ftTom) - (2*thickness/12) * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + (2 * thickness / 12) * ftTom);
             wTop.position.set(0, wBottom.position.y + wBack.scale.y - wBottom.scale.y, 0);
         } else {
             wTopLayer.visible = true;
-            wTop.scale.set((wWidth * ftTom), (thickness / 12) * ftTom, wDepth * ftTom + (2 * thickness / 12) * ftTom - 1.35 / 12 * ftTom);
+            wTop.scale.set((wWidth * ftTom) - (2*thickness/12) * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + (2 * thickness / 12) * ftTom - 1.35 / 12 * ftTom);
             wTop.position.set(0, wBottom.position.y + wBack.scale.y - wBottom.scale.y, -1.35 / 24 * ftTom);
         }
         updateWardrobeEdges(edgeTop, wTop)
@@ -2027,17 +2105,17 @@ function updateWardrobe() {
 
     if (wpLoftBottom) {
         if (!isHingedDoor) {
-            wpLoftBottom.scale.set(wWidth * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + (2 * (thickness / 12) * ftTom));
+            wpLoftBottom.scale.set(wWidth * ftTom - (2*thickness/12) * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + (2 * (thickness / 12) * ftTom));
             wpLoftBottom.position.set(wTop.position.x, wTop.position.y + wpLoftBottom.scale.y, wTopLayer.position.z);
         } else {
-            wpLoftBottom.scale.set(wWidth * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + (2 * (thickness / 12) * ftTom));
+            wpLoftBottom.scale.set(wWidth * ftTom - (2*thickness/12) * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + (2 * (thickness / 12) * ftTom));
             wpLoftBottom.position.set(wTop.position.x, wTop.position.y + wpLoftBottom.scale.y, wTopLayer.position.z);
         }
         updateWardrobeEdges(edgeLoftBottom, wpLoftBottom)
     }
 
     if (wpLoftBack) {
-        wpLoftBack.scale.set(wWidth * ftTom + (wpLoftLeft.scale.x + wpLoftRight.scale.x), wLoft * ftTom, (thickness / 12) * ftTom);
+        wpLoftBack.scale.set(wWidth * ftTom - (2*thickness/12) * ftTom, wLoft * ftTom, (thickness / 12) * ftTom);
         wpLoftBack.position.set(0, wpLoftBottom.position.y + wpLoftBack.scale.y / 2 - wpLoftBottom.scale.y / 2, -wpLoftBottom.scale.z / 2 + (thickness / 24) * ftTom);
 
         updateWardrobeEdges(edgeLoftBack, wpLoftBack)
@@ -2056,12 +2134,25 @@ function updateWardrobe() {
     }
     if (wpLoftTop) {
 
-        wpLoftTop.scale.set(wWidth * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));
+        wpLoftTop.scale.set(wWidth * ftTom - (2*thickness/12) * ftTom, (thickness / 12) * ftTom, wDepth * ftTom + ((thickness / 12) * ftTom));
         wpLoftTop.position.set(0, wpLoftBack.scale.y + wpLoftBottom.position.y - (thickness / 12) * ftTom, ((thickness / 24) * ftTom));
         updateWardrobeEdges(edgeLoftTop, wpLoftTop)
     }
     createVerticalArrow();
     createHorizontalArrow();
+    createDepthArrow();
+    if (depthSideMesh) {
+        depthSideMesh.scale.copy(wLeftLayer.scale)
+        depthSideMesh.position.set(wRight.position.x + depthSideMesh.scale.z / 2 + 0.1, wLeft.position.y, wLeft.position.z - wLeft.scale.z / 2);
+        depthSideMesh.rotation.y = 90 * THREE.Math.DEG2RAD;
+    }
+    if (depthSideMeshLoft) {
+        depthSideMeshLoft.scale.copy(wpLoftLeft.scale)
+        depthSideMeshLoft.position.set(wpLoftRight.position.x + depthSideMesh.scale.z / 2 + 0.1, wpLoftLeft.position.y, wpLoftLeft.position.z - wpLoftLeft.scale.z / 2);
+        depthSideMeshLoft.rotation.y = 90 * THREE.Math.DEG2RAD;
+
+        depthSideMeshLoft.visible = isLoft;
+    }
 }
 
 function createHorizontalSplitter(index) {
@@ -2926,41 +3017,42 @@ function helpers() {
 function onClick() {
     //setflipDoor_Select()
 
-    if (selectedObject ) {
-        if(deleteSprites_group.visible){
-        for (var i = 0; i < columns; i++) {
+    if (selectedObject) {
+        if (deleteSprites_group.visible) {
+            for (var i = 0; i < columns; i++) {
 
-            if (_columns[i] == selectedObject) {
+                if (_columns[i] == selectedObject) {
 
-                if (_columns[i - 1]) {
+                    if (_columns[i - 1]) {
 
-                    adjacentParts.push(_columns[i - 1]);
-                    deleteSprites_group.remove(deleteSprites[i - 1])
+                        adjacentParts.push(_columns[i - 1]);
+                        deleteSprites_group.remove(deleteSprites[i - 1])
+                    }
+                    if (_columns[i + 1]) {
+                        deleteSprites_group.remove(deleteSprites[i + 1])
+                        adjacentParts.push(_columns[i + 1]);
+                    }
+
+                    removed_index = i;
+                    removed_id.push(i);
+
+
+
+
+                    deleteSprites_group.remove(deleteSprites[i])
+                    _columns_group.remove(_columns[i]);
+                    _columnsEdges_group.remove(_columnsEdges[i]);
+
+                    removed.push(_columns[i]);
                 }
-                if (_columns[i + 1]) {
-                    deleteSprites_group.remove(deleteSprites[i + 1])
-                    adjacentParts.push(_columns[i + 1]);
-                }
 
-                removed_index = i;
-                removed_id.push(i);
-         
-                
-               
-                
-                deleteSprites_group.remove(deleteSprites[i])
-                _columns_group.remove(_columns[i]);
-                // _columnsEdges_group.remove(_columnsEdges[i]);
-               
-                removed.push(_columns[i]);
             }
+        }
 
-        }}
-        
-            selectedObject = null;
-        
-        
-       
+        selectedObject = null;
+
+
+
 
     }
 
@@ -3005,25 +3097,25 @@ function onClick() {
                     e.traverse(function (child) {
                         if (child instanceof THREE.Mesh) {
                             if (child == selectedDoor) {
-                                 if(_isDoorRight.includes(e)){
+                                if (_isDoorRight.includes(e)) {
                                     child.material = _mirrorMaterials;
                                     child.material.needsUpdate = true;
-                                }else if(_isDoorLeft.includes(e)){
+                                } else if (_isDoorLeft.includes(e)) {
                                     child.material = _flipMirrorMaterials;
                                     child.material.needsUpdate = true;
-                                }else{
+                                } else {
                                     if (_hDoors_parent.indexOf(e) % 2 != 0) {
 
                                         child.material = _mirrorMaterials;
                                         child.material.needsUpdate = true;
-                                    }else if(_hDoors_parent.indexOf(e) % 2 == 0) {
-    
+                                    } else if (_hDoors_parent.indexOf(e) % 2 == 0) {
+
                                         child.material = _flipMirrorMaterials;
                                         child.material.needsUpdate = true;
-        
+
                                     }
                                 }
-                            } 
+                            }
 
                             // swappedDoors.forEach(s => {
 
@@ -3339,6 +3431,7 @@ function Export() {
                 const output = JSON.stringify(gltf, null, 2);
                 // console.log(output);
                 saveString(output, 'wardrobe.gltf');
+                interactivePlane_group.visible = true;
                 floor.visible = true;
                 wall.visible = true;
                 wallLeft.visible = true;
@@ -3736,9 +3829,9 @@ function columnsCombination() {
 
                     }
 
-                    if(_intDrawers_parent[i]){
+                    if (_intDrawers_parent[i]) {
                         var a = _intDrawers_parent[i];
-                        a.traverse(function (e){
+                        a.traverse(function (e) {
                             if (e instanceof THREE.Mesh) {
                                 e.scale.setX(sizeToChange);
                                 e.position.setX(posToChange);
@@ -3825,27 +3918,27 @@ function columnsCombination() {
                                 updateInternalDrawerSmall(i + 1);
 
                                 var b = _smallIntDrawers[i + 1];
-                                b.scale.setX(offset - thickness/12 *ftTom);
+                                b.scale.setX(offset - thickness / 12 * ftTom);
                                 var a = _smallIntDrawers[i];
                                 a.scale.setX(sizeToChange);
                                 a.position.setX(posToChange);
                                 var c = _lockers[i];
                                 var d = _locker_splitters[i];
-                                c.scale.setX(offset - thickness/12 *ftTom);
-                                d.scale.setX(offset - thickness/12 *ftTom);
-                               
+                                c.scale.setX(offset - thickness / 12 * ftTom);
+                                d.scale.setX(offset - thickness / 12 * ftTom);
+
                                 // createMeshInbetweenLockerSmallDrawer(c,b);
                             } else {
                                 createInternalDrawerSmall(i + 1);
                                 updateInternalDrawerSmall(i + 1);
 
                                 var b = _smallIntDrawers[i + 1];
-                                b.scale.setX(offset - thickness/12 *ftTom);
+                                b.scale.setX(offset - thickness / 12 * ftTom);
                                 var c = _lockers[i];
                                 var d = _locker_splitters[i];
-                                
-                                c.scale.setX(offset - thickness/12 *ftTom);
-                                d.scale.setX(offset - thickness/12 *ftTom);
+
+                                c.scale.setX(offset - thickness / 12 * ftTom);
+                                d.scale.setX(offset - thickness / 12 * ftTom);
                             }
 
 
@@ -3872,41 +3965,41 @@ function columnsCombination() {
 
                                 var b = _smallIntDrawers[i + 1];
                                 removeLocker(i + 1);
-                                b.scale.setX(offset - thickness/12 *ftTom);
+                                b.scale.setX(offset - thickness / 12 * ftTom);
                             }
                         } else {
                             var b = _smallIntDrawers[i + 1];
                             updateInternalDrawerSmall(i + 1)
-                            b.scale.setX(offset - thickness/12 *ftTom);
+                            b.scale.setX(offset - thickness / 12 * ftTom);
                         }
 
                         if (_lockers[i]) {
                             var b = _smallIntDrawers[i + 1];
-                            b.scale.setX(offset - thickness/12 *ftTom);
+                            b.scale.setX(offset - thickness / 12 * ftTom);
                             var a = _lockers[i];
                             var c = _locker_splitters[i]
-                            a.scale.setX(offset - thickness/12 *ftTom);
-                            c.scale.setX(offset - thickness/12 *ftTom);
+                            a.scale.setX(offset - thickness / 12 * ftTom);
+                            c.scale.setX(offset - thickness / 12 * ftTom);
                         } else {
                             createLocker(i);
                             updateLocker(i);
                             var a = _lockers[i];
                             var b = _locker_splitters[i]
-                            a.scale.setX(offset - thickness/12 *ftTom);
-                            b.scale.setX(offset - thickness/12 *ftTom);
+                            a.scale.setX(offset - thickness / 12 * ftTom);
+                            b.scale.setX(offset - thickness / 12 * ftTom);
                         }
                     } else {
-                     
+
                         if (_lockers[i]) {
                             createInternalDrawerSmall(i + 1);
                             updateInternalDrawerSmall(i + 1);
                             var b = _smallIntDrawers[i + 1];
-                            b.scale.setX(offset - thickness/12 *ftTom);
+                            b.scale.setX(offset - thickness / 12 * ftTom);
 
                             var c = _lockers[i];
                             var d = _locker_splitters[i];
-                            c.scale.setX(offset-thickness/6 *ftTom);
-                            d.scale.setX(offset - thickness/12 *ftTom);
+                            c.scale.setX(offset - thickness / 6 * ftTom);
+                            d.scale.setX(offset - thickness / 12 * ftTom);
                             //  createMeshInbetweenLockerSmallDrawer(c,b);
                         } else if (_lockers[i + 1]) {
                             removeLocker(i + 1);
@@ -3915,12 +4008,12 @@ function columnsCombination() {
                             createInternalDrawerSmall(i + 1);
                             updateInternalDrawerSmall(i + 1);
                             var b = _smallIntDrawers[i + 1];
-                            b.scale.setX(offset - thickness/12 *ftTom);
+                            b.scale.setX(offset - thickness / 12 * ftTom);
 
                             var c = _lockers[i];
                             var d = _locker_splitters[i];
-                            c.scale.setX(offset - thickness/12 * ftTom);
-                            d.scale.setX(offset - thickness/12 * ftTom) ;
+                            c.scale.setX(offset - thickness / 12 * ftTom);
+                            d.scale.setX(offset - thickness / 12 * ftTom);
                         }
                     }
 
@@ -4527,6 +4620,8 @@ function _flipDoor(index) {
     // _hDoors_parent[index].children[j].scale.setX(offset - thickness / 24 * ftTom);
 
     // _hDoors_parent[removed_id[i]].children[j].position.setX(_hDoors_parent[removed_id[i]].children[j].scale.x / 2);
+
+
 }
 
 
@@ -4932,7 +5027,7 @@ function initMaterial() {
         name: "wm_door",
         transparent: false,
         opacity: 1,
-        map:new THREE.TextureLoader().load("./Textures/whiteGrad.jpg"),
+        map: new THREE.TextureLoader().load("./Textures/whiteGrad.jpg"),
     });
     _hangerMaterial = new THREE.MeshStandardMaterial({
         color: 0xbfbfbf,
@@ -4950,26 +5045,26 @@ function initMaterial() {
         color: 0xff55dd,
         roughness: 0.8,
         name: "wm_column",
-        map:new THREE.TextureLoader().load("./Textures/whiteGrad4.jpg"),
+        map: new THREE.TextureLoader().load("./Textures/whiteGrad4.jpg"),
     });
     _extDrawerMaterial = new THREE.MeshStandardMaterial({
         color: 0xff7f50,
         roughness: 0.8,
         name: "wm_extDrawer",
-        map:new THREE.TextureLoader().load("./Textures/whiteGrad3.jpg"),
+        map: new THREE.TextureLoader().load("./Textures/whiteGrad3.jpg"),
     });
     _intSmallMaterial = new THREE.MeshStandardMaterial({
         color: 0xadaffa,
         roughness: 0.8,
         name: "wm_intSmallDrawer",
-        map:new THREE.TextureLoader().load("./Textures/whiteGrad.jpg"),
-     
+        map: new THREE.TextureLoader().load("./Textures/whiteGrad.jpg"),
+
     });
     _intLargeMaterial = new THREE.MeshStandardMaterial({
         color: 0xaa7f50,
         roughness: 0.8,
         name: "wm_intLargeDrawer",
-        map:new THREE.TextureLoader().load("./Textures/whiteGrad4.jpg"),
+        map: new THREE.TextureLoader().load("./Textures/whiteGrad4.jpg"),
     });
 
     _mirrorMaterials = [new THREE.MeshStandardMaterial({
@@ -5094,7 +5189,7 @@ function renderOption() {
         _lockerMaterial.color.set(defaultColor);
         _columnsMaterial.color.set(defaultColor2);
         _shelfMaterial.color.set(defaultColor);
-        
+
         // ssaoPass.output = THREE.SSAOPass.OUTPUT.Default;
     } else if (renderOptionsValue == 1) {
         scene.traverse(function (child) {
@@ -5116,17 +5211,20 @@ function renderOption() {
         _shelfMaterial.color.set(debug_botShelfColor);
         ssaoPass.output = THREE.SSAOPass.OUTPUT.Beauty;
     } else if (renderOptionsValue == 2) {
-        var mat = new THREE.LineBasicMaterial( { color: 0xffffff, linewidth: 2 } );
-       
+        var mat = new THREE.LineBasicMaterial({
+            color: 0xffffff,
+            linewidth: 2
+        });
+
         scene.traverse(function (child) {
             if (child instanceof THREE.Mesh) {
 
                 if (child.visible) {
-                    
 
-                    
 
-                    
+
+
+
                     // child.castShadow = false;
                     // child.receiveShadow = false;
                     // child.visible = true;
@@ -5169,8 +5267,12 @@ function updateColumnsDoor() {
         removeDoor();
         removeSlideDoors();
         removeFlipDoorSprite();
-        removeColumns();
         removeColumnsEdges();
+        removeSplitterEdges();
+        removeColumnsArrow();
+        removeUpperArrows();
+        removeColumns();
+
         removeColumnsBottom();
         removeColumnsSprite();
         removeHorizontalSplitter();
@@ -5727,6 +5829,9 @@ function reset() {
     removeFlipDoorSprite();
     removeColumns();
     removeColumnsEdges();
+    removeSplitterEdges();
+    removeColumnsArrow();
+    removeUpperArrows();
     removeColumnsBottom();
     removeColumnsSprite();
     removeHorizontalSplitter();
@@ -5758,15 +5863,15 @@ function reset() {
 }
 
 
-function doorVisiblity(object,visibility){
-    if(object instanceof THREE.Group){       
-        object.visible = visibility;   
-        if(!visibility){
+function doorVisiblity(object, visibility) {
+    if (object instanceof THREE.Group) {
+        object.visible = visibility;
+        if (!visibility) {
             $("#actionDoorVisibility").html(('<i class="fa fa-eye"></i> Unhide Doors'));
-           $("#actionSlideDoorRight").addClass("disabled");
-           $("#actionSlideDoorLeft").addClass("disabled");
-           $("#actionDoor").addClass("disabled");
-        }else{
+            $("#actionSlideDoorRight").addClass("disabled");
+            $("#actionSlideDoorLeft").addClass("disabled");
+            $("#actionDoor").addClass("disabled");
+        } else {
             $("#actionDoorVisibility").html(('<i class="fa fa-eye-slash"></i> Hide Doors'));
             $("#actionSlideDoorRight").removeClass("disabled");
             $("#actionSlideDoorLeft").removeClass("disabled");
@@ -5777,7 +5882,7 @@ function doorVisiblity(object,visibility){
 
 
 
-function setPrice(){    
+function setPrice() {
 
     var initialPrice = 10; //1.25 sqft price onlyWardrobe
     // var widthMeasure = offset - thickness/12 * ftTom;
@@ -5786,120 +5891,123 @@ function setPrice(){
     var hingedDoorPrice = 20 * _hDoors_parent_group.children.length; //One Door
 
     var lockerPrice = 15 * _locker_group.children.length;
-    
 
-    var smallDrawersDoubleSize = _smallIntDrawers.filter(e=>e instanceof THREE.Mesh && e.scale.x > offset);
+
+    var smallDrawersDoubleSize = _smallIntDrawers.filter(e => e instanceof THREE.Mesh && e.scale.x > offset);
     var smallDrawerDoublePrice = 70 * smallDrawersDoubleSize.length;
-    var smallDrawersSingleSize = _smallIntDrawers.filter(e=>e instanceof THREE.Mesh && e.scale.x <= offset);
-    var smallDrawerPrice = 35 * smallDrawersSingleSize.length ;
+    var smallDrawersSingleSize = _smallIntDrawers.filter(e => e instanceof THREE.Mesh && e.scale.x <= offset);
+    var smallDrawerPrice = 35 * smallDrawersSingleSize.length;
 
- 
-    var largeDrawersDoubleSize = _largeIntDrawers.filter(e=>e instanceof THREE.Mesh && e.scale.x > offset);
+
+    var largeDrawersDoubleSize = _largeIntDrawers.filter(e => e instanceof THREE.Mesh && e.scale.x > offset);
     var largeDrawerDoublePrice = 80 * largeDrawersDoubleSize.length;
-    var largeDrawersSingleSize = _largeIntDrawers.filter(e=>e instanceof THREE.Mesh && e.scale.x <= offset);
+    var largeDrawersSingleSize = _largeIntDrawers.filter(e => e instanceof THREE.Mesh && e.scale.x <= offset);
     var largeDrawerPrice = 40 * largeDrawersSingleSize.length;
-    
-   
-    var externalDrawerDoubleSize = _extDrawers.filter(e=>e instanceof THREE.Mesh && e.scale.x > offset )
+
+
+    var externalDrawerDoubleSize = _extDrawers.filter(e => e instanceof THREE.Mesh && e.scale.x > offset)
     var externalDrawerDoublePrice = 70 * externalDrawerDoubleSize.length;
-    var externalDrawerSingleSize = _extDrawers.filter(e=>e instanceof THREE.Mesh &&  e.scale.x <= offset);
+    var externalDrawerSingleSize = _extDrawers.filter(e => e instanceof THREE.Mesh && e.scale.x <= offset);
     var externalDrawerPrice = 35 * externalDrawerSingleSize.length;
-    
-    var hangerDoubleSize = _hangers.filter(e=>e instanceof THREE.Mesh && e.scale.y > offset);
+
+    var hangerDoubleSize = _hangers.filter(e => e instanceof THREE.Mesh && e.scale.y > offset);
     var hangerDoublePrice = 10 * hangerDoubleSize.length;
-    var hangerSingleSize = _hangers.filter(e=>e instanceof THREE.Mesh && e.scale.y <= offset);
+    var hangerSingleSize = _hangers.filter(e => e instanceof THREE.Mesh && e.scale.y <= offset);
     var hangerPrice = 5 * hangerSingleSize.length;
 
-   
-    
-    var splitterDoubleSize = _m_splitters.filter(e=>e instanceof THREE.Mesh && e.scale.x > offset )
+
+
+    var splitterDoubleSize = _m_splitters.filter(e => e instanceof THREE.Mesh && e.scale.x > offset)
     var splitterDoublePrice = 10 * splitterDoubleSize.length;
-    var splitterSingleSize = _m_splitters.filter(e=>e instanceof THREE.Mesh &&  e.scale.x <= offset);
-    var splitterPrice = 5 * splitterSingleSize.length  ;
-    
+    var splitterSingleSize = _m_splitters.filter(e => e instanceof THREE.Mesh && e.scale.x <= offset);
+    var splitterPrice = 5 * splitterSingleSize.length;
+
     // console.log((12*offset/ftTom)-thickness/2)
-    var intDrawer = _intDrawers_parent.filter(e=>e instanceof THREE.Group);
-    var dCount = 0; dDoubleCount = 0;
-    
-    intDrawer.forEach(function(e){
-    
-        if(e.children[0].scale.x> offset){
+    var intDrawer = _intDrawers_parent.filter(e => e instanceof THREE.Group);
+    var dCount = 0;
+    dDoubleCount = 0;
+
+    intDrawer.forEach(function (e) {
+
+        if (e.children[0].scale.x > offset) {
             dDoubleCount += e.children.length;
-        }else{
+        } else {
             dCount += e.children.length;
         }
-   
+
     })
     var intDrawerPrice = 35 * dCount;
     var intDrawerDoublePrice = 70 * dDoubleCount;
-  
 
-    var ts = _top_shelves_parent.filter(e=>e instanceof THREE.Group);
-    var tsCount = 0;tsDoubleCount = 0;
-    
-    ts.forEach(function(e){
-    
-        if(e.children[0].scale.x> offset){
+
+    var ts = _top_shelves_parent.filter(e => e instanceof THREE.Group);
+    var tsCount = 0;
+    tsDoubleCount = 0;
+
+    ts.forEach(function (e) {
+
+        if (e.children[0].scale.x > offset) {
             tsDoubleCount += e.children.length;
-        }else{
+        } else {
             tsCount += e.children.length;
         }
-   
+
     })
     var topShelfPrice = 2 * tsCount;
     var topShelfDoublePrice = 4 * tsDoubleCount;
-    
-    var bs = _bot_shelf_parent.filter(e=>e!=null);
-    var bsCount = 0; var bsDoubleCount = 0;
-    bs.forEach(function(e){
-    
-            if(e.children[0].scale.x> offset){
-                bsDoubleCount += e.children.length;
-            }else{
-                bsCount += e.children.length;
-            }
-       
+
+    var bs = _bot_shelf_parent.filter(e => e != null);
+    var bsCount = 0;
+    var bsDoubleCount = 0;
+    bs.forEach(function (e) {
+
+        if (e.children[0].scale.x > offset) {
+            bsDoubleCount += e.children.length;
+        } else {
+            bsCount += e.children.length;
+        }
+
     })
 
-  
-    var botShelfPrice = 2 * bsCount;
-    var botShelfDoublePrice = 4* bsDoubleCount;
 
-    
-    
-    var columnsPrice = 8 *(_columns.length-removed.length) ;
- 
-    var totalInteriorCost =   smallDrawerDoublePrice + smallDrawerPrice + largeDrawerPrice + largeDrawerDoublePrice + externalDrawerDoublePrice + externalDrawerPrice + lockerPrice + hangerPrice + hangerDoublePrice
-     + topShelfPrice + topShelfDoublePrice + botShelfPrice + botShelfDoublePrice + intDrawerDoublePrice + intDrawerPrice ;
-   totalPrice =( calculateWardrobeVolume() * initialPrice) + splitterPrice + splitterDoublePrice + slideDoorPrice + hingedDoorPrice + totalInteriorCost + columnsPrice;
-  
- 
+    var botShelfPrice = 2 * bsCount;
+    var botShelfDoublePrice = 4 * bsDoubleCount;
+
+
+
+    var columnsPrice = 8 * (_columns.length - removed.length);
+
+    var totalInteriorCost = smallDrawerDoublePrice + smallDrawerPrice + largeDrawerPrice + largeDrawerDoublePrice + externalDrawerDoublePrice + externalDrawerPrice + lockerPrice + hangerPrice + hangerDoublePrice +
+        topShelfPrice + topShelfDoublePrice + botShelfPrice + botShelfDoublePrice + intDrawerDoublePrice + intDrawerPrice;
+    totalPrice = (calculateWardrobeVolume() * initialPrice) + splitterPrice + splitterDoublePrice + slideDoorPrice + hingedDoorPrice + totalInteriorCost + columnsPrice;
+
+
     // totalPrice = Math.ceil(totalPrice);
-   
-   
-    $(".price").html("$ "+totalPrice);
+
+
+    $(".price").html("$ " + totalPrice);
 
 }
 
 
 
-function calculateWardrobeVolume(object){
+function calculateWardrobeVolume(object) {
     let volume;
-    if(isLoft){
-       volume =  (wWidth*((Math.abs(wHeight) + Math.abs(wLoft)))*wDepth)*ftTom;
-    }else{
-        volume =  (wWidth*wHeight*wDepth)*ftTom;
+    if (isLoft) {
+        volume = (wWidth * ((Math.abs(wHeight) + Math.abs(wLoft))) * wDepth) * ftTom;
+    } else {
+        volume = (wWidth * wHeight * wDepth) * ftTom;
     }
-  
+
 
     return volume.toFixed(1);
 }
 
-function createMeshInbetweenLockerSmallDrawer(locker,drawer){
-    var g= new THREE.BoxGeometry(1,1,1);
-    var mesh = new THREE.Mesh(g,_columnsMaterial);
+function createMeshInbetweenLockerSmallDrawer(locker, drawer) {
+    var g = new THREE.BoxGeometry(1, 1, 1);
+    var mesh = new THREE.Mesh(g, _columnsMaterial);
     mesh.name = "inbetweenLS";
-    mesh.position.setX( (locker.position.x) );
+    mesh.position.setX((locker.position.x));
     mesh.position.setY(drawer.position.y);
     mesh.position.setZ(drawer.position.z);
     mesh.scale.copy(_columns[0].scale);
@@ -5909,56 +6017,56 @@ function createMeshInbetweenLockerSmallDrawer(locker,drawer){
 
 }
 
-function createInternalDrawers(index,row){
+function createInternalDrawers(index, row) {
     var g = new THREE.BoxGeometry(1, 1, 1);
 
     let _drawers_group = new THREE.Group();
 
-    if(_m_splitters.length>0){
-        for (var j = 0; j < row; j++) { 
+    if (_m_splitters.length > 0) {
+        for (var j = 0; j < row; j++) {
             _intDrawers[j] = new THREE.Mesh(g, _intSmallMaterial);
             _intDrawers[j].name = "_drawer_" + j;
-            _intDrawers[j].scale.set(_m_splitters[index].scale.x,1,_m_splitters[index].scale.z);
+            _intDrawers[j].scale.set(_m_splitters[index].scale.x, 1, _m_splitters[index].scale.z);
             _drawers_group.add(_intDrawers[j]);
-    
+
         }
     }
-  
+
     _drawers_group.name = "_drawers_" + index;
     _intDrawers_parent[index] = _drawers_group;
 
 
     scene.add(_intDrawers_parent[index]);
-    
+
 }
 
-function updateInternalDrawers(index){
-
-    
-   
-    var pos = (wBottom.position.y+wBottom.scale.y/2);
+function updateInternalDrawers(index) {
 
 
-    
+
+    var pos = (wBottom.position.y + wBottom.scale.y / 2);
+
+
+
 
     if (_intDrawers_parent[index] instanceof THREE.Group) {
-        
-       var vertical_offset = ((_m_splitters[index].position.y- _m_splitters[index].scale.y/2)-(wBottom.position.y+wBottom.scale.y/2))/_intDrawers_parent[index].children.length;
 
-        
-            for (var j = 0; j < _intDrawers_parent[index].children.length; j++) {
-                if (_intDrawers_parent[index].children[j] instanceof THREE.Mesh) {
-                    _intDrawers_parent[index].children[j].scale.set(_m_splitters[index].scale.x,vertical_offset,_m_splitters[index].scale.z);
-                    _intDrawers_parent[index].children[j].position.set(index * offset,  j*_intDrawers_parent[index].children[j].scale.y,
-                      _m_splitters[index].position.z);
-                }
+        var vertical_offset = ((_m_splitters[index].position.y - _m_splitters[index].scale.y / 2) - (wBottom.position.y + wBottom.scale.y / 2)) / _intDrawers_parent[index].children.length;
 
+
+        for (var j = 0; j < _intDrawers_parent[index].children.length; j++) {
+            if (_intDrawers_parent[index].children[j] instanceof THREE.Mesh) {
+                _intDrawers_parent[index].children[j].scale.set(_m_splitters[index].scale.x, vertical_offset, _m_splitters[index].scale.z);
+                _intDrawers_parent[index].children[j].position.set(index * offset, j * _intDrawers_parent[index].children[j].scale.y,
+                    _m_splitters[index].position.z);
             }
-        
-      
+
+        }
+
+
 
     }
-    _intDrawers_parent[index].position.set(offset / 2 + wLeft.position.x, pos+vertical_offset/2, _intDrawers_parent[index].position.z);
+    _intDrawers_parent[index].position.set(offset / 2 + wLeft.position.x, pos + vertical_offset / 2, _intDrawers_parent[index].position.z);
 }
 
 
@@ -5983,257 +6091,648 @@ function removeInternalDrawers(index) {
 
 }
 
+function createColumnsArrows(index) {
+    var from = new THREE.Vector3(0, 0, 0);
+    var to = new THREE.Vector3(0, 0, 0);
 
-function createColumnsEdgeGeometry(index){
-         
 
-    var g = new THREE.EdgesGeometry(_columns[index].geometry.clone());
-    var mesh = new THREE.LineSegments( g, new THREE.LineBasicMaterial( { color: 0x000000 , name:"_m_columns_line"+index} ) );
+
+    var direction = to.clone().sub(from);
+    var length = direction.manhattanLength();
+    
+
+  
+    var ArrowL = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000, 0.05, 0.05);
+    var ArrowR = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000, 0.05, 0.05);
+
+    if (!_cLeftArrow_parent.includes(ArrowL)) {
+        _cLeftArrow_parent.push(ArrowL);
+    }
+    if(!_cRightArrow_parent.includes(ArrowR)){
+        _cRightArrow_parent.push(ArrowR);
+    }
+    
+
+    _cLeftArrow_group.add(_cLeftArrow_parent[index]);
+    _cRightArrow_group.add(_cRightArrow_parent[index]);
+
+    dimensionScene.add(_cLeftArrow_group);
+    dimensionScene.add(_cRightArrow_group);
+
+    
+    var cLabelValue = document.createElement('div');
+    cLabelValue.className = "columnLabel";
+    cLabelValue.innerHTML = "";
+    cLabelValue.style.top = 0;
+    cLabelValue.style.left = 0;
+    cLabelValue.style.fontSize = "0.5px";
+    cLabelValue.style.textAlign = "right";
+    
+    var cLabel = new THREE.CSS3DObject(cLabelValue);
+    
+    if (!_cLabels.includes(cLabel)) {
+        _cLabels.push(cLabel);
+    }
+    _cLabel_group.add(_cLabels[index])
+    dimensionScene.add(_cLabel_group);
+}
+
+function updateColumnsArrow(index) {
+    var from;
+    var to;
+    _cLeftArrow_group.position.copy(_columns_group.position.clone());
+    _cRightArrow_group.position.copy(_columns_group.position.clone());
+    _cLabel_group.position.copy(_columns_group.position.clone());
+    if (index == 0) {
+        from = new THREE.Vector3(_columns[0].position.x-offset/2, edgeBottom.position.y - 0.2, edgeLeft.position.z - edgeLeft.scale.z / 2);
+        to = new THREE.Vector3(_columns[0].position.x-offset + thickness/24 * ftTom , edgeBottom.position.y - 0.2, edgeLeft.position.z - edgeLeft.scale.z / 2);
+    } else {
+        if (index == customColumns - 1) {
+            from = new THREE.Vector3(_columns[index - 1].position.x+offset/2 , edgeBottom.position.y- 0.2, edgeLeft.position.z - edgeLeft.scale.z / 2);
+            to = new THREE.Vector3(_columns[index - 1].position.x+ thickness/24 * ftTom , edgeBottom.position.y - 0.2, edgeLeft.position.z - edgeLeft.scale.z / 2);
+        } else {
+            from = new THREE.Vector3(_columns[index - 1].position.x + offset / 2, edgeBottom.position.y - 0.2, edgeLeft.position.z - edgeLeft.scale.z / 2);
+            to = new THREE.Vector3(_columns[index - 1].position.x+ thickness/24 * ftTom , edgeBottom.position.y - 0.2, edgeLeft.position.z - edgeLeft.scale.z / 2);
+        }
+    }
+
+
+    var direction = to.clone().sub(from);
+    var length = direction.manhattanLength();
+
+    _cLeftArrow_parent[index].setDirection(direction.normalize());
+    _cLeftArrow_parent[index].setLength(length, 0.05, 0.05);
+    _cLeftArrow_parent[index].position.copy(from.clone());
+
+    _cRightArrow_parent[index].setDirection(direction.negate().normalize());
+    _cRightArrow_parent[index].setLength(length, 0.05, 0.05);
+    _cRightArrow_parent[index].position.copy(from.clone());
    
+
+   
+    var lengthOffset =12*(( _columns_group.position.x - _columns[0].scale.x/2) - (wLeft.position.x + wLeft.scale.x/2))/ftTom;
+    
+    
+    
+    _cLabels[index].element.innerHTML = (lengthOffset).toFixed(4) + " in";
+    _cLabels[index].position.set(_cLeftArrow_parent[index].position.x,_cLeftArrow_parent[index].position.y + 0.01 , _cLeftArrow_parent[index].position.z);
+    _cLabels[index].scale.set(0.1, 0.1, 0.1);
+}
+
+function removeColumnsArrow(index) {
+    if (index) {
+        if (_cLeftArrow_parent.includes(_cLeftArrow_parent[index])) {
+            dimensionScene.remove(_cLeftArrow_group);
+            _cLeftArrow_parent[index] = null;
+
+        }
+        if (_cRightArrow_parent.includes(_cRightArrow_parent[index])) {
+            dimensionScene.remove(_cRightArrow_group);
+            _cRightArrow_parent[index] = null;
+
+        }
+        
+        if (_cLabels.includes(_cLabels[index])) {
+            dimensionScene.remove(_cLabel_group);
+            _cLabels[index] = null;
+
+        }
+
+    } else {
+        _cLeftArrow_parent.forEach(e => {
+            if (e instanceof THREE.ArrowHelper) {
+                _cLeftArrow_group.remove(e);
+            }
+
+        })
+        _cLeftArrow_parent = [];
+
+        _cRightArrow_parent.forEach(e => {
+            if (e instanceof THREE.ArrowHelper) {
+                _cRightArrow_group.remove(e);
+            }
+
+        })
+        _cRightArrow_parent = [];
+
+        _cLabels.forEach(e => {
+            if (e!=null) {
+                _cLabel_group.remove(e);
+            }
+
+        })
+        _cLabels = [];
+
+
+    }
+}
+function createUpperArrows(index){
+    var from = new THREE.Vector3(0, 0, 0);
+    var to = new THREE.Vector3(0, 0, 0);
+
+
+
+    var direction = to.clone().sub(from);
+    var length = direction.manhattanLength();
+    
+
+  
+    var ArrowUp = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000, 0.05, 0.05);
+    var ArrowDown = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000, 0.05, 0.05);
+
+    if (!_cUpperArrowUps_parent.includes(ArrowUp)) {
+        _cUpperArrowUps_parent.push(ArrowUp);
+    }
+    if(!_cUpperArrowDowns_parent.includes(ArrowDown)){
+        _cUpperArrowDowns_parent.push(ArrowDown);
+    }
+    
+
+    _cUpperArrowUp_group.add(_cUpperArrowUps_parent[index]);
+    _cUpperArrowDown_group.add(_cUpperArrowDowns_parent[index]);
+
+    dimensionScene.add(_cUpperArrowUp_group);
+    dimensionScene.add(_cUpperArrowDown_group);
+
+}
+function updateUpperArrows(index){
+    var from,fromDown;
+    var to,toDown;
+    _cUpperArrowUp_group.position.copy(_columns_group.position.clone());
+    _cUpperArrowDown_group.position.copy(_columns_group.position.clone());
+    // _cLabel_group.position.copy(_columns_group.position.clone());
+    var midpoint = (wTop.position.y - _m_splitters[index].position.y/2 + _m_splitters[index].scale.y  );
+    if (index == 0) {
+        from = new THREE.Vector3(_columns[0].position.x-offset/2, midpoint, edgeLeft.position.z - edgeLeft.scale.z / 2);
+        to = new THREE.Vector3(_columns[0].position.x-offset/2 , wTop.position.y - wTop.scale.y/2, edgeLeft.position.z - edgeLeft.scale.z / 2);
+
+        fromDown = new THREE.Vector3(_columns[0].position.x-offset/2, midpoint, edgeLeft.position.z - edgeLeft.scale.z / 2);
+        toDown = new THREE.Vector3(_columns[0].position.x-offset/2 , wTop.position.y - wTop.scale.y/2, edgeLeft.position.z - edgeLeft.scale.z / 2);
+    } else {
+        if (index == customColumns - 1) {
+            from = new THREE.Vector3(_columns[index - 1].position.x+offset/2 ,midpoint, edgeLeft.position.z - edgeLeft.scale.z / 2);
+            to = new THREE.Vector3(_columns[index - 1].position.x+offset/2,  wTop.position.y - wTop.scale.y/2, edgeLeft.position.z - edgeLeft.scale.z / 2);
+
+            fromDown = new THREE.Vector3(_columns[index - 1].position.x+offset/2 ,midpoint, edgeLeft.position.z - edgeLeft.scale.z / 2);
+            toDown = new THREE.Vector3(_columns[index - 1].position.x+offset/2,  wTop.position.y - wTop.scale.y/2, edgeLeft.position.z - edgeLeft.scale.z / 2);
+        } else {
+            from = new THREE.Vector3(_columns[index - 1].position.x + offset / 2, midpoint, edgeLeft.position.z - edgeLeft.scale.z / 2);
+            to = new THREE.Vector3(_columns[index - 1].position.x + offset / 2 ,wTop.position.y - wTop.scale.y/2, edgeLeft.position.z - edgeLeft.scale.z / 2);
+
+            fromDown = new THREE.Vector3(_columns[index - 1].position.x + offset / 2, midpoint, edgeLeft.position.z - edgeLeft.scale.z / 2);
+            toDown = new THREE.Vector3(_columns[index - 1].position.x + offset / 2 ,wTop.position.y - wTop.scale.y/2, edgeLeft.position.z - edgeLeft.scale.z / 2);
+        }
+    }
+   
+
+    var direction = to.clone().sub(from);
+    var directionDown = toDown.clone().sub(fromDown);
+    var length = direction.manhattanLength();
+
+    _cUpperArrowUps_parent[index].setDirection(direction.normalize());
+    _cUpperArrowUps_parent[index].setLength(length, 0.05, 0.05);
+    _cUpperArrowUps_parent[index].position.copy(from.clone());
+
+    _cUpperArrowDowns_parent[index].setDirection(direction.negate().normalize());
+    _cUpperArrowDowns_parent[index].setLength(length, 0.05, 0.05);
+    _cUpperArrowDowns_parent[index].position.copy(fromDown.clone());
+   
+
+}
+function removeUpperArrows(index){
+    if (index) {
+        if (_cUpperArrowUps_parent.includes(_cUpperArrowUps_parent[index])) {
+            dimensionScene.remove(_cUpperArrowUp_group);
+            _cUpperArrowUps_parent[index] = null;
+
+        }
+        if (_cUpperArrowDowns_parent.includes(_cUpperArrowDowns_parent[index])) {
+            dimensionScene.remove(_cUpperArrowDown_group);
+            _cUpperArrowDowns_parent[index] = null;
+
+        }
+    } else {
+        _cUpperArrowUps_parent.forEach(e => {
+            if (e instanceof THREE.ArrowHelper) {
+                _cUpperArrowUp_group.remove(e);
+            }
+
+        })
+        _cUpperArrowUps_parent = [];
+
+        _cUpperArrowDowns_parent.forEach(e => {
+            if (e instanceof THREE.ArrowHelper) {
+                _cUpperArrowDown_group.remove(e);
+            }
+
+        })
+        _cUpperArrowDowns_parent = [];
+
+      
+
+
+    }
+}
+function createSplitterEdges(index){
+    var g = new THREE.EdgesGeometry(_columns[0].geometry.clone());
+    var m = new THREE.LineBasicMaterial({
+        color: 0x000000,
+        name: "_m_splitters_edge_" + index
+    });
+    var mesh = new THREE.LineSegments(g, m);
+
+
+    mesh.name = "_m_splitters_edges" + index;
+
+
+
+    _splitterEdges[index] = mesh;
+    _splitterEdges_group.name = "w_columns_lines";
+    _splitterEdges_group.add(_splitterEdges[index]);
+
+
+
+
+    dimensionScene.add(_splitterEdges_group);
+
+}
+
+function updateSplitterEdges(index){
+    
+    _splitterEdges[index].scale.copy(_m_splitters[index].scale);
+    _splitterEdges[index].position.copy(_m_splitters[index].position);
+    _splitterEdges_group.position.copy(_m_splitters_group.position)
+}
+
+function removeSplitterEdges(index){
+    
+    if (index) {
+        _splitterEdges.forEach(e => {
+            if (_splitterEdges[index] instanceof THREE.Mesh && _splitterEdges[index] == e) {
+                if (_splitterEdges_group instanceof THREE.Group) {
+                    _splitterEdges_group.remove(e);
+
+                }
+            }
+        })
+        _splitterEdges[index] = null;
+    } else {
+
+        _splitterEdges.forEach(e => {
+
+
+            if (_splitterEdges_group instanceof THREE.Group) {
+                _splitterEdges_group.remove(e);
+
+            }
+
+
+
+
+        })
+
+        dimensionScene.remove(_splitterEdges_group);
+        _splitterEdges = [];
+
+
+    }
+}
+
+
+function createColumnsEdgeGeometry(index) {
+
+    var g = new THREE.EdgesGeometry(_columns[0].geometry.clone());
+    var m = new THREE.LineBasicMaterial({
+        color: 0x000000,
+        name: "_m_columns_line" + index
+    });
+    var mesh = new THREE.LineSegments(g, m);
+
+
     mesh.name = "w_columns_line_" + index;
+
+
+
     _columnsEdges[index] = mesh;
     _columnsEdges_group.name = "w_columns_lines";
     _columnsEdges_group.add(_columnsEdges[index]);
 
+
+
+
     dimensionScene.add(_columnsEdges_group);
+
+
 }
 
-function updateColumnsEdgeGeometry(index){
-    
-        _columnsEdges.forEach(e=>{
-            e.scale.copy(_columns[index].scale);
-            e.position.copy(_columns[index].position)
-        })     
-    
+function updateColumnsEdgeGeometry(index) {
+
+
+
+    _columnsEdges[index].scale.copy(_columns[index].scale);
+    _columnsEdges[index].position.copy(_columns[index].position);
+
 }
 
 function removeColumnsEdges(index) {
 
+
     if (index) {
         _columnsEdges.forEach(e => {
-            if (_columnsEdges[index] instanceof THREE.Mesh && _columnsEdges[index] == e) {
+            if (_columnsEdges[index] instanceof THREE.Mesh && _columns[index] == e) {
                 if (_columnsEdges_group instanceof THREE.Group) {
                     _columnsEdges_group.remove(e);
+
                 }
             }
         })
         _columnsEdges[index] = null;
     } else {
-        if (_columnsEdges) {
-            _columnsEdges.forEach(e => {
-                if (e instanceof THREE.Mesh) {
-                    if (_columnsEdges_group instanceof THREE.Group) {
-                        _columnsEdges_group.remove(e);
-                        dimensionScene.remove(_columnsEdges_group);
-                    }
-                }
-            })
-            _columnsEdges = [];
-       
-        }
+
+        _columnsEdges.forEach(e => {
+
+
+            if (_columnsEdges_group instanceof THREE.Group) {
+                _columnsEdges_group.remove(e);
+
+            }
+
+
+
+
+        })
+
+        dimensionScene.remove(_columnsEdges_group);
+        _columnsEdges = [];
+
+
     }
 
-  
+
 }
-function createWardrobeEdges(object){
+
+function createWardrobeEdges(object) {
     let edges = new THREE.EdgesGeometry(object.geometry.clone());
-                  
-    var subject = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0x000000 } ) );
+
+    var subject = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({
+        color: 0x000000
+    }));
     // if(subject instanceof THREE.Mesh){
     //     subject.scale.set(object.scale.x,object.scale.y,object.scale.z);
     //     subject.position.set(object.position.x,object.position.y,object.position.z);
     // }
-    
-    dimensionScene.add( subject );
+
+    dimensionScene.add(subject);
     return subject;
 }
-function updateWardrobeEdges(subject,object){
-    
-  if(subject!=null){
-    subject.scale.copy(object.scale);
-    subject.position.copy(object.position);
-    subject.visible = object.visible;
-  }
- 
-    
+
+function updateWardrobeEdges(subject, object) {
+
+    if (subject != null) {
+        subject.scale.copy(object.scale);
+        subject.position.copy(object.position);
+        subject.visible = object.visible;
+    }
+
+
 }
 
-function removeWardrobeEdges(subject){
-    scene.traverse(function(child){
-        if(child == subject){
+function removeWardrobeEdges(subject) {
+    scene.traverse(function (child) {
+        if (child == subject) {
             scene.remove(subject);
         }
     })
 }
 
-function createVerticalArrow(){
-    
-    if(edgeLeft){
-        
-     
+
+
+function createVerticalArrow() {
+
+    if (edgeLeft) {
+
+
         // if(isLoft){
         //     from = new THREE.Vector3( edgeLeft.position.x - 0.1,( edgeLeft.scale.y + edgeLoftLeft.scale.y )/2 ,  edgeLeft.position.z - edgeLeft.scale.z/2 );
         //     to = new THREE.Vector3( edgeLeft.position.x - 0.1, edgeLoftTop.position.y + thickness/24*ftTom, edgeLeft.position.z- edgeLeft.scale.z/2 );
         // }else{
-           
+
         // }
-        var from = new THREE.Vector3( edgeLeft.position.x - 0.1,edgeLeft.position.y,  edgeLeft.position.z - edgeLeft.scale.z/2 );
-        var to = new THREE.Vector3( edgeLeft.position.x - 0.1, edgeTop.position.y + thickness/24*ftTom, edgeLeft.position.z- edgeLeft.scale.z/2 );
+        var from = new THREE.Vector3(edgeLeft.position.x - 0.1, edgeLeft.position.y, edgeLeft.position.z - edgeLeft.scale.z / 2);
+        var to = new THREE.Vector3(edgeLeft.position.x - 0.1, edgeTop.position.y + thickness / 24 * ftTom, edgeLeft.position.z - edgeLeft.scale.z / 2);
         var direction = to.clone().sub(from);
-        
-        var length =  direction.manhattanLength();
-        
-        if(wvArrowUp == null){
-            
-            wvArrowUp = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000 , 0.05,0.05);
-            wvArrowDown = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000 , 0.05,0.05);
-            
-            
-            dimensionScene.add( wvArrowUp );
-            dimensionScene.add( wvArrowDown );
+
+        var length = direction.manhattanLength();
+
+        if (wvArrowUp == null) {
+
+            wvArrowUp = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000, 0.05, 0.05);
+            wvArrowDown = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000, 0.05, 0.05);
+
+
+            dimensionScene.add(wvArrowUp);
+            dimensionScene.add(wvArrowDown);
 
             hValue = document.createElement('div');
-            hValue.innerHTML =  (wHeight) + "ft";
+            hValue.innerHTML = (wHeight) + " ft";
             hValue.style.top = 0;
             hValue.style.left = 0;
             hValue.style.fontSize = "0.5px";
             hValue.style.textAlign = "right";
-            
-            
-           
-             heightLabel = new THREE.CSS3DObject( hValue );
-           
-            dimensionScene.add( heightLabel );
-        
-            
-        }else{
-            hValue.innerHTML =  (wHeight ) + "ft";
+
+
+
+            heightLabel = new THREE.CSS3DObject(hValue);
+
+            dimensionScene.add(heightLabel);
+
+
+        } else {
+          
             wvArrowUp.setDirection(direction.normalize());
-            wvArrowUp.setLength(length,0.05,0.05);
+            wvArrowUp.setLength(length, 0.05, 0.05);
             wvArrowUp.position.copy(from.clone());
 
             wvArrowDown.setDirection(direction.negate().normalize());
-            wvArrowDown.setLength(length,0.05,0.05);
+            wvArrowDown.setLength(length, 0.05, 0.05);
             wvArrowDown.position.copy(from.clone());
-            heightLabel.position.set( wvArrowUp.position.x - 0.15, edgeLeft.position.y -0.2, 0 );
-            heightLabel.scale.set(0.2,0.2,0.2)
+
+            hValue.innerHTML = (wHeight) + " ft";
+            heightLabel.position.set(wvArrowUp.position.x - 0.15, edgeLeft.position.y - 0.2, 0);
+            heightLabel.scale.set(0.2, 0.2, 0.2)
             // wHeightText.position.set(0,0.5,0.4);
         }
-        
-        
-        
-       
-        if(isLoft){
-            var from = new THREE.Vector3( edgeLoftLeft.position.x - 0.1,edgeLoftLeft.position.y,  edgeLeft.position.z - edgeLeft.scale.z/2 );
-            var to = new THREE.Vector3( edgeLoftLeft.position.x - 0.1, edgeLoftTop.position.y + thickness/24*ftTom, edgeLeft.position.z- edgeLeft.scale.z/2 );
+
+
+
+
+        if (isLoft) {
+            var from = new THREE.Vector3(edgeLoftLeft.position.x - 0.1, edgeLoftLeft.position.y, edgeLeft.position.z - edgeLeft.scale.z / 2);
+            var to = new THREE.Vector3(edgeLoftLeft.position.x - 0.1, edgeLoftTop.position.y + thickness / 24 * ftTom, edgeLeft.position.z - edgeLeft.scale.z / 2);
             var direction = to.clone().sub(from);
-            
-            var length =  direction.manhattanLength();
-            if(wlArrowUp == null){
-                wlArrowUp = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000 , 0.05,0.05);
-                wlArrowDown = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000 , 0.05,0.05);
-              
-                dimensionScene.add( wlArrowUp );
-                dimensionScene.add( wlArrowDown );
+
+            var length = direction.manhattanLength();
+            if (wlArrowUp == null) {
+                wlArrowUp = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000, 0.05, 0.05);
+                wlArrowDown = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000, 0.05, 0.05);
+
+                dimensionScene.add(wlArrowUp);
+                dimensionScene.add(wlArrowDown);
 
                 wlArrowUp.visible = true;
-                wlArrowDown.visible= true;
+                wlArrowDown.visible = true;
 
                 hLoftValue = document.createElement('div');
-                hLoftValue.innerHTML =  (wLoft) + "ft";
+                hLoftValue.innerHTML = (wLoft) + " ft";
                 hLoftValue.style.top = 0;
                 hLoftValue.style.left = 0;
                 hLoftValue.style.fontSize = "0.5px";
                 hLoftValue.style.textAlign = "right";
-            
-            
-           
-             loftLabel = new THREE.CSS3DObject( hLoftValue );
-           
-                dimensionScene.add( loftLabel );
-            }else{
+
+
+
+                loftLabel = new THREE.CSS3DObject(hLoftValue);
+
+                dimensionScene.add(loftLabel);
+            } else {
                 wlArrowUp.setDirection(direction.normalize());
-                wlArrowUp.setLength(length,0.05,0.05);
+                wlArrowUp.setLength(length, 0.05, 0.05);
                 wlArrowUp.position.copy(from.clone());
-    
+
                 wlArrowDown.setDirection(direction.negate().normalize());
-                wlArrowDown.setLength(length,0.05,0.05);
+                wlArrowDown.setLength(length, 0.05, 0.05);
                 wlArrowDown.position.copy(from.clone());
                 wlArrowUp.visible = true;
-                wlArrowDown.visible= true;
+                wlArrowDown.visible = true;
 
-              
+
                 loftLabel.visible = true;
 
-                hLoftValue.innerHTML =  (wLoft) + "ft";
-                loftLabel.position.set( wlArrowUp.position.x - 0.15, edgeLoftLeft.position.y -0.1, 0 );
-                loftLabel.scale.set(0.2,0.2,0.2)
+                hLoftValue.innerHTML = (wLoft) + " ft";
+                loftLabel.position.set(wlArrowUp.position.x - 0.15, edgeLoftLeft.position.y - 0.1, 0);
+                loftLabel.scale.set(0.2, 0.2, 0.2)
             }
-        }else{
-            if(wlArrowUp){
+        } else {
+            if (wlArrowUp) {
                 wlArrowUp.visible = false;
-                wlArrowDown.visible= false;
+                wlArrowDown.visible = false;
                 loftLabel.visible = false;
             }
         }
-        
+
     }
-    
+
 
 }
 
+function createDepthArrow() {
+    if (depthSideMesh) {
 
-function createHorizontalArrow(){
-    
-    if(edgeLeft){
-        
-        var from = new THREE.Vector3( edgeBottom.position.x ,edgeBottom.position.y - 0.15,  edgeLeft.position.z - edgeLeft.scale.z/2 );
-        var to = new THREE.Vector3( edgeLeft.position.x - thickness/12 * ftTom, edgeBottom.position.y-0.15, edgeLeft.position.z- edgeLeft.scale.z/2 );
+        var from = new THREE.Vector3(depthSideMesh.position.x, edgeBottom.position.y - 0.3, edgeLeft.position.z - edgeLeft.scale.z / 2);
+        var to = new THREE.Vector3(depthSideMesh.position.x - depthSideMesh.scale.z / 2, edgeBottom.position.y - 0.3, edgeLeft.position.z - edgeLeft.scale.z / 2);
         var direction = to.clone().sub(from);
-        
-        var length =  direction.manhattanLength();
-        
-        
-        
-       
-        if(whArrowL == null){
-            whArrowL = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000 , 0.05,0.05);
-            whArrowR = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000 , 0.05,0.05);
-          
-            dimensionScene.add( whArrowL );
-           dimensionScene.add( whArrowR );
 
-           wValue = document.createElement('div');
-           wValue.innerHTML =  (wWidth) + "ft";
-           wValue.style.top = 0;
-           wValue.style.left = 0;
-           wValue.style.fontSize = "0.5px";
-           wValue.style.textAlign = "right";
+        var length = direction.manhattanLength();
 
-           widthLabel = new THREE.CSS3DObject( wValue );
-           
-           dimensionScene.add( widthLabel );
-            
-        }else{
+        if (wdArrowL == null) {
+            wdArrowL = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000, 0.05, 0.05);
+            wdArrowR = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000, 0.05, 0.05);
+            dimensionScene.add(wdArrowL);
+            dimensionScene.add(wdArrowR);
+
+
+            depthLabelValue = document.createElement('div');
+            depthLabelValue.innerHTML = (wDepth) + " ft";
+            depthLabelValue.style.top = 0;
+            depthLabelValue.style.left = 0;
+            depthLabelValue.style.fontSize = "0.5px";
+            depthLabelValue.style.textAlign = "right";
+
+            depthLabel = new THREE.CSS3DObject(depthLabelValue);
+
+            dimensionScene.add(depthLabel);
+        } else {
+            wdArrowL.setDirection(direction.normalize());
+            wdArrowL.setLength(length, 0.05, 0.05);
+            wdArrowL.position.copy(from.clone());
+
+
+            wdArrowR.setDirection(direction.negate().normalize());
+            wdArrowR.setLength(length, 0.05, 0.05);
+            wdArrowR.position.copy(from.clone());
+
+
+            depthLabelValue.innerHTML = (wDepth) + " ft";
+            depthLabel.position.set(wdArrowL.position.x, wdArrowL.position.y - 0.3, 0);
+            depthLabel.scale.set(0.2, 0.2, 0.2)
+        }
+    }
+}
+
+function createHorizontalArrow() {
+
+    if (edgeLeft) {
+
+        var from = new THREE.Vector3(edgeBottom.position.x, edgeBottom.position.y - 0.3, edgeLeft.position.z - edgeLeft.scale.z / 2);
+        var to = new THREE.Vector3(edgeLeft.position.x - thickness / 12 * ftTom, edgeBottom.position.y - 0.3, edgeLeft.position.z - edgeLeft.scale.z / 2);
+        var direction = to.clone().sub(from);
+
+        var length = direction.manhattanLength();
+
+
+
+
+        if (whArrowL == null) {
+            whArrowL = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000, 0.05, 0.05);
+            whArrowR = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000, 0.05, 0.05);
+
+            dimensionScene.add(whArrowL);
+            dimensionScene.add(whArrowR);
+
+            wValue = document.createElement('div');
+            wValue.innerHTML = (wWidth) + " ft";
+            wValue.style.top = 0;
+            wValue.style.left = 0;
+            wValue.style.fontSize = "0.5px";
+            wValue.style.textAlign = "right";
+
+            widthLabel = new THREE.CSS3DObject(wValue);
+
+            dimensionScene.add(widthLabel);
+
+        } else {
             whArrowL.setDirection(direction.normalize());
-            whArrowL.setLength(length,0.05,0.05);
+            whArrowL.setLength(length, 0.05, 0.05);
             whArrowL.position.copy(from.clone());
 
             whArrowR.setDirection(direction.negate().normalize());
-            whArrowR.setLength(length,0.05,0.05);
+            whArrowR.setLength(length, 0.05, 0.05);
             whArrowR.position.copy(from.clone());
 
-            
-            wValue.innerHTML =  (wWidth) + "ft";
-            widthLabel.position.set(  0, whArrowR.position.y - 0.2, 0 );
-            widthLabel.scale.set(0.2,0.2,0.2)
+
+            wValue.innerHTML = (wWidth) + " ft";
+            widthLabel.position.set(0, whArrowR.position.y - 0.3, 0);
+            widthLabel.scale.set(0.2, 0.2, 0.2)
         }
-        
+
     }
-    
+
 
 }
 
-function swaprender(){
-    isMeasured  = !isMeasured;
+function swaprender() {
+    isMeasured = !isMeasured;
+
+}
+
+
+function downloadImage() {
+    html2canvas(document.body).then(canvas => {
+
+        // document.getElementById('capturedImage').src = canvas.toDataURL();     
+        // window.open(canvas.toDataURL())
+
+    });
+
+
 }
