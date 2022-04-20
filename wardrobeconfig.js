@@ -484,7 +484,7 @@ function render() {
 
 function getInputs() {
     chooseColumns_number();
-    $(".textOver").hide();
+    
     $("#actionDoor").hide();
     $("#actionDoorVisibilty").hide();
     $("#actionSlideDoorLeft").hide();
@@ -5201,7 +5201,7 @@ function renderOption() {
     var debug_columns_color = "#ff55dd";
     var debug_locker_color = "#ddffdd";
     var debug_door_color = "#fafa22"
-    var wireframeColor = "#000000";
+    
     if (renderOptionsValue == 0) {
         scene.traverse(function (child) {
             if (child instanceof THREE.Mesh) {
@@ -5251,34 +5251,36 @@ function renderOption() {
         _columnsMaterial.color.set(debug_columns_color);
         _shelfMaterial.color.set(debug_botShelfColor);
         ssaoPass.output = THREE.SSAOPass.OUTPUT.Beauty;
-    } else if (renderOptionsValue == 2) {
-        var mat = new THREE.LineBasicMaterial({
-            color: 0xffffff,
-            linewidth: 2
-        });
+    } 
+    
+    // else if (renderOptionsValue == 2) {
+    //     var mat = new THREE.LineBasicMaterial({
+    //         color: 0xffffff,
+    //         linewidth: 2
+    //     });
 
-        scene.traverse(function (child) {
-            if (child instanceof THREE.Mesh) {
+    //     scene.traverse(function (child) {
+    //         if (child instanceof THREE.Mesh) {
 
-                if (child.visible) {
-
-
-
-
-
-                    // child.castShadow = false;
-                    // child.receiveShadow = false;
-                    // child.visible = true;
-                    // child.material.wireframe = true;
-                    // child.material.wireframeLinejoin = "round";
-                    // child.material.wireframeLinecap = "square";
-                }
+    //             if (child.visible) {
 
 
 
-            }
-        })
-    }
+
+
+    //                 // child.castShadow = false;
+    //                 // child.receiveShadow = false;
+    //                 // child.visible = true;
+    //                 // child.material.wireframe = true;
+    //                 // child.material.wireframeLinejoin = "round";
+    //                 // child.material.wireframeLinecap = "square";
+    //             }
+
+
+
+    //         }
+    //     })
+    // }
 
 
 
@@ -7065,7 +7067,7 @@ function swaprender() {
 
 function downloadImage() {
 
-    $(".textOver").show();
+    $(".textOver").removeClass("d-none");
     html2canvas(dimensionviewer).then(canvas => {
 
         canvas.style.display = 'none'
@@ -7079,7 +7081,7 @@ function downloadImage() {
         a.setAttribute('href', image)
         a.click()
         canvas.remove()
-        $(".textOver").hide();
+        $(".textOver").addClass("d-none");
     });
 
 }
