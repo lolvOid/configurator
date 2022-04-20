@@ -313,7 +313,7 @@ function init() {
 
     dimensionviewer.appendChild(css2DRenderer.domElement);
     dimensionviewer.appendChild(dimensionRenderer.domElement);
-    dimensionCanvas = document.querySelector('#dimensionviewer :nth-child(2)')
+    // dimensionCanvas = document.querySelector('#dimensionviewer :nth-child(2)')
 
     post_process();
 
@@ -469,13 +469,14 @@ function render() {
     if (isMeasured) {
         viewer.hidden = true;
         dimensionviewer.hidden = false;
-        // $(".downloadDimension").show();
+        $(".downloadDimension").show();
+        
         $("input:radio[name='renderOptions']").prop("disabled", true);
 
     } else {
         viewer.hidden = false;
         dimensionviewer.hidden = true;
-        // $(".downloadDimension").hide();
+        $(".downloadDimension").hide();
         $("input:radio[name='renderOptions']").prop("disabled", false);
 
     }
@@ -483,7 +484,7 @@ function render() {
 
 function getInputs() {
     chooseColumns_number();
-
+    $(".textOver").hide();
     $("#actionDoor").hide();
     $("#actionDoorVisibilty").hide();
     $("#actionSlideDoorLeft").hide();
@@ -900,6 +901,7 @@ function removeColumns(index) {
             _columns = [];
             removed = [];
             removed_id = [];
+            removed_index = null;
             adjacentParts = [];
         }
     }
@@ -3906,14 +3908,26 @@ function columnsCombination() {
                     //Horizontal Splitter
                     if (_m_splitters[i]) {
                         var a = _m_splitters[i];
+                        
                         a.scale.setX(sizeToChange);
                         a.position.setX(posToChange);
-
+                        var b = _splitterEdges[i];
+                        b.scale.copy(a.scale);
+                        b.position.copy(a.position);
                         // removeHorizontalSplitter(i+1);
+                        _splitterEdges[i+1].visible = false;
+                        _m_splitters[i + 1].visible = false;
+                       
                     } else if (_m_splitters[i + 1]) {
                         var a = _m_splitters[i];
                         a.scale.setX(sizeToChange);
                         a.position.setX(posToChange);
+
+                        var b = _splitterEdges[i];
+                        b.scale.copy(a.scale);
+                        b.position.copy(a.position);
+                        
+                        _splitterEdges[i+1].visible = false;
                         _m_splitters[i + 1].visible = false;
                         // removeHorizontalSplitter(i+1);
                     }
@@ -6187,27 +6201,61 @@ function updateColumnsArrow(index) {
     var direction = to.clone().sub(from);
     var length = direction.manhattanLength();
 
-    _cLeftArrow_parent[index].setDirection(direction.normalize());
-    _cLeftArrow_parent[index].setLength(length, 0.05, 0.05);
-    _cLeftArrow_parent[index].position.copy(from.clone());
-
-    _cRightArrow_parent[index].setDirection(direction.negate().normalize());
-    _cRightArrow_parent[index].setLength(length, 0.05, 0.05);
-    _cRightArrow_parent[index].position.copy(from.clone());
-
-
-
     var lengthOffset = 12 * ((_columns_group.position.x - _columns[0].scale.x / 2) - (wLeft.position.x + wLeft.scale.x / 2)) / ftTom;
-
-
-
     _cLabels[index].element.innerHTML = (lengthOffset).toFixed(4) + " in";
     _cLabels[index].position.set(0.065, 0, 0);
+
+    if(_cLeftArrow_parent[index] instanceof THREE.ArrowHelper){
+        _cLeftArrow_parent[index].setDirection(direction.normalize());
+        _cLeftArrow_parent[index].setLength(length, 0.05, 0.05);
+        _cLeftArrow_parent[index].position.copy(from.clone());
+    }
+    if(_cRightArrow_parent[index] instanceof THREE.ArrowHelper){
+        _cRightArrow_parent[index].setDirection(direction.negate().normalize());
+        _cRightArrow_parent[index].setLength(length, 0.05, 0.05);
+        _cRightArrow_parent[index].position.copy(from.clone());
+    }
+
+    if(index == removed_index){
+        removeColumnsArrow(index+1);
+        if(_cLeftArrow_parent[index] instanceof THREE.ArrowHelper && _cUpperLabels[index] instanceof THREE.CSS2DObject){
+            
+            
+                from = new THREE.Vector3(_columns[removed_index].position.x, edgeBottom.position.y - 0.2, edgeLeft.position.z - edgeLeft.scale.z / 2);
+                to = new THREE.Vector3(_columns[removed_index].position.x - offset + thickness / 24 * ftTom, edgeBottom.position.y - 0.2, edgeLeft.position.z - edgeLeft.scale.z / 2);
+            
+        
+        
+            var direction = to.clone().sub(from);
+            var length = direction.manhattanLength();
+
+            _cLeftArrow_parent[index].setDirection(direction.normalize());
+            _cLeftArrow_parent[index].setLength(length, 0.05, 0.05);
+            _cLeftArrow_parent[index].position.copy(from.clone());
+            _cRightArrow_parent[index].setDirection(direction.negate().normalize());
+            _cRightArrow_parent[index].setLength(length, 0.05, 0.05);
+            _cRightArrow_parent[index].position.copy(from.clone());
+
+            
+            _cLabels[index].element.innerHTML = 2*(lengthOffset+thickness/2).toFixed(4) + " in";
+            
+        }
+       
+    }
+
+
+
+
+   
     // _cLabels[index].scale.set(0.125, 0.125, 0.125);
 }
 
 function removeColumnsArrow(index) {
     if (index) {
+        if(_cLabels.includes(_cLabels[index])){
+            _cLeftArrow_parent[index].remove(_cLabels[index]);
+            _cLabels[index] = null;
+        }
         if (_cLeftArrow_parent.includes(_cLeftArrow_parent[index])) {
             _cLeftArrow_group.remove(_cLeftArrow_parent[index]);
             _cLeftArrow_parent[index] = null;
@@ -6222,20 +6270,28 @@ function removeColumnsArrow(index) {
 
     } else {
 
+        
         _cLeftArrow_parent.forEach(e => {
-            _cLabels.forEach(a => {
-                e.remove(a);
-            })
-        })
-
-        _cLeftArrow_parent.forEach(e => {
-            _cLeftArrow_group.remove(e);
+            if(e instanceof THREE.ArrowHelper){
+                _cLabels.forEach(a => {
+                    if(a instanceof THREE.CSS2DObject){
+                        e.remove(a);
+                    }
+                    
+                })
+            
+                _cLeftArrow_group.remove(e);
+            }
         })
         dimensionScene.remove(_cLeftArrow_group)
         _cLeftArrow_parent = [];
-
+        _cLabels = [];
+        
         _cRightArrow_parent.forEach(e => {
-            _cRightArrow_group.remove(e);
+            if(e instanceof THREE.ArrowHelper){
+                _cRightArrow_group.remove(e);
+            }
+            
         })
         dimensionScene.remove(_cRightArrow_group)
         _cRightArrow_parent = [];
@@ -6326,19 +6382,36 @@ function updateUpperArrows(index) {
     var directionDown = toDown.clone().sub(fromDown);
     var length = direction.manhattanLength();
     var lengthDown = directionDown.manhattanLength();
-    _cUpperArrowUps_parent[index].setDirection(direction.normalize());
-    _cUpperArrowUps_parent[index].setLength(length, 0.05, 0.05);
-    _cUpperArrowUps_parent[index].position.copy(from.clone());
-
-    _cUpperArrowDowns_parent[index].setDirection(directionDown.normalize());
-    _cUpperArrowDowns_parent[index].setLength(lengthDown, 0.05, 0.05);
-    _cUpperArrowDowns_parent[index].position.copy(fromDown.clone());
 
     var lengthToSplitter = wTop.position.y - _m_splitters[index].position.y - wTop.scale.y;
-
-
     _cUpperLabels[index].element.innerHTML = (12 * lengthToSplitter / ftTom).toFixed(1) + " in";
     _cUpperLabels[index].position.set(0, -0.05, 0);
+
+    if(_cUpperArrowUps_parent[index] instanceof THREE.ArrowHelper){
+        _cUpperArrowUps_parent[index].setDirection(direction.normalize());
+        _cUpperArrowUps_parent[index].setLength(length, 0.05, 0.05);
+        _cUpperArrowUps_parent[index].position.copy(from.clone());
+    }
+    
+    if(_cUpperArrowDowns_parent[index] instanceof THREE.ArrowHelper){
+        _cUpperArrowDowns_parent[index].setDirection(directionDown.normalize());
+        _cUpperArrowDowns_parent[index].setLength(lengthDown, 0.05, 0.05);
+        _cUpperArrowDowns_parent[index].position.copy(fromDown.clone());
+    }
+
+    if(index == removed_index){
+        removeUpperArrows(index+1);
+        if(_cUpperArrowDowns_parent[index] instanceof THREE.ArrowHelper && _cUpperLabels[index] instanceof THREE.CSS2DObject){
+            
+            _cUpperArrowUps_parent[index].position.setX(_columns[removed_index].position.x);
+            _cUpperArrowDowns_parent[index].position.setX(_columns[removed_index].position.x);
+        }
+       
+    }
+   
+
+
+   
     // _cUpperLabels[index].scale.set(0.135, 0.135, 0.135);
     _cUpperArrowUp_group.position.copy(_columns_group.position.clone());
     _cUpperArrowDown_group.position.copy(_columns_group.position.clone());
@@ -6348,48 +6421,52 @@ function updateUpperArrows(index) {
 
 function removeUpperArrows(index) {
     if (index) {
-        if (_cUpperArrowUps_parent.includes(_cUpperArrowUps_parent[index])) {
+
+            
+        if(_cUpperLabels.includes(_cUpperLabels[index])){
             _cUpperArrowUps_parent[index].remove(_cUpperLabels[index]);
-            dimensionScene.remove(_cUpperArrowUps_parent[index]);
-
-
             _cUpperLabels[index] = null;
+        }
+        if (_cUpperArrowUps_parent.includes(_cUpperArrowUps_parent[index])) {
+            _cUpperArrowUp_group.remove(_cUpperArrowUps_parent[index]);
             _cUpperArrowUps_parent[index] = null;
 
         }
         if (_cUpperArrowDowns_parent.includes(_cUpperArrowDowns_parent[index])) {
-            dimensionScene.remove(_cUpperArrowDowns_parent[index]);
+            _cUpperArrowDown_group.remove(_cUpperArrowDowns_parent[index]);
             _cUpperArrowDowns_parent[index] = null;
 
         }
 
-
-        // if (_cUpperLabels.includes(_cUpperLabels[index])) {
-        //     dimensionScene.remove(_cUpperLabels_group);
-        //     _cUpperLabels[index] = null;
-
-        // }
     } else {
 
 
-        _cUpperArrowUps_parent.forEach(e => {
-            _cUpperLabels.forEach(a => {
-                e.remove(a);
-            })
-        })
-
-        _cUpperLabels = [];
-
+       
 
         _cUpperArrowUps_parent.forEach(e => {
-            _cUpperArrowUp_group.remove(e);
+            
+            if(e instanceof THREE.ArrowHelper){
+                _cUpperLabels.forEach(a => {
+                    if(a instanceof THREE.CSS2DObject){
+                        e.remove(a);
+                    }
+                    
+                })
+                _cUpperArrowUp_group.remove(e);    
+            }
+            
         })
         dimensionScene.remove(_cUpperArrowUp_group);
+        _cUpperLabels = [];
+
         _cUpperArrowUps_parent = [];
 
 
         _cUpperArrowDowns_parent.forEach(e => {
-            _cUpperArrowDown_group.remove(e);
+            if(e instanceof THREE.ArrowHelper){
+                _cUpperArrowDown_group.remove(e);
+            }
+            
         })
         dimensionScene.remove(_cUpperArrowDown_group);
         _cUpperArrowDowns_parent = [];
@@ -6455,7 +6532,7 @@ function updateLowerArrows(index) {
     var to, toDown;
     _cLowerArrowDown_group.position.copy(_columns_group.position.clone());
     _cLowerArrowUp_group.position.copy(_columns_group.position.clone());
-    _cLowerLabels_group.position.copy(_columns_group.position.clone());
+    
     var midpoint = (_m_splitters[index].position.y / 2 - wBottom.position.y + 0.05);
     var midpointdown = (_m_splitters[index].position.y / 2 - wBottom.position.y - 0.05);
     if (index == 0) {
@@ -6486,48 +6563,44 @@ function updateLowerArrows(index) {
     var length = direction.manhattanLength();
     var lengthDown = directionDown.manhattanLength();
 
-   
-
-    if(index == removed_index){
-        removeLowerArrows(index);
-        if(_cLowerArrowDowns_parent[index+1] instanceof THREE.ArrowHelper){
-            
-            var from =  new THREE.Vector3(_columns[removed_index].position.x , midpointdown, edgeLeft.position.z - edgeLeft.scale.z / 2);
-            var to = new THREE.Vector3(_columns[removed_index].position.x, wBottom.position.y + wBottom.scale.y / 2, edgeLeft.position.z - edgeLeft.scale.z / 2);
-            var direction = to.clone().sub(from);
-            var length = direction.manhattanLength();
-
-
-            _cLowerArrowDowns_parent[index+1].setDirection(direction.normalize());
-           _cLowerArrowDowns_parent[index+1].setLength(length, 0.05, 0.05);
-            _cLowerArrowDowns_parent[index+1].position.copy(from.clone());
-        }
-       
-    }else{
-        if (_cLowerArrowUps_parent[index] instanceof THREE.ArrowHelper) {
-            _cLowerArrowUps_parent[index].setDirection(direction.normalize());
-            _cLowerArrowUps_parent[index].setLength(length, 0.05, 0.05);
-            _cLowerArrowUps_parent[index].position.copy(from.clone());
-        }
-    
-        if (_cLowerArrowDowns_parent[index] instanceof THREE.ArrowHelper) {
-            _cLowerArrowDowns_parent[index].setDirection(directionDown.normalize());
-            _cLowerArrowDowns_parent[index].setLength(lengthDown, 0.05, 0.05);
-            _cLowerArrowDowns_parent[index].position.copy(fromDown.clone());
-        }
-    
-    }
     var lengthToSplitter = _m_splitters[index].position.y - _m_splitters[index].scale.y - wBottom.position.y;
-
-
     _cLowerLabels[index].element.innerHTML = (12 * lengthToSplitter / ftTom).toFixed(3) + " in";
     _cLowerLabels[index].position.set(0, -0.05, 0);
+
+    if (_cLowerArrowUps_parent[index] instanceof THREE.ArrowHelper) {
+        _cLowerArrowUps_parent[index].setDirection(direction.normalize());
+        _cLowerArrowUps_parent[index].setLength(length, 0.05, 0.05);
+        _cLowerArrowUps_parent[index].position.copy(from.clone());
+    }
+
+    if (_cLowerArrowDowns_parent[index] instanceof THREE.ArrowHelper) {
+        _cLowerArrowDowns_parent[index].setDirection(directionDown.normalize());
+        _cLowerArrowDowns_parent[index].setLength(lengthDown, 0.05, 0.05);
+        _cLowerArrowDowns_parent[index].position.copy(fromDown.clone());
+    }
+
+    if(index == removed_index){
+        removeLowerArrows(index+1);
+        if(_cLowerArrowDowns_parent[index] instanceof THREE.ArrowHelper && _cLowerLabels[index] instanceof THREE.CSS2DObject){
+            // _cLowerLabels[index].position.setX()
+            
+            _cLowerArrowUps_parent[index].position.setX(_columns[removed_index].position.x);
+            _cLowerArrowDowns_parent[index].position.setX(_columns[removed_index].position.x);
+        }
+       
+    }
+
     // _cLowerLabels[index].scale.set(0.135, 0.135, 0.135);
 
 }
 
 function removeLowerArrows(index) {
     if (index) {
+            
+        if(_cLowerLabels.includes(_cLowerLabels[index])){
+            _cLowerArrowUps_parent[index].remove(_cLowerLabels[index]);
+            _cLowerLabels[index] = null;
+        }
         if (_cLowerArrowUps_parent.includes(_cLowerArrowUps_parent[index])) {
             _cLowerArrowUp_group.remove(_cLowerArrowUps_parent[index]);
             _cLowerArrowUps_parent[index] = null;
@@ -6541,23 +6614,30 @@ function removeLowerArrows(index) {
 
 
     } else {
+   
+        
         _cLowerArrowUps_parent.forEach(e => {
-            _cLowerLabels.forEach(a => {
-                e.remove(a);
-            })
-        })
-
-        _cLowerLabels = [];
-
-        _cLowerArrowUps_parent.forEach(e => {
-            _cLowerArrowUp_group.remove(e);
+            if(e instanceof THREE.ArrowHelper){
+                _cLowerLabels.forEach(a => {        
+                    if(a instanceof THREE.CSS2DObject){
+                    e.remove(a);
+                    }
+                })
+                _cLowerArrowUp_group.remove(e);
+            }
+            
+            
         })
         dimensionScene.remove(_cLowerArrowUp_group);
         _cLowerArrowUps_parent = [];
+        _cLowerLabels = [];
 
 
         _cLowerArrowDowns_parent.forEach(e => {
-            _cLowerArrowDown_group.remove(e);
+            if(e instanceof THREE.ArrowHelper){
+                _cLowerArrowDown_group.remove(e);
+            }
+            
         })
         dimensionScene.remove(_cLowerArrowDown_group);
 
@@ -6985,12 +7065,13 @@ function swaprender() {
 
 function downloadImage() {
 
-
+    $(".textOver").show();
     html2canvas(dimensionviewer).then(canvas => {
+
         canvas.style.display = 'none'
 
         document.body.appendChild(canvas)
-        return canvas
+        return canvas;
     }).then(canvas => {
         const image = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream')
         const a = document.createElement('a')
@@ -6998,6 +7079,7 @@ function downloadImage() {
         a.setAttribute('href', image)
         a.click()
         canvas.remove()
+        $(".textOver").hide();
     });
 
 }

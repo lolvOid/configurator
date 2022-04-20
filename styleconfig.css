@@ -1,4 +1,4 @@
-#modelviewer,#dimensionviewer{
+#modelviewer, #dimensionViewer{
     width: 70%;
     height: 100%;
     position: fixed;
@@ -6,13 +6,15 @@
   
 }
 
-#modelviewer canvas, #dimensionviewer canvas{
+
+#modelviewer canvas, #dimensionViewer canvas{
   width: 100%;
   height: 100%;
   margin: 0;
   z-index: 0;
   position: fixed;
 }
+
 .rightnavigator{
    z-index: 999;
    right: 0;
@@ -52,4 +54,11 @@
   z-index: 99;
   right: 32%;
   top: 16%;
+}
+
+.textOver{
+  position: fixed;
+  bottom: 0;
+  left: 25%;
+  
 }
