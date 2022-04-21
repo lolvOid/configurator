@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name='viewport' content='width=device-width' />
+    <title>Wardrobe Config</title>
+
+
+    <link rel="stylesheet" href="./styleconfig.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://unpkg.com/@fortawesome/fontawesome-free@6.1.1/css/fontawesome.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/@fortawesome/fontawesome-free@6.1.1/css/all.min.css">
+
+
+
+    <script src="./threejs/build/three.js"></script>
+    <script src="./threejs/exporters/GLTFExporter.js"></script>
+    <script src="./threejs/controls/OrbitControls.js"></script>
+    <script src="./threejs/loaders/RGBELoader.js"></script>
+    <script src="./threejs/loaders/GLTFLoader.js"></script>
+    <script src="./threejs/postprocessing/EffectComposer.js"></script>
+    <script src="./threejs/postprocessing/SSAARenderPass.js"></script>
+    <script src="./threejs/shaders/FXAAShader.js"></script>
+    <script src="./threejs/postprocessing/RenderPass.js"></script>
+    <script src="./threejs/postprocessing/ShaderPass.js"></script>
+    <script src="./threejs/postprocessing/OutlinePass.js"></script>
+    <script src="./threejs/shaders/SSAOShader.js"></script>
+    <script src="./threejs/shaders/CopyShader.js"></script>
+    <script src="./threejs/math/SimplexNoise.js"></script>
+    <script src="./threejs/postprocessing/SSAOPass.js"></script>
+    <script src="./threejs/postprocessing/SSAARenderPass.js"></script>
+    <script src="./threejs/shaders/HorizontalBlurShader.js"></script>
+    <script src="./threejs/shaders/VerticalBlurShader.js"></script>
+    <script src="./threejs/shaders/SMAAShader.js"></script>
+    <script src="./threejs/postprocessing/SMAAPass.js"></script>
+    <script src="./threejs/loaders/FontLoader.js"></script>
+    <script src="./threejs/geometries/TextGeometry.js"></script>
+    <script src="./threejs/renderers/CSS2DRenderer.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+</head>
+
+<body>
+    <div class="rightnavigator shadow">
+        <div class="col-12">
+            <form action="POST" class="p-2 ">
+
+                <h5 class="text-center">Wardrobe Options <span style="color:chartreuse"> $$$!</span></h5>
+                <div class="form-control m-1" id="sizeOptions">
+
+
+
+                    <h6 class="m-2">Choose Dimensions:</h6>
+                    <div class="form-control m-1 ">
+                        <p>Height:</p>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input btn-check" type="radio" name="heightOptions" id="height1"
+                                value="6" checked>
+                            <label class="form-check-label btn btn-outline-secondary" for="height1">6 ft</label>
+                        </div>
+
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input btn-check" type="radio" name="heightOptions" id="height2"
+                                value="6.5">
+                            <label class="form-check-label btn btn-outline-secondary" for="height2">6.5 ft</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input btn-check" type="radio" name="heightOptions" id="height3"
+                                value="7">
+                            <label class="form-check-label btn btn-outline-secondary" for="height3">7 ft</label>
+                        </div>
+                    </div>
+                    <div class="form-control m-1 ">
+                        <label for="width">Width: <output id="rangeoutput">2.5</output> ft</label>
+                        <input type="range" name="width" id="width" class="form-range" min="2.5" max="12" step="0.5"
+                            value="2.5" oninput="rangeoutput.value = this.value">
+                    </div>
+
+
+
+
+                    <div class="form-control m-1">
+                        <p>Depth:</p>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input btn-check" type="radio" name="depthOptions" id="depth1"
+                                value="1.5" checked>
+                            <label class="form-check-label btn btn-outline-secondary" for="depth1">1.5 ft</label>
+                        </div>
+
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input btn-check" type="radio" name="depthOptions" id="depth2"
+                                value="1.75">
+                            <label class="form-check-label btn btn-outline-secondary" for="depth2">1.75 ft</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input btn-check" type="radio" name="depthOptions" id="depth3"
+                                value="2">
+                            <label class="form-check-label btn btn-outline-secondary" for="depth3">2 ft</label>
+                        </div>
+                        <!-- <a class=" btn btn-outline-success float-end" id="doneDepth"><i class="fa fa-check"></i>
+                            </a> -->
+                    </div>
+                    <div class="form-control m-1 d-md-flex">
+
+                        <div class="form-check form-switch m-2">
+                            <input class="form-check-input" type="checkbox" name="loftOptionsEnable" id="addloft">
+                            <label class="form-check-label" for="addloft" id="loftLabel"> Add Loft</label>
+                        </div>
+
+                        <div class="form-check-inline" id="loftOptionsPanel">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input btn-check" type="radio" name="loftOptions" id="loft1"
+                                    value="3" checked>
+                                <label class="form-check-label btn btn-outline-secondary" for="loft1">3 ft</label>
+                            </div>
+
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input btn-check" type="radio" name="loftOptions" id="loft2"
+                                    value="3.5">
+                                <label class="form-check-label btn btn-outline-secondary" for="loft2">3.5 ft</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input btn-check" type="radio" name="loftOptions" id="loft3"
+                                    value="4    ">
+                                <label class="form-check-label btn btn-outline-secondary" for="loft3">4 ft</label>
+                            </div>
+                            <!-- <div class="row m-2 d-flex">
+                                    <a class="btn btn-outline-dark" id="actionloftDoor"></a>
+                                </div> -->
+                        </div>
+
+
+                    </div>
+
+                    <div class="row d-flex m-1 ">
+                        <a class="btn btn-outline-success" id="doneDimensions"><i class="fa fa-check"></i>Done</a>
+
+
+                    </div>
+
+
+
+                </div>
+
+
+                <div class="form-control" id="columnDoorOptions">
+                    <a class="btn btn-outline-dark" id="backToDimensions"><i class="fa fa-chevron-left"></i></a>
+                    <div class="form-control-lg m-1 d-inline-flex">
+                        <h6 class="mt-0">Choose Doors Type:</h6>
+                        <div class="form-check form-check-inline ">
+                            <input class="form-check-input btn-check" type="radio" name="doorOptions" id="hingedDoor"
+                                value="0">
+                            <label class="form-check-label btn btn-outline-secondary " for="hingedDoor">Hinged
+                                Doors</label>
+                        </div>
+
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input btn-check" type="radio" name="doorOptions" id="slideDoor"
+                                value="1">
+                            <label class="form-check-label btn btn-outline-secondary" for="slideDoor">Sliding
+                                Door</label>
+
+                        </div>
+
+
+                    </div>
+
+                    <div class="row m-1" id="chooseColumns">
+                        <h6>Choose Columns:</h6>
+
+
+                        <div class="d-md-inline-block justify-content-center " id="columns-group">
+
+                        </div>
+
+                    </div>
+
+                    <div class="row d-flex m-1">
+                        <a class="btn btn-outline-success" id="doneColumns"><i class="fa fa-check"></i>Done</a>
+
+
+                    </div>
+                </div>
+
+                <div id="editInterior" class="form-control m-1">
+                    <a class="btn btn-outline-dark" id="backToDoors"><i class="fa fa-chevron-left"></i></a>
+                    <h6 class="m-2">Features: </h6>
+
+                    <div class="form-control m-1">
+                        <h6>Doors Actions:</h6>
+                        <div class="row m-1">
+                            <a class="btn btn-outline-dark m-1" id="actionDoorVisibility"></a>
+                            <a class="btn btn-outline-dark m-1" id="actionDoor"></a>
+                            <a class="btn btn-outline-dark m-1" id="actionSlideDoorLeft"></a>
+                            <a class="btn btn-outline-dark m-1" id="actionSlideDoorRight"></a>
+
+
+                        </div>
+                    </div>
+
+
+                    <div class="row m-2">
+
+
+                        <h6>
+                            Edit Selected Column : <span id="column_id"></span>
+                        </h6>
+
+                        <select class="form-select m-1" name="hangerOrShelf" id="hangerOrShelf">
+                            <option value="0">Select Hanger or Shelf</option>
+                            <option value="1">Hanger $5</option>
+                            <option value="2">Shelf $6</option>
+
+                        </select>
+
+                        <!-- <a class="btn btn-outline-dark m-1" style="color:#faaaee; border-color: #faaaee;"
+                            data-bs-toggle="modal" data-bs-target="#optionModal" >Add Bottom Shelves</a> -->
+                        <!-- <a class="btn btn-outline-dark m-1" style="color:#22ffaa; border-color: #22ffaa;"
+                            data-bs-toggle="modal" data-bs-target="#optionModal" >Add Splitter</a> -->
+                        <a class="btn btn-outline-dark m-1" id="addID">Add Int Drawers</a>
+                        <a class="btn btn-outline-dark m-1" id="addLocker">Add Locker $15</a>
+                        <a class="btn btn-outline-dark m-1" id="addIDS">Add I.Drawer S $35</a>
+                        <a class="btn btn-outline-dark m-1" id="addIDL">Add I.Drawer L $40</a>
+                        <a class="btn btn-outline-dark m-1" id="addED">Add E.Drawer $35</a>
+                        <a class="btn btn-outline-dark m-1" id="addBottomShelf">Add Bottom Shelf</a>
+
+                        <!-- <a class="btn btn-outline-danger m-1" id="removeAll">Remove All</a> -->
+                    </div>
+                    <label for="copyto" class="form-label m-1">Copy To:</label>
+                    <select class="form-select m-1" id="copyto" aria-label="copyto">
+                        <!-- <option selected>Copy to Column:</option>
+                        <option value="1">One</option>
+                        <option value="2">Two</option>
+                        <option value="3">Three</option> -->
+                    </select>
+
+                    <div class="row m-1">
+                        <a class="btn btn-outline-dark m-1" id="addMirror"> Add Mirror on Door </a>
+                    </div>
+                    <!-- <div class="row m-2">
+                        <h6>Add Hinged Door</h6>
+                        <a class="btn btn-outline-dark m-1" id="addHingedDoor">Add Hinged Door </a>
+                        
+                        <a class="btn btn-outline-dark m-1" id="actionDoor"></a> -->
+                    <!-- <a class="btn btn-outline-dark m-1" id="editDoor">Edit Door</a> -->
+                    <!-- <select class="form-select m-1" id="flipDoor" aria-label="flipDoor">
+                            <option selected value="0">Flip Door:</option> -->
+                    <!-- <option value="1">One</option>
+                            <option value="2">Two</option>
+                            <option value="3">Three</option> -->
+                    <!-- </select> -->
+                    <!-- </div> -->
+
+
+                </div>
+                <div class="form-control m-1">
+
+                    <h6 class="p-2">Render Options:</h6>
+                    <div class="form-check-inline" id="loftOptionsPanel">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input btn-check" type="radio" name="renderOptions"
+                                id="renderOption1" value="0" checked>
+                            <label class="form-check-label btn btn-outline-secondary" for="renderOption1">Shaded</label>
+                        </div>
+
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input btn-check" type="radio" name="renderOptions"
+                                id="renderOption2" value="1">
+                            <label class="form-check-label btn btn-outline-secondary" for="renderOption2">Debug</label>
+                        </div>
+                        <!-- <div class="form-check form-check-inline">
+                            <input class="form-check-input btn-check" type="radio" name="renderOptions"
+                                id="renderOption3" value="2">
+                            <label class="form-check-label btn btn-outline-secondary"
+                                for="renderOption3">Wireframe</label>
+                        </div> -->
+                    </div>
+
+
+                </div>
+                <div class="row m-1">
+                    <a class="btn btn-outline-success m-1" onclick="reset()"> Reset</a>
+                    <a class="btn btn-outline-dark m-1" id="export"> Export</a>
+
+                </div>
+
+<!-- 
+                <div class="row  m-1 position-relative ">
+
+                    <div class="row row-cols-1 row-cols-md-2 g-4">
+                        <div class="col">
+                          <div class="card" id="view1">
+                            
+                          
+                          </div>
+                        </div>
+                        <div class="col">
+                          <div class="card" id="view2">
+                          
+                          </div>
+                        </div>
+                        <div class="col">
+                          <div class="card" id="view3">
+                           
+                           
+                          </div>
+                        </div>
+                        <div class="col">
+                          <div class="card" id="view4">
+                            
+                          </div>
+                        </div>
+                      </div>
+                </div> -->
+
+
+            </form>
+        </div>
+    </div>
+
+
+
+
+    <div id="modelviewer">
+
+    </div>
+
+    <div id="dimensionViewer">
+
+
+        <p class="textOver d-none">
+            wardrobe dimensions &copy; configurator.freddielin.work
+        </p>
+    </div>
+
+
+    <a class="btn btn-outline-dark dimension" onclick="swaprender()"> <i class="fa fa-2x fa-ruler-combined"></i></a>
+    <a class="btn btn-outline-dark downloadDimension" onclick="downloadImage()"> <i
+            class="fa fa-2x fa-download"></i></a>
+    <div class="price">
+
+    </div>
+    <!-- Small modal -->
+
+
+
+    <script src="https://unpkg.com/@fortawesome/fontawesome-free@6.1.1/js/fontawesome.min.js"></script>
+    <script src="https://unpkg.com/@fortawesome/fontawesome-free@6.1.1/js/all.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js"
+        integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="anonymous"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"
+        integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"
+        integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous">
+    </script>
+
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script> -->
+    <script src="./wardrobeconfig.js"></script>
+</body>
+
+</html>
