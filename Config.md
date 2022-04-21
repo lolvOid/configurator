@@ -67,10 +67,7 @@ if no external -> In L to bottom
 
 divided into 4 equal
 
-
 ---
-
-
 
 Height
 Width
@@ -102,3 +99,59 @@ height of rail 0.5in
 1ft from top
 1ft from mid
 1ft from bottom
+
+
+# BED
+
+Top view
+Head board
+
+Top View
+width - 4 options 3ft, 4ft, 5ft, 6ft
+depth - 5 options > 6ft to 7ft 0.25 increment
+height - 2 options 1.25ft, 1.75ft normal and low
+
+head have five designs and textures
+width and headboard
+
+##### Storage
+
+---
+
+-top layer can be lifted
+-two drawers to two sides
+drawer dimension -> depth half -> width full
+
+if width 3 -> one side drawer
+else both side drawer
+
+thickness 1" and height 6" top
+legs width 1" height 4in
+
+mattress 5" height
+
+if Drawer
+back & front panel full 1in
+
+in 3ft one pillow
+other two pillow
+
+bed side tables
+
+
+
+# SOFAS
+
+
+Top View
+
+add button in 4 sides of square
+
+arm rest half
+and other is empty
+-Lounger
+-Chaise
+
+L shape
+U shape
+Straight Line
