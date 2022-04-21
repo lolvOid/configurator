@@ -47,61 +47,66 @@
         <div class="col-12">
             <form action="POST" class="p-2 ">
 
-                <h5 class="text-center">Wardrobe Options <span style="color:chartreuse"> $$$!</span></h5>
+                <h5 class="text-center">Bed Options <span style="color:chartreuse"></span></h5>
                 <div class="form-control m-1" id="sizeOptions">
 
 
 
                     <h6 class="m-2">Choose Dimensions:</h6>
                     <div class="form-control m-1 ">
+                        <p>Width:</p>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input btn-check" type="radio" name="widthOptions" id="width1"
+                                value="3" checked>
+                            <label class="form-check-label btn btn-outline-secondary" for="width1">3 ft</label>
+                        </div>
+
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input btn-check" type="radio" name="widthOptions" id="width2"
+                                value="4" >
+                            <label class="form-check-label btn btn-outline-secondary" for="width2">4 ft</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input btn-check" type="radio" name="widthOptions" id="width3"
+                                value="5" >
+                            <label class="form-check-label btn btn-outline-secondary" for="width3">5 ft</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input btn-check" type="radio" name="widthOptions" id="width4"
+                                value="6" >
+                            <label class="form-check-label btn btn-outline-secondary" for="width4">6 ft</label>
+                        </div>
+                        <!-- <label for="width">Width: <output id="rangeoutput">6</output> ft</label>
+                        <input type="range" name="width" id="width" class="form-range" min="3" max="6" step="1"
+                            value="3" oninput="rangeoutput.value = this.value"> -->
+                    </div>
+                    <div class="form-control m-1">
+                       
+                        <label for="depth">Depth: <output id="rangeoutput">6</output> ft</label>
+                        <input type="range" name="depth" id="depth" class="form-range" min="6" max="7" step="0.25"
+                            value="6" oninput="rangeoutput.value = this.value">
+                    </div>
+                    <div class="form-control m-1 ">
                         <p>Height:</p>
                         <div class="form-check form-check-inline">
                             <input class="form-check-input btn-check" type="radio" name="heightOptions" id="height1"
-                                value="6" checked>
-                            <label class="form-check-label btn btn-outline-secondary" for="height1">6 ft</label>
+                                value="1.25" >
+                            <label class="form-check-label btn btn-outline-secondary" for="height1">Low</label>
                         </div>
 
                         <div class="form-check form-check-inline">
                             <input class="form-check-input btn-check" type="radio" name="heightOptions" id="height2"
-                                value="6.5">
-                            <label class="form-check-label btn btn-outline-secondary" for="height2">6.5 ft</label>
+                                value="1.75" checked>
+                            <label class="form-check-label btn btn-outline-secondary" for="height2">Normal</label>
                         </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input btn-check" type="radio" name="heightOptions" id="height3"
-                                value="7">
-                            <label class="form-check-label btn btn-outline-secondary" for="height3">7 ft</label>
-                        </div>
+                        
                     </div>
-                    <div class="form-control m-1 ">
-                        <label for="width">Width: <output id="rangeoutput">2.5</output> ft</label>
-                        <input type="range" name="width" id="width" class="form-range" min="2.5" max="12" step="0.5"
-                            value="2.5" oninput="rangeoutput.value = this.value">
-                    </div>
+                    
 
 
 
 
-                    <div class="form-control m-1">
-                        <p>Depth:</p>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input btn-check" type="radio" name="depthOptions" id="depth1"
-                                value="1.5" checked>
-                            <label class="form-check-label btn btn-outline-secondary" for="depth1">1.5 ft</label>
-                        </div>
-
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input btn-check" type="radio" name="depthOptions" id="depth2"
-                                value="1.75">
-                            <label class="form-check-label btn btn-outline-secondary" for="depth2">1.75 ft</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input btn-check" type="radio" name="depthOptions" id="depth3"
-                                value="2">
-                            <label class="form-check-label btn btn-outline-secondary" for="depth3">2 ft</label>
-                        </div>
-                        <!-- <a class=" btn btn-outline-success float-end" id="doneDepth"><i class="fa fa-check"></i>
-                            </a> -->
-                    </div>
+                  
                     <div class="form-control m-1 d-md-flex">
 
                         <div class="form-check form-switch m-2">
@@ -145,44 +150,7 @@
                 </div>
 
 
-                <div class="form-control" id="columnDoorOptions">
-                    <a class="btn btn-outline-dark" id="backToDimensions"><i class="fa fa-chevron-left"></i></a>
-                    <div class="form-control-lg m-1 d-inline-flex">
-                        <h6 class="mt-0">Choose Doors Type:</h6>
-                        <div class="form-check form-check-inline ">
-                            <input class="form-check-input btn-check" type="radio" name="doorOptions" id="hingedDoor"
-                                value="0">
-                            <label class="form-check-label btn btn-outline-secondary " for="hingedDoor">Hinged
-                                Doors</label>
-                        </div>
-
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input btn-check" type="radio" name="doorOptions" id="slideDoor"
-                                value="1">
-                            <label class="form-check-label btn btn-outline-secondary" for="slideDoor">Sliding
-                                Door</label>
-
-                        </div>
-
-
-                    </div>
-
-                    <div class="row m-1" id="chooseColumns">
-                        <h6>Choose Columns:</h6>
-
-
-                        <div class="d-md-inline-block justify-content-center " id="columns-group">
-
-                        </div>
-
-                    </div>
-
-                    <div class="row d-flex m-1">
-                        <a class="btn btn-outline-success" id="doneColumns"><i class="fa fa-check"></i>Done</a>
-
-
-                    </div>
-                </div>
+         
 
                 <div id="editInterior" class="form-control m-1">
                     <a class="btn btn-outline-dark" id="backToDoors"><i class="fa fa-chevron-left"></i></a>
@@ -331,7 +299,7 @@
 
 
         <p class="textOver d-none">
-            wardrobe dimensions &copy; configurator.freddielin.work
+            bed dimensions &copy; configurator.freddielin.work
         </p>
     </div>
 
@@ -359,7 +327,7 @@
     </script>
 
     <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script> -->
-    <script src="./wardrobeconfig.js"></script>
+    <script src="./bedconfig.js"></script>
 </body>
 
 </html>
