@@ -58,9 +58,13 @@ let wall, wallRight, wallLeft, floor;
 var totalPrice = 0;
 
 
-var bedTops = [], bedLegs = [] , bedFloor;
+var bedTops = [], bedLegs = [] , bedFloor, bedDrawers= []; 
+var bedDrawerLeft = new THREE.Group();
+var bedDrawerRight = new THREE.Group();
 
 var font;
+const gltfLoader = new THREE.GLTFLoader();
+var bedMatress;
 init();
 
 animate();
@@ -109,6 +113,15 @@ function getInputs() {
         Export();
     })
 
+    $("#addDrawers").click(function(){
+        createDrawers();
+    })
+
+    $("#addMatress").click(function(){
+       
+            bedMatress.visible = true;
+      
+    })
 }
 
 function init() {
@@ -221,7 +234,7 @@ function init() {
 
     controls.minPolarAngle = 0; // radians
     controls.maxPolarAngle = Math.PI / 2;
-    controls.minAzimuthAngle = -Math.PI / 2;
+    // controls.minAzimuthAngle = -Math.PI / 2;
     controls.maxAzimuthAngle = Math.PI / 2;
     window.addEventListener('resize', onWindowResize, true);
     // document.addEventListener('pointermove', onPointerMove);
@@ -233,6 +246,8 @@ function init() {
     createBedTop();
     createBedLegs();
     bedFloor = createBox("bedFloor");
+    createMatress();
+    
 }
 
 function onWindowResize() {
@@ -274,6 +289,10 @@ function render() {
     updateBedTop()
     updateBedLegs();
     updateBedFloor();
+    updateDrawers();
+    if(bedMatress){
+        updateMatress();
+    }
     delta = clock.getDelta();
 
 
@@ -467,8 +486,8 @@ function createBox(name) {
     var m = new THREE.MeshStandardMaterial({
         color: 0xdedede,
         name: "m_" + name,
-        transparent: true,
-        opacity: 1
+        
+        
     });
     var mesh = new THREE.Mesh(g, m);
     mesh.name = "b_" + name;
@@ -501,6 +520,13 @@ function updateBedTop() {
     bedTops.forEach(e => {
         e.position.setY(fromFloor);
     });
+
+    if(bedDrawerLeft.children.length>0){
+        bedTops[0].scale.setY(wHeight*ftTom);
+        bedTops[0].position.setY(bedTops[0].scale.y/2);
+        bedTops[1].scale.setY(wHeight*ftTom);
+        bedTops[1].position.setY(bedTops[1].scale.y/2);
+    }
 }
 
 
@@ -531,6 +557,13 @@ function updateBedLegs() {
     bedLegs[3].position.setX(bedTops[1].scale.x/2);
     bedLegs[3].position.setZ(bedTops[2].scale.z/2-bedLegs[3].scale.z/2.5+bedTops[0].scale.z);
     
+    if(bedDrawerLeft.visible && bedDrawerLeft.children.length>0){
+        bedLegs[0].visible = false;
+        bedLegs[1].visible = false;
+    }else{
+        bedLegs[0].visible = true;
+        bedLegs[1].visible = true;
+    }
 }
 function createBedTop() {
     for (var i = 0; i < 4; i++) {
@@ -546,6 +579,8 @@ function createBedLegs(){
         bedLegs.push(createBox("bedLegs_" + i));
 
     }
+
+
 }
 
 
@@ -643,4 +678,144 @@ function updateBedFloor(){
     }
 
 
+}
+function createMatress(){
+  importMatress();
+    
+}
+function setMatress(matress){
+    matress.scale.set(wWidth*ftTom,4*ftTom/12,wDepth*ftTom);
+    matress.position.setY(bedFloor.position.y + bedFloor.scale.y/2)
+    
+    var mat = matress.children[0].children[0];
+
+   
+    var matNormal =texLoader.load('./models/matress/m_normal.png');
+
+    mat.castShadow = true;
+    mat.receiveShadow = true;
+    // mat.material = new THREE.MeshStandardMaterial({color:0xf0f0f0,metalness:0, map:matAlbedo, normalMap:matNormal, aoMap:matAO, flatShading:"false", bum});
+    mat.material.metalness = 0;
+
+    mat.material.color.set("#ffffff");
+    mat.material.aoIntensity = 1;
+    mat.material.bumpMap = matNormal;
+    
+    this.bedMatress = matress;
+    bedMatress.visible = false;
+    
+}
+
+function updateMatress(){
+    
+    bedMatress.scale.set(wWidth*ftTom,4*ftTom/12,wDepth*ftTom);
+    bedMatress.position.setY(bedFloor.position.y + bedFloor.scale.y/2)
+}
+
+function importMatress(){
+    
+    gltfLoader.load(
+        './models/matress/matress.gltf',
+        function (gltf){
+            scene.add(gltf.scene)        
+            setMatress(gltf.scene);
+        }
+    )
+ 
+    
+}
+
+function createDrawers(){
+    bedDrawerLeft.name = "DrawerLeft";
+    bedDrawerRight.name = "DrawerRight";
+    for (var i = 0; i < 5; i++) {
+      
+        bedDrawerLeft.add(  createBox("drawerLeft_parts"+i));
+        bedDrawerRight.add(createBox("drawerRight_parts"+i));
+    }
+
+    scene.add(bedDrawerLeft)
+    scene.add(bedDrawerRight)
+    
+}
+
+function updateDrawers(){
+
+    var height = wHeight*ftTom-bedTops[2].scale.y;
+  
+    if(bedDrawerLeft.children.length>0){
+       
+        bedDrawerLeft.children.forEach(e => {
+            e.material.color.set("#d0d0d0")
+        });
+        bedDrawerRight.children.forEach(e => {
+            e.material.color.set("#d5d5d5")
+        });
+        bedDrawerLeft.position.setY( wHeight * ftTom/2-bedTops[2].scale.y/2);
+
+        bedDrawerRight.position.setY( wHeight * ftTom/2-bedTops[2].scale.y/2);
+        
+      
+
+        bedDrawerLeft.children[0].scale.set(wWidth*ftTom,ftTom/12, wDepth*ftTom-bedLegs[0].scale.z/2-ftTom/12); // bottom
+        bedDrawerLeft.children[1].scale.set(ftTom/12,height, wDepth*ftTom-bedLegs[0].scale.z/2-ftTom/8); // left
+        bedDrawerLeft.children[2].scale.set(ftTom/12,height, wDepth*ftTom-bedLegs[0].scale.z/2-ftTom/8); // right
+        bedDrawerLeft.children[3].scale.set(wWidth*ftTom+ftTom/12,height,ftTom/12); // front
+        bedDrawerLeft.children[4].scale.set(wWidth*ftTom+ftTom/12,height,ftTom/12); // back
+
+        bedDrawerRight.children[0].scale.set(wWidth*ftTom,ftTom/12, wDepth*ftTom-bedLegs[0].scale.z/2-ftTom/12); // bottom
+        bedDrawerRight.children[1].scale.set(ftTom/12,height, wDepth*ftTom-bedLegs[0].scale.z/2-ftTom/8); // left
+        bedDrawerRight.children[2].scale.set(ftTom/12,height, wDepth*ftTom-bedLegs[0].scale.z/2-ftTom/8); // right
+        bedDrawerRight.children[3].scale.set(wWidth*ftTom+ftTom/12,height,ftTom/12); // front
+        bedDrawerRight.children[4].scale.set(wWidth*ftTom+ftTom/12,height,ftTom/12); // back
+
+
+
+        if(wWidth ==3){
+            
+            bedDrawerRight.visible = false;
+            bedDrawerLeft.position.setX(0);
+            bedDrawerLeft.children[0].scale.setX(wWidth*ftTom);
+            bedDrawerLeft.children[3].scale.setX(wWidth*ftTom);
+            bedDrawerLeft.children[4].scale.setX(wWidth*ftTom);
+
+            bedDrawerRight.children[0].scale.setX(wWidth*ftTom);
+            bedDrawerRight.children[3].scale.setX(wWidth*ftTom);
+            bedDrawerRight.children[4].scale.setX(wWidth*ftTom);
+           
+        }else{
+            bedDrawerRight.visible = true;
+            bedDrawerRight.position.setX(wWidth*ftTom/4);
+            bedDrawerLeft.position.setX(-wWidth*ftTom/4);
+
+            bedDrawerLeft.children[0].scale.setX(wWidth*ftTom/2);
+            bedDrawerLeft.children[3].scale.setX(wWidth*ftTom/2);
+            bedDrawerLeft.children[4].scale.setX(wWidth*ftTom/2);
+         
+            bedDrawerRight.children[0].scale.setX(wWidth*ftTom/2);
+            bedDrawerRight.children[3].scale.setX(wWidth*ftTom/2);
+            bedDrawerRight.children[4].scale.setX(wWidth*ftTom/2);
+        }
+        bedDrawerLeft.children[0].position.setY(-wHeight*ftTom/2+bedTops[2].scale.y/2+ftTom/24); // bottom
+        bedDrawerLeft.children[0].position.setZ(-bedLegs[0].scale.z/2+ftTom/12); // bottom
+        bedDrawerLeft.children[1].position.setX(-bedDrawerLeft.children[0].scale.x/2); // left
+        bedDrawerLeft.children[1].position.setZ(- bedLegs[0].scale.z/2+ftTom/16); // left
+        bedDrawerLeft.children[2].position.setX(bedDrawerLeft.children[0].scale.x/2); // right
+        bedDrawerLeft.children[2].position.setZ(- bedLegs[0].scale.z/2+ftTom/16); // right
+        bedDrawerLeft.children[3].position.setZ(wDepth/2*ftTom-bedLegs[0].scale.z+ftTom/24); // front
+        bedDrawerLeft.children[4].position.setZ(-wDepth/2*ftTom+ftTom/12); // back
+
+        bedDrawerRight.children[0].position.setY(-wHeight*ftTom/2+bedTops[2].scale.y/2+ftTom/24); // bottom
+        bedDrawerRight.children[0].position.setZ(-bedLegs[0].scale.z/2+ftTom/12); // bottom
+        bedDrawerRight.children[1].position.setX(-bedDrawerRight.children[0].scale.x/2); // left
+        bedDrawerRight.children[1].position.setZ(- bedLegs[0].scale.z/2+ftTom/16); // left
+        bedDrawerRight.children[2].position.setX(bedDrawerRight.children[0].scale.x/2); // right
+        bedDrawerRight.children[2].position.setZ(- bedLegs[0].scale.z/2+ftTom/16); // right
+        bedDrawerRight.children[3].position.setZ(wDepth/2*ftTom-bedLegs[0].scale.z+ftTom/24); // front
+        bedDrawerRight.children[4].position.setZ(-wDepth/2*ftTom+ftTom/12); // back
+
+    }
+
+
+   
 }

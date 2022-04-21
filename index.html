@@ -39,6 +39,7 @@
     <script src="./threejs/loaders/FontLoader.js"></script>
     <script src="./threejs/geometries/TextGeometry.js"></script>
     <script src="./threejs/renderers/CSS2DRenderer.js"></script>
+    <script src="./threejs/loaders/GLTFLoader.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 </head>
 
@@ -63,17 +64,17 @@
 
                         <div class="form-check form-check-inline">
                             <input class="form-check-input btn-check" type="radio" name="widthOptions" id="width2"
-                                value="4" >
+                                value="4">
                             <label class="form-check-label btn btn-outline-secondary" for="width2">4 ft</label>
                         </div>
                         <div class="form-check form-check-inline">
                             <input class="form-check-input btn-check" type="radio" name="widthOptions" id="width3"
-                                value="5" >
+                                value="5">
                             <label class="form-check-label btn btn-outline-secondary" for="width3">5 ft</label>
                         </div>
                         <div class="form-check form-check-inline">
                             <input class="form-check-input btn-check" type="radio" name="widthOptions" id="width4"
-                                value="6" >
+                                value="6">
                             <label class="form-check-label btn btn-outline-secondary" for="width4">6 ft</label>
                         </div>
                         <!-- <label for="width">Width: <output id="rangeoutput">6</output> ft</label>
@@ -81,7 +82,7 @@
                             value="3" oninput="rangeoutput.value = this.value"> -->
                     </div>
                     <div class="form-control m-1">
-                       
+
                         <label for="depth">Depth: <output id="rangeoutput">6</output> ft</label>
                         <input type="range" name="depth" id="depth" class="form-range" min="6" max="7" step="0.25"
                             value="6" oninput="rangeoutput.value = this.value">
@@ -90,7 +91,7 @@
                         <p>Height:</p>
                         <div class="form-check form-check-inline">
                             <input class="form-check-input btn-check" type="radio" name="heightOptions" id="height1"
-                                value="1.25" >
+                                value="1.25">
                             <label class="form-check-label btn btn-outline-secondary" for="height1">Low</label>
                         </div>
 
@@ -99,127 +100,51 @@
                                 value="1.75" checked>
                             <label class="form-check-label btn btn-outline-secondary" for="height2">Normal</label>
                         </div>
-                        
-                    </div>
-                    
-
-
-
-
-                  
-                    <div class="form-control m-1 d-md-flex">
-
-                        <div class="form-check form-switch m-2">
-                            <input class="form-check-input" type="checkbox" name="loftOptionsEnable" id="addloft">
-                            <label class="form-check-label" for="addloft" id="loftLabel"> Add Loft</label>
-                        </div>
-
-                        <div class="form-check-inline" id="loftOptionsPanel">
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input btn-check" type="radio" name="loftOptions" id="loft1"
-                                    value="3" checked>
-                                <label class="form-check-label btn btn-outline-secondary" for="loft1">3 ft</label>
-                            </div>
-
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input btn-check" type="radio" name="loftOptions" id="loft2"
-                                    value="3.5">
-                                <label class="form-check-label btn btn-outline-secondary" for="loft2">3.5 ft</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input btn-check" type="radio" name="loftOptions" id="loft3"
-                                    value="4    ">
-                                <label class="form-check-label btn btn-outline-secondary" for="loft3">4 ft</label>
-                            </div>
-                            <!-- <div class="row m-2 d-flex">
-                                    <a class="btn btn-outline-dark" id="actionloftDoor"></a>
-                                </div> -->
-                        </div>
-
 
                     </div>
 
-                    <div class="row d-flex m-1 ">
+
+
+
+
+
+
+                    <!-- <div class="row d-flex m-1 ">
                         <a class="btn btn-outline-success" id="doneDimensions"><i class="fa fa-check"></i>Done</a>
 
 
-                    </div>
+                    </div> -->
 
 
 
                 </div>
 
 
-         
+
 
                 <div id="editInterior" class="form-control m-1">
-                    <a class="btn btn-outline-dark" id="backToDoors"><i class="fa fa-chevron-left"></i></a>
+                    <!-- <a class="btn btn-outline-dark" id="backToDoors"><i class="fa fa-chevron-left"></i></a> -->
                     <h6 class="m-2">Features: </h6>
 
-                    <div class="form-control m-1">
-                        <h6>Doors Actions:</h6>
-                        <div class="row m-1">
-                            <a class="btn btn-outline-dark m-1" id="actionDoorVisibility"></a>
-                            <a class="btn btn-outline-dark m-1" id="actionDoor"></a>
-                            <a class="btn btn-outline-dark m-1" id="actionSlideDoorLeft"></a>
-                            <a class="btn btn-outline-dark m-1" id="actionSlideDoorRight"></a>
 
-
-                        </div>
-                    </div>
 
 
                     <div class="row m-2">
 
 
-                        <h6>
-                            Edit Selected Column : <span id="column_id"></span>
-                        </h6>
 
-                        <select class="form-select m-1" name="hangerOrShelf" id="hangerOrShelf">
-                            <option value="0">Select Hanger or Shelf</option>
-                            <option value="1">Hanger $5</option>
-                            <option value="2">Shelf $6</option>
 
-                        </select>
-
-                        <!-- <a class="btn btn-outline-dark m-1" style="color:#faaaee; border-color: #faaaee;"
-                            data-bs-toggle="modal" data-bs-target="#optionModal" >Add Bottom Shelves</a> -->
-                        <!-- <a class="btn btn-outline-dark m-1" style="color:#22ffaa; border-color: #22ffaa;"
-                            data-bs-toggle="modal" data-bs-target="#optionModal" >Add Splitter</a> -->
-                        <a class="btn btn-outline-dark m-1" id="addID">Add Int Drawers</a>
-                        <a class="btn btn-outline-dark m-1" id="addLocker">Add Locker $15</a>
-                        <a class="btn btn-outline-dark m-1" id="addIDS">Add I.Drawer S $35</a>
-                        <a class="btn btn-outline-dark m-1" id="addIDL">Add I.Drawer L $40</a>
+                        <a class="btn btn-outline-dark m-1" id="addDrawers">Add Drawers</a>
+                        <a class="btn btn-outline-dark m-1" id="addPillow">Add Pillow</a>
+                        <a class="btn btn-outline-dark m-1" id="addMatress">Add Matress</a>
+                        <a class="btn btn-outline-dark m-1" id="addSideTableLeft">Add Table Left</a>
+                        <a class="btn btn-outline-dark m-1" id="addSideTableRight">Add Table Right</a>
+                        <!-- <a class="btn btn-outline-dark m-1" id="addIDL">Add I.Drawer L $40</a>
                         <a class="btn btn-outline-dark m-1" id="addED">Add E.Drawer $35</a>
-                        <a class="btn btn-outline-dark m-1" id="addBottomShelf">Add Bottom Shelf</a>
+                        <a class="btn btn-outline-dark m-1" id="addBottomShelf">Add Bottom Shelf</a> -->
 
-                        <!-- <a class="btn btn-outline-danger m-1" id="removeAll">Remove All</a> -->
-                    </div>
-                    <label for="copyto" class="form-label m-1">Copy To:</label>
-                    <select class="form-select m-1" id="copyto" aria-label="copyto">
-                        <!-- <option selected>Copy to Column:</option>
-                        <option value="1">One</option>
-                        <option value="2">Two</option>
-                        <option value="3">Three</option> -->
-                    </select>
 
-                    <div class="row m-1">
-                        <a class="btn btn-outline-dark m-1" id="addMirror"> Add Mirror on Door </a>
                     </div>
-                    <!-- <div class="row m-2">
-                        <h6>Add Hinged Door</h6>
-                        <a class="btn btn-outline-dark m-1" id="addHingedDoor">Add Hinged Door </a>
-                        
-                        <a class="btn btn-outline-dark m-1" id="actionDoor"></a> -->
-                    <!-- <a class="btn btn-outline-dark m-1" id="editDoor">Edit Door</a> -->
-                    <!-- <select class="form-select m-1" id="flipDoor" aria-label="flipDoor">
-                            <option selected value="0">Flip Door:</option> -->
-                    <!-- <option value="1">One</option>
-                            <option value="2">Two</option>
-                            <option value="3">Three</option> -->
-                    <!-- </select> -->
-                    <!-- </div> -->
 
 
                 </div>
@@ -254,7 +179,7 @@
 
                 </div>
 
-<!-- 
+                <!-- 
                 <div class="row  m-1 position-relative ">
 
                     <div class="row row-cols-1 row-cols-md-2 g-4">
