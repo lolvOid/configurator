@@ -1,3 +1,7 @@
+
+
+# Wardrobe
+
 in Height - 3 options
 6ft 6.5ft 7ft
 
@@ -100,11 +104,10 @@ height of rail 0.5in
 1ft from mid
 1ft from bottom
 
-
 # BED
 
 Top view
-Head board
+Headboard
 
 Top View
 width - 4 options 3ft, 4ft, 5ft, 6ft
@@ -138,10 +141,7 @@ other two pillow
 
 bed side tables
 
-
-
 # SOFAS
-
 
 Top View
 
