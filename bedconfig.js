@@ -170,7 +170,7 @@ function getInputs() {
             $(this).removeClass("btn-outline-dark");
             bedTableRight.visible = true;
         }else{
-            $(this).html("Remove Table Right");
+            $(this).html("Add Table Right");
             $(this).addClass("btn-outline-dark");
             $(this).removeClass("btn-outline-danger");
             bedTableRight.visible = false;
