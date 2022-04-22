@@ -61,10 +61,11 @@ var totalPrice = 0;
 var bedTops = [], bedLegs = [] , bedFloor, bedDrawers= []; 
 var bedDrawerLeft = new THREE.Group();
 var bedDrawerRight = new THREE.Group();
-
+var bedTableLeft = new THREE.Group();
+var bedTableRight = new THREE.Group();
 var font;
 const gltfLoader = new THREE.GLTFLoader();
-var bedMatress;
+var bedMatress, pillowL,pillowR;
 init();
 
 animate();
@@ -76,27 +77,14 @@ function getInputs() {
     $("#depth").on("input", function () {
         wDepth = $("#depth").val();
 
-        // if (wDepth > 3) {
-        //     $("#hingedDoor").prop("checked", false);
-        //     $("#chooseColumns").hide();
 
-        //     $("#slideDoor").prop("checked", false);
-        //     $("#slideDoor").prop("disabled", false);
-        // } else {
-        //     $("#slideDoor").prop("checked", false);
-        //     $("#slideDoor").prop("disabled", true);
-        // }
-
-
-
-        // reset();
 
     })
 
 
     $("input:radio[name='heightOptions']").click(function () {
 
-        // reset();
+        
         wHeight = $(this).val();
 
     });
@@ -104,8 +92,10 @@ function getInputs() {
 
     $("input:radio[name='widthOptions']").click(function () {
 
-        // reset();
+        
         wWidth = $(this).val();
+
+       
 
     });
 
@@ -114,14 +104,80 @@ function getInputs() {
     })
 
     $("#addDrawers").click(function(){
-        createDrawers();
+      
+
+        if(!bedDrawerLeft.visible){
+            $(this).html("Remove Drawers");
+            $(this).addClass("btn-outline-danger");
+            $(this).removeClass("btn-outline-dark");
+            bedDrawerLeft.visible = true;
+        }
+        else{
+            $(this).html("Add Drawers");
+            $(this).addClass("btn-outline-dark");
+            $(this).removeClass("btn-outline-danger");
+            bedDrawerLeft.visible = false;
+            bedDrawerRight.visible = false;
+        }
+        
     })
 
     $("#addMatress").click(function(){
-       
+        
+        if(!bedMatress.visible && !pillowL.visible){
+            $(this).html("Remove Matress & Pillow");
+            $(this).addClass("btn-outline-danger");
+            $(this).removeClass("btn-outline-dark");
+
+            pillowL.visible = true;
+            
             bedMatress.visible = true;
+        }else{
+
+            $(this).html("Add Matress & Pillow");
+            $(this).addClass("btn-outline-dark");
+            $(this).removeClass("btn-outline-danger");
+            pillowL.visible = false;
+            pillowR.visible = false;
+            bedMatress.visible = false;
+        }
+            
       
     })
+
+    $("#addSideTableLeft").click(function(){
+
+      
+
+        if(!bedTableLeft.visible){
+            $(this).html("Remove Table Left");
+            $(this).addClass("btn-outline-danger");
+            $(this).removeClass("btn-outline-dark");
+            bedTableLeft.visible = true;
+        }else{
+            $(this).html("Add Table Left");
+            $(this).addClass("btn-outline-dark");
+            $(this).removeClass("btn-outline-danger");
+            bedTableLeft.visible = false;
+        }
+        
+    })
+
+    $("#addSideTableRight").click(function(){
+        if(!bedTableRight.visible){
+            $(this).html("Remove Table Right");
+            $(this).addClass("btn-outline-danger");
+            $(this).removeClass("btn-outline-dark");
+            bedTableRight.visible = true;
+        }else{
+            $(this).html("Remove Table Right");
+            $(this).addClass("btn-outline-dark");
+            $(this).removeClass("btn-outline-danger");
+            bedTableRight.visible = false;
+        }
+        
+    })
+
 }
 
 function init() {
@@ -137,7 +193,7 @@ function init() {
     font = new THREE.FontLoader().load('./assets/fonts/helvetiker_regular.typeface.json');
     camera = new THREE.PerspectiveCamera(25, fwidth / fheight, 0.01, 100);
 
-    camera.position.set(0, 0, 15);
+    camera.position.set(0, 5, 15);
     camera.aspect = fwidth / fheight;
     camera.layers.enable(0);
     camera.layers.enable(1);
@@ -160,7 +216,7 @@ function init() {
 
     create_lights();
     createFloor();
-
+    
     helpers();
 
     exporter = new THREE.GLTFExporter();
@@ -234,7 +290,7 @@ function init() {
 
     controls.minPolarAngle = 0; // radians
     controls.maxPolarAngle = Math.PI / 2;
-    // controls.minAzimuthAngle = -Math.PI / 2;
+    controls.minAzimuthAngle = -Math.PI / 2;
     controls.maxAzimuthAngle = Math.PI / 2;
     window.addEventListener('resize', onWindowResize, true);
     // document.addEventListener('pointermove', onPointerMove);
@@ -245,9 +301,12 @@ function init() {
 
     createBedTop();
     createBedLegs();
+    createDrawers();
     bedFloor = createBox("bedFloor");
     createMatress();
-    
+    createPillow();
+    createWall();
+    createBedSideTable();
 }
 
 function onWindowResize() {
@@ -290,9 +349,15 @@ function render() {
     updateBedLegs();
     updateBedFloor();
     updateDrawers();
+    updateBedSideTable();
     if(bedMatress){
         updateMatress();
     }
+
+    if(pillowL){
+        updatePillow();
+    }
+    updateWall();
     delta = clock.getDelta();
 
 
@@ -394,11 +459,11 @@ function createWall() {
 }
 
 function updateWall() {
-    if (wBack && wall) {
-        floor.position.setY(wLeft.position.y - wLeft.scale.y / 2);
+    if (bedTops.length>0 && wall) {
+      
         wallLeft.position.setX(8);
         wallRight.position.setX(-8)
-        wall.position.setZ(wBack.position.z - thickness / 12 * ftTom)
+        wall.position.setZ(bedTops[0].position.z - ftTom/12)
 
     }
 }
@@ -521,14 +586,20 @@ function updateBedTop() {
         e.position.setY(fromFloor);
     });
 
-    if(bedDrawerLeft.children.length>0){
+    if(bedDrawerLeft.visible){
         bedTops[0].scale.setY(wHeight*ftTom);
         bedTops[0].position.setY(bedTops[0].scale.y/2);
         bedTops[1].scale.setY(wHeight*ftTom);
         bedTops[1].position.setY(bedTops[1].scale.y/2);
+    }else{
+        
+        bedTops[0].scale.setY(height);
+        bedTops[0].position.setY(fromFloor);
+          
+        bedTops[1].scale.setY(height);
+        bedTops[1].position.setY(fromFloor);
     }
 }
-
 
 function updateBedLegs() {
 
@@ -582,6 +653,7 @@ function createBedLegs(){
 
 
 }
+
 
 
 function updateBedFloor(){
@@ -690,16 +762,16 @@ function setMatress(matress){
     var mat = matress.children[0].children[0];
 
    
-    var matNormal =texLoader.load('./models/matress/m_normal.png');
+    var texAO =texLoader.load('./models/matress/ao.png');
+
 
     mat.castShadow = true;
     mat.receiveShadow = true;
+    mat.material.color.set("#ffffff");
     // mat.material = new THREE.MeshStandardMaterial({color:0xf0f0f0,metalness:0, map:matAlbedo, normalMap:matNormal, aoMap:matAO, flatShading:"false", bum});
     mat.material.metalness = 0;
-
-    mat.material.color.set("#ffffff");
-    mat.material.aoIntensity = 1;
-    mat.material.bumpMap = matNormal;
+  
+    // mat.material.bumpMap = matNormal;
     
     this.bedMatress = matress;
     bedMatress.visible = false;
@@ -724,6 +796,142 @@ function importMatress(){
  
     
 }
+function createPillow(){
+    importPilow();    
+}
+
+function setPillow(pillow){
+    // pillow.children[0].material = new THREE.MeshStandardMaterial({color:0xffffff});
+    pillow.children[0].castShadow = true;
+    pillow.children[0].receiveShadow = true;
+    
+    pillowL = pillow;
+    pillowL.visible = false;
+   
+    
+    pillowR = pillow.clone();
+    
+    scene.add(pillowR);
+    
+}
+
+function updatePillow(){
+    if(bedMatress.visible){
+        pillowL.scale.set(1.8,1.8,1.8)
+        pillowR.scale.copy(pillowL.scale)
+        
+        if(wWidth>3){
+            pillowR.visible = pillowL.visible;    
+            
+            pillowL.position.setX(-bedMatress.scale.x/4);
+            pillowR.position.setX(bedMatress.scale.x/4);
+        }else{
+            
+            
+            pillowR.visible = false;
+            
+            pillowR.position.setX(0);
+            pillowL.position.setX(0);
+        }
+        
+        pillowL.position.setZ(bedMatress.position.z-bedMatress.scale.z/2+0.25)
+        pillowL.position.setY(bedMatress.position.y+bedMatress.scale.y+pillowL.scale.y*ftTom/12);
+        
+        pillowR.position.setZ(bedMatress.position.z-bedMatress.scale.z/2+0.25)
+        pillowR.position.setY(bedMatress.position.y+bedMatress.scale.y+pillowL.scale.y*ftTom/12);
+    }
+    
+}
+function importPilow(){
+     
+    gltfLoader.load(
+        './models/pillow/pillow_lp.gltf',
+        function (gltf){
+            scene.add(gltf.scene)        
+            setPillow(gltf.scene);
+            
+        }
+    )
+}
+
+function createBedSideTable(){
+    bedTableLeft.name = "BedSideTableLeft";
+    for(var i = 0 ; i < 5; i++){
+        bedTableLeft.add(createBox("bedTableLeftpart_"+i));
+        
+        bedTableRight.add(createBox("bedTableRightpart_"+i));
+       
+    }
+    scene.add(bedTableLeft);
+    scene.add(bedTableRight);
+
+    bedTableLeft.visible = false;
+    bedTableRight.visible = false;
+}
+
+function updateBedSideTable(){
+    var fromFloor = wHeight * ftTom/2 ;
+  
+    bedTableLeft.children.forEach(e=>{
+        e.position.setY(fromFloor);
+    })
+
+    bedTableLeft.children[0].scale.set(0.6, wHeight*ftTom-ftTom/12,ftTom/12); //back
+    
+    bedTableLeft.children[1].scale.set(ftTom/12,wHeight*ftTom-ftTom/12, 0.6-bedTableLeft.children[0].scale.z); //left
+    bedTableLeft.children[2].scale.set(ftTom/12,wHeight*ftTom-ftTom/12, 0.6-bedTableLeft.children[0].scale.z); // right: 
+    bedTableLeft.children[3].scale.set(0.6-ftTom/6,ftTom/12, 0.6-bedTableLeft.children[0].scale.z); //bottom
+    bedTableLeft.children[4].scale.set(0.6,ftTom/12, 0.6); //top
+
+    bedTableLeft.children[0].position.setZ(bedTops[0].position.z);
+    bedTableLeft.children[0].position.setY(bedTableLeft.children[0].scale.y/2);
+    
+    bedTableLeft.children[1].position.setX (-bedTableLeft.children[0].scale.x/2+bedTableLeft.children[1].scale.x/2);
+    bedTableLeft.children[1].position.setY(bedTableLeft.children[1].scale.y/2);
+    bedTableLeft.children[1].position.setZ (bedTableLeft.children[0].position.z+bedTableLeft.children[1].scale.z/2+bedTableLeft.children[0].scale.z/2);
+    
+    bedTableLeft.children[2].position.setY(bedTableLeft.children[2].scale.y/2);
+    bedTableLeft.children[2].position.setX (bedTableLeft.children[0].scale.x/2-bedTableLeft.children[1].scale.x/2);
+    bedTableLeft.children[2].position.setZ (bedTableLeft.children[0].position.z+bedTableLeft.children[2].scale.z/2+bedTableLeft.children[0].scale.z/2);
+   
+    bedTableLeft.children[3].position.setY (bedTableLeft.children[3].scale.y/2);
+    bedTableLeft.children[3].position.setZ(bedTableLeft.children[0].position.z+bedTableLeft.children[3].scale.z/2+bedTableLeft.children[0].scale.z/2)
+
+    bedTableLeft.children[4].position.setY (bedTableLeft.children[0].scale.y+bedTableLeft.children[4].scale.y/2);
+    bedTableLeft.children[4].position.setZ(bedTableLeft.children[0].position.z+bedTableLeft.children[4].scale.z/2-bedTableLeft.children[0].scale.z/2)
+
+  
+    bedTableRight.children.forEach(e=>{
+        e.position.setY(fromFloor);
+    })
+
+    bedTableRight.children[0].scale.set(0.6, wHeight*ftTom-ftTom/12,ftTom/12); //back
+    
+    bedTableRight.children[1].scale.set(ftTom/12,wHeight*ftTom-ftTom/12, 0.6-bedTableRight.children[0].scale.z); //left
+    bedTableRight.children[2].scale.set(ftTom/12,wHeight*ftTom-ftTom/12, 0.6-bedTableRight.children[0].scale.z); // right: 
+    bedTableRight.children[3].scale.set(0.6-ftTom/6,ftTom/12, 0.6-bedTableRight.children[0].scale.z); //bottom
+    bedTableRight.children[4].scale.set(0.6,ftTom/12, 0.6); //top
+
+    bedTableRight.children[0].position.setZ(bedTops[0].position.z);
+    bedTableRight.children[0].position.setY(bedTableRight.children[0].scale.y/2);
+    
+    bedTableRight.children[1].position.setX (-bedTableRight.children[0].scale.x/2+bedTableRight.children[1].scale.x/2);
+    bedTableRight.children[1].position.setY(bedTableRight.children[1].scale.y/2);
+    bedTableRight.children[1].position.setZ (bedTableRight.children[0].position.z+bedTableRight.children[1].scale.z/2+bedTableRight.children[0].scale.z/2);
+    
+    bedTableRight.children[2].position.setY(bedTableRight.children[2].scale.y/2);
+    bedTableRight.children[2].position.setX (bedTableRight.children[0].scale.x/2-bedTableRight.children[1].scale.x/2);
+    bedTableRight.children[2].position.setZ (bedTableRight.children[0].position.z+bedTableRight.children[2].scale.z/2+bedTableRight.children[0].scale.z/2);
+   
+    bedTableRight.children[3].position.setY (bedTableRight.children[3].scale.y/2);
+    bedTableRight.children[3].position.setZ(bedTableRight.children[0].position.z+bedTableRight.children[3].scale.z/2+bedTableRight.children[0].scale.z/2)
+
+    bedTableRight.children[4].position.setY (bedTableRight.children[0].scale.y+bedTableRight.children[4].scale.y/2);
+    bedTableRight.children[4].position.setZ(bedTableRight.children[0].position.z+bedTableRight.children[4].scale.z/2-bedTableRight.children[0].scale.z/2)
+
+    bedTableRight.position.set(bedLegs[1].position.x+bedLegs[1].scale.x+bedTableRight.children[3].scale.x/2+bedTableRight.children[1].scale.x/2,0,0)
+    bedTableLeft.position.set(bedLegs[0].position.x-bedLegs[0].scale.x-bedTableLeft.children[3].scale.x/2-bedTableLeft.children[2].scale.x/2,0,0)
+}
 
 function createDrawers(){
     bedDrawerLeft.name = "DrawerLeft";
@@ -736,7 +944,8 @@ function createDrawers(){
 
     scene.add(bedDrawerLeft)
     scene.add(bedDrawerRight)
-    
+    bedDrawerLeft.visible = false;  
+    bedDrawerRight.visible = false;
 }
 
 function updateDrawers(){
@@ -784,7 +993,7 @@ function updateDrawers(){
             bedDrawerRight.children[4].scale.setX(wWidth*ftTom);
            
         }else{
-            bedDrawerRight.visible = true;
+            bedDrawerRight.visible = bedDrawerLeft.visible;
             bedDrawerRight.position.setX(wWidth*ftTom/4);
             bedDrawerLeft.position.setX(-wWidth*ftTom/4);
 
@@ -819,3 +1028,36 @@ function updateDrawers(){
 
    
 }
+
+function reset(){
+    if(bedMatress.visible){
+        bedMatress.visible = false;
+    }
+    if(pillowL.visible){
+        pillowL.visible = false;
+    }
+    if(pillowR.visible){
+        pillowR.visible = false;
+    }
+
+    if(wWidth>3){
+        wWidth = 3;
+    }
+
+    if(wHeight!=1.75){
+        wHeight=1.75
+    }
+
+    if(wDepth>6){
+        wDepth = 6;
+    }
+
+  
+    $("#depth").val("3");
+
+    
+
+}
+
+
+
