@@ -1141,8 +1141,8 @@ function updateDrawers() {
             bedDrawerRight.remove(bedDrawerRight.children[7])
         }
 
-        if( bedDrawerLeft.children[7] ){
-            bedDrawerLeft.children[7].visible =   bedDrawerRight.visible
+        if( bedDrawerRight.children[7] ){
+            bedDrawerRight.children[7].visible =   bedDrawerRight.visible
         }
 
     }
