@@ -1077,7 +1077,7 @@ function updateDrawers() {
         } else {
             bedDrawerRight.visible = bedDrawerLeft.visible;
           
-
+            
             bedDrawerLeft.children[0].scale.setX(wWidth * ftTom / 2 - ftTom / 12);
             bedDrawerLeft.children[3].scale.setX(wWidth * ftTom / 2 - ftTom / 12);
             bedDrawerLeft.children[4].scale.setX(wWidth * ftTom / 2 - ftTom / 12);
@@ -1141,7 +1141,9 @@ function updateDrawers() {
             bedDrawerRight.remove(bedDrawerRight.children[7])
         }
 
-        
+        if( bedDrawerLeft.children[7] ){
+            bedDrawerLeft.children[7].visible =   bedDrawerRight.visible
+        }
 
     }
 
