@@ -127,6 +127,7 @@ function getInputs() {
             bedDrawerLeft.visible = false;
             bedDrawerRight.visible = false;
             if(bedDrawerLeft.children[7])bedDrawerLeft.remove(bedDrawerLeft.children[7]);
+            if(bedDrawerRight.children[7])bedDrawerRight.remove(bedDrawerRight.children[7]);
         }
 
     })
@@ -309,8 +310,9 @@ function init() {
 
 
     createBedTop();
-    createBedLegs();
+   
     createDrawers();
+     createBedLegs();
     bedFloor = createBox("bedFloor");
     createMatress();
     createPillow();
@@ -474,7 +476,7 @@ function updateWall() {
 
         wallLeft.position.setX(8);
         wallRight.position.setX(-8)
-        wall.position.setZ(bedLegs[0].position.z - bedLegs[0].scale.z / 2)
+        wall.position.setZ(bedTops[0].position.z - bedTops[0].scale.z / 2)
 
     }
 }
@@ -614,15 +616,15 @@ function updateBedTop() {
 }
 
 function updateBedLegs() {
-
-    var fromFloor = wHeight * ftTom / 2;
-    var depth = ftTom / 12;
-    var height = wHeight * ftTom;
-    var width = 4 * ftTom / 12;
+    
+    var fromFloor = wHeight * ftTom / 2-3*ftTom/12;
+    var depth = ftTom ;
+    var height = wHeight * ftTom-6*ftTom/12;
+    var width = ftTom/12;
     bedLegs.forEach(e => {
         e.position.setY(fromFloor);
         e.scale.set(width, height, depth);
-
+        e.visible = bedDrawerLeft.visible;
     });
 
     //0 Back Left
@@ -630,15 +632,22 @@ function updateBedLegs() {
     //2 Front Left
     //3 Front Right
 
-    bedLegs[0].position.setX(-bedTops[0].scale.x / 2 + bedLegs[0].scale.x / 2);
-    bedLegs[0].position.setZ(bedTops[0].position.z - bedLegs[0].scale.z);
-    bedLegs[1].position.setX(bedTops[0].scale.x / 2 - bedLegs[1].scale.x / 2);
-    bedLegs[1].position.setZ(bedTops[0].position.z - bedLegs[1].scale.z);
+    bedLegs[0].position.setX( bedTops[2].position.x );
+    bedLegs[0].position.setZ( bedTops[0].position.z+bedTops[0].scale.z/2+ bedLegs[0].scale.z/2);
+    bedLegs[1].position.setX( bedTops[3].position.x );
+    bedLegs[1].position.setZ( bedTops[0].position.z+bedTops[0].scale.z/2+ bedLegs[1].scale.z/2);
 
-    bedLegs[2].position.setX(-bedTops[1].scale.x / 2 + bedLegs[2].scale.x / 2);
-    bedLegs[2].position.setZ(bedTops[1].position.z + bedLegs[2].scale.z);
-    bedLegs[3].position.setX(bedTops[1].scale.x / 2 - bedLegs[3].scale.x / 2);
-    bedLegs[3].position.setZ(bedTops[1].position.z + bedLegs[3].scale.z);
+    
+    
+    
+    // bedLegs[0].position.setZ(bedTops[0].position.z - bedLegs[0].scale.z);
+    // bedLegs[1].position.setX(bedTops[0].scale.x / 2 - bedLegs[1].scale.x / 2);
+    // bedLegs[1].position.setZ(bedTops[0].position.z - bedLegs[1].scale.z);
+
+    // bedLegs[2].position.setX(-bedTops[1].scale.x / 2 + bedLegs[2].scale.x / 2);
+    // bedLegs[2].position.setZ(bedTops[1].position.z + bedLegs[2].scale.z);
+    // bedLegs[3].position.setX(bedTops[1].scale.x / 2 - bedLegs[3].scale.x / 2);
+    // bedLegs[3].position.setZ(bedTops[1].position.z + bedLegs[3].scale.z);
 
     // if(bedDrawerLeft.visible && bedDrawerLeft.children.length>0){
     //     bedLegs[0].visible = false;
@@ -658,7 +667,7 @@ function createBedTop() {
 }
 
 function createBedLegs() {
-    for (var i = 0; i < 4; i++) {
+    for (var i = 0; i < 2; i++) {
 
         bedLegs.push(createBox("bedLegs_" + i));
 
@@ -972,8 +981,8 @@ function updateBedSideTable() {
     bedTableRight.children[4].position.setY(bedTableRight.children[0].scale.y + bedTableRight.children[4].scale.y / 2);
     bedTableRight.children[4].position.setZ(bedTableRight.children[0].position.z + bedTableRight.children[4].scale.z / 2 - bedTableRight.children[0].scale.z / 2)
 
-    bedTableRight.position.set(bedLegs[1].position.x + bedLegs[1].scale.x / 2 + bedTableRight.children[3].scale.x / 2 + bedTableRight.children[1].scale.x, 0, bedLegs[1].position.z - bedTableRight.children[3].scale.z / 2 + bedTableRight.children[1].scale.z / 2)
-    bedTableLeft.position.set(bedLegs[0].position.x - bedLegs[0].scale.x / 2 - bedTableLeft.children[3].scale.x / 2 - bedTableLeft.children[2].scale.x, 0, bedLegs[0].position.z - bedTableLeft.children[3].scale.z / 2 + bedTableLeft.children[1].scale.z / 2)
+    bedTableRight.position.set(bedTops[0].position.x +bedTops[0].scale.x/2 + bedTableRight.children[3].scale.x / 2 + bedTableRight.children[1].scale.x, 0, bedTops[0].position.z )
+    bedTableLeft.position.set(bedTops[0].position.x -bedTops[0].scale.x/2 - bedTableLeft.children[3].scale.x / 2 - bedTableLeft.children[2].scale.x, 0,bedTops[0].position.z)
 }
 
 function createDrawers() {
@@ -994,8 +1003,8 @@ function createDrawers() {
     }
   
 
-    scene.add(bedDrawerLeft)
-    scene.add(bedDrawerRight)
+    scene.add(bedDrawerLeft);
+    scene.add(bedDrawerRight);
     bedDrawerLeft.visible = false;
     bedDrawerRight.visible = false;
 
@@ -1136,11 +1145,18 @@ function updateDrawers() {
             
             isDrawerHandleCreated = false;
         }
-        if( bedDrawerLeft.children[7]  && isDrawerHandleCreated){
-            bedDrawerLeft.remove(bedDrawerLeft.children[7])
-            bedDrawerRight.remove(bedDrawerRight.children[7])
-        }
 
+        if( isDrawerHandleCreated){
+            if(bedDrawerLeft.children[7] ){
+                bedDrawerLeft.remove(bedDrawerLeft.children[7])
+            }
+            if( bedDrawerRight.children[7]){
+            
+                bedDrawerRight.remove(bedDrawerRight.children[7])
+            }   
+           
+        }
+         
         if( bedDrawerRight.children[7] ){
             bedDrawerRight.children[7].visible =   bedDrawerRight.visible
         }
