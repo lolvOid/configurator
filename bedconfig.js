@@ -688,7 +688,7 @@ function updateBedFloor() {
     const link = document.createElement('a');
     link.style.display = 'none';
     document.body.appendChild(link);
-
+    
     function save(blob, filename) {
 
         link.href = URL.createObjectURL(blob);
@@ -756,7 +756,7 @@ function updateBedFloor() {
                 } else {
 
                     const output = JSON.stringify(gltf, null, 2);
-                    console.log(output);
+                    console.log(output);                   
                     saveString(output, 'bed.gltf');
 
                     floor.visible = true;
