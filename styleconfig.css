@@ -15,6 +15,11 @@
   position: fixed;
 }
 
+#arviewer{
+  width: 100%;
+  height: auto;
+}
+
 .rightnavigator{
    z-index: 999;
    right: 0;
