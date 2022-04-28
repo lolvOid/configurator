@@ -1,17 +1,19 @@
-$(document).ready(function () {
+import {ARButton} from "https://unpkg.com/three@0.124.0/examples/jsm/webxr/ARButton.js";
 
-})
+
 let scene, camera, orthoCamera, dimensionScene, dimensionRenderer, renderer, directionalLight, ambientLight, controls;
 let css2DRenderer;
 
 const viewer = document.getElementById("modelviewer");
 const dimensionviewer = document.getElementById("dimensionViewer");
-
+const arviewer = document.getElementById("arviewer");
 
 const fwidth = viewer.offsetWidth || dimensionviewer.offsetWidth;
 const fheight = viewer.offsetHeight || dimensionviewer.offsetHeight;
 let dimensionCanvas;
 var dimensionImage;
+
+
 
 let wWidth = 2.5,
     wHeight = 6,
@@ -192,6 +194,13 @@ var _cUpperArrowDown_group = new THREE.Group();
 var _cLowerArrowUp_group = new THREE.Group();
 var _cLowerArrowDown_group = new THREE.Group();
 
+
+let reticle;
+let gl = null;
+let hitTestSource;
+let hitTestSourceRequested = false;
+
+let isAR;
 
 var font;
 init();
@@ -5970,7 +5979,8 @@ function setPrice() {
     // console.log((12*offset/ftTom)-thickness/2)
     var intDrawer = _intDrawers_parent.filter(e => e instanceof THREE.Group);
     var dCount = 0;
-    dDoubleCount = 0;
+    var dDoubleCount = 0;
+    
 
     intDrawer.forEach(function (e) {
 
@@ -5987,7 +5997,7 @@ function setPrice() {
 
     var ts = _top_shelves_parent.filter(e => e instanceof THREE.Group);
     var tsCount = 0;
-    tsDoubleCount = 0;
+    var tsDoubleCount = 0;
 
     ts.forEach(function (e) {
 

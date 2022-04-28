@@ -1,7 +1,5 @@
-$(document).ready(function () {
 
-})
-let scene, camera, orthoCamera, dimensionScene, dimensionRenderer, renderer, directionalLight, ambientLight, controls;
+let scene, camera, orthoCameraTop,orthoCameraLeft, dimensionScene, dimensionRenderer, renderer, directionalLight, ambientLight, controls;
 let css2DRenderer;
 
 const viewer = document.getElementById("modelviewer");
@@ -12,6 +10,8 @@ const fwidth = viewer.offsetWidth || dimensionviewer.offsetWidth;
 const fheight = viewer.offsetHeight || dimensionviewer.offsetHeight;
 let dimensionCanvas;
 var dimensionImage;
+
+
 
 let wWidth = 3,
     wHeight = 1.75,
@@ -34,12 +34,13 @@ var removed = [];
 var adjacentParts = [];
 var substitubale = 0;
 var columns_group = document.getElementById("columns-group");
-
+var isMeasured = false;
 
 let top_shelves = [],
     bot_shelves = [];
 
-
+let left = 0;
+const bottom = 0;
 var clock;
 var delta = 0;
 
@@ -65,10 +66,25 @@ var bedDrawerLeft = new THREE.Group();
 var bedDrawerRight = new THREE.Group();
 var bedTableLeft = new THREE.Group();
 var bedTableRight = new THREE.Group();
+
+var bedDrawerLeft = new THREE.Group();
+var bedDrawerRight = new THREE.Group();
+var bedTableLeft = new THREE.Group();
+var bedTableRight = new THREE.Group();
+
+var bedDrawerLeftEdge = new THREE.Group();
+var bedDrawerRightEdge = new THREE.Group();
+var bedTableLeftEdge = new THREE.Group();
+var bedTableRightEdge = new THREE.Group();
+
 var font;
 const gltfLoader = new THREE.GLTFLoader();
 var bedMatress, pillowL, pillowR;
 var drawerLeft, isDrawerHandleCreated = false;
+
+var bedTopsEdges = [],bedLegsEdges=[], bedDrawersEdges = [];
+var whArrowL,whArrowR;
+
 init();
 
 animate();
@@ -110,7 +126,7 @@ function getInputs() {
             $(this).removeClass("btn-outline-dark");
             
             bedDrawerLeft.visible = true;
-
+        
             isDrawerHandleCreated = true;
     
 
@@ -123,11 +139,10 @@ function getInputs() {
             $(this).html("Add Drawers");
             $(this).addClass("btn-outline-dark");
             $(this).removeClass("btn-outline-danger");
-            removeDrawerHandle();
+           
             bedDrawerLeft.visible = false;
             bedDrawerRight.visible = false;
-            if(bedDrawerLeft.children[7])bedDrawerLeft.remove(bedDrawerLeft.children[7]);
-            if(bedDrawerRight.children[7])bedDrawerRight.remove(bedDrawerRight.children[7]);
+  
         }
 
     })
@@ -209,13 +224,21 @@ function init() {
     camera.layers.enable(1);
     camera.layers.enable(2);
 
-    orthoCamera = new THREE.OrthographicCamera(fwidth / -2, fwidth / 2, fheight / 2, fheight / -2, .001, 1000);
+    orthoCameraTop = new THREE.OrthographicCamera(fwidth / -2, fwidth / 2, fheight / 2, fheight / -2, .001, 1000);
+    
+    // orthoCameraTop.rotation.z = 180*THREE.Math.DEG2RAD;
+    orthoCameraTop.rotation.x = -90*THREE.Math.DEG2RAD;
+    orthoCameraTop.position.y = 2;
+   
+   
+    orthoCameraLeft = new THREE.OrthographicCamera(fwidth / -2, fwidth / 2, fheight / 2, fheight / -2, .001, 1000);
+    orthoCameraLeft.position.x = -1;
+    orthoCameraLeft.rotation.y = -90*THREE.Math.DEG2RAD;
 
-
-    // orthoCamera.zoom = 250;
-    orthoCamera.updateProjectionMatrix();
-    dimensionScene.add(orthoCamera);
-
+    // orthoCameraTop.zoom = 250;
+    orthoCameraTop.updateProjectionMatrix();
+    dimensionScene.add(orthoCameraTop);
+    dimensionScene.add(orthoCameraLeft);
     // camera.lookAt(wBottom.position);
 
     raycaster = new THREE.Raycaster();
@@ -262,17 +285,19 @@ function init() {
     })
     dimensionRenderer.setPixelRatio(window.devicePixelRatio);
     dimensionRenderer.setSize(fwidth, fheight);
-    dimensionRenderer.compile(dimensionScene, orthoCamera)
+    dimensionRenderer.compile(dimensionScene, orthoCameraTop)
+
+
 
 
     css2DRenderer = new THREE.CSS2DRenderer({
 
     });
-    css2DRenderer.setSize(fwidth, fheight);
+    css2DRenderer.setSize(fwidth, Math.floor(fheight/2)+100);
     css2DRenderer.domElement.style.position = 'fixed';
     // css2DRenderer.domElement.style.fontFamily = "Arial"
     css2DRenderer.domElement.style.color = '#000000';
-    css2DRenderer.domElement.style.top = '0px';
+    css2DRenderer.domElement.style.top = '-100px';
     css2DRenderer.domElement.style.left = '0px';
     css2DRenderer.domElement.style.zIndex = 1
 
@@ -297,7 +322,7 @@ function init() {
     controls.dampingFactor = 1;
     controls.target.set(0, 0.5, 0);
 
-
+    
     controls.minPolarAngle = 0; // radians
     controls.maxPolarAngle = Math.PI / 2;
     controls.minAzimuthAngle = -Math.PI / 2;
@@ -310,7 +335,7 @@ function init() {
 
 
     createBedTop();
-   
+
     createDrawers();
      createBedLegs();
     bedFloor = createBox("bedFloor");
@@ -331,13 +356,14 @@ function onWindowResize() {
 
         camera.aspect = fwidth / fheight;
         camera.updateProjectionMatrix();
-        css2DRenderer.setSize(fwidth, fheight);
+       
         // renderer.setSize(fwidth, fheight);
         composer.setSize(fwidth, fheight);
 
         dimensionRenderer.setSize(fwidth, fheight);
-        orthoCamera.updateProjectionMatrix();
-
+        css2DRenderer.setSize(fwidth, fheight);
+        orthoCameraTop.updateProjectionMatrix();
+        orthoCameraLeft.updateProjectionMatrix();
     }
     const pixelRatio = renderer.getPixelRatio();
     fxaaPass.material.uniforms['resolution'].value.x = 1 / (fwidth * pixelRatio);
@@ -358,7 +384,8 @@ function animate() {
 
 function render() {
 
-    updateBedTop()
+    updateBedTop();
+    createHorizontalArrow();
     updateBedLegs();
     updateBedFloor();
     updateDrawers();
@@ -373,11 +400,57 @@ function render() {
     updateWall();
     delta = clock.getDelta();
 
+    
+    dimensionRenderer.setViewport(left,Math.floor(fheight/2)-100,fwidth,Math.floor(fheight/2));
+    dimensionRenderer.setScissor(left, Math.floor(fheight/2)-100, fwidth,Math.floor(fheight/2));
+    dimensionRenderer.setScissorTest(true);
+    css2DRenderer.setSize(dimensionRenderer.domElement.width, Math.floor (dimensionRenderer.domElement.height/2));
+    
+    orthoCameraTop.left=fwidth / -2;
+    orthoCameraTop.right = fwidth/2;
+    orthoCameraTop.top = fheight /4 ;
+    orthoCameraTop.bottom = fheight/ -4;
+    orthoCameraTop.zoom = 200;
+    
+    orthoCameraTop.updateProjectionMatrix();
 
-    dimensionRenderer.render(dimensionScene, orthoCamera);
-    css2DRenderer.render(dimensionScene, orthoCamera);
+    dimensionRenderer.render(dimensionScene, orthoCameraTop);
+    css2DRenderer.render(dimensionScene, orthoCameraTop);
+
+    // css2DRenderer.setSize(fwidth, dimensionRenderer.domElement.height/2+100);
+    dimensionRenderer.setViewport(left,-100,fwidth,Math.floor(fheight/2));
+    dimensionRenderer.setScissor(left, -100, fwidth,Math.floor(fheight/2));
+    dimensionRenderer.setScissorTest(true);
+    
+    
+      
+    orthoCameraLeft.left=fwidth / -2;
+    orthoCameraLeft.right = fwidth/2;
+    orthoCameraLeft.top = fheight /4 ;
+    orthoCameraLeft.bottom = fheight/ -4;
+    orthoCameraLeft.zoom = 200;
+    orthoCameraLeft.updateProjectionMatrix();
+    dimensionRenderer.render(dimensionScene, orthoCameraLeft);
+  
+    
+
+    if (isMeasured) {
+        viewer.hidden = true;
+        dimensionviewer.hidden = false;
+        $(".downloadDimension").show();
+        
+        $("input:radio[name='renderOptions']").prop("disabled", true);
+
+    } else {
+        viewer.hidden = false;
+        dimensionviewer.hidden = true;
+        $(".downloadDimension").hide();
+        $("input:radio[name='renderOptions']").prop("disabled", false);
+
+    }
 
     composer.render();
+
 
 
 }
@@ -604,6 +677,12 @@ function updateBedTop() {
     bedTops[0].position.setY(bedTops[0].scale.y / 2);
     bedTops[1].scale.setY(wHeight * ftTom);
     bedTops[1].position.setY(bedTops[1].scale.y / 2);
+
+    for(var i = 0 ; i<bedLegsEdges.length;i++){
+        bedLegsEdges[i].position.copy(bedLegs[i].position);
+        bedLegsEdges[i].scale.copy(bedLegs[i].scale);
+        bedLegsEdges[i].visible = bedLegs[i].visible;
+    }
     // }
     // else{
 
@@ -613,6 +692,11 @@ function updateBedTop() {
     //     bedTops[1].scale.setY(height);
     //     bedTops[1].position.setY(fromFloor);
     // }
+    
+    for(var i = 0; i<bedTopsEdges.length;i++){
+        bedTopsEdges[i].position.copy(bedTops[i].position);
+        bedTopsEdges[i].scale.copy(bedTops[i].scale);
+    }
 }
 
 function updateBedLegs() {
@@ -638,8 +722,6 @@ function updateBedLegs() {
     bedLegs[1].position.setZ( bedTops[0].position.z+bedTops[0].scale.z/2+ bedLegs[1].scale.z/2);
 
     
-    
-    
     // bedLegs[0].position.setZ(bedTops[0].position.z - bedLegs[0].scale.z);
     // bedLegs[1].position.setX(bedTops[0].scale.x / 2 - bedLegs[1].scale.x / 2);
     // bedLegs[1].position.setZ(bedTops[0].position.z - bedLegs[1].scale.z);
@@ -662,7 +744,7 @@ function createBedTop() {
     for (var i = 0; i < 4; i++) {
 
         bedTops.push(createBox("bedTop_" + i));
-
+        bedTopsEdges.push(createEdges(bedTops[i]));
     }
 }
 
@@ -670,7 +752,7 @@ function createBedLegs() {
     for (var i = 0; i < 2; i++) {
 
         bedLegs.push(createBox("bedLegs_" + i));
-
+        bedLegsEdges.push(createEdges(bedLegs[i]));
     }
 
 
@@ -705,7 +787,7 @@ function updateBedFloor() {
         const formData = new FormData();
 
         let sceneFile = new File([blob], "bed.gltf");
-        console.log(sceneFile)
+        
         formData.append("file", sceneFile);
 
         const options = {
@@ -988,27 +1070,46 @@ function updateBedSideTable() {
 function createDrawers() {
     bedDrawerLeft.name = "DrawerLeft";
     bedDrawerRight.name = "DrawerRight";
+
+    
     for (var i = 0; i < 5; i++) {
 
         bedDrawerLeft.add(createBox("drawerLeft_parts" + i));
+       
         bedDrawerRight.add(createBox("drawerRight_parts" + i));
+
+        
     }
     
-
+    for(var i = 0;i<bedDrawerLeft.children.length;i++){
+        bedDrawerLeftEdge.add(createEdges(bedDrawerLeft.children[i]));
+        bedDrawerRightEdge.add(createEdges(bedDrawerRight.children[i]));
+    }
     
     for (var i = 0; i < 2; i++) {
 
         bedDrawerLeft.add(new THREE.Mesh( new THREE.CylinderGeometry(2 * ftTom / 12, 2 * ftTom / 12, 4 * ftTom / 12, 24, 1), bedDrawerLeft.children[0].material));
         bedDrawerRight.add(new THREE.Mesh( new THREE.CylinderGeometry(2 * ftTom / 12, 2 * ftTom / 12, 4 * ftTom / 12, 24, 1), bedDrawerRight.children[0].material));
+
+        
     }
   
+    bedDrawerLeftEdge.add(createEdges(bedDrawerLeft.children[5].clone()))
+    bedDrawerLeftEdge.add(createEdges(bedDrawerLeft.children[6].clone()))
+
+    bedDrawerRightEdge.add(createEdges(bedDrawerRight.children[5].clone()))
+    bedDrawerRightEdge.add(createEdges(bedDrawerRight.children[6].clone()))
+
+    dimensionScene.add(bedDrawerLeftEdge);
+    dimensionScene.add(bedDrawerRightEdge);
 
     scene.add(bedDrawerLeft);
     scene.add(bedDrawerRight);
+
     bedDrawerLeft.visible = false;
     bedDrawerRight.visible = false;
-
-
+    bedDrawerLeftEdge.visible = false;
+    bedDrawerRightEdge.visible = false;
 
 
     // var a=  ThreeCSG.fromMesh(bedDrawerLeft.children[1]);
@@ -1034,11 +1135,11 @@ function updateDrawers() {
         bedDrawerRight.position.setY(wHeight * ftTom / 2 - bedTops[2].scale.y / 2);
 
 
-        bedDrawerLeft.children[0].scale.set(wWidth * ftTom - ftTom / 12, ftTom / 12, wDepth * ftTom - bedTops[1].scale.z - ftTom - ftTom / 6); // bottom
+        bedDrawerLeft.children[0].scale.set(wWidth * ftTom , ftTom / 12, wDepth * ftTom - bedTops[1].scale.z - ftTom - ftTom / 6); // bottom
         bedDrawerLeft.children[1].scale.set(ftTom / 12, height, bedDrawerLeft.children[0].scale.z + ftTom / 6); // left
         bedDrawerLeft.children[2].scale.set(ftTom / 12, height, bedDrawerLeft.children[1].scale.z); // right
-        bedDrawerLeft.children[3].scale.set(wWidth * ftTom - ftTom / 12, height, ftTom / 12); // front
-        bedDrawerLeft.children[4].scale.set(bedDrawerLeft.children[3].scale.x, height, ftTom / 12); // back
+        bedDrawerLeft.children[3].scale.set( bedDrawerLeft.children[0].scale.x, height, ftTom / 12); // front
+        bedDrawerLeft.children[4].scale.set( bedDrawerLeft.children[3].scale.x, height, ftTom / 12); // back
 
         bedDrawerLeft.children[5].position.setX(bedDrawerLeft.children[1].position.x)
         bedDrawerLeft.children[5].position.setZ(bedDrawerLeft.children[1].position.z - bedDrawerLeft.children[1].scale.z / 4)
@@ -1054,8 +1155,8 @@ function updateDrawers() {
         bedDrawerRight.children[0].scale.set(wWidth * ftTom - ftTom / 12, ftTom / 12, wDepth * ftTom - bedTops[1].scale.z - ftTom - ftTom / 6); // bottom
         bedDrawerRight.children[1].scale.set(ftTom / 12, height, bedDrawerRight.children[0].scale.z + ftTom / 6); // left
         bedDrawerRight.children[2].scale.set(ftTom / 12, height, bedDrawerRight.children[1].scale.z); // right
-        bedDrawerRight.children[3].scale.set(wWidth * ftTom - ftTom / 12, height, ftTom / 12); // front
-        bedDrawerRight.children[4].scale.set(bedDrawerRight.children[3].scale.x, height, ftTom / 12); // back
+        bedDrawerRight.children[3].scale.set( bedDrawerRight.children[0].scale.x, height, ftTom / 12); // front
+        bedDrawerRight.children[4].scale.set( bedDrawerRight.children[0].scale.x, height, ftTom / 12); // back
 
 
         bedDrawerRight.children[5].position.setX(bedDrawerLeft.children[2].position.x)
@@ -1075,30 +1176,34 @@ function updateDrawers() {
             bedDrawerRight.visible = false;
             
             bedDrawerLeft.children[0].scale.setX(wWidth * ftTom - ftTom / 12);
-            bedDrawerLeft.children[3].scale.setX(wWidth * ftTom - ftTom / 12);
-            bedDrawerLeft.children[4].scale.setX(wWidth * ftTom - ftTom / 12);
+          
 
             bedDrawerRight.children[0].scale.setX(wWidth * ftTom - ftTom / 12);
-            bedDrawerRight.children[3].scale.setX(wWidth * ftTom - ftTom / 12);
-            bedDrawerRight.children[4].scale.setX(wWidth * ftTom - ftTom / 12);
+          
 
             bedDrawerLeft.position.setX(0);
+            bedDrawerRight.position.setX(0);
         } else {
             bedDrawerRight.visible = bedDrawerLeft.visible;
           
             
-            bedDrawerLeft.children[0].scale.setX(wWidth * ftTom / 2 - ftTom / 12);
-            bedDrawerLeft.children[3].scale.setX(wWidth * ftTom / 2 - ftTom / 12);
-            bedDrawerLeft.children[4].scale.setX(wWidth * ftTom / 2 - ftTom / 12);
+            bedDrawerLeft.children[0].scale.setX(wWidth * ftTom / 2 - ftTom / 6+ ftTom/24 );
+        
 
-            bedDrawerRight.children[0].scale.setX(wWidth * ftTom / 2 - ftTom / 12);
-            bedDrawerRight.children[3].scale.setX(wWidth * ftTom / 2 - ftTom / 12);
-            bedDrawerRight.children[4].scale.setX(wWidth * ftTom / 2 - ftTom / 12);
-
-            bedDrawerRight.position.setX(wWidth * ftTom / 4);
-            bedDrawerLeft.position.setX(-wWidth * ftTom / 4);
+            bedDrawerRight.children[0].scale.setX(wWidth * ftTom / 2 - ftTom / 6+ftTom/24);
+         
+            bedDrawerLeft.position.setX(-wWidth * ftTom / 4 -ftTom/48);
+            bedDrawerRight.position.setX(wWidth * ftTom / 4 +ftTom/48);
+            
         }
+        bedDrawerLeft.children[3].scale.setX( bedDrawerLeft.children[0].scale.x);
+        bedDrawerLeft.children[4].scale.setX( bedDrawerLeft.children[3].scale.x);
+        
+        bedDrawerRight.children[3].scale.setX( bedDrawerRight.children[0].scale.x);
+        bedDrawerRight.children[4].scale.setX( bedDrawerRight.children[3].scale.x);
 
+        bedDrawerLeftEdge.visible =  bedDrawerLeft.visible;
+        bedDrawerRightEdge.visible = bedDrawerRight.visible;
 
         bedDrawerLeft.children[0].position.setY(-wHeight * ftTom / 2 + bedTops[2].scale.y / 2 + ftTom / 24); // bottom
         bedDrawerLeft.children[0].position.setZ(bedTops[1].position.z - bedDrawerLeft.children[0].scale.z / 2 - bedDrawerLeft.children[4].scale.z - bedTops[1].scale.z / 2); // bottom
@@ -1125,7 +1230,7 @@ function updateDrawers() {
 
         bedDrawerRight.children[3].position.setZ(bedDrawerRight.children[0].position.z + bedDrawerRight.children[0].scale.z / 2 + bedDrawerRight.children[3].scale.z / 2); // front
         bedDrawerRight.children[4].position.setZ(bedDrawerRight.children[0].position.z - bedDrawerRight.children[0].scale.z / 2 - bedDrawerRight.children[4].scale.z / 2); // back
-
+      
 
 
         bedDrawerLeft.children[1].visible = false;
@@ -1136,30 +1241,102 @@ function updateDrawers() {
         bedDrawerRight.children[5].visible = false;
         bedDrawerRight.children[6].visible = false;
 
-        
-         
-        
-        if( !bedDrawerLeft.children[7] &&  isDrawerHandleCreated ){
-            bedDrawerLeft.add( new THREE.CSG.toMesh(THREE.CSG.fromMesh(bedDrawerLeft.children[1]).subtract(THREE.CSG.fromMesh(bedDrawerLeft.children[6])).subtract(THREE.CSG.fromMesh(bedDrawerLeft.children[5])), bedDrawerLeft.children[1].material));
-            bedDrawerRight.add( new THREE.CSG.toMesh(THREE.CSG.fromMesh(bedDrawerRight.children[2]).subtract(THREE.CSG.fromMesh(bedDrawerRight.children[6])).subtract(THREE.CSG.fromMesh(bedDrawerRight.children[5])), bedDrawerRight.children[2].material));
-            
-            isDrawerHandleCreated = false;
-        }
+      
+        // if( !bedDrawerLeft.children[7] &&  isDrawerHandleCreated ){
 
+
+        //     bedDrawerLeft.add( new THREE.CSG.toMesh(THREE.CSG.fromMesh(bedDrawerLeft.children[1]).subtract(THREE.CSG.fromMesh(bedDrawerLeft.children[6])).subtract(THREE.CSG.fromMesh(bedDrawerLeft.children[5])), bedDrawerLeft.children[1].material));
+        //     bedDrawerRight.add( new THREE.CSG.toMesh(THREE.CSG.fromMesh(bedDrawerRight.children[2]).subtract(THREE.CSG.fromMesh(bedDrawerRight.children[6])).subtract(THREE.CSG.fromMesh(bedDrawerRight.children[5])), bedDrawerRight.children[2].material));
+
+        //     // bedDrawerLeftEdge.add(bedDrawerLeft.children[7].clone());
+        //     // bedDrawerRightEdge.add(bedDrawerRight.children[7].clone());
+
+        //     isDrawerHandleCreated = false;
+        // }
+  
+        
+        
         if( isDrawerHandleCreated){
-            if(bedDrawerLeft.children[7] ){
+            if (bedDrawerLeft.children[7] ) {
                 bedDrawerLeft.remove(bedDrawerLeft.children[7])
+             
             }
-            if( bedDrawerRight.children[7]){
-            
+            if(bedDrawerLeftEdge.children[7]){
+                bedDrawerLeftEdge.remove(bedDrawerLeftEdge.children[7]);
+            }
+            if (bedDrawerRight.children[7]  ) {
+
                 bedDrawerRight.remove(bedDrawerRight.children[7])
-            }   
+               
+            }
+
+            if(bedDrawerRightEdge.children[7]){
+                bedDrawerRightEdge.remove(bedDrawerRightEdge.children[7]);
+            }
+
+            if(!bedDrawerLeft.children[7] ){
+                bedDrawerLeft.add( new THREE.CSG.toMesh(THREE.CSG.fromMesh(bedDrawerLeft.children[1]).subtract(THREE.CSG.fromMesh(bedDrawerLeft.children[6])).subtract(THREE.CSG.fromMesh(bedDrawerLeft.children[5])), bedDrawerLeft.children[1].material));
+               
+            }
+
+            if(!bedDrawerLeftEdge.children[7]){
+                bedDrawerLeftEdge.add(createEdges(bedDrawerLeft.children[7].clone()));
+          
+            }
+            if(!bedDrawerRight.children[7]){
+                bedDrawerRight.add( new THREE.CSG.toMesh(THREE.CSG.fromMesh(bedDrawerRight.children[2]).subtract(THREE.CSG.fromMesh(bedDrawerRight.children[6])).subtract(THREE.CSG.fromMesh(bedDrawerRight.children[5])), bedDrawerRight.children[2].material));
+                
+            }
+
+            
+            if(!bedDrawerRightEdge.children[7]){
+                bedDrawerRightEdge.add(createEdges(bedDrawerRight.children[7].clone()));
+            }
            
         }
-         
-        if( bedDrawerRight.children[7] ){
-            bedDrawerRight.children[7].visible =   bedDrawerRight.visible
+
+        if(!isDrawerHandleCreated){
+            if (bedDrawerLeft.children[7] ) {
+                bedDrawerLeft.remove(bedDrawerLeft.children[7])
+      
+            }
+            if(bedDrawerLeftEdge.children[7]){
+                bedDrawerLeftEdge.remove(bedDrawerLeftEdge.children[7]);
+            }
+            if (bedDrawerRight.children[7]) {
+
+                bedDrawerRight.remove(bedDrawerRight.children[7])
+                
+            }
+            if(bedDrawerRightEdge.children[7]){
+                bedDrawerRightEdge.remove(bedDrawerRightEdge.children[7]);
+            }
+            isDrawerHandleCreated = true;
         }
+         
+        
+        for(var i = 0 ; i<bedDrawerLeftEdge.children.length;i++){
+            bedDrawerLeftEdge.children[i].position.copy(bedDrawerLeft.children[i].position);
+            bedDrawerLeftEdge.children[i].scale.copy(bedDrawerLeft.children[i].scale);
+            bedDrawerLeftEdge.children[i].rotation.copy(bedDrawerLeft.children[i].rotation);
+          
+            bedDrawerLeftEdge.children[i].visible = bedDrawerLeft.children[i].visible;
+        }
+
+      
+        for(var i = 0 ; i<bedDrawerRightEdge.children.length;i++){
+         
+            bedDrawerRightEdge.children[i].position.copy(bedDrawerRight.children[i].position);
+            bedDrawerRightEdge.children[i].scale.copy(bedDrawerRight.children[i].scale);
+            bedDrawerRightEdge.children[i].rotation.copy(bedDrawerRight.children[i].rotation);
+          
+            bedDrawerRightEdge.children[i].visible = bedDrawerRight.children[i].visible;
+        }
+     
+        
+        bedDrawerLeftEdge.position.copy(bedDrawerLeft.position)
+        bedDrawerRightEdge.position.copy(bedDrawerRight.position)
+ 
 
     }
 
@@ -1200,9 +1377,97 @@ function reset() {
 function removeDrawerHandle() {
 
 
-    bedDrawerLeft.remove(drawerLeft);
 
 
+
+}
+
+
+function swaprender() {
+    isMeasured = !isMeasured;
+
+}
+
+function createEdges(object) {
+    let edges = new THREE.EdgesGeometry(object.geometry.clone());
+
+    var subject = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({
+        color: 0x000000
+    }));
+
+    dimensionScene.add(subject);
+    return subject;
+}
+
+function downloadImage() {
+
+    $(".textOver").removeClass("d-none");
+    html2canvas(dimensionviewer).then(canvas => {
+
+        canvas.style.display = 'none'
+
+        document.body.appendChild(canvas)
+        return canvas;
+    }).then(canvas => {
+        const image = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream')
+        const a = document.createElement('a')
+        a.setAttribute('download', 'bed_dimension.png')
+        a.setAttribute('href', image)
+        a.click()
+        canvas.remove()
+        $(".textOver").addClass("d-none");
+    });
+
+}
+
+function createHorizontalArrow() {
+
+    if (bedTops.length>0) {
+
+       
+        var from = new THREE.Vector3(bedTops[1].position.x, bedTops[1].position.y - 0.3, bedTops[1].position.z +bedTops[1].scale.z+0.1);
+        var to = new THREE.Vector3(-bedTops[1].scale.x/2,bedTops[1].position.y - 0.3, bedTops[1].position.z+bedTops[1].scale.z+0.1 );
+        var direction = to.clone().sub(from);
+
+        var length = direction.manhattanLength();
+
+
+
+
+        if (whArrowL == null) {
+            whArrowL = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000, 0.05, 0.05);
+            whArrowR = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000, 0.05, 0.05);
+
+            dimensionScene.add(whArrowL);
+            dimensionScene.add(whArrowR);
+
+            wValue = document.createElement('div');
+            wValue.innerHTML = (wWidth) + " ft";
+
+            wValue.style.fontSize = "15px";
+
+
+            widthLabel = new THREE.CSS2DObject(wValue);
+
+            whArrowL.add(widthLabel);
+
+        } else {
+            whArrowL.setDirection(direction.normalize());
+            whArrowL.setLength(length, 0.05, 0.05);
+            whArrowL.position.copy(from.clone());
+
+            whArrowR.setDirection(direction.negate().normalize());
+            whArrowR.setLength(length, 0.05, 0.05);
+            whArrowR.position.copy(from.clone());
+
+
+            wValue.innerHTML = (wWidth) + " ft(" + wWidth * 12 + " in)";
+            // widthLabel.position.set(0, 0,0);
+            
+            // widthLabel.scale.set(0.15, 0.15, 0.15)
+        }
+
+    }
 
 
 }
