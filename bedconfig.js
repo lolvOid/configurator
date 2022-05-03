@@ -1,6 +1,6 @@
 
 let scene, camera, orthoCameraTop,orthoCameraLeft, dimensionScene, dimensionRenderer, renderer, directionalLight, ambientLight, controls;
-let css2DRenderer;
+let css2DRenderer,css2DRenderer2;
 
 const viewer = document.getElementById("modelviewer");
 const dimensionviewer = document.getElementById("dimensionViewer");
@@ -83,8 +83,8 @@ var bedMatress, pillowL, pillowR;
 var drawerLeft, isDrawerHandleCreated = false;
 
 var bedTopsEdges = [],bedLegsEdges=[], bedDrawersEdges = [];
-var whArrowL,whArrowR;
-
+var whArrowL,whArrowR, wvArrowUp, wvArrowDown , wvvArrowUp, wvvArrowDown;
+var widthLabel,heightLabel,depthLabel, depthLabel2;
 init();
 
 animate();
@@ -142,7 +142,7 @@ function getInputs() {
            
             bedDrawerLeft.visible = false;
             bedDrawerRight.visible = false;
-  
+            
         }
 
     })
@@ -220,22 +220,30 @@ function init() {
 
     camera.position.set(0, 5, 15);
     camera.aspect = fwidth / fheight;
-    camera.layers.enable(0);
-    camera.layers.enable(1);
-    camera.layers.enable(2);
+  
 
     orthoCameraTop = new THREE.OrthographicCamera(fwidth / -2, fwidth / 2, fheight / 2, fheight / -2, .001, 1000);
     
     // orthoCameraTop.rotation.z = 180*THREE.Math.DEG2RAD;
     orthoCameraTop.rotation.x = -90*THREE.Math.DEG2RAD;
     orthoCameraTop.position.y = 2;
-   
-   
+  
     orthoCameraLeft = new THREE.OrthographicCamera(fwidth / -2, fwidth / 2, fheight / 2, fheight / -2, .001, 1000);
     orthoCameraLeft.position.x = -1;
     orthoCameraLeft.rotation.y = -90*THREE.Math.DEG2RAD;
-
+    
+  
     // orthoCameraTop.zoom = 250;
+ 
+    orthoCameraTop.layers.enable(1)
+    orthoCameraTop.layers.enable(2)
+
+    orthoCameraLeft.layers.enable(1)
+    orthoCameraLeft.layers.enable(2)
+    orthoCameraLeft.layers.enable(3)
+    orthoCameraLeft.layers.disable(0)
+
+     
     orthoCameraTop.updateProjectionMatrix();
     dimensionScene.add(orthoCameraTop);
     dimensionScene.add(orthoCameraLeft);
@@ -290,21 +298,22 @@ function init() {
 
 
 
-    css2DRenderer = new THREE.CSS2DRenderer({
-
-    });
-    css2DRenderer.setSize(fwidth, Math.floor(fheight/2)+100);
+    css2DRenderer = new THREE.CSS2DRenderer();
+    
+    css2DRenderer.setSize(fwidth,fheight);
     css2DRenderer.domElement.style.position = 'fixed';
     // css2DRenderer.domElement.style.fontFamily = "Arial"
     css2DRenderer.domElement.style.color = '#000000';
-    css2DRenderer.domElement.style.top = '-100px';
+    css2DRenderer.domElement.style.top = '0px';
     css2DRenderer.domElement.style.left = '0px';
     css2DRenderer.domElement.style.zIndex = 1
+
 
     viewer.appendChild(renderer.domElement);
 
     dimensionviewer.appendChild(css2DRenderer.domElement);
     dimensionviewer.appendChild(dimensionRenderer.domElement);
+
     // dimensionCanvas = document.querySelector('#dimensionviewer :nth-child(2)')
 
     post_process();
@@ -344,7 +353,7 @@ function init() {
     createWall();
     createBedSideTable();
     getInputs();
-
+    
 }
 
 function onWindowResize() {
@@ -359,9 +368,10 @@ function onWindowResize() {
        
         // renderer.setSize(fwidth, fheight);
         composer.setSize(fwidth, fheight);
+        css2DRenderer.setSize(fwidth,Math.floor(fheight/2));
 
         dimensionRenderer.setSize(fwidth, fheight);
-        css2DRenderer.setSize(fwidth, fheight);
+        
         orthoCameraTop.updateProjectionMatrix();
         orthoCameraLeft.updateProjectionMatrix();
     }
@@ -386,6 +396,8 @@ function render() {
 
     updateBedTop();
     createHorizontalArrow();
+    createVerticalArrows();
+    createHeightArrows();
     updateBedLegs();
     updateBedFloor();
     updateDrawers();
@@ -400,11 +412,28 @@ function render() {
     updateWall();
     delta = clock.getDelta();
 
+    if (isMeasured) {
+        viewer.hidden = true;
+        dimensionviewer.hidden = false;
+       
+        $(".downloadDimension").show();
+        
+        $("input:radio[name='renderOptions']").prop("disabled", true);
+        
+    } else {
+        viewer.hidden = false;
+        dimensionviewer.hidden = true;
+        $(".downloadDimension").hide();
+        $("input:radio[name='renderOptions']").prop("disabled", false);
+
+    }
     
-    dimensionRenderer.setViewport(left,Math.floor(fheight/2)-100,fwidth,Math.floor(fheight/2));
-    dimensionRenderer.setScissor(left, Math.floor(fheight/2)-100, fwidth,Math.floor(fheight/2));
+    dimensionRenderer.setViewport(left,Math.floor(fheight/2),fwidth,Math.floor(fheight/2));
+    dimensionRenderer.setScissor(left, Math.floor(fheight/2), fwidth,Math.floor(fheight/2));
     dimensionRenderer.setScissorTest(true);
-    css2DRenderer.setSize(dimensionRenderer.domElement.width, Math.floor (dimensionRenderer.domElement.height/2));
+  
+    
+    // css2DRenderer.setSize(dimensionRenderer.domElement.width, Math.floor (dimensionRenderer.domElement.height/2));
     
     orthoCameraTop.left=fwidth / -2;
     orthoCameraTop.right = fwidth/2;
@@ -413,41 +442,30 @@ function render() {
     orthoCameraTop.zoom = 200;
     
     orthoCameraTop.updateProjectionMatrix();
-
+    // dimensionRenderer.setClearColor(0x00ff00)
     dimensionRenderer.render(dimensionScene, orthoCameraTop);
-    css2DRenderer.render(dimensionScene, orthoCameraTop);
+  
 
     // css2DRenderer.setSize(fwidth, dimensionRenderer.domElement.height/2+100);
-    dimensionRenderer.setViewport(left,-100,fwidth,Math.floor(fheight/2));
-    dimensionRenderer.setScissor(left, -100, fwidth,Math.floor(fheight/2));
+    dimensionRenderer.setViewport(left,0,fwidth,Math.floor(fheight/2));
+    dimensionRenderer.setScissor(left, 0, fwidth,Math.floor(fheight/2));
     dimensionRenderer.setScissorTest(true);
+  
     
-    
-      
     orthoCameraLeft.left=fwidth / -2;
     orthoCameraLeft.right = fwidth/2;
     orthoCameraLeft.top = fheight /4 ;
     orthoCameraLeft.bottom = fheight/ -4;
     orthoCameraLeft.zoom = 200;
     orthoCameraLeft.updateProjectionMatrix();
+    // dimensionRenderer.setClearColor(0xff0000)
     dimensionRenderer.render(dimensionScene, orthoCameraLeft);
+
+    css2DRenderer.setSize(fwidth,fheight);
+    css2DRenderer.render(dimensionScene, orthoCameraTop);
   
     
 
-    if (isMeasured) {
-        viewer.hidden = true;
-        dimensionviewer.hidden = false;
-        $(".downloadDimension").show();
-        
-        $("input:radio[name='renderOptions']").prop("disabled", true);
-
-    } else {
-        viewer.hidden = false;
-        dimensionviewer.hidden = true;
-        $(".downloadDimension").hide();
-        $("input:radio[name='renderOptions']").prop("disabled", false);
-
-    }
 
     composer.render();
 
@@ -1385,7 +1403,11 @@ function removeDrawerHandle() {
 
 function swaprender() {
     isMeasured = !isMeasured;
-
+   
+  
+    
+    
+    
 }
 
 function createEdges(object) {
@@ -1395,7 +1417,9 @@ function createEdges(object) {
         color: 0x000000
     }));
 
+    subject.layers.set(1)
     dimensionScene.add(subject);
+
     return subject;
 }
 
@@ -1430,26 +1454,29 @@ function createHorizontalArrow() {
         var direction = to.clone().sub(from);
 
         var length = direction.manhattanLength();
-
-
-
+        var wValue;
+     
 
         if (whArrowL == null) {
             whArrowL = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000, 0.05, 0.05);
             whArrowR = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000, 0.05, 0.05);
-
+           
             dimensionScene.add(whArrowL);
             dimensionScene.add(whArrowR);
+            
+          
 
             wValue = document.createElement('div');
             wValue.innerHTML = (wWidth) + " ft";
-
+         
             wValue.style.fontSize = "15px";
 
-
+         
             widthLabel = new THREE.CSS2DObject(wValue);
-
-            whArrowL.add(widthLabel);
+            
+            dimensionScene.add(widthLabel);
+        
+            
 
         } else {
             whArrowL.setDirection(direction.normalize());
@@ -1460,11 +1487,165 @@ function createHorizontalArrow() {
             whArrowR.setLength(length, 0.05, 0.05);
             whArrowR.position.copy(from.clone());
 
-
-            wValue.innerHTML = (wWidth) + " ft(" + wWidth * 12 + " in)";
-            // widthLabel.position.set(0, 0,0);
+            widthLabel.element.innerHTML = (wWidth) + " ft(" + wWidth * 12 + " in)";
+          
+            widthLabel.position.setZ(whArrowL.position.z/2-0.65)
+          
             
             // widthLabel.scale.set(0.15, 0.15, 0.15)
+        }
+
+    }
+
+
+}
+
+
+function createVerticalArrows() {
+    
+    if (bedTops.length>0) {
+
+        var from = new THREE.Vector3(bedTops[3].position.x+ 0.1, bedTops[2].position.y - 0.5, bedTops[2].position.z );
+        var to = new THREE.Vector3(bedTops[3].position.x + 0.1,bedTops[2].position.y - 0.5, -bedTops[2].scale.z/2-bedTops[0].scale.z);
+        var direction = to.clone().sub(from);
+
+        var length = direction.manhattanLength();
+      
+        var wValue;
+     
+
+        if (wvArrowUp == null ) {
+
+            wvArrowUp = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000, 0.05, 0.05);
+            wvArrowDown = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000, 0.05, 0.05);
+            
+
+
+            wvArrowUp.traverse(function (n){
+                n.layers.set(2);
+            })
+            wvArrowDown.traverse(function (n){
+                n.layers.set(2);
+            })
+
+         
+            dimensionScene.add(wvArrowUp);
+            dimensionScene.add(wvArrowDown);
+            
+         
+            
+            
+
+            wValue = document.createElement('div');
+            wValue.innerHTML = (wDepth) + " ft";
+            wValue.style.top ="0px";
+            wValue.style.fontSize = "15px";
+
+
+            wValue2 = document.createElement('div');
+            wValue2.innerHTML = (wDepth) + " ft";
+            wValue2.style.top ="0px";
+            wValue2.style.fontSize = "15px";
+          
+            depthLabel = new THREE.CSS2DObject(wValue);
+            depthLabel2 = new THREE.CSS2DObject(wValue2);
+            
+            wvArrowUp.add(depthLabel);
+            dimensionScene.add(depthLabel2);
+            
+            
+
+        } else {
+            wvArrowUp.setDirection(direction.normalize());
+            wvArrowUp.setLength(length, 0.05, 0.05);
+            wvArrowUp.position.copy(from.clone());
+
+            wvArrowDown.setDirection(direction.negate().normalize());
+            wvArrowDown.setLength(length, 0.05, 0.05);
+            wvArrowDown.position.copy(from.clone());
+
+          
+
+            depthLabel.element.innerHTML = (wDepth) + " ft(" + wDepth * 12 + " in)";
+            depthLabel2.element.innerHTML = (wDepth) + " ft(" + wDepth * 12 + " in)";
+           
+            depthLabel.position.set(0.25,0.6,0)
+            depthLabel2.position.set(0,0,0.6-wvArrowUp.position.y/2)
+            // widthLabel.scale.set(0.15, 0.15, 0.15)
+        }
+
+    }
+
+
+}
+
+
+
+function createHeightArrows() {
+    
+    if (bedTops.length>0) {
+
+        var from = new THREE.Vector3(-bedLegs[0].position.x/2 , wHeight*ftTom/2, bedLegs[0].position.z-0.35 );
+        var to = new THREE.Vector3(-bedLegs[0].position.x/2 ,wHeight*ftTom,bedLegs[0].position.z-0.35);
+        var direction = to.clone().sub(from);
+
+        var length = direction.manhattanLength();
+      
+        var wValue;
+     
+
+        if (wvvArrowUp == null ) {
+
+            wvvArrowUp = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000, 0.05, 0.05);
+            wvvArrowDown = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000, 0.05, 0.05);
+            
+
+
+            wvvArrowUp.traverse(function (n){
+                n.layers.set(3);
+            })
+            wvvArrowDown.traverse(function (n){
+                n.layers.set(3);
+            })
+
+         
+            dimensionScene.add(wvvArrowUp);
+            dimensionScene.add(wvvArrowDown);
+            
+         
+            
+            
+
+            wValue = document.createElement('div');
+            wValue.innerHTML = (wHeight) + " ft";
+            wValue.style.top ="50%";
+            wValue.style.fontSize = "15px";
+
+
+          
+          
+            heightLabel = new THREE.CSS2DObject(wValue);
+          
+            dimensionScene.add(heightLabel);
+    
+            
+            
+
+        } else {
+            wvvArrowUp.setDirection(direction.normalize());
+            wvvArrowUp.setLength(length, 0.05, 0.05);
+            wvvArrowUp.position.copy(from.clone());
+
+            wvvArrowDown.setDirection(direction.negate().normalize());
+            wvvArrowDown.setLength(length, 0.05, 0.05);
+            wvvArrowDown.position.copy(from.clone());
+
+          
+
+            heightLabel.element.innerHTML = (wHeight) + " ft(" + wHeight * 12 + " in)";
+          
+            heightLabel.position.set(wvvArrowUp.position.z-0.3,0,-0.625-wvvArrowUp.position.y/2)
+          
         }
 
     }
