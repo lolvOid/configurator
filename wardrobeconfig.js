@@ -200,7 +200,7 @@ let hitTestSource;
 let hitTestSourceRequested = false;
 
 let isAR;
-
+var row = 0;
 var font;
 init();
 
@@ -389,8 +389,9 @@ function animate() {
 function render() {
 
     $("input:radio[name='columnsOptions']").change(function () {
+        set_columns_number($(this).val());
         if ($(this).is(":checked")) {
-           set_columns_number($(this).val());
+      
             isCreated = true;
 
         }
@@ -3713,7 +3714,7 @@ function reset_adjacents_removed_columns() {
 }
 
 function onHeightChanged(plane_index) {
-    var row = 0;
+     row = 0;
 
 
     if (wHeight == 6) {
