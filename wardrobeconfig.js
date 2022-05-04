@@ -1,4 +1,3 @@
-import {ARButton} from "https://unpkg.com/three@0.124.0/examples/jsm/webxr/ARButton.js";
 
 
 let scene, camera, orthoCamera, dimensionScene, dimensionRenderer, renderer, directionalLight, ambientLight, controls;
@@ -494,6 +493,13 @@ function render() {
 function getInputs() {
     chooseColumns_number();
     
+    $("#swapRender").click(function(){
+        swaprender();
+    })
+
+    $("#downloadImage").click(function(){
+        downloadImage();
+    })
     $("#actionDoor").hide();
     $("#actionDoorVisibilty").hide();
     $("#actionSlideDoorLeft").hide();
