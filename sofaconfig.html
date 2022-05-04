@@ -16,8 +16,8 @@
 
 
 
-    <!-- <script src="./threejs/build/three.js"></script> -->
-    <script src="https://unpkg.com/three@0.124.0/build/three.min.js"></script>
+    <script src="./threejs/build/three.js"></script>
+    <!-- <script src="https://unpkg.com/three@0.124.0/build/three.min.js"></script>
     <script src="https://unpkg.com/three@0.124.0/examples/js/exporters/GLTFExporter.js"></script>
     <script src="https://unpkg.com/three@0.124.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://unpkg.com/three@0.124.0/examples/js/exporters/GLTFExporter.js"></script>
@@ -39,11 +39,11 @@
     <script src="https://unpkg.com/three@0.124.0/examples/js/shaders/SMAAShader.js"></script>
     <script src="https://unpkg.com/three@0.124.0/examples/js/postprocessing/SMAAPass.js"></script>
     <script src="https://unpkg.com/three@0.124.0/examples/js/loaders/STLLoader.js"></script>
-    <script src="https://unpkg.com/three@0.124.0/examples/js/loaders/STLLoader.js"></script>
-    <script src="https://unpkg.com/three@0.124.0/examples/jsm/webxr/ARButton.js"></script>
+    <script src="https://unpkg.com/three@0.124.0/examples/js/loaders/STLLoader.js"></script> -->
+    
     <script src="./threejs/renderers/CSS2DRenderer.js"></script>
     <script src="./threejs/renderers/CSS3DRenderer.js"></script>
-<!--     
+    
     <script src="./threejs/exporters/GLTFExporter.js"></script>
     <script src="./threejs/controls/OrbitControls.js"></script>
     <script src="./threejs/loaders/RGBELoader.js"></script>
@@ -71,7 +71,7 @@
     
 
     
-    <script src="./threejs/loaders/STLLoader.js"></script> -->
+    <script src="./threejs/loaders/STLLoader.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="./threejs/THREE.CSG.js"></script>
     
@@ -155,14 +155,17 @@
                     <h6 class="m-2">Features: </h6>
 
 
-
+                 
 
                     <div class="row m-2">
 
+                        
+                        <h6><br> Selected Sofa : <span id="sofaIndex"></span></h6>
 
-
-
-                        <!-- <a class="btn btn-outline-dark m-1" id="addDrawers">Add Drawers</a> -->
+                        <a class="btn btn-outline-dark m-1" id="addLeft">Add Left</a>
+                        <a class="btn btn-outline-dark m-1" id="addRight">Add Right</a>
+                        <a class="btn btn-outline-dark m-1" id="addCornerDouble">Add Corner Double</a>
+                        <a class="btn btn-outline-dark m-1" id="addCorner">Add Corner Single</a>
                         
                         <!-- <a class="btn btn-outline-dark m-1" id="addMatress">Add Matress & Pillow</a> -->
                         
