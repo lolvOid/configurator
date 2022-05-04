@@ -390,6 +390,7 @@ function render() {
 
     $("input:radio[name='columnsOptions']").change(function () {
         if ($(this).is(":checked")) {
+           set_columns_number($(this).val());
             isCreated = true;
 
         }
@@ -3674,7 +3675,7 @@ function chooseColumns_number() {
             columns_radio.type = "radio";
             columns_radio.value = (i + 1);
             columns_radio.id = "columns_" + (i + 1);
-            columns_radio.setAttribute("onclick", "set_columns_number(" + (i + 1) + ")");
+            // columns_radio.setAttribute("onclick", "set_columns_number(" + (i + 1) + ")");
             columns_radio.className = "form-check-input columns-change  btn-check";
             columns_radio.name = "columnsOptions";
 
