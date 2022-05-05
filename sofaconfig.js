@@ -87,6 +87,12 @@ function getInputs() {
         Export();
     })
 
+    
+    $("#addDouble").click(function () {
+        addDoubleBox(currentSofaIndex)
+        // createSofa(currentSofaIndex, "right");
+    })
+    
     $("#addLeft").click(function () {
 
         addBoxLeft(currentSofaIndex)
@@ -105,11 +111,16 @@ function getInputs() {
         isCorner = true;
     })
 
+    $("#addFront").click(function () {
+        addBoxFront(currentSofaIndex)
+        // createSofa(currentSofaIndex, "right");
+    })
     $("#addCorner").click(function () {
         addCornerSingle(currentSofaIndex)
         // createSofa(currentSofaIndex, "cornersingle");
         isCorner = true;
     })
+
 }
 
 function init() {
@@ -269,7 +280,7 @@ function init() {
 
 function onWindowResize() {
     const canvas = renderer.domElement;
-
+    
     const width = canvas.clientWidth;
     const height = canvas.clientHeight;
     if (canvas.width !== width || canvas.height !== height) {
@@ -296,15 +307,14 @@ function onWindowResize() {
 function animate() {
     requestAnimationFrame(animate);
 
-    controls.update();
+   
 
-
+    update();   
     render();
-
+    
 }
-
-function render() {
-
+function update(){
+    controls.update();
     $("#sofaIndex").html(currentSofaIndex);
     delta = clock.getDelta();
     checkSofas();
@@ -323,6 +333,9 @@ function render() {
         $("input:radio[name='renderOptions']").prop("disabled", false);
 
     }
+
+}
+function render() {
 
     dimensionRenderer.setViewport(left, Math.floor(fheight / 2), fwidth, Math.floor(fheight / 2));
     dimensionRenderer.setScissor(left, Math.floor(fheight / 2), fwidth, Math.floor(fheight / 2));
@@ -649,6 +662,56 @@ function addBoxRight(index){
         box_group.add(e);
     })
 }
+function addBoxFront(index){
+    var s = boxes[index].clone();
+    if(s.children[2]){
+        s.remove(s.children[2])
+    }
+    
+  
+    s.children[1].scale.setX(1);
+    s.children[1].position.setX(s.children[0].position.x)
+ 
+
+    s.position.set(boxes[index].position.x,boxes[index].position.y,boxes[index].position.z+boxes[index].scale.z);
+    s.rotation.y = -90 * THREE.MathUtils.DEG2RAD;
+    s.name= "sofa_"+(index+1);
+    boxes.push(s);
+    boxes.forEach(e=>{
+        box_group.add(e);
+    })
+}
+
+function addDoubleBox(index){
+    var s = boxes[index].clone();
+    s.scale.setX( 4*ftTom);
+    
+    if(boxes[index].rotation.y <0){
+        s.rotation.y = boxes[index].rotation.y
+        if(!isCorner){
+            s.position.set(boxes[index].position.x,boxes[index].position.y,boxes[index].position.z+s.scale.z/2+boxes[index].scale.z);
+        }
+     
+    }else{
+        if(!isLeft){
+            s.position.set(boxes[index].position.x-s.scale.x/4-boxes[index].scale.x,boxes[index].position.y,boxes[index].position.z);
+        }
+        if(!isRight){
+            s.position.set(boxes[index].position.x+s.scale.x/4+boxes[index].scale.x,boxes[index].position.y,boxes[index].position.z);
+        }
+    }
+   
+   
+    
+   
+    s.name= "sofa_"+(index+1);
+
+    boxes[index] = s;
+    boxes.forEach(e=>{
+        box_group.add(e);
+    })
+
+}
 
 function addCornerSingle(index){
     
@@ -664,7 +727,7 @@ function addCornerSingle(index){
     b.position.setX(s.children[1].scale.x/2+b.scale.x/7);
 
     b.position.setZ(s.children[1].scale.z/2-b.scale.z/2);
-
+    
     s.children[1].scale.setX(s.scale.x/2+b.scale.x)
    s.children[1].position.setX(s.children[0].position.x+s.children[1].scale.x/9)
            
@@ -677,6 +740,17 @@ function addCornerSingle(index){
     boxes.forEach(e=>{
         box_group.add(e);
     })
+    if(isLeft){
+        s.scale.setX(s.scale.x*1);
+    }
+    
+    if(isRight){
+        s.scale.setX(s.scale.x*-1);
+    }
+
+  if(sofas[index].rotation.y == -90){
+      s.rotation.y = -Math.PI/2;
+  }
 }
 function addCornerDouble(index){
     var s = boxes[index];
@@ -903,62 +977,64 @@ function updateArmRest(index) {
 }
 
 function checkSofas() {
+    if(currentSofaIndex !=-1){
+// $("#sofaIndex").html(currentSofaIndex);
+isLeft = false;
+isRight = false;
+$("#addLeft").removeClass("disabled");
+$("#addRight").removeClass("disabled");
+var arr = [];
+for (var i = 0; i < boxes.length; i++) {
 
-    // $("#sofaIndex").html(currentSofaIndex);
-    isLeft = false;
-    isRight = false;
-    $("#addLeft").removeClass("disabled");
-    $("#addRight").removeClass("disabled");
-    var arr = [];
-    for (var i = 0; i < boxes.length; i++) {
-
-        if (boxes[i] instanceof THREE.Mesh) {
-
-
-            // console.log("sofa "+currentSofaIndex + "- "+"sofa "+i+" = "+ ((boxes[currentSofaIndex].position.z-boxes[i].position.z).toFixed(1)))
-            if((boxes[currentSofaIndex].position.z- boxes[i].position.z).toFixed(1) > 0){
-                $("#addCorner").removeClass("disabled");
-            }else if((boxes[currentSofaIndex].position.z- boxes[i].position.z).toFixed(1) < 0){
-                $("#addCorner").addClass("disabled");
-            }
-            
-            if ((boxes[currentSofaIndex].position.x - boxes[i].position.x).toFixed(1) > 0) {
-                isLeft = true;
-                //  console.log("sofa "+currentSofaIndex + "- "+"sofa "+i+" = "+ ((sofas[currentSofaIndex].position.x-sofas[i].position.x).toFixed(1)))
-                
-
-                $("#addLeft").addClass("disabled");
-
-            } else if ((boxes[currentSofaIndex].position.x - boxes[i].position.x).toFixed(1) < 0) {
-
-                isRight = true;
-                
-
-                $("#addRight").addClass("disabled");
-            }
-            // if(Math.abs(Math.round(sofas[i].position.x- sofas[currentSofaIndex].position.x))){
-
-            // }
-            // arr.push((sofas[currentSofaIndex].position.x - sofas[i].position.x).toFixed(1));
+    if (boxes[i] instanceof THREE.Mesh) {
 
 
-            // var max = Math.max.apply(Math, arr);
-            // var min = Math.min.apply(Math, arr);
-
-            // if ((sofas[currentSofaIndex].position.x - sofas[i].position.x).toFixed(1) == max) {
-            //     s_armL.position.setX(sofas[i].position.x - s_armL.scale.x / 2);
-            //     s_armL.position.setZ(sofas[i].position.z - s_armL.scale.z / 2);
-
-            // }
-
-            // if ((sofas[currentSofaIndex].position.x - sofas[i].position.x).toFixed(1) == min) {
-            //     s_armR.position.setX(sofas[i].position.x + s_armR.scale.x / 2 + sofas[i].children[0].scale.x);
-            //     s_armR.position.setZ(sofas[i].position.z - s_armR.scale.z / 2);
-
-            // }
-
+        // console.log("sofa "+currentSofaIndex + "- "+"sofa "+i+" = "+ ((boxes[currentSofaIndex].position.z-boxes[i].position.z).toFixed(1)))
+        if((boxes[currentSofaIndex].position.z- boxes[i].position.z).toFixed(1) > 0){
+            $("#addCorner").removeClass("disabled");
+        }else if((boxes[currentSofaIndex].position.z- boxes[i].position.z).toFixed(1) < 0){
+            $("#addCorner").addClass("disabled");
         }
+        
+        if ((boxes[currentSofaIndex].position.x - boxes[i].position.x).toFixed(1) > 0) {
+            isLeft = true;
+            //  console.log("sofa "+currentSofaIndex + "- "+"sofa "+i+" = "+ ((sofas[currentSofaIndex].position.x-sofas[i].position.x).toFixed(1)))
+            
+            
+            $("#addLeft").addClass("disabled");
+
+        } else if ((boxes[currentSofaIndex].position.x - boxes[i].position.x).toFixed(1) < 0) {
+
+            isRight = true;
+            
+
+            $("#addRight").addClass("disabled");
+        }
+        // if(Math.abs(Math.round(sofas[i].position.x- sofas[currentSofaIndex].position.x))){
+
+        // }
+        // arr.push((sofas[currentSofaIndex].position.x - sofas[i].position.x).toFixed(1));
+
+
+        // var max = Math.max.apply(Math, arr);
+        // var min = Math.min.apply(Math, arr);
+
+        // if ((sofas[currentSofaIndex].position.x - sofas[i].position.x).toFixed(1) == max) {
+        //     s_armL.position.setX(sofas[i].position.x - s_armL.scale.x / 2);
+        //     s_armL.position.setZ(sofas[i].position.z - s_armL.scale.z / 2);
+
+        // }
+
+        // if ((sofas[currentSofaIndex].position.x - sofas[i].position.x).toFixed(1) == min) {
+        //     s_armR.position.setX(sofas[i].position.x + s_armR.scale.x / 2 + sofas[i].children[0].scale.x);
+        //     s_armR.position.setZ(sofas[i].position.z - s_armR.scale.z / 2);
+
+        // }
+
     }
+}
+    }
+    
 
 }
 
