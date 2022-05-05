@@ -83,8 +83,8 @@ var bedMatress, pillowL, pillowR;
 var drawerLeft, isDrawerHandleCreated = false;
 
 var bedTopsEdges = [],bedLegsEdges=[], bedDrawersEdges = [];
-var whArrowL,whArrowR, wvArrowUp, wvArrowDown , wvvArrowUp, wvvArrowDown;
-var widthLabel,heightLabel,depthLabel, depthLabel2;
+var whArrowL,whArrowR, wvArrowUp, wvArrowDown , wvvArrowUp, wvvArrowDown , wdArrowUp, wdArrowDown ,wdArrowUp2, wdArrowDown2 ,wdArrowUp3, wdArrowDown3  ;
+var widthLabel,heightLabel,depthLabel, depthLabel2 , drawerLabel, drawerLabel2,drawerLabel3;
 init();
 
 animate();
@@ -237,10 +237,12 @@ function init() {
  
     orthoCameraTop.layers.enable(1)
     orthoCameraTop.layers.enable(2)
+    orthoCameraTop.layers.enable(4)
 
     orthoCameraLeft.layers.enable(1)
     orthoCameraLeft.layers.enable(2)
     orthoCameraLeft.layers.enable(3)
+    orthoCameraLeft.layers.enable(4)
     orthoCameraLeft.layers.disable(0)
 
      
@@ -397,6 +399,7 @@ function render() {
     updateBedTop();
     createHorizontalArrow();
     createVerticalArrows();
+    createDrawerArrows()
     createHeightArrows();
     updateBedLegs();
     updateBedFloor();
@@ -1570,7 +1573,7 @@ function createVerticalArrows() {
             depthLabel2.element.innerHTML = (wDepth) + " ft(" + wDepth * 12 + " in)";
            
             depthLabel.position.set(0.25,0.6,0)
-            depthLabel2.position.set(0,0,0.6-wvArrowUp.position.y/2)
+            depthLabel2.position.set(0,0,0.7-wvArrowUp.position.y/2)
             // widthLabel.scale.set(0.15, 0.15, 0.15)
         }
 
@@ -1579,6 +1582,178 @@ function createVerticalArrows() {
 
 }
 
+
+
+
+function createDrawerArrows() {
+    
+    if (bedTops.length>0) {
+
+        var from = new THREE.Vector3(bedDrawerLeft.position.x, bedDrawerLeft.position.y, bedDrawerLeft.position.z-0.1 );
+        var to = new THREE.Vector3(bedDrawerLeft.position.x,bedDrawerLeft.position.y, bedDrawerLeft.children[4].position.z+bedDrawerLeft.children[4].scale.z/2   );
+        var direction = to.clone().sub(from);
+        var length = direction.manhattanLength();
+      
+
+        var from2 = new THREE.Vector3(bedDrawerLeft.position.x, bedDrawerLeft.position.y, bedDrawerLeft.position.z+0.4);
+        var to2 = new THREE.Vector3(bedDrawerLeft.position.x,bedDrawerLeft.position.y, bedDrawerLeft.children[3].position.z -bedDrawerLeft.children[3].scale.z/2 );
+        var direction2 = to2.clone().sub(from2);
+        var length2 = direction2.manhattanLength();
+      
+        
+        var from3 = new THREE.Vector3(bedDrawerRight.position.x, bedDrawerRight.position.y, bedDrawerRight.position.z-0.1 );
+        var to3 = new THREE.Vector3(bedDrawerRight.position.x,bedDrawerRight.position.y, bedDrawerRight.children[4].position.z+bedDrawerRight.children[4].scale.z/2   );
+        var direction3 = to3.clone().sub(from3);
+        var length3 = direction3.manhattanLength();
+      
+
+
+        var from4 = new THREE.Vector3(bedDrawerRight.position.x, bedDrawerRight.position.y, bedDrawerRight.position.z+0.4 );
+        var to4 = new THREE.Vector3(bedDrawerRight.position.x,bedDrawerRight.position.y, bedDrawerRight.children[3].position.z-bedDrawerRight.children[3].scale.z/2   );
+        var direction4 = to4.clone().sub(from4);
+        var length4 = direction4.manhattanLength();
+
+        var from5 = new THREE.Vector3(bedTops[0].position.x, bedDrawerRight.position.y,(bedTops[0].position.z+bedTops[0].scale.z/2)+ftTom/2);
+        var to5 = new THREE.Vector3(bedTops[0].position.x,bedDrawerRight.position.y, bedTops[0].position.z+bedTops[0].scale.z/2 );
+        var direction5 = to5.clone().sub(from5);
+        var length5 = direction5.manhattanLength();
+
+        var wValue;
+        
+      
+
+        if (wdArrowUp == null && wdArrowUp2 ==null ) {
+
+            wdArrowUp = new THREE.ArrowHelper(direction.normalize(), from, length, 0x000000, 0.05, 0.05);
+            wdArrowDown = new THREE.ArrowHelper(direction2.normalize(), from2, length2, 0x000000, 0.05, 0.05);
+            
+            wdArrowUp2 = new THREE.ArrowHelper(direction3.normalize(), from3, length3, 0x000000, 0.05, 0.05);
+            wdArrowDown2 = new THREE.ArrowHelper(direction4.normalize(), from4, length4, 0x000000, 0.05, 0.05);
+
+            wdArrowUp3= new THREE.ArrowHelper(direction5.normalize(), from5, length5, 0x000000, 0.05, 0.05);
+            wdArrowDown3 = new THREE.ArrowHelper(direction5.normalize(), from5, length5, 0x000000, 0.05, 0.05);
+
+            wdArrowUp.traverse(function (n){
+                n.layers.set(4);
+            })
+            wdArrowDown.traverse(function (n){
+                n.layers.set(4);
+            })
+                     
+            wdArrowUp3.traverse(function (n){
+                n.layers.set(4);
+            })
+            wdArrowDown3.traverse(function (n){
+                n.layers.set(4);
+            })
+            dimensionScene.add(wdArrowUp);
+            dimensionScene.add(wdArrowDown);
+            
+            dimensionScene.add(wdArrowUp2);
+            dimensionScene.add(wdArrowDown2);
+            
+            
+            dimensionScene.add(wdArrowUp3);
+            dimensionScene.add(wdArrowDown3);
+
+            wValue = document.createElement('div');
+          
+            wValue.style.top ="0px";
+            wValue.style.fontSize = "15px";
+
+
+            wValue2 = document.createElement('div');
+            
+            wValue2.style.top ="0px";
+            wValue2.style.fontSize = "15px";
+
+            wValue3 = document.createElement('div');
+            
+            wValue3.style.top ="0px";
+            wValue3.style.fontSize = "15px";
+          
+            wValue4 = document.createElement('div');
+            
+            wValue4.style.top ="0px";
+            wValue4.style.fontSize = "15px";
+
+            wValue5 = document.createElement('div');
+            
+            wValue5.style.top ="0px";
+            wValue5.style.fontSize = "15px";
+
+            drawerLabel = new THREE.CSS2DObject(wValue);
+            drawerLabel2 = new THREE.CSS2DObject(wValue2);
+            drawerLabel3 = new THREE.CSS2DObject(wValue3);
+            drawerLabel4 = new THREE.CSS2DObject(wValue4);
+            drawerLabel5 = new THREE.CSS2DObject(wValue5);
+
+            wdArrowUp.add(drawerLabel);
+            wdArrowUp2.add(drawerLabel3);
+            wdArrowUp3.add(drawerLabel4);
+
+            dimensionScene.add(drawerLabel2);
+            dimensionScene.add(drawerLabel5);
+            
+
+        } else {
+            wdArrowUp.setDirection(direction.normalize());
+            wdArrowUp.setLength(length, 0.05, 0.05);
+            wdArrowUp.position.copy(from.clone());
+
+            wdArrowDown.setDirection(direction2.normalize());
+            wdArrowDown.setLength(length2, 0.05, 0.05);
+            wdArrowDown.position.copy(from2.clone());
+
+            wdArrowUp2.setDirection(direction3.normalize());
+            wdArrowUp2.setLength(length3, 0.05, 0.05);
+            wdArrowUp2.position.copy(from3.clone());
+
+            wdArrowDown2.setDirection(direction4.normalize());
+            wdArrowDown2.setLength(length4, 0.05, 0.05);
+            wdArrowDown2.position.copy(from4.clone());
+
+            wdArrowUp3.setDirection(direction5.normalize());
+            wdArrowUp3.setLength(length5, 0.05, 0.05);
+            wdArrowUp3.position.copy(from5.clone());
+
+            wdArrowDown3.setDirection(direction5.negate().normalize());
+            wdArrowDown3.setLength(length5, 0.05, 0.05);
+            wdArrowDown3.position.copy(from5.clone());
+
+            var dist = bedDrawerLeft.children[3].position.manhattanDistanceTo(bedDrawerLeft.children[4].position)-bedDrawerLeft.children[3].scale.z ;
+            dist = dist/ftTom;
+            dist = dist.toFixed(2);
+
+            var dist2 =  dist*12;
+            dist2 = dist2.toFixed(2)
+
+            
+            drawerLabel.element.innerHTML =  dist+ " ft <br>(" +  dist2 + " in)";
+            drawerLabel2.element.innerHTML =  dist+ " ft <br>(" + dist2 + " in)";
+            drawerLabel3.element.innerHTML =  dist+ " ft <br>(" + dist2 + " in)";
+            drawerLabel4.element.innerHTML =  0.9+ " ft (" + 11 + " in)";
+            drawerLabel5.element.innerHTML =  0.9+ " ft <br>(" + 11 + " in)";
+
+            drawerLabel.element.style.textAlign =drawerLabel5.element.style.textAlign = drawerLabel4.element.style.textAlign = drawerLabel3.element.style.textAlign = drawerLabel2.element.style.textAlign = "center"
+            drawerLabel.position.set(0,0.45,0)
+           
+            drawerLabel3.position.set(0,0.45,0)
+            drawerLabel2.position.set(0.1,0,0.625-wdArrowUp.position.y)
+            drawerLabel4.position.set(0.025,wdArrowUp3.position.z/2+0.625,0)
+
+            drawerLabel5.position.set(wdArrowUp3.position.z,0,0.625-wdArrowUp3.position.y/2)
+
+            wdArrowUp.visible = wdArrowDown.visible = drawerLabel.visible = drawerLabel2.visible = bedDrawerLeft.visible;
+            wdArrowUp2.visible = wdArrowDown2.visible = drawerLabel3.visible = bedDrawerRight.visible;
+            wdArrowUp3.visible = wdArrowDown3.visible = drawerLabel4.visible = drawerLabel5.visible= bedDrawerLeft.visible;
+            // widthLabel.scale.set(0.15, 0.15, 0.15)
+        }
+
+    }
+
+
+}
 
 
 function createHeightArrows() {
