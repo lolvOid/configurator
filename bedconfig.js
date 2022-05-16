@@ -442,7 +442,7 @@ function render() {
     orthoCameraTop.right = fwidth/2;
     orthoCameraTop.top = fheight /4 ;
     orthoCameraTop.bottom = fheight/ -4;
-    orthoCameraTop.zoom = 200;
+    orthoCameraTop.zoom = 200*(fwidth)/1500;
     
     orthoCameraTop.updateProjectionMatrix();
     // dimensionRenderer.setClearColor(0x00ff00)
@@ -459,7 +459,7 @@ function render() {
     orthoCameraLeft.right = fwidth/2;
     orthoCameraLeft.top = fheight /4 ;
     orthoCameraLeft.bottom = fheight/ -4;
-    orthoCameraLeft.zoom = 200;
+    orthoCameraLeft.zoom = 200 * fwidth/1500;
     orthoCameraLeft.updateProjectionMatrix();
     // dimensionRenderer.setClearColor(0xff0000)
     dimensionRenderer.render(dimensionScene, orthoCameraLeft);
@@ -1573,7 +1573,7 @@ function createVerticalArrows() {
             depthLabel2.element.innerHTML = (wDepth) + " ft(" + wDepth * 12 + " in)";
            
             depthLabel.position.set(0.25,0.6,0)
-            depthLabel2.position.set(0,0,0.7-wvArrowUp.position.y/2)
+            depthLabel2.position.set(0,0,((fwidth/fheight)/1.85)-wvArrowUp.position.y/2)
             // widthLabel.scale.set(0.15, 0.15, 0.15)
         }
 
@@ -1659,7 +1659,7 @@ function createDrawerArrows() {
             wValue = document.createElement('div');
           
             wValue.style.top ="0px";
-            wValue.style.fontSize = "15px";
+            
 
 
             wValue2 = document.createElement('div');
@@ -1727,7 +1727,11 @@ function createDrawerArrows() {
 
             var dist2 =  dist*12;
             dist2 = dist2.toFixed(2)
-
+            drawerLabel.element.style.fontSize = 12*fwidth/1000+"px";
+            drawerLabel2.element.style.fontSize = 12*fwidth/1000+"px";
+            drawerLabel3.element.style.fontSize = 12*fwidth/1000+"px";
+            drawerLabel4.element.style.fontSize = 12*fwidth/1000+"px";
+            drawerLabel5.element.style.fontSize = 12*fwidth/1000+"px";
             
             drawerLabel.element.innerHTML =  dist+ " ft <br>(" +  dist2 + " in)";
             drawerLabel2.element.innerHTML =  dist+ " ft <br>(" + dist2 + " in)";
@@ -1736,13 +1740,13 @@ function createDrawerArrows() {
             drawerLabel5.element.innerHTML =  0.9+ " ft <br>(" + 11 + " in)";
 
             drawerLabel.element.style.textAlign =drawerLabel5.element.style.textAlign = drawerLabel4.element.style.textAlign = drawerLabel3.element.style.textAlign = drawerLabel2.element.style.textAlign = "center"
-            drawerLabel.position.set(0,0.45,0)
-           
-            drawerLabel3.position.set(0,0.45,0)
-            drawerLabel2.position.set(0.1,0,0.625-wdArrowUp.position.y)
-            drawerLabel4.position.set(0.025,wdArrowUp3.position.z/2+0.625,0)
-
-            drawerLabel5.position.set(wdArrowUp3.position.z,0,0.625-wdArrowUp3.position.y/2)
+            drawerLabel.position.set(0,(fwidth/1000)*0.45,0)
+            drawerLabel2.position.set(0.1,0,0.8-wdArrowUp.position.y*(fwidth/1000))
+            drawerLabel3.position.set(0,(fwidth/1000)*0.45,0)
+          
+            drawerLabel4.position.set(0.025,(fwidth/1000)*wdArrowUp3.position.z/2+0.725,0)
+            
+            drawerLabel5.position.set(wdArrowUp3.position.z,0,((fwidth/fheight)/2)-wdArrowUp3.position.y/2)
 
             wdArrowUp.visible = wdArrowDown.visible = drawerLabel.visible = drawerLabel2.visible = bedDrawerLeft.visible;
             wdArrowUp2.visible = wdArrowDown2.visible = drawerLabel3.visible = bedDrawerRight.visible;
@@ -1819,7 +1823,7 @@ function createHeightArrows() {
 
             heightLabel.element.innerHTML = (wHeight) + " ft(" + wHeight * 12 + " in)";
           
-            heightLabel.position.set(wvvArrowUp.position.z-0.3,0,-0.625-wvvArrowUp.position.y/2)
+            heightLabel.position.set(wvvArrowUp.position.z-0.3,0,-((fwidth/fheight)/2)-wvvArrowUp.position.y/2)
           
         }
 
