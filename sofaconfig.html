@@ -152,32 +152,58 @@
 
                 <div id="editInterior" class="form-control m-1">
                     <!-- <a class="btn btn-outline-dark" id="backToDoors"><i class="fa fa-chevron-left"></i></a> -->
-                    <h6 class="m-2">Features: </h6>
-
+                    
+<!-- 
 
                  
+                    <div class="form-control m-1 ">
+                        <p>Height:</p>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input btn-check" type="radio" name="heightOptions" id="height1"
+                                value="1.25">
+                            <label class="form-check-label btn btn-outline-secondary" for="height1">Low</label>
+                        </div>
 
-                    <div class="row m-2">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input btn-check" type="radio" name="heightOptions" id="height2"
+                                value="1.75" checked>
+                            <label class="form-check-label btn btn-outline-secondary" for="height2">Normal</label>
+                        </div>
+
+                    </div> -->
+                    
+
+                    <div class="form-control m-1">
 
                         
-                        <h6><br> Selected Sofa : <span id="sofaIndex"></span></h6>
-                        <div class="form-check form-check-inline">
+                        
+
+                        
+                        <select name="selectSofa" class="form-select" id="selectSofa">
+                            <option value="" selected> Choose Designs</option>
+                            <option value="0" >Sofa 1</option>
+                            <option value="1">Sofa 2</option>
+                            <option value="2">Sofa 3</option>
+                            <option value="3">Sofa 4</option>
+                            <option value="4">Sofa 5</option>
+                        </select>
+                        <!-- <div class="form-check form-check-inline">
                             <input class="form-check-input btn-check" type="radio" name="renderOptions"
                                 id="renderOption1" value="0" checked>
                             <label class="form-check-label btn btn-outline-secondary" for="renderOption1">Shaded</label>
-                        </div>
-                        <a class="btn btn-outline-dark m-1" id="addDouble">Add Double</a>
+                        </div> -->
+                        <!-- <a class="btn btn-outline-dark m-1" id="addDouble">Add Double</a>
                         <a class="btn btn-outline-dark m-1" id="addLeft">Add Left</a>
                         <a class="btn btn-outline-dark m-1" id="addRight">Add Right</a>
                         <a class="btn btn-outline-dark m-1" id="addCornerDouble">Add Corner Double</a>
                         <a class="btn btn-outline-dark m-1" id="addCorner">Add Corner Single</a>
-                        <a class="btn btn-outline-dark m-1" id="addFront">Add Front</a>
+                        <a class="btn btn-outline-dark m-1" id="addFront">Add Front</a> -->
                         <!-- <a class="btn btn-outline-dark m-1" id="addMatress">Add Matress & Pillow</a> -->
                         
                         <!-- <a class="btn btn-outline-dark m-1" id="addIDL">Add I.Drawer L $40</a>
                         <a class="btn btn-outline-dark m-1" id="addED">Add E.Drawer $35</a>
                         <a class="btn btn-outline-dark m-1" id="addBottomShelf">Add Bottom Shelf</a> -->
-
+                        <h6><br> Total Pieces : <span id="sofaCount"></span></h6>
 
                     </div>
 
