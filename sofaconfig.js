@@ -145,6 +145,9 @@
     var enableHorizontalBottomAdding = false,
         enableLeftVerticalBottomAdding = false;
     let posVector = new THREE.Vector3(0, 0, 0);
+    var flag =  0;
+
+    
     init();
 
     animate();
@@ -421,7 +424,7 @@
         } else {
             enableHorizontalBottomAdding = false;
         }
-        console.log("last: " + lasthSingleCount + ", single: " + hSingleCount, ", Enable: " + enableHorizontalBottomAdding)
+        // console.log("last: " + lasthSingleCount + ", single: " + hSingleCount, ", Enable: " + enableHorizontalBottomAdding)
         updateHorizontalBottoms();
         updateVerticalBottomLeft();
         updateVerticalBottomRight();
@@ -1194,8 +1197,10 @@
                         legs[i].children[1].position.set(-btmSize.x / 2 + lSize.x, 0, btmSize.z / 2 - bkSize.z / 2);
                         legs[i].children[2].position.set(btmSize.x / 2 - lSize.x / 2, 0, -btmSize.z / 2 - bkSize.z / 2);
                         legs[i].children[3].position.set(btmSize.x / 2 - lSize.x / 2, 0, btmSize.z / 2 - bkSize.z / 2);
-                    }
 
+                   
+             
+                    }
 
                 }
 
@@ -2227,6 +2232,26 @@
         if (sofa.armrestL && sofa.armrestR) {
             var sl = sofa.armrestL.clone();
             var sr = sofa.armrestR.clone();
+            var legFL = sofa.leg.clone();
+            var legRL = sofa.leg.clone();
+            var legFR = sofa.leg.clone();
+            var legRR = sofa.leg.clone();
+
+
+            var armrestSize = new THREE.Box3().setFromObject(sl).getSize(new THREE.Vector3());
+            var lSize =  new THREE.Box3().setFromObject(legFL).getSize(new THREE.Vector3());
+                
+            legFL.position.set(sl.position.x+armrestSize.x/2,0,sl.position.z+armrestSize.z/3-lSize.z/2);
+            legRL.position.set(sl.position.x+armrestSize.x/2,0,sl.position.z-armrestSize.z/2+lSize.z/4);
+
+            legFR.position.set(sr.position.x-armrestSize.x/2,0,sr.position.z+armrestSize.z/3-lSize.z/2);
+            legRR.position.set(sr.position.x-armrestSize.x/2,0,sr.position.z-armrestSize.z/2+lSize.z/4);
+            sl.add(legFL);
+            sl.add(legRL);
+            sr.add(legFR);
+            sr.add(legRR);
+
+            
             if (!armrests.includes(sl)) {
                 armrests.push(sl);
             }
@@ -2308,6 +2333,7 @@
                         sofas.push(s)
                     }
                     armrests[0].visible = false;
+                    lasthSingleCount += 1;
                 }
                 if (isRight) {
                     var s = sofa.chaiseL.clone();
@@ -2318,6 +2344,7 @@
                         sofas.push(s)
                     }
                     armrests[1].visible = false;
+                    lasthSingleCount -= 1;
                 }
             }
 
@@ -2389,7 +2416,8 @@
         if (sofa.ottoman) {
             if (index != null) {
                 var s = sofa.ottoman.clone();
-                var sofaSize = new THREE.Box3().setFromObject(sofas[index]).getSize(new THREE.Vector3());
+                var sofaSize = new THREE.Box3().setFromObject(sofas[index].children[0]).getSize(new THREE.Vector3());
+                console.log(sofas[index].children[0].name)
                 var sSize = new THREE.Box3().setFromObject(s).getSize(new THREE.Vector3());
 
                 if (isLeft) {
@@ -2439,7 +2467,7 @@
 
         let p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16;
 
-        var a = Object.keys(sofa);
+    
 
 
         if (type == 0) {
@@ -2701,9 +2729,13 @@
                 leftIndex = sofas.indexOf(e);
                 if (e.rotation.y == 0) {
                     if (e.name != sofa.cornerR.name) {
-
-                        leftHorizontalIndex = sofas.indexOf(e);
+                        if( e.name != sofa.chaiseR.name){
+                            leftHorizontalIndex = sofas.indexOf(e);
+                           
+                        }
+                        
                     }
+                   
                 }
                 if (e.rotation.y > 0) {
                     leftverticalIndex = sofas.indexOf(e);
@@ -2953,6 +2985,20 @@
         if (currentSingleCount < 3) {
             e.childNodes[1].className = "d-none";
         }
+        if(isLeft){
+            if(leftverticalSingleCount > 0 ){
+                e.childNodes[1].className = "d-none";
+                e.childNodes[2].className = "d-none";
+            }
+        }
+        if(isRight){
+            if(rightverticalSingleCount >0){
+                e.childNodes[1].className = "d-none";
+                e.childNodes[2].className = "d-none";
+
+            }
+        }
+        
         if (currentChaiseCount == 1) {
 
             e.childNodes[2].className = "d-none";
@@ -2966,6 +3012,7 @@
             e.childNodes[3].className = "d-none";
 
         }
+
         if (sofas[index].name == sofa.chaiseL.name || sofas[index].name == sofa.chaiseR.name) {
             e.childNodes[0].className = "d-none";
             e.childNodes[1].className = "d-none";
