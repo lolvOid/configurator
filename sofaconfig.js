@@ -80,7 +80,14 @@
         box_group = new THREE.Group();
 
     var sofaType = 0;
-    var bottoms= [],backs=[];
+    var bottoms = [],
+        leftbottoms = [],
+        rightbottoms = [],
+        backs = [],
+        leftbacks = [],
+        leftlegs = [],
+        rightbacks = [],
+        rightlegs = [];
     var sofa = {
         single: null,
         armrestL: null,
@@ -101,15 +108,43 @@
     };
     var legs = [];
     var loading = 0;
+
+
+    var singleCount = 0,
+        leftCount = 0,
+        rightCount = 0;
+
     const btn_group = new THREE.Group();
+
     var leftIndex = 0,
         rightIndex = 0;
 
     var currentSingleCount = 0,
         currentChaiseCount = 0,
         currentCornerCount = 0;
-    var lastBottomSofa = [],lastBackSofa = [];
-    var max = 0;
+    var lastBottomSofa = [],
+        lastBottomSofasLV = [],
+        lastBottomSofasRV = [],
+        lastBackSofa = [],
+        lastBackSofaLV = [],
+        lastBackSofaRV = [];
+    var max = 0,
+        lmax = 0;
+    var leftverticalSingleCount = 0,
+        rightverticalSingleCount = 0,
+        hSingleCount = 0;
+    var leftverticalIndex = 0,
+        rightverticalIndex = 0,
+        leftHorizontalIndex = 0;
+    var isLeftVertical = false,
+        isRightVertical = false;
+    var startVerticalLeft = false,
+        isCornerR = false;
+    var lasthSingleCount = 0,
+        lastLeftSingleCount = 0;
+    var enableHorizontalBottomAdding = false,
+        enableLeftVerticalBottomAdding = false;
+    let posVector = new THREE.Vector3(0, 0, 0);
     init();
 
     animate();
@@ -139,6 +174,8 @@
 
         cssScene = new THREE.Scene();
         scene = new THREE.Scene();
+
+
         dimensionScene = new THREE.Scene();
 
 
@@ -343,7 +380,7 @@
     function update() {
         controls.update();
         updateFloor();
-      
+
 
         var singles = sofas.filter(sofas => sofas.name == sofa.single.name);
         var chaiseL = sofas.filter(sofas => sofas.name == sofa.chaiseL.name);
@@ -355,33 +392,40 @@
         currentCornerCount = cornerL.length + cornerR.length;
 
 
-        if (currentSingleCount < 8) {
+
+
+        sofaCount = currentSingleCount + currentChaiseCount + currentCornerCount;
+        if (sofaCount < 16) {
             btn_group.visible = true;
         } else {
             btn_group.visible = false;
         }
-    
-        sofaCount = currentSingleCount + currentChaiseCount + currentCornerCount;
         $("#sofaCount").html(sofaCount);
 
         checkDistance();
-        
-        // console.log("Left " + leftIndex + ", " + "Right " + rightIndex)
-        
+
+
         updateArmrests(leftIndex, rightIndex);
         updateButtonCorner(leftIndex, rightIndex);
-        // addBottom();
-        // $("#sofaIndex").html(currentSofaIndex);
-        updateBottoms();
+
+
         if (sofas.length > 0) {
             btn_group.position.set(0, 0, 0);
-    
+
 
         }
-       
-       
-      
- 
+
+
+        if (lasthSingleCount <= hSingleCount) {
+            enableHorizontalBottomAdding = true;
+        } else {
+            enableHorizontalBottomAdding = false;
+        }
+        console.log("last: " + lasthSingleCount + ", single: " + hSingleCount, ", Enable: " + enableHorizontalBottomAdding)
+        updateHorizontalBottoms();
+        updateVerticalBottomLeft();
+        updateVerticalBottomRight();
+
         delta = clock.getDelta();
 
         if (isMeasured) {
@@ -596,25 +640,6 @@
 
     }
 
-    function createBox(name) {
-        var g = new THREE.BoxBufferGeometry(1, 1, 1);
-        var m = new THREE.MeshStandardMaterial({
-            color: 0xdedede,
-            name: "m_" + name,
-
-
-
-
-
-
-        });
-        var mesh = new THREE.Mesh(g, m);
-        mesh.name = "s_" + name;
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
-
-        return mesh;
-    }
 
 
     //Export
@@ -721,74 +746,6 @@
 
     }
 
-    function addLegs(count, index, parent) {
-        var legCounts = 0;
-
-        // if => 4 legs counts 8 -> parent 4 .2 set
-        // if=> 5 legs counts 8-> parent 4 .2 set different distance 2/3 + 0.25
-        // if=>6 legs counts 12-> parent 6. 3
-        //if=>7 legs counts 12 -> parent 6.3 different distance 2/3 + 0.25
-        //if = 8 legs counts 16 -> parent 8 . 4
-
-        // if(count <4){
-        //     legCounts = 4;
-        // }else if(count >=4 && count<6){
-        //     legCounts = 8;
-        // }else if(count >=6 && count < 8){
-        //     legCounts = 12;
-        // }else if(count == 8){
-        //     legCounts = 16;
-        // }
-
-
-
-        for (var i = 0; i < count; i++) {
-            var leg_group = new THREE.Group();
-            leg_group.name = "legs" + i;
-            for (var j = 0; j < 2; j++) {
-
-                leg_group.add(sofa.leg.clone());
-
-
-            }
-
-
-
-            sofas[index].add(leg_group);
-        }
-
-        var armrestSize = new THREE.Box3().setFromObject(sofa.armrestL).getSize(new THREE.Vector3());
-        var sofaSize = new THREE.Box3().setFromObject(sofas[index]).getSize(new THREE.Vector3());
-        var leftLeg = sofas[index].children[sofas[index].children.length - 2];
-        var rightLeg = sofas[index].children[sofas[index].children.length - 1];
-
-        leftLeg.position.setX(sofas[index].position.x - sofaSize.x / 2);
-        rightLeg.position.setX(sofas[index].position.x + sofaSize.x / 2);
-        // sofas[index].children[0].position.setX(sofas[index].position.x+sofaSize.x/2);
-        // sofas[index].children[1].position.setX(sofas[index].position.x+sofaSize.x/2);
-        // for(var i =0;i<legs.length;i++){
-
-        //       legs[0].position.setX(sofas[index].position.x+sofaSize.x/2+armrestSize.x/2)
-        //       legs[0].position.setZ(sofas[index].position.z);
-        //       legs[legs.length-1].position.setX(sofas[index].position.x-sofaSize.x/2-armrestSize.x/2)
-        //       legs[legs.length-1].position.setZ(sofas[index].position.z);
-        // }
-
-        // legs[0].position.setX(armrests[0].position.x+armrestSize.x/2)
-        // legs[0].position.setZ(armrests[0].position.z);
-        // legs[1].position.setX(armrests[1].position.x-armrestSize.x/2)
-        // legs[1].position.setZ(armrests[1].position.z);
-
-
-        // legs[0].children[0].position.setZ(legs[0].position.z+0.25)
-        // legs[0].children[1].position.setZ(legs[0].position.z-0.4)
-
-
-        // legs[1].children[0].position.setZ(legs[1].position.z+0.25)
-        // legs[1].children[1].position.setZ(legs[1].position.z-0.4)
-
-    }
-    var singleCount = 0;
     function addSingle(index, rotation) {
 
 
@@ -803,7 +760,8 @@
 
             if (index != null) {
                 var sofaSize = new THREE.Box3().setFromObject(sofas[index].children[0]).getSize(new THREE.Vector3());
-
+                var cornerSize = new THREE.Box3().setFromObject(sofa.cornerL).getSize(new THREE.Vector3());
+                var cornerSeatSize = new THREE.Box3().setFromObject(sofa.cornerL.children[5]).getSize(new THREE.Vector3());
                 var armrestSize = new THREE.Box3().setFromObject(sofa.armrestL).getSize(new THREE.Vector3());
 
 
@@ -811,43 +769,79 @@
                 if (isLeft) {
 
                     if (sofas[index].name == sofa.cornerR.name) {
-                        if (sofas[index].rotation.y > 0) {
-                            s.position.setX(sofas[index].position.x + sofaSize.z / 2 + armrestSize.x)
-                            s.position.setZ(sofas[index].position.z)
-                            s.rotation.y = Math.PI;
-                        } else {
-                            s.position.setX(sofas[index].position.x)
-                            s.position.setZ(sofas[index].position.z + sofaSize.z - armrestSize.x)
-                            s.rotation.y = Math.PI / 2;
-                        }
+                        enableHorizontalBottomAdding = false;
+                        s.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI / 2);
+
+
+
+                        s.position.setX(sofas[index].position.x);
+                        s.position.setZ(sofas[index].position.z + cornerSeatSize.z);
+
+                        leftverticalSingleCount += 1;
+
+                        addVerticalBottomLeft();
                     } else if (sofas[index].rotation.y > 0) {
+                        enableHorizontalBottomAdding = false;
+                        var a = new THREE.Object3D();
+
+                        s.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), Math.PI / 2);
+                        s.translateX((-1 - leftverticalSingleCount) * sofaSize.x)
+                        s.position.setX(sofas[index].position.x);
 
 
-                        s.position.setX(sofas[index].position.x)
-                        s.position.setZ(sofas[index].position.z + sofaSize.z)
-                        // s.position.setY(sofa.armrestL.position.y)
-                        s.rotation.y = Math.PI / 2;
 
+
+
+                        leftverticalSingleCount += 1;
+
+                        addVerticalBottomLeft();
 
                     } else {
+                        enableHorizontalBottomAdding = true;
+                        hSingleCount += 1;
+                        lasthSingleCount = hSingleCount;
                         s.position.setX(sofas[index].position.x - sofaSize.x)
                     }
+
                 }
                 if (isRight) {
                     if (sofas[index].name == sofa.cornerL.name) {
+                        enableHorizontalBottomAdding = false;
+                        s.rotateOnAxis(new THREE.Vector3(0, 1, 0), -Math.PI / 2);
 
-                        s.position.setX(sofas[index].position.x)
-                        s.position.setZ(sofas[index].position.z + sofaSize.z - armrestSize.x)
-                        s.rotation.y = -Math.PI / 2;
+
+
+                        s.position.setX(sofas[index].position.x);
+                        s.position.setZ(sofas[index].position.z + cornerSeatSize.z);
+
+                        rightverticalSingleCount += 1;
+                        addVerticalBottomRight();
                     } else if (sofas[index].rotation.y < 0) {
-                        s.position.setX(sofas[index].position.x)
-                        s.position.setZ(sofas[index].position.z + sofaSize.z)
-                        s.position.setY(sofa.armrestL.position.y)
-                        s.rotation.y = -Math.PI / 2;
+
+                        enableHorizontalBottomAdding = false;
+                        s.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), -Math.PI / 2);
+                        s.translateX((1 + rightverticalSingleCount) * sofaSize.x)
+                        s.position.setX(sofas[index].position.x);
+
+
+
+
+
+                        rightverticalSingleCount += 1;
+                        addVerticalBottomRight();
                     } else {
+                        enableHorizontalBottomAdding = true;
+                        hSingleCount += 1;
+                        lasthSingleCount = hSingleCount;
                         s.position.setX(sofas[index].position.x + sofaSize.x)
                     }
+
+
                 }
+
+
+
+
 
 
 
@@ -855,426 +849,1378 @@
 
 
                 s.position.setX(0);
+
             }
+
+
             if (!sofas.includes(s)) {
                 sofas.push(s)
             }
-           if(sofas.length>0){
-            addBottom()
-           }
-         
+
+
+            if (sofas.length > 0) {
+                if (enableHorizontalBottomAdding) {
+
+                    addHorizontalBottom()
+                }
+
+
+            }
+
         }
-        
+
 
 
     }
-    function addBottom(){
-     
-        if(sofas.length>0){
-            var c = currentSingleCount+1;
-            if(c >3){
-                
-                if(c %2==0){
-                    max = 2;
-                }else{
-                    max = 3;
+
+    function addHorizontalBottom() {
+
+
+        var c = hSingleCount;
+
+
+        if (c > 3) {
+
+            if (c % 2 == 0) {
+                max = 2;
+            } else {
+                max = 3;
+            }
+        } else {
+            max = 3;
+
+        }
+
+
+        if (singleCount < max) {
+
+            singleCount += 1;
+
+
+
+        } else {
+            lastBottomSofa = [];
+            lastBackSofa = [];
+
+            singleCount = 1;
+
+
+        }
+
+
+
+        // console.log(singleCount)
+        var seatSize = new THREE.Box3().setFromObject(sofas[0].children[0]).getSize(new THREE.Vector3());
+        if (lastBottomSofa.length > 0) {
+            // Bottom
+
+            var btmLSize = new THREE.Box3().setFromObject(lastBottomSofa[1]).getSize(new THREE.Vector3());
+            var btmSize = new THREE.Box3().setFromObject(lastBottomSofa[0]).getSize(new THREE.Vector3());
+
+
+            lastBottomSofa[0].position.setZ(sofas[leftHorizontalIndex].position.z);
+
+            lastBottomSofa[0].scale.setX(singleCount + btmLSize.x * 8);
+
+            var btmSize = new THREE.Box3().setFromObject(lastBottomSofa[0]).getSize(new THREE.Vector3());
+
+
+            //back
+            var bkLSize = new THREE.Box3().setFromObject(lastBackSofa[1]).getSize(new THREE.Vector3());
+            var bkSize = new THREE.Box3().setFromObject(lastBackSofa[0]).getSize(new THREE.Vector3());
+
+
+
+
+            lastBackSofa[0].scale.x = singleCount + bkLSize.x * 4;
+
+
+
+
+
+        } else {
+            //Bottom
+            {
+                var btm = sofa.bottom.clone();
+                var btmL = sofa.bottomL.clone();
+                var btmR = sofa.bottomR.clone();
+
+
+                if (!lastBottomSofa.includes(btm)) {
+                    lastBottomSofa.push(btm);
+
                 }
-            }else{
-              max = 3;
-                
-            }
 
-            if(singleCount<max){
-                
-                singleCount += 1;
-               
-               
+                if (!lastBottomSofa.includes(btmL)) {
+                    lastBottomSofa.push(btmL);
 
-            }else{
-                lastBottomSofa= [];
-                lastBackSofa = [];
+                }
+                if (!lastBottomSofa.includes(btmR)) {
+                    lastBottomSofa.push(btmR);
+                }
 
-                singleCount = 1;
-             
-                
-            }
-       
-            var seatSize = new THREE.Box3().setFromObject(sofas[0].children[0]).getSize(new THREE.Vector3());
-            if(lastBottomSofa.length>0){
-                // Bottom
-              
-                var btmLSize =new THREE.Box3().setFromObject(lastBottomSofa[1]).getSize(new THREE.Vector3()); 
                 var btmSize = new THREE.Box3().setFromObject(lastBottomSofa[0]).getSize(new THREE.Vector3());
-               
-                
-                lastBottomSofa[0].position.setZ(sofas[leftIndex].position.z);
-               
-                lastBottomSofa[0].scale.x= singleCount +btmLSize.x*4;
-                var btmSize = new THREE.Box3().setFromObject(lastBottomSofa[0]).getSize(new THREE.Vector3());
-               
-
-              
                 lastBottomSofa[1].position.setX(lastBottomSofa[0].position.x + btmSize.x / 2);
                 lastBottomSofa[1].position.setZ(lastBottomSofa[0].position.z);
-    
-    
+
+
                 lastBottomSofa[2].position.setX(lastBottomSofa[0].position.x - btmSize.x / 2);
                 lastBottomSofa[2].position.setZ(lastBottomSofa[0].position.z);
-                
 
-                //back
-                var bkLSize =new THREE.Box3().setFromObject(lastBackSofa[1]).getSize(new THREE.Vector3()); 
-                var bkSize = new THREE.Box3().setFromObject(lastBackSofa[0]).getSize(new THREE.Vector3());
-               
-                
-              
-               
-                lastBackSofa[0].scale.x= singleCount +bkLSize.x*4;
-                var btmSize = new THREE.Box3().setFromObject(lastBackSofa[0]).getSize(new THREE.Vector3());
-               
+                const btm_group = new THREE.Group();
+                btm_group.name = "Bottoms";
+                lastBottomSofa.forEach(e => {
+                    btm_group.add(e);
 
-              
-                lastBackSofa[1].position.setX(lastBackSofa[0].position.x + bkSize.x / 2);
-                lastBackSofa[1].position.setZ(lastBottomSofa[0].position.z);
-    
-    
-                lastBackSofa[2].position.setX(lastBackSofa[0].position.x - btmSize.x / 2);
-                lastBackSofa[2].position.setZ(lastBackSofa[0].position.z);
-                
-             
-            }else{
-                //Bottom
-                {
-                    var btm = sofa.bottom.clone();
-                    var btmL = sofa.bottomL.clone();
-                    var btmR = sofa.bottomR.clone();
-            
-                        
-                    if (!lastBottomSofa.includes(btm)) {
-                        lastBottomSofa.push(btm);
-        
-                    }
-        
-                    if (!lastBottomSofa.includes(btmL)) {
-                        lastBottomSofa.push(btmL);
-        
-                    }
-                    if (!lastBottomSofa.includes(btmR)) {
-                        lastBottomSofa.push(btmR);
-                    }
-    
-                    var btmSize = new THREE.Box3().setFromObject(lastBottomSofa[0]).getSize(new THREE.Vector3());
-                    lastBottomSofa[1].position.setX(lastBottomSofa[0].position.x + btmSize.x / 2);
-                    lastBottomSofa[1].position.setZ(lastBottomSofa[0].position.z);
-                    
-                    
-                    lastBottomSofa[2].position.setX(lastBottomSofa[0].position.x - btmSize.x / 2);
-                    lastBottomSofa[2].position.setZ(lastBottomSofa[0].position.z);
-    
-                    const btm_group = new THREE.Group();
-                    btm_group.name = "Bottoms";
-                    lastBottomSofa.forEach(e=>{
-                        btm_group.add(e);
-                        
-                    })
-                    
-                    if(!bottoms.includes(btm_group)){
-                        
-                        bottoms.push(btm_group);
-                        
-                    }
-                    bottoms.forEach(e=>{
-                        scene.add(e)
-                    })
-                }
-               
-              
-                //Back
-                {
-                    var bk = sofa.singleback.clone();
-                    var bkL = sofa.singlebackL.clone();
-                    var bkR = sofa.singlebackR.clone();
-            
-                        
-                    if (!lastBackSofa.includes(bk)) {
-                        lastBackSofa.push(bk);
-        
-                    }
-        
-                    if (!lastBackSofa.includes(bkL)) {
-                        lastBackSofa.push(bkL);
-        
-                    }
-                    if (!lastBackSofa.includes(bkR)) {
-                        lastBackSofa.push(bkR);
-                    }
-    
-                    var bkSize = new THREE.Box3().setFromObject(lastBackSofa[0]).getSize(new THREE.Vector3());
-                    lastBackSofa[0].position.setZ(sofas[leftIndex].position.z-seatSize.z/2);
-                    lastBackSofa[1].position.setX(lastBackSofa[0].position.x + bkSize.x / 2);
-                    lastBackSofa[1].position.setZ(lastBackSofa[0].position.z);
-                    
-                    
-                    lastBackSofa[2].position.setX(lastBackSofa[0].position.x - bkSize.x / 2);
-                    lastBackSofa[2].position.setZ(lastBackSofa[0].position.z);
-    
-                    const bk_group = new THREE.Group();
-                    bk_group.name = "Backs";
-                    lastBackSofa.forEach(e=>{
-                        bk_group.add(e);
-                        
-                    })
-                    
-                    if(!backs.includes(bk_group)){
-                        
-                        backs.push(bk_group);
-                        
-                    }
-                    backs.forEach(e=>{
-                        scene.add(e)
-                    })
-                }
-            
+                })
 
-               
-            }
-            if(singleCount == 1){
-                   // Legs
-                
-                
-                var leg_group = new THREE.Group();
-                leg_group.name= "Legs";
-                for(var i = 0;i<4;i++){
-                    leg_group.add(sofa.leg.clone());
-                    
-                }
-                if(!legs.includes(leg_group)){
-                    legs.push(leg_group);
-                }
-            
+                if (!bottoms.includes(btm_group)) {
 
-               
-               
-                legs.forEach(e => {
+                    bottoms.push(btm_group);
+
+                }
+                bottoms.forEach(e => {
                     scene.add(e)
-                });
-            
-            
+                })
             }
-         
 
-           
+
+            //Back
+            {
+                var bk = sofa.singleback.clone();
+                var bkL = sofa.singlebackL.clone();
+                var bkR = sofa.singlebackR.clone();
+
+
+                if (!lastBackSofa.includes(bk)) {
+                    lastBackSofa.push(bk);
+
+                }
+
+                if (!lastBackSofa.includes(bkL)) {
+                    lastBackSofa.push(bkL);
+
+                }
+                if (!lastBackSofa.includes(bkR)) {
+                    lastBackSofa.push(bkR);
+                }
+
+                var bkSize = new THREE.Box3().setFromObject(lastBackSofa[0]).getSize(new THREE.Vector3());
+                lastBackSofa[0].position.setZ(sofas[leftHorizontalIndex].position.z - seatSize.z / 2);
+                lastBackSofa[1].position.setX(lastBackSofa[0].position.x + bkSize.x / 2);
+                lastBackSofa[1].position.setZ(lastBackSofa[0].position.z);
+
+
+                lastBackSofa[2].position.setX(lastBackSofa[0].position.x - bkSize.x / 2);
+                lastBackSofa[2].position.setZ(lastBackSofa[0].position.z);
+
+                const bk_group = new THREE.Group();
+                bk_group.name = "Backs";
+                lastBackSofa.forEach(e => {
+                    bk_group.add(e);
+
+                })
+
+                if (!backs.includes(bk_group)) {
+
+                    backs.push(bk_group);
+
+                }
+                backs.forEach(e => {
+                    scene.add(e)
+                })
+            }
+
+
+
         }
-       
-    
-        
+        if (singleCount == 1) {
+            // Legs
+
+
+            var leg_group = new THREE.Group();
+            leg_group.name = "Legs";
+            for (var i = 0; i < 4; i++) {
+                leg_group.add(sofa.leg.clone());
+
+            }
+            if (!legs.includes(leg_group)) {
+                legs.push(leg_group);
+            }
+
+
+
+
+            legs.forEach(e => {
+                scene.add(e)
+            });
+
+
+        }
+
+
+
     }
 
-    function updateBottoms(){
-        
-        if(bottoms.length>0){
-          
-            var sofaSize = new THREE.Box3().setFromObject(sofas[leftIndex]).getSize(new THREE.Vector3());
-            for(var i = 0;i<bottoms.length;i++){
-                if(i>0){
-                    
-                    var currentBtmSize = new THREE.Box3().setFromObject(bottoms[i].children[0]).getSize(new THREE.Vector3());
-                     if(currentSingleCount>3){
-                         if(currentSingleCount%2==0){
-                            bottoms[i].children[0].scale.setX(2);
-                           
-                             currentBtmSize = new THREE.Box3().setFromObject(bottoms[i].children[0]).getSize(new THREE.Vector3());
-                           
-                         }else{
-                            bottoms[i-1].children[0].scale.setX(2);
-                            bottoms[i].children[0].scale.setX(3);
-                        
-                             currentBtmSize = new THREE.Box3().setFromObject(bottoms[i].children[0]).getSize(new THREE.Vector3());
-                           
-                            if( i-2==0){
-                           
-                                var btmSize = new THREE.Box3().setFromObject(bottoms[i-2]).getSize(new THREE.Vector3());    
-                            
-                                var btmLSize = new THREE.Box3().setFromObject(bottoms[i-2].children[1]).getSize(new THREE.Vector3());
-            
-                                var bottomSize = btmLSize.x + btmSize.x;
-                                var btmSizeUp = new THREE.Box3().setFromObject(bottoms[i-1]).getSize(new THREE.Vector3());
-                                bottoms[i-1].position.setX(bottoms[i-2].position.x+bottomSize);
+    function updateHorizontalBottoms() {
+
+        if (bottoms.length > 0) {
+            if (enableHorizontalBottomAdding) {
+                var sofaSize = new THREE.Box3().setFromObject(sofas[leftHorizontalIndex]).getSize(new THREE.Vector3());
+                for (var i = 0; i < bottoms.length; i++) {
+                    if (i > 0) {
+
+                        var prevBtmLSize = new THREE.Box3().setFromObject(bottoms[i - 1].children[1]).getSize(new THREE.Vector3());
+                        if (hSingleCount > 3) {
+                            if (hSingleCount % 2 == 0) {
+
+
+
+                                bottoms[i].children[0].scale.setX(2 + prevBtmLSize.x * 3);
+
+                                var currentBtmSize = new THREE.Box3().setFromObject(bottoms[i].children[0]).getSize(new THREE.Vector3());
+
+                                var prevBtmSize = new THREE.Box3().setFromObject(bottoms[i - 1]).getSize(new THREE.Vector3());
+
+
+                                var prevBtmLSize = new THREE.Box3().setFromObject(bottoms[i - 1].children[1]).getSize(new THREE.Vector3());
+
+
+
+                                bottoms[i].children[1].position.setX(bottoms[i].children[0].position.x + currentBtmSize.x / 2);
+                                bottoms[i].children[1].position.setZ(bottoms[i].children[0].position.z);
+
+                                bottoms[i].children[2].position.setX(bottoms[i].children[0].position.x - currentBtmSize.x / 2);
+                                bottoms[i].children[2].position.setZ(bottoms[i].children[0].position.z);
+
+
+                                bottoms[i].position.setX(bottoms[i - 1].position.x + currentBtmSize.x + prevBtmLSize.x * 2);
+
+                                var bkSize = new THREE.Box3().setFromObject(backs[i].children[0]).getSize(new THREE.Vector3());
+                                var lSize = new THREE.Box3().setFromObject(legs[i].children[0]).getSize(new THREE.Vector3());
+                                legs[i].position.setX(bottoms[i].position.x);
+                                legs[i].children[0].position.set(-currentBtmSize.x / 2 + lSize.x, 0, -currentBtmSize.z / 2 - bkSize.z / 2);
+                                legs[i].children[1].position.set(-currentBtmSize.x / 2 + lSize.x, 0, currentBtmSize.z / 2 - bkSize.z / 2);
+                                legs[i].children[2].position.set(currentBtmSize.x / 2 - lSize.x, 0, -currentBtmSize.z / 2 - bkSize.z / 2);
+                                legs[i].children[3].position.set(currentBtmSize.x / 2 - lSize.x, 0, currentBtmSize.z / 2 - bkSize.z / 2);
+                            } else {
+
+                                bottoms[i - 1].children[0].scale.setX(2 + prevBtmLSize.x * 3);
+                                bottoms[i].children[0].scale.setX(3 + (prevBtmLSize.x * 6));
+
+
+
+
+                                var prevBtmSize = new THREE.Box3().setFromObject(bottoms[i - 1].children[0]).getSize(new THREE.Vector3());
+
+                                var prevBtmScale = new THREE.Box3().setFromObject(bottoms[i - 1]).getSize(new THREE.Vector3())
+
+                                bottoms[i - 1].children[1].position.setX(bottoms[i - 1].children[0].position.x + prevBtmSize.x / 2);
+                                bottoms[i - 1].children[1].position.setZ(bottoms[i - 1].children[0].position.z);
+
+                                bottoms[i - 1].children[2].position.setX(bottoms[i - 1].children[0].position.x - prevBtmSize.x / 2);
+                                bottoms[i - 1].children[2].position.setZ(bottoms[i - 1].children[0].position.z);
+
+                                var currentBtmSize = new THREE.Box3().setFromObject(bottoms[i].children[0]).getSize(new THREE.Vector3());
+
+
+
+                                if (i - 2 >= 0) {
+                                    bottoms[i - 1].position.setX(bottoms[i - 2].position.x + prevBtmSize.x + prevBtmLSize.x * 2);
+                                }
+
+                                bottoms[i].position.setX((bottoms[i - 1].position.x + currentBtmSize.x / 2 + prevBtmSize.x / 2 + prevBtmLSize.x * 2));
+
+                                bottoms[i].children[1].position.setX(bottoms[i].children[0].position.x + currentBtmSize.x / 2);
+                                bottoms[i].children[1].position.setZ(bottoms[i].children[0].position.z);
+
+                                bottoms[i].children[2].position.setX(bottoms[i].children[0].position.x - currentBtmSize.x / 2);
+                                bottoms[i].children[2].position.setZ(bottoms[i].children[0].position.z);
+
+
+                                var bkSize = new THREE.Box3().setFromObject(backs[i].children[0]).getSize(new THREE.Vector3());
+                                var lSize = new THREE.Box3().setFromObject(legs[i].children[0]).getSize(new THREE.Vector3());
+                                legs[i].position.setX(bottoms[i].position.x);
+                                legs[i].children[0].position.set(-currentBtmSize.x / 2 + lSize.x, 0, -currentBtmSize.z / 2 - bkSize.z / 2);
+                                legs[i].children[1].position.set(-currentBtmSize.x / 2 + lSize.x, 0, currentBtmSize.z / 2 - bkSize.z / 2);
+                                legs[i].children[2].position.set(currentBtmSize.x / 2 - lSize.x, 0, -currentBtmSize.z / 2 - bkSize.z / 2);
+                                legs[i].children[3].position.set(currentBtmSize.x / 2 - lSize.x, 0, currentBtmSize.z / 2 - bkSize.z / 2);
+
+                                legs[i - 1].position.setX(bottoms[i - 1].position.x);
+                                legs[i - 1].children[0].position.set(-prevBtmSize.x / 2 + lSize.x, 0, -prevBtmSize.z / 2 - bkSize.z / 2);
+                                legs[i - 1].children[1].position.set(-prevBtmSize.x / 2 + lSize.x, 0, prevBtmSize.z / 2 - bkSize.z / 2);
+                                legs[i - 1].children[2].position.set(prevBtmSize.x / 2 - lSize.x, 0, -prevBtmSize.z / 2 - bkSize.z / 2);
+                                legs[i - 1].children[3].position.set(prevBtmSize.x / 2 - lSize.x, 0, prevBtmSize.z / 2 - bkSize.z / 2);
+
                             }
-                            
-                            
-                            var prevBtmSize = new THREE.Box3().setFromObject(bottoms[i-1].children[0]).getSize(new THREE.Vector3());
-                            
-                            bottoms[i-1].children[1].position.setX(   bottoms[i-1].children[0].position.x + prevBtmSize.x / 2);
-                            bottoms[i-1].children[1].position.setZ(   bottoms[i-1].children[0].position.z);
-                            
-                            bottoms[i-1].children[2].position.setX(   bottoms[i-1].children[0].position.x - prevBtmSize.x / 2);
-                            bottoms[i-1].children[2].position.setZ(   bottoms[i-1].children[0].position.z);
-                           
-                    
-                         
-                         }
-                        
-                      
-                    }
-          
-                     currentBtmSize = new THREE.Box3().setFromObject(bottoms[i].children[0]).getSize(new THREE.Vector3());
-                 
-                    var btmSize = new THREE.Box3().setFromObject(bottoms[i-1]).getSize(new THREE.Vector3());
-                   
-                    var btmLSize = new THREE.Box3().setFromObject(bottoms[i-1].children[1]).getSize(new THREE.Vector3());
 
-                    var bottomSize = btmLSize.x + btmSize.x;
-                    var btmSizeUp = new THREE.Box3().setFromObject(bottoms[i]).getSize(new THREE.Vector3());
 
-                    
-                    bottoms[i].children[1].position.setX(   bottoms[i].children[0].position.x + currentBtmSize.x / 2);
-                    bottoms[i].children[1].position.setZ(   bottoms[i].children[0].position.z);
-                    
-                    bottoms[i].children[2].position.setX(   bottoms[i].children[0].position.x - currentBtmSize.x / 2);
-                    bottoms[i].children[2].position.setZ(   bottoms[i].children[0].position.z);
-                    
-                    
-                    bottoms[i].position.setX(bottoms[i-1].position.x+bottomSize/2+btmSizeUp.x/2);
+                        }
 
-                    var bkSize = new THREE.Box3().setFromObject(backs[i].children[0]).getSize(new THREE.Vector3());
-                    var lSize =  new THREE.Box3().setFromObject(legs[i].children[0]).getSize(new THREE.Vector3());
-                    legs[i].position.setX(bottoms[i].position.x);
-                    legs[i].children[0].position.set(-currentBtmSize.x/2+lSize.x,0,-currentBtmSize.z/2-bkSize.z/2);
-                    legs[i].children[1].position.set(-currentBtmSize.x/2+lSize.x,0,currentBtmSize.z/2-bkSize.z/2);
-                    legs[i].children[2].position.set(currentBtmSize.x/2-lSize.x,0,-currentBtmSize.z/2-bkSize.z/2);
-                    legs[i].children[3].position.set(currentBtmSize.x/2-lSize.x,0,currentBtmSize.z/2-bkSize.z/2);
-                }   
-                if(i==0){
-                    
-                    if(currentSingleCount==3){                        
-                        bottoms[i].position.setX(sofas[leftIndex].position.x+sofaSize.x)    
+
+
+
+
                     }
-                    else if(currentSingleCount==2 ){
-                        bottoms[i].position.setX(sofas[leftIndex].position.x+sofaSize.x/2)    
+                    if (i == 0) {
+                        var btmSize = new THREE.Box3().setFromObject(bottoms[i].children[0]).getSize(new THREE.Vector3());
+                        var btmLSize = new THREE.Box3().setFromObject(bottoms[i].children[1]).getSize(new THREE.Vector3());
+                        if (hSingleCount == 3) {
+                            bottoms[i].position.setX(sofas[leftHorizontalIndex].position.x + sofaSize.x)
+                        } else if (hSingleCount == 2) {
+                            bottoms[i].position.setX(sofas[leftHorizontalIndex].position.x + sofaSize.x / 2)
+                        } else if (hSingleCount == 1) {
+                            bottoms[i].position.setX(sofas[leftHorizontalIndex].position.x)
+                        } else if (hSingleCount > 3) {
+                            bottoms[i].children[0].scale.setX(2 + btmLSize.x * 2);
+                            bottoms[i].position.setX(sofas[leftHorizontalIndex].position.x + sofaSize.x / 2)
+                        }
+
+
+
+
+
+
+                        bottoms[i].children[1].position.setX(bottoms[i].children[0].position.x + btmSize.x / 2);
+                        bottoms[i].children[1].position.setZ(bottoms[i].children[0].position.z);
+
+                        bottoms[i].children[2].position.setX(bottoms[i].children[0].position.x - btmSize.x / 2);
+                        bottoms[i].children[2].position.setZ(bottoms[i].children[0].position.z);
+
+                        var bkSize = new THREE.Box3().setFromObject(backs[i].children[0]).getSize(new THREE.Vector3());
+                        var lSize = new THREE.Box3().setFromObject(legs[i].children[0]).getSize(new THREE.Vector3());
+                        legs[i].position.setX(bottoms[i].position.x);
+                        legs[i].children[0].position.set(-btmSize.x / 2 + lSize.x, 0, -btmSize.z / 2 - bkSize.z / 2);
+                        legs[i].children[1].position.set(-btmSize.x / 2 + lSize.x, 0, btmSize.z / 2 - bkSize.z / 2);
+                        legs[i].children[2].position.set(btmSize.x / 2 - lSize.x / 2, 0, -btmSize.z / 2 - bkSize.z / 2);
+                        legs[i].children[3].position.set(btmSize.x / 2 - lSize.x / 2, 0, btmSize.z / 2 - bkSize.z / 2);
                     }
-                    else if(currentSingleCount==1){
-                        bottoms[i].position.setX(sofas[leftIndex].position.x)    
-                    }else if(currentSingleCount>3){
-                        bottoms[i].children[0].scale.setX(2);
-                        bottoms[i].position.setX(sofas[leftIndex].position.x+sofaSize.x/2)    
-                    }
-               
-                    var btmSize = new THREE.Box3().setFromObject(bottoms[i].children[0]).getSize(new THREE.Vector3());
-                  
-                
-                   
-            
-                    bottoms[i].children[1].position.setX(   bottoms[i].children[0].position.x + btmSize.x / 2);
-                    bottoms[i].children[1].position.setZ(   bottoms[i].children[0].position.z);
-                    
-                    bottoms[i].children[2].position.setX(   bottoms[i].children[0].position.x - btmSize.x / 2);
-                    bottoms[i].children[2].position.setZ(   bottoms[i].children[0].position.z);
-                    
-                    var bkSize = new THREE.Box3().setFromObject(backs[i].children[0]).getSize(new THREE.Vector3());
-                    var lSize =  new THREE.Box3().setFromObject(legs[i].children[0]).getSize(new THREE.Vector3());
-                   legs[i].position.setX(bottoms[i].position.x);
-                   legs[i].children[0].position.set(-btmSize.x/2+lSize.x,0,-btmSize.z/2-bkSize.z/2);
-                   legs[i].children[1].position.set(-btmSize.x/2+lSize.x,0,btmSize.z/2-bkSize.z/2);
-                   legs[i].children[2].position.set(btmSize.x/2-lSize.x/2,0,-btmSize.z/2-bkSize.z/2);
-                   legs[i].children[3].position.set(btmSize.x/2-lSize.x/2,0,btmSize.z/2-bkSize.z/2);
+
+
                 }
 
-              
-            }
-           
-            for(var i = 0;i<backs.length;i++){
-                if(i>0){
-             
-                     if(currentSingleCount>3){
-                         if(currentSingleCount%2==0){
-                            backs[i].children[0].scale.setX(2);
-                           
-                         }else{
-                            backs[i-1].children[0].scale.setX(2);
-                            backs[i].children[0].scale.setX(3);
-                        
-                 
-                           
-                            if( i-2==0){
-                           
-                                var bkSize = new THREE.Box3().setFromObject(backs[i-2]).getSize(new THREE.Vector3());    
-                            
-                                var bkLSize = new THREE.Box3().setFromObject(backs[i-2].children[1]).getSize(new THREE.Vector3());
-            
-                                var backSize = bkLSize.x + bkSize.x;
-                                var bkSizeUp = new THREE.Box3().setFromObject(backs[i-1]).getSize(new THREE.Vector3());
-                                backs[i-1].position.setX(backs[i-2].position.x+backSize);
+                //back
+                for (var i = 0; i < backs.length; i++) {
+                    if (i > 0) {
+
+                        var prevBtmLSize = new THREE.Box3().setFromObject(backs[i - 1].children[1]).getSize(new THREE.Vector3());
+                        if (hSingleCount > 3) {
+                            if (hSingleCount % 2 == 0) {
+
+
+
+                                backs[i].children[0].scale.setX(2 + prevBtmLSize.x * 3);
+
+                                var currentBtmSize = new THREE.Box3().setFromObject(backs[i].children[0]).getSize(new THREE.Vector3());
+
+                                var prevBtmSize = new THREE.Box3().setFromObject(backs[i - 1]).getSize(new THREE.Vector3());
+
+
+                                var prevBtmLSize = new THREE.Box3().setFromObject(backs[i - 1].children[1]).getSize(new THREE.Vector3());
+
+
+
+                                backs[i].children[1].position.setX(backs[i].children[0].position.x + currentBtmSize.x / 2);
+                                backs[i].children[1].position.setZ(backs[i].children[0].position.z);
+
+                                backs[i].children[2].position.setX(backs[i].children[0].position.x - currentBtmSize.x / 2);
+                                backs[i].children[2].position.setZ(backs[i].children[0].position.z);
+
+
+                                backs[i].position.setX(backs[i - 1].position.x + currentBtmSize.x + prevBtmLSize.x * 2);
+                            } else {
+
+                                backs[i - 1].children[0].scale.setX(2 + prevBtmLSize.x * 3);
+                                backs[i].children[0].scale.setX(3 + (prevBtmLSize.x * 6));
+
+
+
+
+                                var prevBtmSize = new THREE.Box3().setFromObject(backs[i - 1].children[0]).getSize(new THREE.Vector3());
+
+                                var prevBtmScale = new THREE.Box3().setFromObject(backs[i - 1]).getSize(new THREE.Vector3())
+
+                                backs[i - 1].children[1].position.setX(backs[i - 1].children[0].position.x + prevBtmSize.x / 2);
+                                backs[i - 1].children[1].position.setZ(backs[i - 1].children[0].position.z);
+
+                                backs[i - 1].children[2].position.setX(backs[i - 1].children[0].position.x - prevBtmSize.x / 2);
+                                backs[i - 1].children[2].position.setZ(backs[i - 1].children[0].position.z);
+
+                                var currentBtmSize = new THREE.Box3().setFromObject(backs[i].children[0]).getSize(new THREE.Vector3());
+
+
+
+                                if (i - 2 >= 0) {
+                                    backs[i - 1].position.setX(backs[i - 2].position.x + prevBtmSize.x + prevBtmLSize.x * 2);
+                                }
+
+                                backs[i].position.setX((backs[i - 1].position.x + currentBtmSize.x / 2 + prevBtmSize.x / 2 + prevBtmLSize.x * 2));
+
+                                backs[i].children[1].position.setX(backs[i].children[0].position.x + currentBtmSize.x / 2);
+                                backs[i].children[1].position.setZ(backs[i].children[0].position.z);
+
+                                backs[i].children[2].position.setX(backs[i].children[0].position.x - currentBtmSize.x / 2);
+                                backs[i].children[2].position.setZ(backs[i].children[0].position.z);
+
+
+
+
+
+
                             }
-                            
-                            
-                            var prevBkSize = new THREE.Box3().setFromObject(backs[i-1].children[0]).getSize(new THREE.Vector3());
-                            
-                            backs[i-1].children[1].position.setX(   backs[i-1].children[0].position.x + prevBkSize.x / 2);
-                            backs[i-1].children[1].position.setZ(   backs[i-1].children[0].position.z);
-                            
-                            backs[i-1].children[2].position.setX(   backs[i-1].children[0].position.x - prevBkSize.x / 2);
-                            backs[i-1].children[2].position.setZ(   backs[i-1].children[0].position.z);
-                    
-                         }
-                        
-                    
-                    }
-                            
-               
-                    var currentBkSize = new THREE.Box3().setFromObject(backs[i].children[0]).getSize(new THREE.Vector3());
-                 
-                    var bkSize = new THREE.Box3().setFromObject(backs[i-1]).getSize(new THREE.Vector3());
-                   
-                    var bkLSize = new THREE.Box3().setFromObject(backs[i-1].children[1]).getSize(new THREE.Vector3());
 
-                    var backSize = bkLSize.x + bkSize.x;
-                    var bkSizeUp = new THREE.Box3().setFromObject(backs[i]).getSize(new THREE.Vector3());
 
-                    
-                    backs[i].children[1].position.setX(   backs[i].children[0].position.x + currentBkSize.x / 2);
-                    backs[i].children[1].position.setZ(   backs[i].children[0].position.z);
-                    
-                    backs[i].children[2].position.setX(   backs[i].children[0].position.x - currentBkSize.x / 2);
-                    backs[i].children[2].position.setZ(   backs[i].children[0].position.z);
-                    
-                    backs[i].position.setX(bottoms[i-1].position.x+backSize/2+bkSizeUp.x/2);
-                }   
-                if(i==0){
-                    
-                    if(currentSingleCount==3){                        
-                        backs[i].position.setX(sofas[leftIndex].position.x+sofaSize.x)    
+                        }
+
+
+
+
                     }
-                    else if(currentSingleCount==2 ){
-                        backs[i].position.setX(sofas[leftIndex].position.x+sofaSize.x/2)    
+                    if (i == 0) {
+                        var btmSize = new THREE.Box3().setFromObject(backs[i].children[0]).getSize(new THREE.Vector3());
+                        var btmLSize = new THREE.Box3().setFromObject(backs[i].children[1]).getSize(new THREE.Vector3());
+                        if (hSingleCount == 3) {
+                            backs[i].position.setX(sofas[leftHorizontalIndex].position.x + sofaSize.x)
+                        } else if (hSingleCount == 2) {
+                            backs[i].position.setX(sofas[leftHorizontalIndex].position.x + sofaSize.x / 2)
+                        } else if (hSingleCount == 1) {
+                            backs[i].position.setX(sofas[leftHorizontalIndex].position.x)
+                        } else if (hSingleCount > 3) {
+                            backs[i].children[0].scale.setX(2 + btmLSize.x * 2);
+                            backs[i].position.setX(sofas[leftHorizontalIndex].position.x + sofaSize.x / 2)
+                        }
+
+
+
+
+
+
+                        backs[i].children[1].position.setX(backs[i].children[0].position.x + btmSize.x / 2);
+                        backs[i].children[1].position.setZ(backs[i].children[0].position.z);
+
+                        backs[i].children[2].position.setX(backs[i].children[0].position.x - btmSize.x / 2);
+                        backs[i].children[2].position.setZ(backs[i].children[0].position.z);
+
+
                     }
-                    else if(currentSingleCount==1){
-                        backs[i].position.setX(sofas[leftIndex].position.x)    
-                    }else if(currentSingleCount>3){
-                        backs[i].children[0].scale.setX(2);
-                        backs[i].position.setX(sofas[leftIndex].position.x+sofaSize.x/2)    
-                    }
-               
-                    var bkSize = new THREE.Box3().setFromObject(backs[i].children[0]).getSize(new THREE.Vector3());
-                  
-                
-                   
-            
-                    backs[i].children[1].position.setX(   backs[i].children[0].position.x + bkSize.x / 2);
-                    backs[i].children[1].position.setZ(   backs[i].children[0].position.z);
-                    
-                    backs[i].children[2].position.setX(   backs[i].children[0].position.x - bkSize.x / 2);
-                    backs[i].children[2].position.setZ(   backs[i].children[0].position.z);
-                    
-    
-                   
+
+
                 }
-
-              
             }
-
-            
         }
+
+    }
+
+    function addVerticalBottomLeft() {
+
+
+        var c = leftverticalSingleCount;
+
+
+        if (c > 3) {
+
+            if (c % 2 == 0) {
+                lmax = 2;
+            } else {
+                lmax = 3;
+            }
+        } else {
+            lmax = 3;
+
+        }
+
+
+        if (leftCount < lmax) {
+
+            leftCount += 1;
+
+
+
+        } else {
+            lastBottomSofasLV = [];
+            lastBackSofaLV = [];
+
+
+            leftCount = 1;
+
+
+        }
+
+
+        var seatSize = new THREE.Box3().setFromObject(sofas[0].children[0]).getSize(new THREE.Vector3());
+        if (lastBottomSofasLV.length > 0) {
+            // Bottom
+
+            var btmLSize = new THREE.Box3().setFromObject(lastBottomSofasLV[1]).getSize(new THREE.Vector3());
+            var btmSize = new THREE.Box3().setFromObject(lastBottomSofasLV[0]).getSize(new THREE.Vector3());
+
+
+
+
+            lastBottomSofasLV[0].scale.x = leftCount + btmLSize.z * 4;
+
+            //back
+            var bkLSize = new THREE.Box3().setFromObject(lastBackSofaLV[1]).getSize(new THREE.Vector3());
+            var bkSize = new THREE.Box3().setFromObject(lastBackSofaLV[0]).getSize(new THREE.Vector3());
+
+
+
+
+            lastBackSofaLV[0].scale.x = leftCount + bkLSize.z * 4;
+
+
+
+
+
+
+
+
+
+        } else {
+            //Bottom
+            {
+                var btm = sofa.bottom.clone();
+                var btmL = sofa.bottomL.clone();
+                var btmR = sofa.bottomR.clone();
+
+
+                if (!lastBottomSofasLV.includes(btm)) {
+                    lastBottomSofasLV.push(btm);
+
+                }
+
+                if (!lastBottomSofasLV.includes(btmL)) {
+                    lastBottomSofasLV.push(btmL);
+
+                }
+                if (!lastBottomSofasLV.includes(btmR)) {
+                    lastBottomSofasLV.push(btmR);
+                }
+
+                var btmSize = new THREE.Box3().setFromObject(lastBottomSofasLV[0]).getSize(new THREE.Vector3());
+                lastBottomSofasLV[1].position.setX(lastBottomSofasLV[0].position.x);
+                lastBottomSofasLV[1].position.setZ(lastBottomSofasLV[0].position.z + btmSize.z / 2);
+
+
+                lastBottomSofasLV[2].position.setX(lastBottomSofasLV[0].position.x);
+                lastBottomSofasLV[2].position.setZ(lastBottomSofasLV[0].position.z - btmSize.z / 2);
+
+                const btm_group = new THREE.Group();
+                btm_group.name = "LeftBottoms";
+                lastBottomSofasLV.forEach(e => {
+                    e.rotation.y = Math.PI / 2;
+                    btm_group.add(e);
+
+                })
+
+                if (!leftbottoms.includes(btm_group)) {
+
+                    leftbottoms.push(btm_group);
+
+                }
+                leftbottoms.forEach(e => {
+                    scene.add(e)
+                })
+            }
+
+
+            //Back
+            {
+                var bk = sofa.singleback.clone();
+                var bkL = sofa.singlebackL.clone();
+                var bkR = sofa.singlebackR.clone();
+
+
+                if (!lastBackSofaLV.includes(bk)) {
+                    lastBackSofaLV.push(bk);
+
+                }
+
+                if (!lastBackSofaLV.includes(bkL)) {
+                    lastBackSofaLV.push(bkL);
+
+                }
+                if (!lastBackSofaLV.includes(bkR)) {
+                    lastBackSofaLV.push(bkR);
+                }
+
+                var bkSize = new THREE.Box3().setFromObject(lastBackSofaLV[0]).getSize(new THREE.Vector3());
+
+
+
+                lastBackSofaLV[1].position.setX(lastBackSofaLV[0].position.x);
+                lastBackSofaLV[1].position.setZ(lastBackSofaLV[0].position.z + bkSize.z / 2);
+
+
+                lastBackSofaLV[2].position.setX(lastBackSofaLV[0].position.x);
+                lastBackSofaLV[2].position.setZ(lastBackSofaLV[0].position.z - bkSize.z / 2);
+
+                const bk_group = new THREE.Group();
+                bk_group.name = "LeftBacks";
+
+                lastBackSofaLV.forEach(e => {
+                    e.rotation.y = Math.PI / 2;
+                    bk_group.add(e);
+
+                })
+
+                if (!leftbacks.includes(bk_group)) {
+
+                    leftbacks.push(bk_group);
+
+                }
+                leftbacks.forEach(e => {
+                    scene.add(e)
+                })
+            }
+
+
+
+
+
+
+        }
+        if (leftCount == 1) {
+            // Legs
+
+
+            var leg_group = new THREE.Group();
+            leg_group.name = "LeftLegs";
+            for (var i = 0; i < 4; i++) {
+                leg_group.add(sofa.leg.clone());
+
+            }
+            if (!leftlegs.includes(leg_group)) {
+                leftlegs.push(leg_group);
+            }
+
+
+
+
+            leftlegs.forEach(e => {
+                scene.add(e)
+            });
+
+
+        }
+    }
+
+    function updateVerticalBottomLeft() {
+
+        if (leftbottoms.length > 0) {
+
+            var sofaSize = new THREE.Box3().setFromObject(sofas[leftverticalIndex]).getSize(new THREE.Vector3());
+            for (var i = 0; i < leftbottoms.length; i++) {
+
+                if (i > 0) {
+
+
+
+                    var prevBtmLSize = new THREE.Box3().setFromObject(leftbottoms[i - 1].children[1]).getSize(new THREE.Vector3());
+
+                    if (leftverticalSingleCount > 3) {
+
+                        if (leftverticalSingleCount % 2 == 0) {
+
+
+
+                            leftbottoms[i].children[0].scale.setX(2 + (prevBtmLSize.z * 3));
+
+                            var currentBtmSize = new THREE.Box3().setFromObject(leftbottoms[i].children[0]).getSize(new THREE.Vector3());
+                            var prevBtmSize = new THREE.Box3().setFromObject(leftbottoms[i - 1]).getSize(new THREE.Vector3());
+                            var prevBtmLSize = new THREE.Box3().setFromObject(leftbottoms[i - 1].children[1]).getSize(new THREE.Vector3());
+
+                            leftbottoms[i].children[1].position.setX(leftbottoms[i].children[0].position.x);
+                            leftbottoms[i].children[1].position.setZ(leftbottoms[i].children[0].position.z - currentBtmSize.z / 2);
+
+                            leftbottoms[i].children[2].position.setX(leftbottoms[i].children[0].position.x);
+                            leftbottoms[i].children[2].position.setZ(leftbottoms[i].children[0].position.z + currentBtmSize.z / 2);
+
+                            leftbottoms[i].position.setZ(leftbottoms[i - 1].position.z - currentBtmSize.z - prevBtmLSize.z * 2);
+
+
+                            leftbottoms[i].position.setX(sofas[leftverticalIndex].position.x)
+                            leftbottoms[i - 1].position.setX(sofas[leftverticalIndex].position.x)
+
+                            var bkSize = new THREE.Box3().setFromObject(leftbacks[i].children[0]).getSize(new THREE.Vector3());
+                            var lSize = new THREE.Box3().setFromObject(leftlegs[i].children[0]).getSize(new THREE.Vector3());
+                            leftlegs[i].position.setX(leftbottoms[i].position.x);
+                            leftlegs[i].position.setZ(leftbottoms[i].position.z);
+                            leftlegs[i].children[0].position.set(btmSize.x / 2 - lSize.x, 0, btmSize.z / 2);
+                            leftlegs[i].children[1].position.set(btmSize.x / 2 - lSize.x, 0, -btmSize.z / 2);
+                            leftlegs[i].children[2].position.set(-btmSize.x / 2 - bkSize.x / 2, 0, btmSize.z / 2 - lSize.z / 2);
+                            leftlegs[i].children[3].position.set(-btmSize.x / 2 - bkSize.x / 2, 0, -btmSize.z / 2 + lSize.z / 2);
+                        } else {
+
+
+                            leftbottoms[i - 1].children[0].scale.setX(2 + prevBtmLSize.z * 3);
+                            leftbottoms[i].children[0].scale.setX(3 + prevBtmLSize.z * 6);
+                            var prevBtmSize = new THREE.Box3().setFromObject(leftbottoms[i - 1].children[0]).getSize(new THREE.Vector3());
+                            var prevBtmScale = new THREE.Box3().setFromObject(leftbottoms[i - 1]).getSize(new THREE.Vector3());
+
+
+                            leftbottoms[i - 1].children[1].position.setX(leftbottoms[i - 1].children[0].position.x);
+                            leftbottoms[i - 1].children[1].position.setZ(leftbottoms[i - 1].children[0].position.z - prevBtmSize.z / 2);
+
+                            leftbottoms[i - 1].children[2].position.setX(leftbottoms[i - 1].children[0].position.x);
+                            leftbottoms[i - 1].children[2].position.setZ(leftbottoms[i - 1].children[0].position.z + prevBtmSize.z / 2);
+
+                            var currentBtmSize = new THREE.Box3().setFromObject(leftbottoms[i].children[0]).getSize(new THREE.Vector3());
+                            if (i - 2 >= 0) {
+
+
+                                leftbottoms[i - 1].position.setZ(leftbottoms[i - 2].position.z - prevBtmSize.z - prevBtmLSize.z * 2);
+                            }
+
+
+                            leftbottoms[i].position.setZ(leftbottoms[i - 1].position.z - currentBtmSize.z / 2 - prevBtmSize.z / 2 - prevBtmLSize.z * 2);
+
+
+                            leftbottoms[i].children[1].position.setX(leftbottoms[i].children[0].position.x);
+                            leftbottoms[i].children[1].position.setZ(leftbottoms[i].children[0].position.z - currentBtmSize.z / 2);
+
+                            leftbottoms[i].children[2].position.setX(leftbottoms[i].children[0].position.x);
+                            leftbottoms[i].children[2].position.setZ(leftbottoms[i].children[0].position.z + currentBtmSize.z / 2);
+
+
+                            leftbottoms[i].position.setX(sofas[leftverticalIndex].position.x)
+                            leftbottoms[i - 1].position.setX(sofas[leftverticalIndex].position.x)
+
+
+                            var bkSize = new THREE.Box3().setFromObject(leftbacks[i].children[0]).getSize(new THREE.Vector3());
+                            var lSize = new THREE.Box3().setFromObject(leftlegs[i].children[0]).getSize(new THREE.Vector3());
+                            leftlegs[i].position.setX(leftbottoms[i].position.x);
+                            leftlegs[i].position.setZ(leftbottoms[i].position.z);
+                            leftlegs[i].children[0].position.set(btmSize.x / 2 - lSize.x, 0, btmSize.z / 2);
+                            leftlegs[i].children[1].position.set(btmSize.x / 2 - lSize.x, 0, -btmSize.z / 2);
+                            leftlegs[i].children[2].position.set(-btmSize.x / 2 - bkSize.x / 2, 0, btmSize.z / 2 - lSize.z / 2);
+                            leftlegs[i].children[3].position.set(-btmSize.x / 2 - bkSize.x / 2, 0, -btmSize.z / 2 + lSize.z / 2);
+
+                            leftlegs[i - 1].position.setX(leftbottoms[i - 1].position.x);
+                            leftlegs[i - 1].position.setZ(leftbottoms[i - 1].position.z);
+                            leftlegs[i - 1].children[0].position.set(btmSize.x / 2 - lSize.x, 0, btmSize.z / 2);
+                            leftlegs[i - 1].children[1].position.set(btmSize.x / 2 - lSize.x, 0, -btmSize.z / 2);
+                            leftlegs[i - 1].children[2].position.set(-btmSize.x / 2 - bkSize.x / 2, 0, btmSize.z / 2 - lSize.z / 2);
+                            leftlegs[i - 1].children[3].position.set(-btmSize.x / 2 - bkSize.x / 2, 0, -btmSize.z / 2 + lSize.z / 2);
+                        }
+
+
+                    }
+
+
+
+                }
+                if (i == 0) {
+                    var btmSize = new THREE.Box3().setFromObject(leftbottoms[i].children[0]).getSize(new THREE.Vector3());
+                    var btmLSize = new THREE.Box3().setFromObject(leftbottoms[i].children[1]).getSize(new THREE.Vector3());
+                    if (leftverticalSingleCount == 3) {
+                        leftbottoms[i].position.setZ(sofas[leftverticalIndex].position.z - sofaSize.z)
+                    } else if (leftverticalSingleCount == 2) {
+                        leftbottoms[i].position.setZ(sofas[leftverticalIndex].position.z - sofaSize.z / 2)
+                    } else if (leftverticalSingleCount == 1) {
+                        leftbottoms[i].position.setZ(sofas[leftverticalIndex].position.z)
+                    } else if (leftverticalSingleCount > 3) {
+                        leftbottoms[i].children[0].scale.setX(2);
+                        leftbottoms[i].position.setZ(sofas[leftverticalIndex].position.z - sofaSize.z / 2)
+                    }
+
+
+
+
+
+
+                    leftbottoms[i].children[1].position.setX(leftbottoms[i].children[0].position.x);
+                    leftbottoms[i].children[1].position.setZ(leftbottoms[i].children[0].position.z - btmSize.z / 2);
+
+                    leftbottoms[i].children[2].position.setX(leftbottoms[i].children[0].position.x);
+                    leftbottoms[i].children[2].position.setZ(leftbottoms[i].children[0].position.z + btmSize.z / 2);
+
+
+                    leftbottoms[i].position.setX(sofas[leftverticalIndex].position.x)
+
+                    var bkSize = new THREE.Box3().setFromObject(leftbacks[i].children[0]).getSize(new THREE.Vector3());
+                    var lSize = new THREE.Box3().setFromObject(leftlegs[i].children[0]).getSize(new THREE.Vector3());
+                    leftlegs[i].position.setX(leftbottoms[i].position.x);
+                    leftlegs[i].position.setZ(leftbottoms[i].position.z);
+                    leftlegs[i].children[0].position.set(btmSize.x / 2 - lSize.x, 0, btmSize.z / 2);
+                    leftlegs[i].children[1].position.set(btmSize.x / 2 - lSize.x, 0, -btmSize.z / 2);
+                    leftlegs[i].children[2].position.set(-btmSize.x / 2 - bkSize.x / 2, 0, btmSize.z / 2 - lSize.z / 2);
+                    leftlegs[i].children[3].position.set(-btmSize.x / 2 - bkSize.x / 2, 0, -btmSize.z / 2 + lSize.z / 2);
+
+                }
+
+
+            }
+            for (var i = 0; i < leftbacks.length; i++) {
+
+                if (i > 0) {
+
+
+
+                    var prevBtmLSize = new THREE.Box3().setFromObject(leftbacks[i - 1].children[1]).getSize(new THREE.Vector3());
+
+                    if (leftverticalSingleCount > 3) {
+
+                        if (leftverticalSingleCount % 2 == 0) {
+
+
+
+                            leftbacks[i].children[0].scale.setX(2 + (prevBtmLSize.z * 3));
+
+                            var currentBtmSize = new THREE.Box3().setFromObject(leftbacks[i].children[0]).getSize(new THREE.Vector3());
+                            var prevBtmSize = new THREE.Box3().setFromObject(leftbacks[i - 1]).getSize(new THREE.Vector3());
+                            var prevBtmLSize = new THREE.Box3().setFromObject(leftbacks[i - 1].children[1]).getSize(new THREE.Vector3());
+
+                            leftbacks[i].children[1].position.setX(leftbacks[i].children[0].position.x);
+                            leftbacks[i].children[1].position.setZ(leftbacks[i].children[0].position.z - currentBtmSize.z / 2);
+
+                            leftbacks[i].children[2].position.setX(leftbacks[i].children[0].position.x);
+                            leftbacks[i].children[2].position.setZ(leftbacks[i].children[0].position.z + currentBtmSize.z / 2);
+
+                            leftbacks[i].position.setZ(leftbacks[i - 1].position.z - currentBtmSize.z - prevBtmLSize.z * 2);
+
+
+                            leftbacks[i].position.setX(sofas[leftverticalIndex].position.x - sofaSize.z / 2)
+                            leftbacks[i - 1].position.setX(sofas[leftverticalIndex].position.x - sofaSize.z / 2)
+                        } else {
+
+
+                            leftbacks[i - 1].children[0].scale.setX(2 + prevBtmLSize.z * 3);
+                            leftbacks[i].children[0].scale.setX(3 + prevBtmLSize.z * 6);
+                            var prevBtmSize = new THREE.Box3().setFromObject(leftbacks[i - 1].children[0]).getSize(new THREE.Vector3());
+                            var prevBtmScale = new THREE.Box3().setFromObject(leftbacks[i - 1]).getSize(new THREE.Vector3());
+
+
+                            leftbacks[i - 1].children[1].position.setX(leftbacks[i - 1].children[0].position.x);
+                            leftbacks[i - 1].children[1].position.setZ(leftbacks[i - 1].children[0].position.z - prevBtmSize.z / 2);
+
+                            leftbacks[i - 1].children[2].position.setX(leftbacks[i - 1].children[0].position.x);
+                            leftbacks[i - 1].children[2].position.setZ(leftbacks[i - 1].children[0].position.z + prevBtmSize.z / 2);
+
+                            var currentBtmSize = new THREE.Box3().setFromObject(leftbacks[i].children[0]).getSize(new THREE.Vector3());
+                            if (i - 2 >= 0) {
+
+
+                                leftbacks[i - 1].position.setZ(leftbacks[i - 2].position.z - prevBtmSize.z - prevBtmLSize.z * 2);
+                            }
+
+
+                            leftbacks[i].position.setZ(leftbacks[i - 1].position.z - currentBtmSize.z / 2 - prevBtmSize.z / 2 - prevBtmLSize.z * 2);
+
+
+                            leftbacks[i].children[1].position.setX(leftbacks[i].children[0].position.x);
+                            leftbacks[i].children[1].position.setZ(leftbacks[i].children[0].position.z - currentBtmSize.z / 2);
+
+                            leftbacks[i].children[2].position.setX(leftbacks[i].children[0].position.x);
+                            leftbacks[i].children[2].position.setZ(leftbacks[i].children[0].position.z + currentBtmSize.z / 2);
+
+
+                            leftbacks[i].position.setX(sofas[leftverticalIndex].position.x - sofaSize.z / 2)
+                            leftbacks[i - 1].position.setX(sofas[leftverticalIndex].position.x - sofaSize.z / 2)
+
+                        }
+
+
+                    }
+
+
+
+                }
+                if (i == 0) {
+                    var btmSize = new THREE.Box3().setFromObject(leftbacks[i].children[0]).getSize(new THREE.Vector3());
+                    var btmLSize = new THREE.Box3().setFromObject(leftbacks[i].children[1]).getSize(new THREE.Vector3());
+                    if (leftverticalSingleCount == 3) {
+                        leftbacks[i].position.setZ(sofas[leftverticalIndex].position.z - sofaSize.z)
+                    } else if (leftverticalSingleCount == 2) {
+                        leftbacks[i].position.setZ(sofas[leftverticalIndex].position.z - sofaSize.z / 2)
+                    } else if (leftverticalSingleCount == 1) {
+                        leftbacks[i].position.setZ(sofas[leftverticalIndex].position.z)
+                    } else if (leftverticalSingleCount > 3) {
+                        leftbacks[i].children[0].scale.setX(2);
+                        leftbacks[i].position.setZ(sofas[leftverticalIndex].position.z - sofaSize.z / 2)
+                    }
+
+
+
+
+
+
+                    leftbacks[i].children[1].position.setX(leftbacks[i].children[0].position.x);
+                    leftbacks[i].children[1].position.setZ(leftbacks[i].children[0].position.z - btmSize.z / 2);
+
+                    leftbacks[i].children[2].position.setX(leftbacks[i].children[0].position.x);
+                    leftbacks[i].children[2].position.setZ(leftbacks[i].children[0].position.z + btmSize.z / 2);
+
+
+                    leftbacks[i].position.setX(sofas[leftverticalIndex].position.x - sofaSize.z / 2)
+
+                }
+
+
+            }
+
+        }
+
+
+
+
+    }
+
+
+    function addVerticalBottomRight() {
+
+
+        var c = rightverticalSingleCount;
+
+
+        if (c > 3) {
+
+            if (c % 2 == 0) {
+                lmax = 2;
+            } else {
+                lmax = 3;
+            }
+        } else {
+            lmax = 3;
+
+        }
+
+
+        if (rightCount < lmax) {
+
+            rightCount += 1;
+
+
+
+        } else {
+            lastBottomSofasRV = [];
+            lastBackSofaRV = [];
+
+
+            rightCount = 1;
+
+
+        }
+
+
+        var seatSize = new THREE.Box3().setFromObject(sofas[0].children[0]).getSize(new THREE.Vector3());
+        if (lastBottomSofasRV.length > 0) {
+            // Bottom
+
+            var btmLSize = new THREE.Box3().setFromObject(lastBottomSofasRV[1]).getSize(new THREE.Vector3());
+            var btmSize = new THREE.Box3().setFromObject(lastBottomSofasRV[0]).getSize(new THREE.Vector3());
+
+
+
+
+            lastBottomSofasRV[0].scale.x = rightCount + btmLSize.z * 4;
+
+            //back
+
+            var bkLSize = new THREE.Box3().setFromObject(lastBackSofaRV[1]).getSize(new THREE.Vector3());
+            var bkSize = new THREE.Box3().setFromObject(lastBackSofaRV[0]).getSize(new THREE.Vector3());
+
+
+
+
+            lastBackSofaRV[0].scale.x = rightCount + bkLSize.z * 4;
+
+
+
+
+
+
+
+
+
+        } else {
+            //Bottom
+            {
+                var btm = sofa.bottom.clone();
+                var btmL = sofa.bottomL.clone();
+                var btmR = sofa.bottomR.clone();
+
+
+                if (!lastBottomSofasRV.includes(btm)) {
+                    lastBottomSofasRV.push(btm);
+
+                }
+
+                if (!lastBottomSofasRV.includes(btmL)) {
+                    lastBottomSofasRV.push(btmL);
+
+                }
+                if (!lastBottomSofasRV.includes(btmR)) {
+                    lastBottomSofasRV.push(btmR);
+                }
+
+                var btmSize = new THREE.Box3().setFromObject(lastBottomSofasRV[0]).getSize(new THREE.Vector3());
+                lastBottomSofasRV[1].position.setX(lastBottomSofasRV[0].position.x);
+                lastBottomSofasRV[1].position.setZ(lastBottomSofasRV[0].position.z + btmSize.z / 2);
+
+
+                lastBottomSofasRV[2].position.setX(lastBottomSofasRV[0].position.x);
+                lastBottomSofasRV[2].position.setZ(lastBottomSofasRV[0].position.z - btmSize.z / 2);
+
+                const btm_group = new THREE.Group();
+                btm_group.name = "RightBottoms";
+                lastBottomSofasRV.forEach(e => {
+                    e.rotation.y = Math.PI / 2;
+                    btm_group.add(e);
+
+                })
+
+                if (!rightbottoms.includes(btm_group)) {
+
+                    rightbottoms.push(btm_group);
+
+                }
+                rightbottoms.forEach(e => {
+                    scene.add(e)
+                })
+            }
+
+
+            //Back
+            {
+                var bk = sofa.singleback.clone();
+                var bkL = sofa.singlebackL.clone();
+                var bkR = sofa.singlebackR.clone();
+
+
+                if (!lastBackSofaRV.includes(bk)) {
+                    lastBackSofaRV.push(bk);
+
+                }
+
+                if (!lastBackSofaRV.includes(bkL)) {
+                    lastBackSofaRV.push(bkL);
+
+                }
+                if (!lastBackSofaRV.includes(bkR)) {
+                    lastBackSofaRV.push(bkR);
+                }
+
+                var bkSize = new THREE.Box3().setFromObject(lastBackSofaRV[0]).getSize(new THREE.Vector3());
+
+
+
+                lastBackSofaRV[1].position.setX(lastBackSofaRV[0].position.x);
+                lastBackSofaRV[1].position.setZ(lastBackSofaRV[0].position.z + bkSize.z / 2);
+
+
+                lastBackSofaRV[2].position.setX(lastBackSofaRV[0].position.x);
+                lastBackSofaRV[2].position.setZ(lastBackSofaRV[0].position.z - bkSize.z / 2);
+
+                const bk_group = new THREE.Group();
+                bk_group.name = "RightBacks";
+
+                lastBackSofaRV.forEach(e => {
+                    e.rotation.y = -Math.PI / 2;
+                    bk_group.add(e);
+
+                })
+
+                if (!rightbacks.includes(bk_group)) {
+
+                    rightbacks.push(bk_group);
+
+                }
+                rightbacks.forEach(e => {
+                    scene.add(e)
+                })
+            }
+
+
+
+
+
+
+        }
+        if (rightCount == 1) {
+            // Legs
+
+
+            var leg_group = new THREE.Group();
+            leg_group.name = "RightLegs";
+            for (var i = 0; i < 4; i++) {
+                leg_group.add(sofa.leg.clone());
+
+            }
+            if (!rightlegs.includes(leg_group)) {
+                rightlegs.push(leg_group);
+            }
+
+
+
+
+            rightlegs.forEach(e => {
+                scene.add(e)
+            });
+
+
+        }
+    }
+
+    function updateVerticalBottomRight() {
+
+        if (rightbottoms.length > 0) {
+
+            var sofaSize = new THREE.Box3().setFromObject(sofas[rightverticalIndex]).getSize(new THREE.Vector3());
+            for (var i = 0; i < rightbottoms.length; i++) {
+
+                if (i > 0) {
+
+
+
+                    var prevBtmLSize = new THREE.Box3().setFromObject(rightbottoms[i - 1].children[1]).getSize(new THREE.Vector3());
+
+                    if (rightverticalSingleCount > 3) {
+
+                        if (rightverticalSingleCount % 2 == 0) {
+
+
+
+                            rightbottoms[i].children[0].scale.setX(2 + (prevBtmLSize.z * 3));
+
+                            var currentBtmSize = new THREE.Box3().setFromObject(rightbottoms[i].children[0]).getSize(new THREE.Vector3());
+                            var prevBtmSize = new THREE.Box3().setFromObject(rightbottoms[i - 1]).getSize(new THREE.Vector3());
+                            var prevBtmLSize = new THREE.Box3().setFromObject(rightbottoms[i - 1].children[1]).getSize(new THREE.Vector3());
+
+                            rightbottoms[i].children[1].position.setX(rightbottoms[i].children[0].position.x);
+                            rightbottoms[i].children[1].position.setZ(rightbottoms[i].children[0].position.z - currentBtmSize.z / 2);
+
+                            rightbottoms[i].children[2].position.setX(rightbottoms[i].children[0].position.x);
+                            rightbottoms[i].children[2].position.setZ(rightbottoms[i].children[0].position.z + currentBtmSize.z / 2);
+
+                            rightbottoms[i].position.setZ(rightbottoms[i - 1].position.z - currentBtmSize.z - prevBtmLSize.z * 2);
+
+
+                            rightbottoms[i].position.setX(sofas[rightverticalIndex].position.x)
+                            rightbottoms[i - 1].position.setX(sofas[rightverticalIndex].position.x)
+
+                            var bkSize = new THREE.Box3().setFromObject(rightbacks[i].children[0]).getSize(new THREE.Vector3());
+                            var lSize = new THREE.Box3().setFromObject(rightlegs[i].children[0]).getSize(new THREE.Vector3());
+                            rightlegs[i].position.setX(rightbottoms[i].position.x);
+                            rightlegs[i].position.setZ(rightbottoms[i].position.z);
+                            rightlegs[i].children[0].position.set(btmSize.x / 2 + lSize.x, 0, btmSize.z / 2);
+                            rightlegs[i].children[1].position.set(btmSize.x / 2 + lSize.x, 0, -btmSize.z / 2);
+                            rightlegs[i].children[2].position.set(-btmSize.x / 2 + bkSize.x / 2, 0, btmSize.z / 2 - lSize.z / 2);
+                            rightlegs[i].children[3].position.set(-btmSize.x / 2 + bkSize.x / 2, 0, -btmSize.z / 2 + lSize.z / 2);
+                        } else {
+
+
+                            rightbottoms[i - 1].children[0].scale.setX(2 + prevBtmLSize.z * 3);
+                            rightbottoms[i].children[0].scale.setX(3 + prevBtmLSize.z * 6);
+                            var prevBtmSize = new THREE.Box3().setFromObject(rightbottoms[i - 1].children[0]).getSize(new THREE.Vector3());
+                            var prevBtmScale = new THREE.Box3().setFromObject(rightbottoms[i - 1]).getSize(new THREE.Vector3());
+
+
+                            rightbottoms[i - 1].children[1].position.setX(rightbottoms[i - 1].children[0].position.x);
+                            rightbottoms[i - 1].children[1].position.setZ(rightbottoms[i - 1].children[0].position.z - prevBtmSize.z / 2);
+
+                            rightbottoms[i - 1].children[2].position.setX(rightbottoms[i - 1].children[0].position.x);
+                            rightbottoms[i - 1].children[2].position.setZ(rightbottoms[i - 1].children[0].position.z + prevBtmSize.z / 2);
+
+                            var currentBtmSize = new THREE.Box3().setFromObject(rightbottoms[i].children[0]).getSize(new THREE.Vector3());
+                            if (i - 2 >= 0) {
+
+
+                                rightbottoms[i - 1].position.setZ(rightbottoms[i - 2].position.z - prevBtmSize.z - prevBtmLSize.z * 2);
+                            }
+
+
+                            rightbottoms[i].position.setZ(rightbottoms[i - 1].position.z - currentBtmSize.z / 2 - prevBtmSize.z / 2 - prevBtmLSize.z * 2);
+
+
+                            rightbottoms[i].children[1].position.setX(rightbottoms[i].children[0].position.x);
+                            rightbottoms[i].children[1].position.setZ(rightbottoms[i].children[0].position.z - currentBtmSize.z / 2);
+
+                            rightbottoms[i].children[2].position.setX(rightbottoms[i].children[0].position.x);
+                            rightbottoms[i].children[2].position.setZ(rightbottoms[i].children[0].position.z + currentBtmSize.z / 2);
+
+
+                            rightbottoms[i].position.setX(sofas[rightverticalIndex].position.x)
+                            rightbottoms[i - 1].position.setX(sofas[rightverticalIndex].position.x)
+
+
+                            var bkSize = new THREE.Box3().setFromObject(rightbacks[i].children[0]).getSize(new THREE.Vector3());
+                            var lSize = new THREE.Box3().setFromObject(rightlegs[i].children[0]).getSize(new THREE.Vector3());
+                            rightlegs[i].position.setX(rightbottoms[i].position.x);
+                            rightlegs[i].position.setZ(rightbottoms[i].position.z);
+                            rightlegs[i].children[0].position.set(btmSize.x / 2 + lSize.x, 0, btmSize.z / 2);
+                            rightlegs[i].children[1].position.set(btmSize.x / 2 + lSize.x, 0, -btmSize.z / 2);
+                            rightlegs[i].children[2].position.set(-btmSize.x / 2 + bkSize.x / 2, 0, btmSize.z / 2 - lSize.z / 2);
+                            rightlegs[i].children[3].position.set(-btmSize.x / 2 + bkSize.x / 2, 0, -btmSize.z / 2 + lSize.z / 2);
+
+                            rightlegs[i - 1].position.setX(rightbottoms[i - 1].position.x);
+                            rightlegs[i - 1].position.setZ(rightbottoms[i - 1].position.z);
+                            rightlegs[i - 1].children[0].position.set(btmSize.x / 2 + lSize.x, 0, btmSize.z / 2);
+                            rightlegs[i - 1].children[1].position.set(btmSize.x / 2 + lSize.x, 0, -btmSize.z / 2);
+                            rightlegs[i - 1].children[2].position.set(-btmSize.x / 2 + bkSize.x / 2, 0, btmSize.z / 2 - lSize.z / 2);
+                            rightlegs[i - 1].children[3].position.set(-btmSize.x / 2 + bkSize.x / 2, 0, -btmSize.z / 2 + lSize.z / 2);
+                        }
+
+
+                    }
+
+
+
+                }
+                if (i == 0) {
+                    var btmSize = new THREE.Box3().setFromObject(rightbottoms[i].children[0]).getSize(new THREE.Vector3());
+                    var btmLSize = new THREE.Box3().setFromObject(rightbottoms[i].children[1]).getSize(new THREE.Vector3());
+                    if (rightverticalSingleCount == 3) {
+                        rightbottoms[i].position.setZ(sofas[rightverticalIndex].position.z - sofaSize.z)
+                    } else if (rightverticalSingleCount == 2) {
+                        rightbottoms[i].position.setZ(sofas[rightverticalIndex].position.z - sofaSize.z / 2)
+                    } else if (rightverticalSingleCount == 1) {
+                        rightbottoms[i].position.setZ(sofas[rightverticalIndex].position.z)
+                    } else if (rightverticalSingleCount > 3) {
+                        rightbottoms[i].children[0].scale.setX(2);
+                        rightbottoms[i].position.setZ(sofas[rightverticalIndex].position.z - sofaSize.z / 2)
+                    }
+
+
+
+
+
+
+                    rightbottoms[i].children[1].position.setX(rightbottoms[i].children[0].position.x);
+                    rightbottoms[i].children[1].position.setZ(rightbottoms[i].children[0].position.z - btmSize.z / 2);
+
+                    rightbottoms[i].children[2].position.setX(rightbottoms[i].children[0].position.x);
+                    rightbottoms[i].children[2].position.setZ(rightbottoms[i].children[0].position.z + btmSize.z / 2);
+
+
+                    rightbottoms[i].position.setX(sofas[rightverticalIndex].position.x)
+
+                    var bkSize = new THREE.Box3().setFromObject(rightbacks[i].children[0]).getSize(new THREE.Vector3());
+                    var lSize = new THREE.Box3().setFromObject(rightlegs[i].children[0]).getSize(new THREE.Vector3());
+                    rightlegs[i].position.setX(rightbottoms[i].position.x);
+                    rightlegs[i].position.setZ(rightbottoms[i].position.z);
+                    rightlegs[i].children[0].position.set(btmSize.x / 2 + lSize.x, 0, btmSize.z / 2);
+                    rightlegs[i].children[1].position.set(btmSize.x / 2 + lSize.x, 0, -btmSize.z / 2);
+                    rightlegs[i].children[2].position.set(-btmSize.x / 2 + bkSize.x / 2, 0, btmSize.z / 2 - lSize.z / 2);
+                    rightlegs[i].children[3].position.set(-btmSize.x / 2 + bkSize.x / 2, 0, -btmSize.z / 2 + lSize.z / 2);
+
+                }
+
+
+            }
+            for (var i = 0; i < rightbacks.length; i++) {
+
+                if (i > 0) {
+
+
+
+                    var prevBtmLSize = new THREE.Box3().setFromObject(rightbacks[i - 1].children[1]).getSize(new THREE.Vector3());
+
+                    if (rightverticalSingleCount > 3) {
+
+                        if (rightverticalSingleCount % 2 == 0) {
+
+
+
+                            rightbacks[i].children[0].scale.setX(2 + (prevBtmLSize.z * 3));
+
+                            var currentBtmSize = new THREE.Box3().setFromObject(rightbacks[i].children[0]).getSize(new THREE.Vector3());
+                            var prevBtmSize = new THREE.Box3().setFromObject(rightbacks[i - 1]).getSize(new THREE.Vector3());
+                            var prevBtmLSize = new THREE.Box3().setFromObject(rightbacks[i - 1].children[1]).getSize(new THREE.Vector3());
+
+                            rightbacks[i].children[1].position.setX(rightbacks[i].children[0].position.x);
+                            rightbacks[i].children[1].position.setZ(rightbacks[i].children[0].position.z + currentBtmSize.z / 2);
+
+                            rightbacks[i].children[2].position.setX(rightbacks[i].children[0].position.x);
+                            rightbacks[i].children[2].position.setZ(rightbacks[i].children[0].position.z - currentBtmSize.z / 2);
+
+                            rightbacks[i].position.setZ(rightbacks[i - 1].position.z - currentBtmSize.z - prevBtmLSize.z * 2);
+
+
+                            rightbacks[i].position.setX(sofas[rightverticalIndex].position.x + sofaSize.z / 2)
+                            rightbacks[i - 1].position.setX(sofas[rightverticalIndex].position.x + sofaSize.z / 2)
+                        } else {
+
+
+                            rightbacks[i - 1].children[0].scale.setX(2 + prevBtmLSize.z * 3);
+                            rightbacks[i].children[0].scale.setX(3 + prevBtmLSize.z * 6);
+                            var prevBtmSize = new THREE.Box3().setFromObject(rightbacks[i - 1].children[0]).getSize(new THREE.Vector3());
+                            var prevBtmScale = new THREE.Box3().setFromObject(rightbacks[i - 1]).getSize(new THREE.Vector3());
+
+
+                            rightbacks[i - 1].children[1].position.setX(rightbacks[i - 1].children[0].position.x);
+                            rightbacks[i - 1].children[1].position.setZ(rightbacks[i - 1].children[0].position.z + prevBtmSize.z / 2);
+
+                            rightbacks[i - 1].children[2].position.setX(rightbacks[i - 1].children[0].position.x);
+                            rightbacks[i - 1].children[2].position.setZ(rightbacks[i - 1].children[0].position.z - prevBtmSize.z / 2);
+
+                            var currentBtmSize = new THREE.Box3().setFromObject(rightbacks[i].children[0]).getSize(new THREE.Vector3());
+                            if (i - 2 >= 0) {
+
+
+                                rightbacks[i - 1].position.setZ(rightbacks[i - 2].position.z - prevBtmSize.z - prevBtmLSize.z * 2);
+                            }
+
+
+                            rightbacks[i].position.setZ(rightbacks[i - 1].position.z - currentBtmSize.z / 2 - prevBtmSize.z / 2 - prevBtmLSize.z * 2);
+
+
+                            rightbacks[i].children[1].position.setX(rightbacks[i].children[0].position.x);
+                            rightbacks[i].children[1].position.setZ(rightbacks[i].children[0].position.z + currentBtmSize.z / 2);
+
+                            rightbacks[i].children[2].position.setX(rightbacks[i].children[0].position.x);
+                            rightbacks[i].children[2].position.setZ(rightbacks[i].children[0].position.z - currentBtmSize.z / 2);
+
+
+                            rightbacks[i].position.setX(sofas[rightverticalIndex].position.x + sofaSize.z / 2)
+                            rightbacks[i - 1].position.setX(sofas[rightverticalIndex].position.x + sofaSize.z / 2)
+
+                        }
+
+
+                    }
+
+
+
+                }
+                if (i == 0) {
+                    var btmSize = new THREE.Box3().setFromObject(rightbacks[i].children[0]).getSize(new THREE.Vector3());
+                    var btmLSize = new THREE.Box3().setFromObject(rightbacks[i].children[1]).getSize(new THREE.Vector3());
+                    if (rightverticalSingleCount == 3) {
+                        rightbacks[i].position.setZ(sofas[rightverticalIndex].position.z - sofaSize.z)
+                    } else if (rightverticalSingleCount == 2) {
+                        rightbacks[i].position.setZ(sofas[rightverticalIndex].position.z - sofaSize.z / 2)
+                    } else if (rightverticalSingleCount == 1) {
+                        rightbacks[i].position.setZ(sofas[rightverticalIndex].position.z)
+                    } else if (rightverticalSingleCount > 3) {
+                        rightbacks[i].children[0].scale.setX(2);
+                        rightbacks[i].position.setZ(sofas[rightverticalIndex].position.z - sofaSize.z / 2)
+                    }
+
+
+
+
+
+
+                    rightbacks[i].children[1].position.setX(rightbacks[i].children[0].position.x);
+                    rightbacks[i].children[1].position.setZ(rightbacks[i].children[0].position.z + btmSize.z / 2);
+
+                    rightbacks[i].children[2].position.setX(rightbacks[i].children[0].position.x);
+                    rightbacks[i].children[2].position.setZ(rightbacks[i].children[0].position.z - btmSize.z / 2);
+
+
+                    rightbacks[i].position.setX(sofas[rightverticalIndex].position.x + sofaSize.z / 2)
+
+                }
+
+
+            }
+
+        }
+
+
+
+
     }
 
     function addArmrest() {
@@ -1302,9 +2248,10 @@
 
         {
 
-            var a = new THREE.Box3().setFromObject(sofas[index1].children[0]).getSize(new THREE.Vector3());
-            var b = new THREE.Box3().setFromObject(sofas[index2].children[0]).getSize(new THREE.Vector3());
+            var a = new THREE.Box3().setFromObject(sofa.single.children[0]).getSize(new THREE.Vector3());
+            var b = new THREE.Box3().setFromObject(sofa.single.children[0]).getSize(new THREE.Vector3());
             var armrestSize = new THREE.Box3().setFromObject(sofa.armrestL).getSize(new THREE.Vector3());
+            var bkSize = new THREE.Box3().setFromObject(sofa.singleback).getSize(new THREE.Vector3());
             if (armrests.length > 0) {
 
                 if (sofas[index1].rotation.y > 0) {
@@ -1313,8 +2260,8 @@
                     armrests[0].rotation.y = Math.PI / 2;
 
 
-                    armrests[0].position.setZ(sofas[index1].position.z + a.z / 2)
-                    armrests[0].position.setX(sofas[index1].position.x + a.x / 2 - armrestSize.x / 2);
+                    armrests[0].position.setZ(sofas[index1].position.z + a.x / 2 + armrestSize.x)
+                    armrests[0].position.setX(sofas[index1].position.x - a.z / 2 + armrestSize.z / 2 - bkSize.z / 2);
                 } else {
                     armrests[0].position.setX(sofas[index1].position.x - a.x / 2 - armrestSize.x)
                     // armrests[0].position.setZ(0.3)
@@ -1326,8 +2273,8 @@
                     armrests[1].rotation.y = -Math.PI / 2;
 
 
-                    armrests[1].position.setZ(sofas[index2].position.z + b.z / 2 + armrestSize.x)
-                    armrests[1].position.setX(sofas[index2].position.x + b.x / 2 + armrestSize.x / 2);
+                    armrests[1].position.setZ(sofas[index2].position.z + b.x / 2 + armrestSize.x)
+                    armrests[1].position.setX(sofas[index2].position.x - b.z / 2 + armrestSize.z / 2 - bkSize.z / 2);
                 } else {
                     armrests[1].position.setX(sofas[index2].position.x + b.x / 2 + armrestSize.x)
                     // armrests[1].position.setZ(0.3)
@@ -1411,6 +2358,8 @@
                         sofas.push(s)
                     }
                     armrests[0].visible = false;
+                    lasthSingleCount += 1;
+
                 }
                 if (isRight) {
                     var s = sofa.cornerL.clone();
@@ -1421,7 +2370,9 @@
                         sofas.push(s)
                     }
                     armrests[1].visible = false;
+                    lasthSingleCount -= 1;
                 }
+
             }
 
 
@@ -1451,7 +2402,7 @@
                     if (!sofas.includes(s)) {
                         sofas.push(s)
                     }
-
+                    lasthSingleCount += 1;
                 }
                 if (isRight) {
                     scene.add(s);
@@ -1461,6 +2412,7 @@
                     if (!sofas.includes(s)) {
                         sofas.push(s)
                     }
+                    lasthSingleCount += 1;
                 }
             }
 
@@ -1592,6 +2544,7 @@
             setSofa(sofa.bottomL);
             setSofa(sofa.bottomR);
             addSingle();
+            hSingleCount += 1;
             addButton();
         })
 
@@ -1746,15 +2699,51 @@
 
             if (a > -1) {
                 leftIndex = sofas.indexOf(e);
+                if (e.rotation.y == 0) {
+                    if (e.name != sofa.cornerR.name) {
+
+                        leftHorizontalIndex = sofas.indexOf(e);
+                    }
+                }
+                if (e.rotation.y > 0) {
+                    leftverticalIndex = sofas.indexOf(e);
+                }
+
 
             }
+
+
             if (b < 1) {
                 rightIndex = sofas.indexOf(e);
 
+                if (e.rotation.y < 0) {
+                    rightverticalIndex = sofas.indexOf(e);
+                }
             }
 
 
+            // if(btn_group.children[0].position.z == e.position.z){
+
+            //         if(e.children[0].name != sofa.cornerR.children[0].name){
+            //             leftHorizontalIndex = sofas.indexOf(e);
+            //         }
+
+
+
+
+
+            // }
+
+
         });
+
+
+
+
+
+
+
+
 
 
     }
@@ -1961,6 +2950,9 @@
 
         var s = new THREE.CSS2DObject(div);
         var e = s.element.childNodes[0].childNodes[0];
+        if (currentSingleCount < 3) {
+            e.childNodes[1].className = "d-none";
+        }
         if (currentChaiseCount == 1) {
 
             e.childNodes[2].className = "d-none";
