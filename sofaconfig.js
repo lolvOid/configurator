@@ -146,9 +146,9 @@
     var enableHorizontalBottomAdding = false,
         enableLeftVerticalBottomAdding = false;
     let posVector = new THREE.Vector3(0, 0, 0);
-    var flag =  0;
+    var flag = 0;
 
-    
+
     init();
 
     animate();
@@ -170,10 +170,10 @@
 
         $("#selectSofa").change(function () {
 
-            sofaType  = $(this).children("option:selected").val();
+            sofaType = $(this).children("option:selected").val();
         })
     }
-    
+
     function init() {
 
         cssScene = new THREE.Scene();
@@ -380,147 +380,214 @@
         render();
 
     }
-    function chooseSofaDesign(type){
-            if(sofa.singleback!=null && sofa.singlebackL !=null && sofa.singlebackR!=null){
-                if(type == 0){
-                    scene.traverse(function(e){
-                        if(e instanceof THREE.Object3D){
-                            if(e.name == sofa.singleback.name ){
-                            
-                                e.children[1].visible = true;
-                                e.children[0].visible = false;
-                            }
 
-                            if(e.name == sofa.singlebackL.name ){
-                               
-                                e.children[1].visible = true;
-                                e.children[0].visible = false;
-                            }
+    function chooseSofaDesign(type) {
+        if (sofa.singleback != null && sofa.singlebackL != null && sofa.singlebackR != null) {
+            if (type == 0) {
+                scene.traverse(function (e) {
+                    if (e instanceof THREE.Object3D) {
+                        if (e.name == sofa.singleback.name) {
 
-                            if(e.name == sofa.singlebackR.name ){
-                                
-                                e.children[1].visible = true;
-                                e.children[0].visible = false;
-                            }
+                            e.children[1].visible = true;
+                            e.children[0].visible = false;
                         }
-                    })
-                    
-                }
-                if(type == 1){
-                    scene.traverse(function(e){
-                        if(e instanceof THREE.Object3D){
-                            if(e.name == sofa.singleback.name ){
-                            
-                                e.children[0].visible = true;
-                                e.children[1].visible = false;
-                            }
 
-                            if(e.name == sofa.singlebackL.name ){
-                               
-                                e.children[0].visible = true;
-                                e.children[1].visible = false;
-                            }
+                        if (e.name == sofa.singlebackL.name) {
 
-                            if(e.name == sofa.singlebackR.name ){
-                                
-                                e.children[0].visible = true;
-                                e.children[1].visible = false;
-                            }
+                            e.children[1].visible = true;
+                            e.children[0].visible = false;
                         }
-                    })
-                }
+
+                        if (e.name == sofa.singlebackR.name) {
+
+                            e.children[1].visible = true;
+                            e.children[0].visible = false;
+                        }
+                    }
+                })
+
             }
-            if(sofa.cornerL!=null && sofa.cornerR !=null){
-                if(type == 0){
-                    scene.traverse(function(e){
-                        if(e instanceof THREE.Object3D){
-                            if(e.name == sofa.cornerL.name ){
-                            
-                                e.children[1].visible = true;
-                                e.children[0].visible = false;
-                            }
-                            if(e.name == sofa.cornerR.name ){
-                            
-                                e.children[1].visible = true;
-                                e.children[0].visible = false;
-                            }
-                            
-                        }
-                    })
-                    
-                }
-                if(type == 1){
-                    scene.traverse(function(e){
-                        if(e instanceof THREE.Object3D){
-                            if(e.name == sofa.cornerL.name ){
-                            
-                                e.children[0].visible = true;
-                                e.children[1].visible = false;
-                            }
+            if (type == 1) {
+                scene.traverse(function (e) {
+                    if (e instanceof THREE.Object3D) {
+                        if (e.name == sofa.singleback.name) {
 
-                            if(e.name == sofa.cornerR.name ){
-                            
-                                e.children[0].visible = true;
-                                e.children[1].visible = false;
-                            }
+                            e.children[0].visible = true;
+                            e.children[1].visible = false;
                         }
-                    })
-                }
-            }
 
-            if(sofa.chaiseL!=null && sofa.chaiseR !=null){
-                if(type == 0){
-                    scene.traverse(function(e){
-                        if(e instanceof THREE.Object3D){
-                            if(e.name == sofa.chaiseL.name ){
-                            
-                                e.children[1].visible = true;
-                                e.children[0].visible = false;
-                            }
-                            if(e.name == sofa.chaiseR.name ){
-                            
-                                e.children[1].visible = true;
-                                e.children[0].visible = false;
-                            }
-                            
-                        }
-                    })
-                    
-                }
-                if(type == 1){
-                    scene.traverse(function(e){
-                        if(e instanceof THREE.Object3D){
-                            if(e.name == sofa.chaiseL.name ){
-                            
-                                e.children[0].visible = true;
-                                e.children[1].visible = false;
-                            }
+                        if (e.name == sofa.singlebackL.name) {
 
-                            if(e.name == sofa.chaiseR.name ){
-                            
-                                e.children[0].visible = true;
-                                e.children[1].visible = false;
-                            }
+                            e.children[0].visible = true;
+                            e.children[1].visible = false;
                         }
-                    })
-                }
+
+                        if (e.name == sofa.singlebackR.name) {
+
+                            e.children[0].visible = true;
+                            e.children[1].visible = false;
+                        }
+                    }
+                })
             }
         }
-        
-        
-    
+        if (sofa.leg != null) {
+            if (type == 0) {
+                scene.traverse(function (e) {
+                    if (e instanceof THREE.Object3D) {
+                        if (e.name == sofa.leg.name) {
+
+                            e.children[1].visible = true;
+                            e.children[0].visible = false;
+                        }
+
+
+                    }
+                })
+
+            }
+            if (type == 1) {
+                scene.traverse(function (e) {
+                    if (e instanceof THREE.Object3D) {
+                        if (e.name == sofa.leg.name) {
+
+                            e.children[0].visible = true;
+                            e.children[1].visible = false;
+                        }
+
+                    }
+                })
+            }
+        }
+
+        if (sofa.armrestL != null && sofa.armrestR != null) {
+            if (type == 0) {
+                scene.traverse(function (e) {
+                    if (e instanceof THREE.Object3D) {
+                        if (e.name == sofa.armrestL.name) {
+
+                            e.children[1].visible = true;
+                            e.children[0].visible = false;
+                        }
+                        if (e.name == sofa.armrestR.name) {
+
+                            e.children[1].visible = true;
+                            e.children[0].visible = false;
+                        }
+
+                    }
+                })
+
+            }
+            if (type == 1) {
+                scene.traverse(function (e) {
+                    if (e instanceof THREE.Object3D) {
+                        if (e.name == sofa.armrestL.name) {
+
+                            e.children[0].visible = true;
+                            e.children[1].visible = false;
+                        }
+
+                        if (e.name == sofa.armrestR.name) {
+
+                            e.children[0].visible = true;
+                            e.children[1].visible = false;
+                        }
+                    }
+                })
+            }
+        }
+        if (sofa.cornerL != null && sofa.cornerR != null) {
+            if (type == 0) {
+                scene.traverse(function (e) {
+                    if (e instanceof THREE.Object3D) {
+                        if (e.name == sofa.cornerL.name) {
+
+                            e.children[1].visible = true;
+                            e.children[0].visible = false;
+                        }
+                        if (e.name == sofa.cornerR.name) {
+
+                            e.children[1].visible = true;
+                            e.children[0].visible = false;
+                        }
+
+                    }
+                })
+
+            }
+            if (type == 1) {
+                scene.traverse(function (e) {
+                    if (e instanceof THREE.Object3D) {
+                        if (e.name == sofa.cornerL.name) {
+
+                            e.children[0].visible = true;
+                            e.children[1].visible = false;
+                        }
+
+                        if (e.name == sofa.cornerR.name) {
+
+                            e.children[0].visible = true;
+                            e.children[1].visible = false;
+                        }
+                    }
+                })
+            }
+        }
+
+        if (sofa.chaiseL != null && sofa.chaiseR != null) {
+            if (type == 0) {
+                scene.traverse(function (e) {
+                    if (e instanceof THREE.Object3D) {
+                        if (e.name == sofa.chaiseL.name) {
+
+                            e.children[1].visible = true;
+                            e.children[0].visible = false;
+                        }
+                        if (e.name == sofa.chaiseR.name) {
+
+                            e.children[1].visible = true;
+                            e.children[0].visible = false;
+                        }
+
+                    }
+                })
+
+            }
+            if (type == 1) {
+                scene.traverse(function (e) {
+                    if (e instanceof THREE.Object3D) {
+                        if (e.name == sofa.chaiseL.name) {
+
+                            e.children[0].visible = true;
+                            e.children[1].visible = false;
+                        }
+
+                        if (e.name == sofa.chaiseR.name) {
+
+                            e.children[0].visible = true;
+                            e.children[1].visible = false;
+                        }
+                    }
+                })
+            }
+        }
+    }
+
+
+
     function update() {
         controls.update();
         updateFloor();
 
-        
+
         var singles = sofas.filter(sofas => sofas.name == sofa.single.name);
         var chaiseL = sofas.filter(sofas => sofas.name == sofa.chaiseL.name);
         var chaiseR = sofas.filter(sofas => sofas.name == sofa.chaiseR.name);
         var cornerL = sofas.filter(sofas => sofas.name == sofa.cornerL.name);
         var cornerR = sofas.filter(sofas => sofas.name == sofa.cornerR.name);
 
-        
+
         currentSingleCount = singles.length;
         currentChaiseCount = chaiseL.length + chaiseR.length;
         currentCornerCount = cornerL.length + cornerR.length;
@@ -895,9 +962,9 @@
             if (index != null) {
                 var sofaSize = new THREE.Box3().setFromObject(sofas[index].children[0]).getSize(new THREE.Vector3());
                 var cornerSize = new THREE.Box3().setFromObject(sofa.cornerL).getSize(new THREE.Vector3());
-          
+
                 var cornerSeatSize = new THREE.Box3().setFromObject(sofa.cornerL.children[1].children[5]).getSize(new THREE.Vector3());
-                
+
                 var armrestSize = new THREE.Box3().setFromObject(sofa.armrestL).getSize(new THREE.Vector3());
 
 
@@ -1203,6 +1270,52 @@
         if (bottoms.length > 0) {
             if (enableHorizontalBottomAdding) {
                 var sofaSize = new THREE.Box3().setFromObject(sofas[leftHorizontalIndex]).getSize(new THREE.Vector3());
+                for (var i = 0; i < legs.length; i++) {
+                    if (legs[i] instanceof THREE.Group) {
+                        for (var j = 0; j < legs[i].children.length; j++) {
+                            if (j == 1 || j == legs[i].children.length - 1) {
+
+                                legs[i].children[j].rotation.y = Math.PI;
+                            }
+                            if (j == 0 || j == 2) {
+                                legs[i].children[j].rotation.y = 0;
+                            }
+
+
+                            if (hSingleCount < 4) {
+                                legs[i].children[j].visible = false;
+                            } else {
+                                if (i == 0) {
+                                    if (j == 2 || j == legs[i].children.length - 1) {
+                                        legs[i].children[j].visible = true;
+                                    }
+                                    if (j == 0 || j == 1) {
+                                        legs[i].children[j].visible = false;
+                                    }
+                                } else if (i == legs.length - 1) {
+                                    if (j == 0 || j == 1) {
+                                        legs[i].children[j].visible = true;
+                                    }
+                                    if (j == 2 || j == legs[i].children.length - 1) {
+                                        legs[i].children[j].visible = false;
+                                    }
+
+                                } else {
+
+                                    legs[i].children[j].visible = true;
+
+                                }
+
+                            }
+
+
+
+                        }
+
+
+                    }
+
+                }
                 for (var i = 0; i < bottoms.length; i++) {
                     if (i > 0) {
 
@@ -1331,8 +1444,8 @@
                         legs[i].children[2].position.set(btmSize.x / 2 - lSize.x / 2, 0, -btmSize.z / 2 - bkSize.z / 2);
                         legs[i].children[3].position.set(btmSize.x / 2 - lSize.x / 2, 0, btmSize.z / 2 - bkSize.z / 2);
 
-                   
-             
+
+
                     }
 
                 }
@@ -1444,6 +1557,8 @@
 
 
                 }
+
+
             }
         }
 
@@ -1648,6 +1763,34 @@
         if (leftbottoms.length > 0) {
 
             var sofaSize = new THREE.Box3().setFromObject(sofas[leftverticalIndex]).getSize(new THREE.Vector3());
+            for (var i = 0; i < leftlegs.length; i++) {
+                if (leftlegs[i] instanceof THREE.Group) {
+                    for (var j = 0; j < leftlegs[i].children.length; j++) {
+                        if (j == 2 || j == leftlegs[i].children.length - 1) {
+
+                            leftlegs[i].children[j].rotation.y = Math.PI / 2;
+                        }
+                        if (j == 0 || j == 1) {
+                            leftlegs[i].children[j].rotation.y = -Math.PI / 2;
+                        }
+
+                     
+                            if (i == 0) {
+                                if (j == 1 || j == leftlegs[i].children.length - 1) {
+                                    leftlegs[i].children[j].visible = true;
+                                }
+                                if (j == 0 || j == 2) {
+                                    leftlegs[i].children[j].visible = false;
+                                }
+                            
+
+                        }
+
+                    }
+                }
+
+            }
+
             for (var i = 0; i < leftbottoms.length; i++) {
 
                 if (i > 0) {
@@ -2105,6 +2248,34 @@
         if (rightbottoms.length > 0) {
 
             var sofaSize = new THREE.Box3().setFromObject(sofas[rightverticalIndex]).getSize(new THREE.Vector3());
+
+            for (var i = 0; i < rightlegs.length; i++) {
+                if (rightlegs[i] instanceof THREE.Group) {
+                    for (var j = 0; j < rightlegs[i].children.length; j++) {
+                        if (j == 2 || j == rightlegs[i].children.length - 1) {
+
+                            rightlegs[i].children[j].rotation.y = -Math.PI / 2;
+                        }
+                        if (j == 0 || j == 1) {
+                            rightlegs[i].children[j].rotation.y = Math.PI / 2;
+                        }
+
+                        
+                        if (i == 0) {
+                            if (j == 1 || j == rightlegs[i].children.length - 1) {
+                                rightlegs[i].children[j].visible = true;
+                            }
+                            if (j == 0 || j == 2) {
+                                rightlegs[i].children[j].visible = false;
+                            }
+                        
+
+                    }
+
+                    }
+                }
+
+            }
             for (var i = 0; i < rightbottoms.length; i++) {
 
                 if (i > 0) {
@@ -2371,20 +2542,20 @@
             var legRR = sofa.leg.clone();
 
 
-            var armrestSize = new THREE.Box3().setFromObject(sl).getSize(new THREE.Vector3());
-            var lSize =  new THREE.Box3().setFromObject(legFL).getSize(new THREE.Vector3());
-                
-            legFL.position.set(sl.position.x+armrestSize.x/2,0,sl.position.z+armrestSize.z/3-lSize.z/2);
-            legRL.position.set(sl.position.x+armrestSize.x/2,0,sl.position.z-armrestSize.z/2+lSize.z/4);
+            // var armrestSize = new THREE.Box3().setFromObject(sl).getSize(new THREE.Vector3());
+            // var lSize =  new THREE.Box3().setFromObject(legFL).getSize(new THREE.Vector3());
 
-            legFR.position.set(sr.position.x-armrestSize.x/2,0,sr.position.z+armrestSize.z/3-lSize.z/2);
-            legRR.position.set(sr.position.x-armrestSize.x/2,0,sr.position.z-armrestSize.z/2+lSize.z/4);
-            sl.add(legFL);
-            sl.add(legRL);
-            sr.add(legFR);
-            sr.add(legRR);
+            // legFL.position.set(sl.position.x+armrestSize.x/2,0,sl.position.z+armrestSize.z/3-lSize.z/2);
+            // legRL.position.set(sl.position.x+armrestSize.x/2,0,sl.position.z-armrestSize.z/2+lSize.z/4);
 
-            
+            // legFR.position.set(sr.position.x-armrestSize.x/2,0,sr.position.z+armrestSize.z/3-lSize.z/2);
+            // legRR.position.set(sr.position.x-armrestSize.x/2,0,sr.position.z-armrestSize.z/2+lSize.z/4);
+            // sl.add(legFL);
+            // sl.add(legRL);
+            // sr.add(legFR);
+            // sr.add(legRR);
+
+
             if (!armrests.includes(sl)) {
                 armrests.push(sl);
             }
@@ -2392,9 +2563,9 @@
                 armrests.push(sr);
             }
 
-          
+
             armrests.forEach(e => {
-                if (e instanceof THREE.Mesh) {
+                if (e instanceof THREE.Object3D) {
                     scene.add(e);
                 }
             })
@@ -2409,9 +2580,10 @@
 
             var a = new THREE.Box3().setFromObject(sofa.single.children[0]).getSize(new THREE.Vector3());
             var b = new THREE.Box3().setFromObject(sofa.single.children[0]).getSize(new THREE.Vector3());
+
             var armrestSizeL = new THREE.Box3().setFromObject(sofa.armrestL).getSize(new THREE.Vector3());
             var armrestSizeR = new THREE.Box3().setFromObject(sofa.armrestR).getSize(new THREE.Vector3());
-            var bkSize = new THREE.Box3().setFromObject(sofa.singleback).getSize(new THREE.Vector3());
+            var bkSize = new THREE.Box3().setFromObject(sofa.singleback.children[0]).getSize(new THREE.Vector3());
             if (armrests.length > 0) {
 
                 if (sofas[index1].rotation.y > 0) {
@@ -2420,10 +2592,10 @@
                     armrests[0].rotation.y = Math.PI / 2;
 
 
-                    armrests[0].position.setZ(sofas[index1].position.z + a.x / 2 + armrestSizeL.x)
-                    armrests[0].position.setX(sofas[index1].position.x - a.z / 2 + armrestSizeL.z / 2 - bkSize.z / 2);
+                    armrests[0].position.setZ(sofas[index1].position.z + a.x / 2)
+                    armrests[0].position.setX(sofas[index1].position.x + a.z / 2 - armrestSizeL.z / 2 + bkSize.z / 2);
                 } else {
-                    armrests[0].position.setX(sofas[index1].position.x - a.x / 2 - armrestSizeL.x)
+                    armrests[0].position.setX(sofas[index1].position.x - a.x / 2)
                     // armrests[0].position.setZ(0.3)
                 }
 
@@ -2433,11 +2605,11 @@
                     armrests[1].rotation.y = -Math.PI / 2;
 
 
-                    armrests[1].position.setZ(sofas[index2].position.z + b.x / 2 + armrestSizeR.x)
-                    armrests[1].position.setX(sofas[index2].position.x - b.z / 2 + armrestSizeR.z / 2 - bkSize.z / 2);
+                    armrests[1].position.setZ(sofas[index2].position.z + b.x / 2)
+                    armrests[1].position.setX(sofas[index2].position.x + b.z / 2 - armrestSizeR.z / 2 + bkSize.z / 2);
                 } else {
-                    armrests[1].position.setX(sofas[index2].position.x + b.x / 2 + armrestSizeR.x)
-                    // armrests[1].position.setZ(0.3)
+                    armrests[1].position.setX(sofas[index2].position.x + b.x / 2)
+
                 }
 
 
@@ -2560,7 +2732,7 @@
 
                     scene.add(s);
                     s.position.setX(sofas[index].position.x - 0.06)
-                    s.position.setZ(sofas[index].position.z + sofaSize.z- sSize.z/2-sSize.z*3+sSize.z/10)
+                    s.position.setZ(sofas[index].position.z + sofaSize.z - sSize.z / 2 - sSize.z * 3 + sSize.z / 10)
 
                     if (!sofas.includes(s)) {
                         sofas.push(s)
@@ -2570,7 +2742,7 @@
                 if (isRight) {
                     scene.add(s);
                     s.position.setX(sofas[index].position.x + 0.06)
-                    s.position.setZ(sofas[index].position.z + sofaSize.z- sSize.z/2-sSize.z*3+sSize.z/10)
+                    s.position.setZ(sofas[index].position.z + sofaSize.z - sSize.z / 2 - sSize.z * 3 + sSize.z / 10)
 
                     if (!sofas.includes(s)) {
                         sofas.push(s)
@@ -2602,65 +2774,66 @@
 
         let p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16;
 
-    
 
 
-    
-            p1 = loadAsync('models/sofas/sofa1/components/single.gltf').then(result => {
-                sofa.single = result.scene.children[0];
-            });
-            p2 = loadAsync('models/sofas/sofa1/components/armrestL.gltf').then(result => {
-                sofa.armrestL = result.scene.children[0];
-            });
-            p3 = loadAsync('models/sofas/sofa1/components/armrestR.gltf').then(result => {
-                sofa.armrestR = result.scene.children[0];
-            });
-            p4 = loadAsync('models/sofas/sofa1/components/chaise.gltf').then(result => {
-                sofa.chaise = result.scene.children[0];
-            });
-            p5 = loadAsync('models/sofas/sofa1/components/chaiseL.gltf').then(result => {
-                sofa.chaiseL = result.scene.children[0];
-            });
-            p6 = loadAsync('models/sofas/sofa1/components/chaiseR.gltf').then(result => {
-                sofa.chaiseR = result.scene.children[0];
-            });
-            p7 = loadAsync('models/sofas/sofa1/components/cornerL.gltf').then(result => {
-                sofa.cornerL = result.scene.children[0];
-            });
-            p8 = loadAsync('models/sofas/sofa1/components/cornerR.gltf').then(result => {
-                sofa.cornerR = result.scene.children[0];
-            });
-            p9 = loadAsync('models/sofas/sofa1/components/ottoman.gltf').then(result => {
-                sofa.ottoman = result.scene.children[0];
-            });
 
-            p10 = loadAsync('models/sofas/sofa1/components/singleback.gltf').then(result => {
-                sofa.singleback = result.scene.children[0];
-            });
-            p11 = loadAsync('models/sofas/sofa1/components/singlebackL.gltf').then(result => {
-                sofa.singlebackL = result.scene.children[0];
-            });
-            p12 = loadAsync('models/sofas/sofa1/components/singlebackR.gltf').then(result => {
-                sofa.singlebackR = result.scene.children[0];
-            });
-            p13 = loadAsync('models/sofas/sofa1/components/bottom.gltf').then(result => {
-                sofa.bottom = result.scene.children[0];
-            });
-            p14 = loadAsync('models/sofas/sofa1/components/bottomL.gltf').then(result => {
-                sofa.bottomL = result.scene.children[0];
-            });
-            p15 = loadAsync('models/sofas/sofa1/components/bottomR.gltf').then(result => {
-                sofa.bottomR = result.scene.children[0];
-            });
-            p16 = loadAsync('models/sofas/sofa1/components/leg.gltf').then(result => {
-                sofa.leg = result.scene.children[0];
-            });
 
-        
+        p1 = loadAsync('models/sofas/sofa1/components/single.gltf').then(result => {
+            sofa.single = result.scene.children[0];
+        });
+        p2 = loadAsync('models/sofas/sofa1/components/armrestL.gltf').then(result => {
+            sofa.armrestL = result.scene.children[0];
+
+        });
+        p3 = loadAsync('models/sofas/sofa1/components/armrestR.gltf').then(result => {
+            sofa.armrestR = result.scene.children[0];
+        });
+        p4 = loadAsync('models/sofas/sofa1/components/chaise.gltf').then(result => {
+            sofa.chaise = result.scene.children[0];
+        });
+        p5 = loadAsync('models/sofas/sofa1/components/chaiseL.gltf').then(result => {
+            sofa.chaiseL = result.scene.children[0];
+        });
+        p6 = loadAsync('models/sofas/sofa1/components/chaiseR.gltf').then(result => {
+            sofa.chaiseR = result.scene.children[0];
+        });
+        p7 = loadAsync('models/sofas/sofa1/components/cornerL.gltf').then(result => {
+            sofa.cornerL = result.scene.children[0];
+        });
+        p8 = loadAsync('models/sofas/sofa1/components/cornerR.gltf').then(result => {
+            sofa.cornerR = result.scene.children[0];
+        });
+        p9 = loadAsync('models/sofas/sofa1/components/ottoman.gltf').then(result => {
+            sofa.ottoman = result.scene.children[0];
+        });
+
+        p10 = loadAsync('models/sofas/sofa1/components/singleback.gltf').then(result => {
+            sofa.singleback = result.scene.children[0];
+        });
+        p11 = loadAsync('models/sofas/sofa1/components/singlebackL.gltf').then(result => {
+            sofa.singlebackL = result.scene.children[0];
+        });
+        p12 = loadAsync('models/sofas/sofa1/components/singlebackR.gltf').then(result => {
+            sofa.singlebackR = result.scene.children[0];
+        });
+        p13 = loadAsync('models/sofas/sofa1/components/bottom.gltf').then(result => {
+            sofa.bottom = result.scene.children[0];
+        });
+        p14 = loadAsync('models/sofas/sofa1/components/bottomL.gltf').then(result => {
+            sofa.bottomL = result.scene.children[0];
+        });
+        p15 = loadAsync('models/sofas/sofa1/components/bottomR.gltf').then(result => {
+            sofa.bottomR = result.scene.children[0];
+        });
+        p16 = loadAsync('models/sofas/sofa1/components/leg.gltf').then(result => {
+            sofa.leg = result.scene.children[0];
+        });
+
+
 
         Promise.all([p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]).then(() => {
 
-            setSofa(sofa.leg);
+
             setSofa(sofa.single);
             setSofa(sofa.armrestL);
             setSofa(sofa.armrestR);
@@ -2676,9 +2849,12 @@
             setSofa(sofa.bottom);
             setSofa(sofa.bottomL);
             setSofa(sofa.bottomR);
+            setSofa(sofa.leg);
             addSingle();
             hSingleCount += 1;
             addButton();
+
+
         })
 
     }
@@ -2702,6 +2878,7 @@
 
             if (e instanceof THREE.Mesh) {
 
+                e.geometry.normalizeNormals();
                 e.castShadow = true;
                 e.receiveShadow = true;
                 // e.material.wireframe = true;
@@ -2834,17 +3011,17 @@
                 leftIndex = sofas.indexOf(e);
                 if (e.rotation.y == 0) {
                     if (e.name != sofa.cornerR.name) {
-                        if( e.name != sofa.chaiseR.name){
-                            if( e.name != sofa.ottoman.name){
+                        if (e.name != sofa.chaiseR.name) {
+                            if (e.name != sofa.ottoman.name) {
                                 leftHorizontalIndex = sofas.indexOf(e);
-                               
+
                             }
-                           
-                           
+
+
                         }
-                        
+
                     }
-                   
+
                 }
                 if (e.rotation.y > 0) {
                     leftverticalIndex = sofas.indexOf(e);
@@ -3094,20 +3271,20 @@
         if (currentSingleCount < 3) {
             e.childNodes[1].className = "d-none";
         }
-        if(isLeft){
-            if(leftverticalSingleCount > 0 ){
+        if (isLeft) {
+            if (leftverticalSingleCount > 0) {
                 e.childNodes[1].className = "d-none";
                 e.childNodes[2].className = "d-none";
             }
         }
-        if(isRight){
-            if(rightverticalSingleCount >0){
+        if (isRight) {
+            if (rightverticalSingleCount > 0) {
                 e.childNodes[1].className = "d-none";
                 e.childNodes[2].className = "d-none";
 
             }
         }
-        
+
         if (currentChaiseCount == 1) {
 
             e.childNodes[2].className = "d-none";
