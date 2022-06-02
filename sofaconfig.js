@@ -327,8 +327,8 @@
 
         controls.minPolarAngle = 0; // radians
         controls.maxPolarAngle = Math.PI / 2;
-        controls.minAzimuthAngle = -Math.PI / 2;
-        controls.maxAzimuthAngle = Math.PI / 2;
+        // controls.minAzimuthAngle = -Math.PI / 2;
+        // controls.maxAzimuthAngle = Math.PI / 2;
         window.addEventListener('resize', onWindowResize, true);
         document.addEventListener('pointermove', onPointerMove);
         document.addEventListener('click', onClick);
@@ -586,21 +586,49 @@
         var chaiseR = sofas.filter(sofas => sofas.name == sofa.chaiseR.name);
         var cornerL = sofas.filter(sofas => sofas.name == sofa.cornerL.name);
         var cornerR = sofas.filter(sofas => sofas.name == sofa.cornerR.name);
-
+        var ottomans = sofas.filter(sofas => sofas.name == sofa.ottoman.name);
 
         currentSingleCount = singles.length;
         currentChaiseCount = chaiseL.length + chaiseR.length;
         currentCornerCount = cornerL.length + cornerR.length;
-
+        var currentOttomanCount = ottomans.length;
 
         chooseSofaDesign(sofaType);
 
-        sofaCount = currentSingleCount + currentChaiseCount + currentCornerCount;
-        if (sofaCount < 16) {
-            btn_group.visible = true;
+        sofaCount = hSingleCount + leftverticalSingleCount + rightverticalSingleCount + currentChaiseCount + currentCornerCount;
+
+        if (hSingleCount > 6) {
+            if (cornerL.length > 0 || chaiseL.length > 0) {
+
+                btn_group.children[0].visible = false;
+            } else if (cornerR.length > 0 || chaiseR.length > 0) {
+
+                btn_group.children[1].visible = false;
+            } else if (hSingleCount == 8) {
+                btn_group.visible = false;
+            }
         } else {
-            btn_group.visible = false;
+            if (leftverticalSingleCount + currentCornerCount > 8) {
+
+                btn_group.children[0].visible = false;
+
+
+
+            }
+            if (rightverticalSingleCount + currentCornerCount > 8) {
+                btn_group.children[1].visible = false;
+            }
         }
+
+
+
+
+
+        // if (sofaCount < 16) {
+        //     btn_group.visible = true;
+        // } else {
+        //     btn_group.visible = false;
+        // }
         $("#sofaCount").html(sofaCount);
 
         checkDistance();
@@ -1774,15 +1802,15 @@
                             leftlegs[i].children[j].rotation.y = -Math.PI / 2;
                         }
 
-                     
-                            if (i == 0) {
-                                if (j == 1 || j == leftlegs[i].children.length - 1) {
-                                    leftlegs[i].children[j].visible = true;
-                                }
-                                if (j == 0 || j == 2) {
-                                    leftlegs[i].children[j].visible = false;
-                                }
-                            
+
+                        if (i == 0) {
+                            if (j == 1 || j == leftlegs[i].children.length - 1) {
+                                leftlegs[i].children[j].visible = true;
+                            }
+                            if (j == 0 || j == 2) {
+                                leftlegs[i].children[j].visible = false;
+                            }
+
 
                         }
 
@@ -2260,7 +2288,7 @@
                             rightlegs[i].children[j].rotation.y = Math.PI / 2;
                         }
 
-                        
+
                         if (i == 0) {
                             if (j == 1 || j == rightlegs[i].children.length - 1) {
                                 rightlegs[i].children[j].visible = true;
@@ -2268,9 +2296,9 @@
                             if (j == 0 || j == 2) {
                                 rightlegs[i].children[j].visible = false;
                             }
-                        
 
-                    }
+
+                        }
 
                     }
                 }
@@ -3139,9 +3167,13 @@
             })[0];
 
             if (res && res.object) {
+
                 if (btn_group.visible) {
-                    selectedBtn = res.object;
-                    selectedBtn.material.color.set("#000000");
+                    if (res.object.visible) {
+                        selectedBtn = res.object;
+                        selectedBtn.material.color.set("#000000");
+                    }
+
                 }
 
 
@@ -3268,14 +3300,19 @@
 
         var s = new THREE.CSS2DObject(div);
         var e = s.element.childNodes[0].childNodes[0];
-        if (currentSingleCount < 3) {
+        if (hSingleCount < 3) {
             e.childNodes[1].className = "d-none";
+            e.childNodes[2].className = "d-none";
         }
+
+
+
         if (isLeft) {
             if (leftverticalSingleCount > 0) {
                 e.childNodes[1].className = "d-none";
                 e.childNodes[2].className = "d-none";
             }
+
         }
         if (isRight) {
             if (rightverticalSingleCount > 0) {
@@ -3293,10 +3330,7 @@
             }
         }
         if (sofas[index].name == sofa.single.name) {
-
-
             e.childNodes[3].className = "d-none";
-
         }
 
         if (sofas[index].name == sofa.chaiseL.name || sofas[index].name == sofa.chaiseR.name) {
@@ -3304,6 +3338,7 @@
             e.childNodes[1].className = "d-none";
             e.childNodes[2].className = "d-none";
         }
+
         if (sofas[index].name == sofa.cornerL.name || sofas[index].name == sofa.cornerR.name) {
             e.childNodes[1].className = "d-none";
             e.childNodes[2].className = "d-none";
