@@ -13,7 +13,7 @@
 
 
     let sHeight = 1.5;
-       
+
 
 
 
@@ -165,10 +165,10 @@
             Export();
         })
 
-        
+
         $("input:radio[name='heightOptions']").click(function () {
 
-          
+
             sHeight = $(this).val();
 
         });
@@ -995,9 +995,9 @@
 
             if (index != null) {
                 var sofaSize = new THREE.Box3().setFromObject(sofas[index].children[0]).getSize(new THREE.Vector3());
-                var cornerSize = new THREE.Box3().setFromObject(sofa.cornerL).getSize(new THREE.Vector3());
+                // var cornerSize = new THREE.Box3().setFromObject(sofa.cornerL).getSize(new THREE.Vector3());
 
-                var cornerSeatSize = new THREE.Box3().setFromObject(sofa.cornerL.children[1].children[5]).getSize(new THREE.Vector3());
+                var cornerSeatSize = new THREE.Box3().setFromObject(sofa.cornerL.children[1].children[2]).getSize(new THREE.Vector3());
 
                 var armrestSize = new THREE.Box3().setFromObject(sofa.armrestL).getSize(new THREE.Vector3());
 
@@ -2812,54 +2812,54 @@
 
 
 
-        p1 = loadAsync('models/sofas/sofa1/components/single.gltf').then(result => {
+        p1 = loadAsync('models/sofas/sofa/components/single.gltf').then(result => {
             sofa.single = result.scene.children[0];
         });
-        p2 = loadAsync('models/sofas/sofa1/components/armrestL.gltf').then(result => {
+        p2 = loadAsync('models/sofas/sofa/components/armrestL.gltf').then(result => {
             sofa.armrestL = result.scene.children[0];
 
         });
-        p3 = loadAsync('models/sofas/sofa1/components/armrestR.gltf').then(result => {
+        p3 = loadAsync('models/sofas/sofa/components/armrestR.gltf').then(result => {
             sofa.armrestR = result.scene.children[0];
         });
-        p4 = loadAsync('models/sofas/sofa1/components/chaise.gltf').then(result => {
+        p4 = loadAsync('models/sofas/sofa/components/chaise.gltf').then(result => {
             sofa.chaise = result.scene.children[0];
         });
-        p5 = loadAsync('models/sofas/sofa1/components/chaiseL.gltf').then(result => {
+        p5 = loadAsync('models/sofas/sofa/components/chaiseL.gltf').then(result => {
             sofa.chaiseL = result.scene.children[0];
         });
-        p6 = loadAsync('models/sofas/sofa1/components/chaiseR.gltf').then(result => {
+        p6 = loadAsync('models/sofas/sofa/components/chaiseR.gltf').then(result => {
             sofa.chaiseR = result.scene.children[0];
         });
-        p7 = loadAsync('models/sofas/sofa1/components/cornerL.gltf').then(result => {
+        p7 = loadAsync('models/sofas/sofa/components/cornerL.gltf').then(result => {
             sofa.cornerL = result.scene.children[0];
         });
-        p8 = loadAsync('models/sofas/sofa1/components/cornerR.gltf').then(result => {
+        p8 = loadAsync('models/sofas/sofa/components/cornerR.gltf').then(result => {
             sofa.cornerR = result.scene.children[0];
         });
-        p9 = loadAsync('models/sofas/sofa1/components/ottoman.gltf').then(result => {
+        p9 = loadAsync('models/sofas/sofa/components/ottoman.gltf').then(result => {
             sofa.ottoman = result.scene.children[0];
         });
 
-        p10 = loadAsync('models/sofas/sofa1/components/singleback.gltf').then(result => {
+        p10 = loadAsync('models/sofas/sofa/components/singleback.gltf').then(result => {
             sofa.singleback = result.scene.children[0];
         });
-        p11 = loadAsync('models/sofas/sofa1/components/singlebackL.gltf').then(result => {
+        p11 = loadAsync('models/sofas/sofa/components/singlebackL.gltf').then(result => {
             sofa.singlebackL = result.scene.children[0];
         });
-        p12 = loadAsync('models/sofas/sofa1/components/singlebackR.gltf').then(result => {
+        p12 = loadAsync('models/sofas/sofa/components/singlebackR.gltf').then(result => {
             sofa.singlebackR = result.scene.children[0];
         });
-        p13 = loadAsync('models/sofas/sofa1/components/bottom.gltf').then(result => {
+        p13 = loadAsync('models/sofas/sofa/components/bottom.gltf').then(result => {
             sofa.bottom = result.scene.children[0];
         });
-        p14 = loadAsync('models/sofas/sofa1/components/bottomL.gltf').then(result => {
+        p14 = loadAsync('models/sofas/sofa/components/bottomL.gltf').then(result => {
             sofa.bottomL = result.scene.children[0];
         });
-        p15 = loadAsync('models/sofas/sofa1/components/bottomR.gltf').then(result => {
+        p15 = loadAsync('models/sofas/sofa/components/bottomR.gltf').then(result => {
             sofa.bottomR = result.scene.children[0];
         });
-        p16 = loadAsync('models/sofas/sofa1/components/leg.gltf').then(result => {
+        p16 = loadAsync('models/sofas/sofa/components/leg.gltf').then(result => {
             sofa.leg = result.scene.children[0];
         });
 
@@ -3033,128 +3033,249 @@
             btn_group.remove(e);
         })
     }
-    function adjustHeight(){
-      
-        if(sofas.length>0){
-            sofas.forEach(e=>{
-           
-                if(e instanceof THREE.Object3D){
-                   
-                       
-                            if(e.children[0].name == "SingleSeat"){
-                                var seatSize = new THREE.Box3().setFromObject(sofa.single.children[0]).getSize(new THREE.Vector3());
-                                e.children[0].position.setY((sHeight*ftTom-seatSize.y) )
-   
+
+    function adjustHeight() {
+
+        if (sofas.length > 0) {
+            sofas.forEach(e => {
+
+                if (e instanceof THREE.Object3D) {
+
+
+                    if (e.children[0].name == "SingleSeat") {
+                        var seatSize = new THREE.Box3().setFromObject(sofa.single.children[0]).getSize(new THREE.Vector3());
+                        e.children[0].position.setY((sHeight * ftTom - seatSize.y))
+
+
+                    }
+                    if (e.children[1].name == "pillow") {
+                        var seatSize = new THREE.Box3().setFromObject(sofa.single.children[0]).getSize(new THREE.Vector3());
+
+                        e.children[1].position.setY(e.children[0].position.y + seatSize.y)
+                    }
+                    if (e.name == sofa.chaiseL.name) {
+
+                        //0 - Pillow
+                        //1 - Legs
+                        //2 - Seat
+                        //3 - Bottom
+                        //4 - Armrest
+                        //5 - Back
+                        var backSize = new THREE.Box3().setFromObject(sofa.singleback).getSize(new THREE.Vector3());
+                        var bottomSize = new THREE.Box3().setFromObject(sofa.bottom).getSize(new THREE.Vector3());
+                        var armSize = new THREE.Box3().setFromObject(sofa.armrestL).getSize(new THREE.Vector3());
+                        for (var i = 0; i < e.children.length; i++) {
+                            // console.log(e.children[i])
+                            var seatSize = new THREE.Box3().setFromObject(e.children[i].children[2]).getSize(new THREE.Vector3());
+
+                            e.children[i].children[2].position.setY((sHeight * ftTom - seatSize.y))
+
+                            if (sHeight == 1.25) {
+                                e.children[i].children[4].scale.setY((armSize.y - seatSize.y + 0.05) / armSize.y)
+                                e.children[i].children[5].scale.setY((backSize.y - seatSize.y + 0.05) / backSize.y)
                                
+                            } else{
+                                e.children[i].children[4].scale.setY(1)
+                                e.children[i].children[5].scale.setY(1)
                             }
-                            if(e.children[1].name == "pillow"){
-                                var seatSize = new THREE.Box3().setFromObject(sofa.single.children[0]).getSize(new THREE.Vector3());
-                                var pillowSize = new THREE.Box3().setFromObject(sofa.single.children[1]).getSize(new THREE.Vector3());
-                                e.children[1].position.setY(  e.children[0].position.y +seatSize.y )
+                            e.children[i].children[3].scale.setY(((sHeight * ftTom - seatSize.y) / (bottomSize.y)).toFixed(2))
+                             e.children[i].children[0].position.setY(e.children[i].children[2].position.y + seatSize.y)
+
+                            
+                        }
+
+
+                    }else  if (e.name == sofa.chaiseR.name) {
+
+                        //0 - Pillow
+                        //1 - Legs
+                        //2 - Seat
+                        //3 - Bottom
+                        //4 - Armrest
+                        //5 - Back
+                        var backSize = new THREE.Box3().setFromObject(sofa.singleback).getSize(new THREE.Vector3());
+                        var bottomSize = new THREE.Box3().setFromObject(sofa.bottom).getSize(new THREE.Vector3());
+                        var armSize = new THREE.Box3().setFromObject(sofa.armrestL).getSize(new THREE.Vector3());
+                        for (var i = 0; i < e.children.length; i++) {
+                            // console.log(e.children[i])
+                            var seatSize = new THREE.Box3().setFromObject(e.children[i].children[2]).getSize(new THREE.Vector3());
+
+                            e.children[i].children[2].position.setY((sHeight * ftTom - seatSize.y))
+
+                            if (sHeight == 1.25) {
+                                e.children[i].children[4].scale.setY((armSize.y - seatSize.y + 0.05) / armSize.y)
+                                e.children[i].children[5].scale.setY((backSize.y - seatSize.y + 0.05) / backSize.y)
+                               
+                            } else{
+                                e.children[i].children[4].scale.setY(1)
+                                e.children[i].children[5].scale.setY(1)
                             }
-                    
-                }   
-                
+                            e.children[i].children[3].scale.setY(((sHeight * ftTom - seatSize.y) / (bottomSize.y)).toFixed(2))
+                             e.children[i].children[0].position.setY(e.children[i].children[2].position.y + seatSize.y)
+
+                            
+                        }
+
+
+                    }
+                    if (e.name == sofa.cornerL.name) {
+
+                        //0 - Pillow
+                        //1 - Legs
+                        //2 - SingleSeat
+                        //3 - Bottom
+                        //4 - Backs
+                        var backSize = new THREE.Box3().setFromObject(sofa.singleback).getSize(new THREE.Vector3());
+                        var bottomSize = new THREE.Box3().setFromObject(sofa.bottom).getSize(new THREE.Vector3());
+                        for (var i = 0; i < e.children.length; i++) {
+
+                            var seatSize = new THREE.Box3().setFromObject(e.children[i].children[2]).getSize(new THREE.Vector3());
+
+                            e.children[i].children[2].position.setY((sHeight * ftTom - seatSize.y))
+                            if (sHeight == 1.25) {
+                                e.children[i].children[4].scale.setY((backSize.y - seatSize.y + 0.05) / backSize.y)
+                            } else{e.children[i].children[4].scale.setY(1)}
+
+                            e.children[i].children[3].scale.setY(((sHeight * ftTom - seatSize.y) / (bottomSize.y)).toFixed(2))
+                            e.children[i].children[0].position.setY(e.children[i].children[2].position.y + seatSize.y)
+                        }
+
+
+
+
+                    } else if (e.name == sofa.cornerR.name) {
+                        //0 - Pillow
+                        //1 - Legs
+                        //2 - SingleSeat
+                        //3 - Bottom
+                        //4 - Backs
+                        var backSize = new THREE.Box3().setFromObject(sofa.singleback).getSize(new THREE.Vector3());
+                        var bottomSize = new THREE.Box3().setFromObject(sofa.bottom).getSize(new THREE.Vector3());
+                        for (var i = 0; i < e.children.length; i++) {
+
+                            var seatSize = new THREE.Box3().setFromObject(e.children[i].children[2]).getSize(new THREE.Vector3());
+
+                            e.children[i].children[2].position.setY((sHeight * ftTom - seatSize.y))
+                            if (sHeight == 1.25) {
+                                e.children[i].children[4].scale.setY((backSize.y - seatSize.y + 0.05) / backSize.y)
+                            } else{e.children[i].children[4].scale.setY(1)}
+
+                            e.children[i].children[3].scale.setY(((sHeight * ftTom - seatSize.y) / (bottomSize.y)).toFixed(2))
+                            e.children[i].children[0].position.setY(e.children[i].children[2].position.y + seatSize.y)
+                        }
+
+                    }
+
+                }
+
             })
 
-        
-                if(backs.length>0){
-                    backs.forEach(b=>{
-                        var seatSize = new THREE.Box3().setFromObject(sofa.single.children[0]).getSize(new THREE.Vector3());
-                        var backSize = new THREE.Box3().setFromObject(sofa.singleback).getSize(new THREE.Vector3());
-                        if(b instanceof THREE.Object3D){
-                            if(sHeight == 1.25){b.scale.setY((backSize.y-seatSize.y+0.05)/backSize.y)}
-                            else (b.scale.setY(1))
-                      
-                   
-                        }
-                    })
-        
-                }
-         
-            if(leftbacks.length>0){
-              
-                leftbacks.forEach(b=>{
-                        var seatSize = new THREE.Box3().setFromObject(sofa.single.children[0]).getSize(new THREE.Vector3());
-                        var backSize = new THREE.Box3().setFromObject(sofa.singleback).getSize(new THREE.Vector3());
-                        if(b instanceof THREE.Object3D){
-                            if(sHeight == 1.25){b.scale.setY((backSize.y-seatSize.y+0.05)/backSize.y)}
-                            else (b.scale.setY(1))
-                      
-                   
-                        }
-                    })
-        
-                
+
+            if (backs.length > 0) {
+                backs.forEach(b => {
+                    var seatSize = new THREE.Box3().setFromObject(sofa.single.children[0]).getSize(new THREE.Vector3());
+                    var backSize = new THREE.Box3().setFromObject(sofa.singleback).getSize(new THREE.Vector3());
+
+                    if (b instanceof THREE.Object3D) {
+                        if (sHeight == 1.25) {
+                            b.scale.setY((backSize.y - seatSize.y + 0.05) / backSize.y)
+                        } else{b.scale.setY(1)}
+
+
+                    }
+                })
+
             }
-          
-            if(rightbacks.length>0){
-              
-                rightbacks.forEach(b=>{
-                        var seatSize = new THREE.Box3().setFromObject(sofa.single.children[0]).getSize(new THREE.Vector3());
-                        var backSize = new THREE.Box3().setFromObject(sofa.singleback).getSize(new THREE.Vector3());
-                        if(b instanceof THREE.Object3D){
-                            if(sHeight == 1.25){b.scale.setY((backSize.y-seatSize.y+0.05)/backSize.y)}
-                            else (b.scale.setY(1))
-                      
-                   
-                        }
-                    })
-        
-                
+
+            if (leftbacks.length > 0) {
+
+                leftbacks.forEach(b => {
+                    var seatSize = new THREE.Box3().setFromObject(sofa.single.children[0]).getSize(new THREE.Vector3());
+                    var backSize = new THREE.Box3().setFromObject(sofa.singleback).getSize(new THREE.Vector3());
+                    if (b instanceof THREE.Object3D) {
+                        if (sHeight == 1.25) {
+                            b.scale.setY((backSize.y - seatSize.y + 0.05) / backSize.y)
+                        } else{b.scale.setY(1)}
+
+
+                    }
+                })
+
+
             }
-          
-            if(bottoms.length>0){
-                bottoms.forEach(b=>{
+
+            if (rightbacks.length > 0) {
+
+                rightbacks.forEach(b => {
+                    var seatSize = new THREE.Box3().setFromObject(sofa.single.children[0]).getSize(new THREE.Vector3());
+                    var backSize = new THREE.Box3().setFromObject(sofa.singleback).getSize(new THREE.Vector3());
+                    if (b instanceof THREE.Object3D) {
+                        if (sHeight == 1.25) {
+                            b.scale.setY((backSize.y - seatSize.y + 0.05) / backSize.y)
+                        } else{b.scale.setY(1)}
+
+
+                    }
+                })
+
+
+            }
+
+            if (bottoms.length > 0) {
+                bottoms.forEach(b => {
                     var seatSize = new THREE.Box3().setFromObject(sofa.single.children[0]).getSize(new THREE.Vector3());
                     var bottomSize = new THREE.Box3().setFromObject(sofa.bottom).getSize(new THREE.Vector3());
-                    if(b instanceof THREE.Object3D){
-                    
-                        b.scale.setY(((sHeight*ftTom-seatSize.y)/(bottomSize.y)).toFixed(2))
-               
+                    if (b instanceof THREE.Object3D) {
+
+                        b.scale.setY(((sHeight * ftTom - seatSize.y) / (bottomSize.y)).toFixed(2))
+
                         // b.children[0].scale.setY((seatSize.y+sHeight*ftTom) )
                     }
                 })
-    
+
             }
-           
-            if(leftbottoms.length>0){
-                leftbottoms.forEach(b=>{
+
+            if (leftbottoms.length > 0) {
+                leftbottoms.forEach(b => {
                     var seatSize = new THREE.Box3().setFromObject(sofa.single.children[0]).getSize(new THREE.Vector3());
                     var bottomSize = new THREE.Box3().setFromObject(sofa.bottom).getSize(new THREE.Vector3());
-                    if(b instanceof THREE.Object3D){
-                    
-                        b.scale.setY(((sHeight*ftTom-seatSize.y)/(bottomSize.y)).toFixed(2))
-               
-                      
+                    if (b instanceof THREE.Object3D) {
+
+                        b.scale.setY(((sHeight * ftTom - seatSize.y) / (bottomSize.y)).toFixed(2))
+
+
                     }
                 })
             }
-            if(rightbottoms.length>0){
-                rightbottoms.forEach(b=>{
+            if (rightbottoms.length > 0) {
+                rightbottoms.forEach(b => {
                     var seatSize = new THREE.Box3().setFromObject(sofa.single.children[0]).getSize(new THREE.Vector3());
                     var bottomSize = new THREE.Box3().setFromObject(sofa.bottom).getSize(new THREE.Vector3());
-                    if(b instanceof THREE.Object3D){
-                    
-                        b.scale.setY(((sHeight*ftTom-seatSize.y)/(bottomSize.y)).toFixed(2))
-               
-                      
+                    if (b instanceof THREE.Object3D) {
+
+                        b.scale.setY(((sHeight * ftTom - seatSize.y) / (bottomSize.y)).toFixed(2))
+
+
                     }
                 })
             }
-            if(armrests.length>0)  armrests.forEach(a=>{
+            if (armrests.length > 0) armrests.forEach(a => {
                 var seatSize = new THREE.Box3().setFromObject(sofas[0].children[0]).getSize(new THREE.Vector3());
                 var armSize = new THREE.Box3().setFromObject(sofa.armrestL).getSize(new THREE.Vector3());
-                if(a instanceof THREE.Object3D){
-                    
-                    if(sHeight == 1.25){a.scale.setY((armSize.y-seatSize.y+0.05)/armSize.y)}
-                    else (a.scale.setY(1))
+                if (a instanceof THREE.Object3D) {
+
+                    if (sHeight == 1.25) {
+                        a.scale.setY((armSize.y - seatSize.y + 0.05) / armSize.y)
+                    } else{a.scale.setY(1)}
 
                 }
             })
-          
+
+
+
         }
     }
+
     function checkDistance() {
         sofas.forEach(e => {
             var a = btn_group.children[0].position.x - e.position.x;
@@ -3466,6 +3587,3 @@
         }
 
     }
-
-
-    
