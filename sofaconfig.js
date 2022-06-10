@@ -4974,83 +4974,83 @@ function createMeasurementsWidth(index1,index2){
 }
 
 function createMeasurementsHeight(index1,index2){
-    if(i_sofas.length>0){
-        checkDistance();
-        var leftSize = new THREE.Box3()
-        .setFromObject(sofas[index1])
-        .getSize(new THREE.Vector3());
-        var rightSize = new THREE.Box3()
-        .setFromObject(sofas[index2])
-        .getSize(new THREE.Vector3());
+    // if(i_sofas.length>0){
+    //     checkDistance();
+    //     var leftSize = new THREE.Box3()
+    //     .setFromObject(sofas[index1])
+    //     .getSize(new THREE.Vector3());
+    //     var rightSize = new THREE.Box3()
+    //     .setFromObject(sofas[index2])
+    //     .getSize(new THREE.Vector3());
 
-        var singleSize = new THREE.Box3()
-        .setFromObject(sofa.single.children[0])
-        .getSize(new THREE.Vector3());
+    //     var singleSize = new THREE.Box3()
+    //     .setFromObject(sofa.single.children[0])
+    //     .getSize(new THREE.Vector3());
 
-        var fromUp ;
-        var toUp ;
-        if(leftCornerIndex){
+    //     var fromUp ;
+    //     var toUp ;
+    //     if(leftCornerIndex){
 
-        }
-        else if(leftChaiseIndex){
+    //     }
+    //     else if(leftChaiseIndex){
 
-        }else{
-            if(leftverticalSingleCount>0){
-                var s = leftverticalSingleCount*2*ftTom;
-                fromUp= new THREE.Vector3(sofas[0].position.x,0,sofas[index1].position.z);
-            }else{
-                fromUp= new THREE.Vector3(sofas[0].position.x,0,sofas[index1].position.z);
-                toUp=  new THREE.Vector3(sofas[0].position.x,0,sofas[index1].position.z-ftTom-6/12*ftTom);
-            }
+    //     }else{
+    //         if(leftverticalSingleCount>0){
+    //             var s = leftverticalSingleCount*2*ftTom;
+    //             fromUp= new THREE.Vector3(sofas[0].position.x,0,sofas[index1].position.z);
+    //         }else{
+    //             fromUp= new THREE.Vector3(sofas[0].position.x,0,sofas[index1].position.z);
+    //             toUp=  new THREE.Vector3(sofas[0].position.x,0,sofas[index1].position.z-ftTom-6/12*ftTom);
+    //         }
           
-        }
+    //     }
 
         
         
         
        
-        var directionUp = toUp.clone().sub(fromUp);
+    //     var directionUp = toUp.clone().sub(fromUp);
 
-        var lengthUp = directionUp.manhattanLength();
+    //     var lengthUp = directionUp.manhattanLength();
         
-        var fromDown = new THREE.Vector3(sofas[0].position.x,0,sofas[index1].position.z-1);
-        var toDown = new THREE.Vector3(sofas[index2].position.x+rightSize.x/2,0,sofas[index1].position.z-1);
-        var directionDown = toDown.clone().sub(fromDown);
+    //     var fromDown = new THREE.Vector3(sofas[0].position.x,0,sofas[index1].position.z-1);
+    //     var toDown = new THREE.Vector3(sofas[index2].position.x+rightSize.x/2,0,sofas[index1].position.z-1);
+    //     var directionDown = toDown.clone().sub(fromDown);
 
-        var lengthDown = directionDown.manhattanLength();
-        if (vArrowUp == null) {
-            vArrowUp = new THREE.ArrowHelper(directionUp.normalize(), fromUp, lengthUp, 0x000000, 0.05, 0.05);
-            vArrowDown = new THREE.ArrowHelper(directionDown.normalize(), fromDown, lengthDown, 0x000000, 0.05, 0.05);
+    //     var lengthDown = directionDown.manhattanLength();
+    //     if (vArrowUp == null) {
+    //         vArrowUp = new THREE.ArrowHelper(directionUp.normalize(), fromUp, lengthUp, 0x000000, 0.05, 0.05);
+    //         vArrowDown = new THREE.ArrowHelper(directionDown.normalize(), fromDown, lengthDown, 0x000000, 0.05, 0.05);
 
-            dimensionScene.add(vArrowUp);
-            // dimensionScene.add(vArrowDown);
+    //         dimensionScene.add(vArrowUp);
+    //         // dimensionScene.add(vArrowDown);
 
-            vValue = document.createElement('div');
+    //         vValue = document.createElement('div');
             
 
-            vValue.style.fontSize = "15px";
+    //         vValue.style.fontSize = "15px";
 
 
-            heightLabel = new THREE.CSS2DObject(vValue);
-            dimensionScene.add(heightLabel)
+    //         heightLabel = new THREE.CSS2DObject(vValue);
+    //         dimensionScene.add(heightLabel)
           
 
-        } else {
-            var distanceValue = 0;
-            vArrowUp.setDirection(directionUp.normalize());
-            vArrowUp.setLength(lengthUp, 0.1, 0.1);
-            vArrowUp.position.copy(fromUp.clone());
+    //     } else {
+    //         var distanceValue = 0;
+    //         vArrowUp.setDirection(directionUp.normalize());
+    //         vArrowUp.setLength(lengthUp, 0.1, 0.1);
+    //         vArrowUp.position.copy(fromUp.clone());
 
-            vArrowDown.setDirection(directionDown.normalize());
-            vArrowDown.setLength(lengthDown, 0.1, 0.1);
-            vArrowDown.position.copy(fromDown.clone());
-            distanceValue = hSingleCount*(singleSize.x/ftTom).toFixed(2)+ currentCornerCount*(2+6/12)+ currentChaiseCount * (2.5+6/12) ;
+    //         vArrowDown.setDirection(directionDown.normalize());
+    //         vArrowDown.setLength(lengthDown, 0.1, 0.1);
+    //         vArrowDown.position.copy(fromDown.clone());
+    //         distanceValue = hSingleCount*(singleSize.x/ftTom).toFixed(2)+ currentCornerCount*(2+6/12)+ currentChaiseCount * (2.5+6/12) ;
             
              
 
-            vValue.innerHTML = distanceValue+ " ft(" +distanceValue*12 + " in)";
-            widthLabel.position.set((sofas[index2].position.x-sofas[index1].position.x)/hSingleCount, 0, -1.25);
+    //         vValue.innerHTML = distanceValue+ " ft(" +distanceValue*12 + " in)";
+    //         widthLabel.position.set((sofas[index2].position.x-sofas[index1].position.x)/hSingleCount, 0, -1.25);
            
-        }
-    }
+    //     }
+    // }
 }
