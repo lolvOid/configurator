@@ -21,7 +21,7 @@
 }
 
 .rightnavigator{
-   z-index: 999;
+   z-index: 800;
    right: 0;
    margin: 0;
    
@@ -184,4 +184,45 @@
 
 #opendoorLabel{
   cursor:pointer;
+}
+
+#loadingScreen {
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+
+  background-color: rgb(255, 255, 255);
+  z-index: 1999;
+}
+#loadingText{
+  position: relative;
+  color: #000;
+  text-align: center;
+  top: 50%;
+  font-size: 2em;
+}
+#progressText{
+  position: absolute;
+  top: 0;
+  color: rgb(255, 255, 255);
+  text-align: center;
+  left: 45%;
+  
+}
+.progressContent{
+  position: relative;
+  top:50%;
+  left: 25%;
+  width: 50%;
+  height: 25px;
+  background-color: rgb(124, 124, 124);
+  border-radius: 10px;
+}
+#progressbar {
+  position: relative;
+  left: 0;
+  width: 1%;
+  height: 100%;
+  background-color: rgb(0, 0, 0);
+  border-radius: 10px;
 }

@@ -77,7 +77,7 @@ var sofas = [],
 sofas_group = new THREE.Group();
 var s_armL, s_armR;
 const gltfLoader = new THREE.GLTFLoader();
-
+const manager = new THREE.LoadingManager();
 var sofaCount = 1;
 var isCorner = false;
 
@@ -3320,13 +3320,35 @@ function getLoading(value) {
 }
 
 function loadAsync(url) {
+    
     return new Promise((resolve) => {
-        new THREE.GLTFLoader().load(url, resolve);
+        new THREE.GLTFLoader(manager).load(url, resolve);
     });
+    
 }
 
 function loadSofa() {
+   
     let p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16;
+    
+    manager.onStart = function ( url, itemsLoaded, itemsTotal ) {
+
+       $("#loadingText").html("Please Wait...");
+       controls.enabled = false;
+    };
+    
+    manager.onProgress = function ( url, itemsLoaded, itemsTotal ) {
+        
+        $("#progressText").html( (itemsLoaded / itemsTotal * 100).toFixed() + '%') 
+        $("#progressbar").css("width", (itemsLoaded / itemsTotal * 100).toFixed());
+
+    };
+    manager.onLoad = function ( ) {
+        $("#loadingScreen").addClass("d-none")
+        controls.enabled = true;
+    };
+    
+
 
     p1 = loadAsync("models/sofas/sofa/components/single.gltf").then((result) => {
         sofa.single = result.scene.children[0];
@@ -3391,7 +3413,7 @@ function loadSofa() {
     p16 = loadAsync("models/sofas/sofa/components/leg.gltf").then((result) => {
         sofa.leg = result.scene.children[0];
     });
-
+    
     Promise.all([
         p1,
         p2,
@@ -3469,8 +3491,8 @@ function setSofa(objA) {
 
 function createNullGroup(name, pos) {
     var nullObject = new THREE.Object3D();
-    var axis = new THREE.AxesHelper(0.4);
-    nullObject.add(axis);
+    // var axis = new THREE.AxesHelper(0.4);
+    // nullObject.add(axis);
     null_group.add(nullObject);
 
     nullObject.scale.set(0.5, 0.5, 0.5);
