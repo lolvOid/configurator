@@ -1235,11 +1235,43 @@ function updateHorizontalBottoms() {
                         legs[i].children[j].rotation.y = 0;
                     }
 
-                    if (hSingleCount < 4) {
-                        legs[i].children[j].visible = true;
+                    if (hSingleCount <4) {
+                        if (i == 0) {
+                            if (j == 2 || j == legs[i].children.length - 1) {
+                                if(armrests[1].visible){
+                                    legs[i].children[j].visible = false;
+                                }else{
+                                    legs[i].children[j].visible = true;
+                                }
+                            }
+                            if (j == 0 || j == 1) {
+                                if(armrests[0].visible){
+                                    legs[i].children[j].visible = false;
+                                }else{
+                                    legs[i].children[j].visible = true;
+                                }
+                                
+                            }
+                        } else if (i == legs.length - 1) {
+                            if (j == 0 || j == 1) {
+                                if(armrests[1].visible){
+                                    legs[i].children[j].visible = false;
+                                }else{
+                                    legs[i].children[j].visible = true;
+                                }
+                            }
+                            if (j == 2 || j == legs[i].children.length - 1) {
+                                if(armrests[1].visible){
+                                    legs[i].children[j].visible = false;
+                                }else{
+                                    legs[i].children[j].visible = true;
+                                }
+                            }
+                        }
                     } else {
                         if (i == 0) {
                             if (j == 2 || j == legs[i].children.length - 1) {
+                                
                                 legs[i].children[j].visible = true;
                             }
                             if (j == 0 || j == 1) {
