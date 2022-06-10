@@ -3105,7 +3105,7 @@ function addOttoman(index) {
             if (isLeft) {
                 scene.add(s);
                 s.position.setX(sofas[index].position.x);
-                s.position.setZ(sofas[index].position.z + sofaSize.z);
+                s.position.setZ(sofas[index].position.z + sofaSize.z + 6/12 * ftTom);
 
                 if (!sofas.includes(s)) {
                     sofas.push(s);
@@ -3115,7 +3115,7 @@ function addOttoman(index) {
             if (isRight) {
                 scene.add(s);
                 s.position.setX(sofas[index].position.x);
-                s.position.setZ(sofas[index].position.z + sofaSize.z);
+                s.position.setZ(sofas[index].position.z + sofaSize.z + 6/12 * ftTom);
 
                 if (!sofas.includes(s)) {
                     sofas.push(s);
