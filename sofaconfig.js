@@ -52,6 +52,8 @@ var delta = 0;
 var texLoader = new THREE.TextureLoader();
 var btnPlus = texLoader.load("assets/plus_white.png");
 var btnMinus = texLoader.load("assets/minus_white.png");
+
+
 var pmremGenerator;
 
 let ssaoPass;
@@ -107,6 +109,17 @@ var sofa = {
     bottomL: null,
     bottomR: null,
     leg: null,
+};
+
+var icons = {
+    single:  texLoader.load("assets/sofasIcons/sofa_single_wa.png"),
+    armrest: texLoader.load("assets/sofasIcons/sofa_armrest.png"),
+    chaiseL: texLoader.load("assets/sofasIcons/sofa_chaiseL.png"),
+    chaiseR: texLoader.load("assets/sofasIcons/sofa_chaiseR.png"),
+    cornerL: texLoader.load("assets/sofasIcons/sofa_cornerL.png"),
+    cornerR: texLoader.load("assets/sofasIcons/sofa_cornerR.png"),
+    ottoman: texLoader.load("assets/sofasIcons/sofa_ottoman.png"),
+    
 };
 var legs = [];
 var loading = 0;
@@ -1223,21 +1236,30 @@ function updateHorizontalBottoms() {
                     }
 
                     if (hSingleCount < 4) {
-                        legs[i].children[j].visible = false;
+                        legs[i].children[j].visible = true;
                     } else {
                         if (i == 0) {
                             if (j == 2 || j == legs[i].children.length - 1) {
                                 legs[i].children[j].visible = true;
                             }
                             if (j == 0 || j == 1) {
-                                legs[i].children[j].visible = false;
+                                if(armrests[0].visible){
+                                    legs[i].children[j].visible = false;
+                                }else{
+                                    legs[i].children[j].visible = true;
+                                }
+                                
                             }
                         } else if (i == legs.length - 1) {
                             if (j == 0 || j == 1) {
                                 legs[i].children[j].visible = true;
                             }
                             if (j == 2 || j == legs[i].children.length - 1) {
-                                legs[i].children[j].visible = false;
+                                if(armrests[1].visible){
+                                    legs[i].children[j].visible = false;
+                                }else{
+                                    legs[i].children[j].visible = true;
+                                }
                             }
                         } else {
                             legs[i].children[j].visible = true;
@@ -4578,6 +4600,7 @@ function removeSofas(index) {
                             lastBottomSofasLV = [];
                             lastBackSofaLV = [];
                             leftCount = 0;
+                            checkDistance();
                             if (leftverticalSingleCount != 0) {
                                 addVerticalBottomLeft();
                             }
@@ -4627,6 +4650,7 @@ function removeSofas(index) {
                             lastBottomSofasRV = [];
                             lastBackSofaRV = [];
                             rightCount = 0;
+                            checkDistance();
                             if (rightverticalSingleCount != 0) {
                                 addVerticalBottomRight();
                             }
@@ -4692,3 +4716,9 @@ function removeSofas(index) {
     }
 
 }
+
+function swaprender() {
+    isMeasured = !isMeasured;
+
+}
+
