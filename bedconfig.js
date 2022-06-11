@@ -78,7 +78,9 @@ var bedTableLeftEdge = new THREE.Group();
 var bedTableRightEdge = new THREE.Group();
 
 var font;
-const gltfLoader = new THREE.GLTFLoader();
+const manager = new THREE.LoadingManager();
+const gltfLoader = new THREE.GLTFLoader(manager);
+
 var bedMatress, pillowL, pillowR;
 var drawerLeft, isDrawerHandleCreated = false;
 
@@ -926,7 +928,22 @@ function importMatress() {
             setMatress(gltf.scene);
         }
     )
+    manager.onStart = function (url, itemsLoaded, itemsTotal) {
 
+        $("#loadingText").html("Please Wait...");
+        controls.enabled = false;
+    };
+
+    manager.onProgress = function (url, itemsLoaded, itemsTotal) {
+
+        $("#progressText").html((itemsLoaded / itemsTotal * 100).toFixed() + '%')
+        $("#progressbar").css("width", (itemsLoaded / itemsTotal * 100).toFixed() + "%");
+
+    };
+    manager.onLoad = function () {
+        $("#loadingScreen").addClass("d-none")
+        controls.enabled = true;
+    };
 
 }
 
