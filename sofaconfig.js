@@ -591,7 +591,7 @@ function update() {
         }else{
             add_btn_group.children[0].visible = true;  
         }
-
+        
         if(rightverticalSingleCount==8){
             add_btn_group.children[1].visible = false;  
         }else{
