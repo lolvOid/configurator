@@ -585,38 +585,20 @@ function update() {
         currentCornerCount;
 
 
-    // if (hSingleCount > 6) {
-    //     if (cornerL.length > 0 || chaiseL.length > 0) {
-    //         // add_btn_group.children[0].visible = false;
-    //     } else if (cornerR.length > 0 || chaiseR.length > 0) {
-    //         // add_btn_group.children[1].visible = false;
-    //     } else if (hSingleCount == 8) {
-    //         // add_btn_group.visible = false;
-    //     }
-    // } else {
-    //     if (leftverticalSingleCount + currentCornerCount > 8) {
-    //         add_btn_group.children[0].visible = false;
-    //     }
-    //     if (rightverticalSingleCount + currentCornerCount > 8) {
-    //         add_btn_group.children[1].visible = false;
-    //     }
-    //     if (chaiseL.length > 0) {
-    //         if (ottomans.length > 1) {
-    //             add_btn_group.children[1].visible = false;
-    //         }
-    //     } else if (chaiseR.length > 0) {
-    //         if (ottomans.length > 1) {
-    //             add_btn_group.children[0].visible = false;
-    //         }
-    //     }
-    // }
-
-    // if (sofaCount < 16) {
-    //     add_btn_group.visible = true;
-    // } else {
-    //     add_btn_group.visible = false;
-    // }
     if (sofaCount > 0) {
+        if(leftverticalSingleCount==8){
+            add_btn_group.children[0].visible = false;  
+        }else{
+            add_btn_group.children[0].visible = true;  
+        }
+
+        if(rightverticalSingleCount==8){
+            add_btn_group.children[1].visible = false;  
+        }else{
+            add_btn_group.children[1].visible = true;  
+        }
+        
+        
         if (chaiseL.length > 0) {
             if (ottomans.length > 1) {
                 add_btn_group.children[1].visible = false;
@@ -631,6 +613,7 @@ function update() {
             }
         }
     }
+    
 
     $("#sofaCount").html(sofaCount);
 
@@ -893,6 +876,7 @@ function helpers() {
     function Export() {
         floor.visible = false;
         add_btn_group.visible = false;
+        remove_btn_group.visible= false;
         // Parse the input and generate the glTF output
         exporter.parse(
             scene,
@@ -908,6 +892,7 @@ function helpers() {
                     floor.visible = true;
 
                     add_btn_group.visible = true;
+                    remove_btn_group.visible= true;
                 }
             },
             // called when there is an error in the generation
@@ -4926,7 +4911,6 @@ function removeSofas(index) {
 
 function swaprender() {
     isMeasured = !isMeasured;
-
 }
 
 function createMeasurementsWidth(index1, index2) {
@@ -5292,4 +5276,25 @@ function createMeasurementsHeightRight(index1, index2) {
 
         }
     }
+}
+
+function downloadImage() {
+
+    $(".textOver").removeClass("d-none");
+    html2canvas(dimensionviewer).then(canvas => {
+
+        canvas.style.display = 'none'
+
+        document.body.appendChild(canvas)
+        return canvas;
+    }).then(canvas => {
+        const image = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream')
+        const a = document.createElement('a')
+        a.setAttribute('download', 'sofa_dimension.png')
+        a.setAttribute('href', image)
+        a.click()
+        canvas.remove()
+        $(".textOver").addClass("d-none");
+    });
+
 }

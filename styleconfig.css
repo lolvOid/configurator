@@ -14,7 +14,11 @@
   z-index: 0;
   position: fixed;
 }
-
+#dimensionViewer2{
+  position: absolute;
+  width: 500px;
+  height: 500px;
+}
 #arviewer{
   width: 100%;
   height: auto;
