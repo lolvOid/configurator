@@ -5018,7 +5018,7 @@ function createMeasurementsHeightLeft(index1, index2) {
         var leftSofas = [];
         var ottomas = [];
 
-        
+        var measurement  = 0;
         sofas.forEach(e => {
             if (e.rotation.y > 0) {
                 if (!leftSofas.includes(e)) {
@@ -5049,13 +5049,14 @@ function createMeasurementsHeightLeft(index1, index2) {
                 fromUp = new THREE.Vector3(sofas[leftCornerIndex].position.x - 0.8, 0, fup);
                 toDown = new THREE.Vector3(sofas[leftCornerIndex].position.x - 0.8, 0, tdown);
                 fromDown = new THREE.Vector3(sofas[leftCornerIndex].position.x - 0.8, 0, fdown);
-
+                measurement = (leftverticalSingleCount * (2) )+ 1 + 2;
             } else {
                 if(leftCornerIndex){
                     var fup = (sofas[leftCornerIndex || leftChaiseIndex].position.z);
                     var tup = sofas[leftCornerIndex || leftChaiseIndex].position.z - ftTom - 6 / 12 * ftTom;
                     var fdown = (sofas[leftCornerIndex || leftChaiseIndex].position.z );
                     var tdown = sofas[leftCornerIndex || leftChaiseIndex].position.z+ftTom ;
+                    measurement = 6/12 + 2;
                 }else if(leftChaiseIndex){
 
                     for (var i = 0; i < sofas[leftChaiseIndex].children.length; i++) {
@@ -5070,14 +5071,17 @@ function createMeasurementsHeightLeft(index1, index2) {
 
                         var fdown = (sofas[leftChaiseIndex].position.z+ftTom/2+oMid.position.z)/2  ;
                         var tdown = ottomas[ottomas.length-1].position.z + ftTom;
+
+                        measurement = 6/12 + 4 + (ottomas.length * (2+6/12));
                     }else{
                         var fup = (sofas[leftChaiseIndex].position.z+ftTom/2  );
                         var tup = sofas[ leftChaiseIndex].position.z -sofaSize.z/2+  ftTom/2;
 
                         var fdown = (sofas[leftChaiseIndex].position.z+ftTom/2  );
                         var tdown = sofas[ leftChaiseIndex].position.z +sofaSize.z/2+  ftTom;
+                        measurement = 6/12 + 4;
                     }
-                 
+                    
                 }
             
                 toUp = new THREE.Vector3(sofas[leftCornerIndex || leftChaiseIndex].position.x - 0.8, 0, tup);
@@ -5092,6 +5096,7 @@ function createMeasurementsHeightLeft(index1, index2) {
 
             fromDown = new THREE.Vector3(sofas[index1].position.x - 0.8, 0, sofas[index1].position.z );
             toDown = new THREE.Vector3(sofas[index1].position.x - 0.8, 0, sofas[index1].position.z+ ftTom );
+            measurement = 6/12 +2;
         }
 
 
@@ -5126,7 +5131,7 @@ function createMeasurementsHeightLeft(index1, index2) {
 
 
         } else {
-            var distanceValue = 0;
+          
             vArrowUpL.setDirection(directionUp.normalize());
             vArrowUpL.setLength(lengthUp, 0.1, 0.1);
             vArrowUpL.position.copy(fromUp.clone());
@@ -5134,7 +5139,7 @@ function createMeasurementsHeightLeft(index1, index2) {
             vArrowDownL.setDirection(directionDown.normalize());
             vArrowDownL.setLength(lengthDown, 0.1, 0.1);
             vArrowDownL.position.copy(fromDown.clone());
-            distanceValue = 2;
+            var distanceValue = measurement;
 
 
 
@@ -5156,7 +5161,7 @@ function createMeasurementsHeightRight(index1, index2) {
         var toDown = new THREE.Vector3(0, 0, 0);
         var rightSofas = [];
         var ottomas = [];
-
+        var measurement  = 0;
         
         sofas.forEach(e => {
             if (e.rotation.y < 0) {
@@ -5188,13 +5193,14 @@ function createMeasurementsHeightRight(index1, index2) {
                 fromUp = new THREE.Vector3(sofas[rightCornerIndex].position.x + 0.8, 0, fup);
                 toDown = new THREE.Vector3(sofas[rightCornerIndex].position.x + 0.8, 0, tdown);
                 fromDown = new THREE.Vector3(sofas[rightCornerIndex].position.x + 0.8, 0, fdown);
-
+                measurement = (leftverticalSingleCount * (2) )+ 1 + 2;
             } else {
                 if(rightCornerIndex){
                     var fup = (sofas[rightCornerIndex || rightChaiseIndex].position.z);
                     var tup = sofas[rightCornerIndex || rightChaiseIndex].position.z - ftTom - 6 / 12 * ftTom;
                     var fdown = (sofas[rightCornerIndex || rightChaiseIndex].position.z );
                     var tdown = sofas[rightCornerIndex || rightChaiseIndex].position.z+ftTom ;
+                    measurement = 6/12 + 2;
                 }else if(rightChaiseIndex){
 
                     for (var i = 0; i < sofas[rightChaiseIndex].children.length; i++) {
@@ -5209,13 +5215,16 @@ function createMeasurementsHeightRight(index1, index2) {
 
                         var fdown = (sofas[rightChaiseIndex].position.z+ftTom/2+oMid.position.z)/2  ;
                         var tdown = ottomas[ottomas.length-1].position.z + ftTom;
+                        measurement = 6/12 + 4 + (ottomas.length * (2+6/12));
                     }else{
                         var fup = (sofas[rightChaiseIndex].position.z+ftTom/2  );
                         var tup = sofas[ rightChaiseIndex].position.z -sofaSize.z/2+  ftTom/2;
 
                         var fdown = (sofas[rightChaiseIndex].position.z+ftTom/2  );
                         var tdown = sofas[ rightChaiseIndex].position.z +sofaSize.z/2+  ftTom;
+                        measurement = 6/12 + 4;
                     }
+                    
                  
                 }
             
@@ -5231,6 +5240,7 @@ function createMeasurementsHeightRight(index1, index2) {
 
             fromDown = new THREE.Vector3(sofas[index2].position.x + 0.8, 0, sofas[index2].position.z );
             toDown = new THREE.Vector3(sofas[index2].position.x + 0.8, 0, sofas[index2].position.z+ ftTom );
+            measurement = 6/12 +2;
         }
 
 
@@ -5265,7 +5275,7 @@ function createMeasurementsHeightRight(index1, index2) {
 
 
         } else {
-            var distanceValue = 0;
+         
             vArrowUpR.setDirection(directionUp.normalize());
             vArrowUpR.setLength(lengthUp, 0.1, 0.1);
             vArrowUpR.position.copy(fromUp.clone());
@@ -5273,7 +5283,7 @@ function createMeasurementsHeightRight(index1, index2) {
             vArrowDownR.setDirection(directionDown.normalize());
             vArrowDownR.setLength(lengthDown, 0.1, 0.1);
             vArrowDownR.position.copy(fromDown.clone());
-            distanceValue = 2;
+            var distanceValue = measurement ;
 
 
 
