@@ -169,7 +169,7 @@ var leftCornerIndex, leftChaiseIndex;
 var rightCornerIndex, rightChaiseIndex;
 var rightIndexs = [];
 
-var hArrowL, hArrowR, vArrowUpL, vArrowDownL , vArrowUpR, vArrowDownR,hLeftLabel,hRightLabel,vValue;
+var hArrowL, hArrowR, vArrowUpL, vArrowDownL, vArrowUpR, vArrowDownR, hLeftLabel, hRightLabel, vValue;
 
 init();
 
@@ -186,10 +186,12 @@ function getInputs() {
 
     $("input:radio[name='heightOptions']").click(function () {
         sHeight = $(this).val();
+        adjustHeight();
     });
 
     $("#selectSofa").change(function () {
         sofaType = $(this).children("option:selected").val();
+        adjustHeight();
     });
 }
 
@@ -394,169 +396,75 @@ function animate() {
 }
 
 function chooseSofaDesign(type) {
-    if (
-        sofa.singleback != null &&
-        sofa.singlebackL != null &&
-        sofa.singlebackR != null
-    ) {
-        if (type == 0) {
-            scene.traverse(function (e) {
-                if (e instanceof THREE.Object3D) {
-                    if (e.name == sofa.singleback.name) {
-                        e.children[1].visible = true;
-                        e.children[0].visible = false;
+    try {
+
+        scene.traverse(function (e) {
+
+
+            if (e instanceof THREE.Object3D) {
+
+                for (let i in e.children) {
+                    if (e.name.match(sofa.single.name)) {
+                        e.children[i].visible = i == type ? true : false;
+                    }
+                    if (e.name.match(sofa.singleback.name)) {
+                        e.children[i].visible = i == type ? true : false;
                     }
 
-                    if (e.name == sofa.singlebackL.name) {
-                        e.children[1].visible = true;
-                        e.children[0].visible = false;
+                    if (e.name.match(sofa.singlebackL.name)) {
+                        e.children[i].visible = i == type ? true : false;
                     }
+                    if (e.name.match(sofa.singlebackR.name)) {
+                        e.children[i].visible = i == type ? true : false;
+                    }
+                    if (e.name.match(sofa.cornerL.name)) {
+                        e.children[i].visible = i == type ? true : false;
+                    }
+                    if (e.name.match(sofa.cornerR.name)) {
+                        e.children[i].visible = i == type ? true : false;
+                    }
+                    if (e.name.match(sofa.chaiseL.name)) {
+                        e.children[i].visible = i == type ? true : false;
+                    }
+                    if (e.name.match(sofa.chaiseR.name)) {
+                        e.children[i].visible = i == type ? true : false;
+                    }
+                    if (e.name.match(sofa.leg.name)) {
+                        e.children[i].visible = i == type ? true : false;
+                    }
+                    if (e.name.match(sofa.armrestL.name)) {
+                        e.children[i].visible = i == type ? true : false;
+                    }
+                    if (e.name.match(sofa.armrestR.name)) {
+                        e.children[i].visible = i == type ? true : false;
+                    }
+                    if (e.name.match(sofa.ottoman.name)) {
+                        e.children[i].visible = i == type ? true : false;
+                    }
+                    if (e.name.match(sofa.bottom.name)) {
+                        e.children[i].visible = i == type ? true : false;
+                    }
+                    if (e.name.match(sofa.bottomL.name)) {
+                     
+                        e.children[i].visible = i == type ? true : false;
+                    }
+                    if (e.name.match(sofa.bottomR.name)) {
+                        e.children[i].visible = i == type ? true : false;
+                    }
+                }
 
-                    if (e.name == sofa.singlebackR.name) {
-                        e.children[1].visible = true;
-                        e.children[0].visible = false;
-                    }
-                }
-            });
-        }
-        if (type == 1) {
-            scene.traverse(function (e) {
-                if (e instanceof THREE.Object3D) {
-                    if (e.name == sofa.singleback.name) {
-                        e.children[0].visible = true;
-                        e.children[1].visible = false;
-                    }
 
-                    if (e.name == sofa.singlebackL.name) {
-                        e.children[0].visible = true;
-                        e.children[1].visible = false;
-                    }
+            }
+        });
 
-                    if (e.name == sofa.singlebackR.name) {
-                        e.children[0].visible = true;
-                        e.children[1].visible = false;
-                    }
-                }
-            });
-        }
-    }
-    if (sofa.leg != null) {
-        if (type == 0) {
-            scene.traverse(function (e) {
-                if (e instanceof THREE.Object3D) {
-                    if (e.name == sofa.leg.name) {
-                        e.children[1].visible = true;
-                        e.children[0].visible = false;
-                    }
-                }
-            });
-        }
-        if (type == 1) {
-            scene.traverse(function (e) {
-                if (e instanceof THREE.Object3D) {
-                    if (e.name == sofa.leg.name) {
-                        e.children[0].visible = true;
-                        e.children[1].visible = false;
-                    }
-                }
-            });
-        }
+
+    } catch (err) {
+
     }
 
-    if (sofa.armrestL != null && sofa.armrestR != null) {
-        if (type == 0) {
-            scene.traverse(function (e) {
-                if (e instanceof THREE.Object3D) {
-                    if (e.name == sofa.armrestL.name) {
-                        e.children[1].visible = true;
-                        e.children[0].visible = false;
-                    }
-                    if (e.name == sofa.armrestR.name) {
-                        e.children[1].visible = true;
-                        e.children[0].visible = false;
-                    }
-                }
-            });
-        }
-        if (type == 1) {
-            scene.traverse(function (e) {
-                if (e instanceof THREE.Object3D) {
-                    if (e.name == sofa.armrestL.name) {
-                        e.children[0].visible = true;
-                        e.children[1].visible = false;
-                    }
 
-                    if (e.name == sofa.armrestR.name) {
-                        e.children[0].visible = true;
-                        e.children[1].visible = false;
-                    }
-                }
-            });
-        }
-    }
-    if (sofa.cornerL != null && sofa.cornerR != null) {
-        if (type == 0) {
-            scene.traverse(function (e) {
-                if (e instanceof THREE.Object3D) {
-                    if (e.name == sofa.cornerL.name) {
-                        e.children[1].visible = true;
-                        e.children[0].visible = false;
-                    }
-                    if (e.name == sofa.cornerR.name) {
-                        e.children[1].visible = true;
-                        e.children[0].visible = false;
-                    }
-                }
-            });
-        }
-        if (type == 1) {
-            scene.traverse(function (e) {
-                if (e instanceof THREE.Object3D) {
-                    if (e.name == sofa.cornerL.name) {
-                        e.children[0].visible = true;
-                        e.children[1].visible = false;
-                    }
 
-                    if (e.name == sofa.cornerR.name) {
-                        e.children[0].visible = true;
-                        e.children[1].visible = false;
-                    }
-                }
-            });
-        }
-    }
 
-    if (sofa.chaiseL != null && sofa.chaiseR != null) {
-        if (type == 0) {
-            scene.traverse(function (e) {
-                if (e instanceof THREE.Object3D) {
-                    if (e.name == sofa.chaiseL.name) {
-                        e.children[1].visible = true;
-                        e.children[0].visible = false;
-                    }
-                    if (e.name == sofa.chaiseR.name) {
-                        e.children[1].visible = true;
-                        e.children[0].visible = false;
-                    }
-                }
-            });
-        }
-        if (type == 1) {
-            scene.traverse(function (e) {
-                if (e instanceof THREE.Object3D) {
-                    if (e.name == sofa.chaiseL.name) {
-                        e.children[0].visible = true;
-                        e.children[1].visible = false;
-                    }
-
-                    if (e.name == sofa.chaiseR.name) {
-                        e.children[0].visible = true;
-                        e.children[1].visible = false;
-                    }
-                }
-            });
-        }
-    }
 }
 
 function update() {
@@ -586,19 +494,19 @@ function update() {
 
 
     if (sofaCount > 0) {
-        if(leftverticalSingleCount==8){
-            add_btn_group.children[0].visible = false;  
-        }else{
-            add_btn_group.children[0].visible = true;  
+        if (leftverticalSingleCount == 8) {
+            add_btn_group.children[0].visible = false;
+        } else {
+            add_btn_group.children[0].visible = true;
         }
-        
-        if(rightverticalSingleCount==8){
-            add_btn_group.children[1].visible = false;  
-        }else{
-            add_btn_group.children[1].visible = true;  
+
+        if (rightverticalSingleCount == 8) {
+            add_btn_group.children[1].visible = false;
+        } else {
+            add_btn_group.children[1].visible = true;
         }
-        
-        
+
+
         if (chaiseL.length > 0) {
             if (ottomans.length > 1) {
                 add_btn_group.children[1].visible = false;
@@ -613,7 +521,7 @@ function update() {
             }
         }
     }
-    
+
 
     $("#sofaCount").html(sofaCount);
 
@@ -644,7 +552,7 @@ function update() {
         leftIndexs[leftIndexs.length - 1],
         rightIndexs[rightIndexs.length - 1]
     );
-    adjustHeight();
+    // adjustHeight();
     createMeasurementsWidth(leftIndexs[leftIndexs.length - 1], rightIndexs[rightIndexs.length - 1])
     createMeasurementsHeightLeft(leftIndexs[leftIndexs.length - 1], rightIndexs[rightIndexs.length - 1])
     createMeasurementsHeightRight(leftIndexs[leftIndexs.length - 1], rightIndexs[rightIndexs.length - 1])
@@ -667,11 +575,24 @@ function update() {
 
 function updateFloor() {
     if (sofa.leg != null) {
-        var f = new THREE.Box3()
-            .setFromObject(sofa.leg)
-            .getSize(new THREE.Vector3());
+      
+        for (let i in sofa.leg.children) {
+            var parent = sofa.leg.children[i];
+            for (let j in parent.children) {
+             
+                if (parent.children[j].name.includes("Leg")) {
+                
+                    var f = new THREE.Box3()
+                        .setFromObject(parent.children[j])
+                        .getSize(new THREE.Vector3());
+                       
+                    
 
+                }
+            }
+        }
         floor.position.setY(-f.y);
+       
     }
 }
 
@@ -876,7 +797,7 @@ function helpers() {
     function Export() {
         floor.visible = false;
         add_btn_group.visible = false;
-        remove_btn_group.visible= false;
+        remove_btn_group.visible = false;
         // Parse the input and generate the glTF output
         exporter.parse(
             scene,
@@ -892,7 +813,7 @@ function helpers() {
                     floor.visible = true;
 
                     add_btn_group.visible = true;
-                    remove_btn_group.visible= true;
+                    remove_btn_group.visible = true;
                 }
             },
             // called when there is an error in the generation
@@ -914,7 +835,7 @@ function addButton() {
     }
     addArmrest();
     updateArmrests(0, 0);
-
+    adjustHeight();
 }
 
 function createTexturePlane(texture) {
@@ -941,126 +862,150 @@ function addSingle(index) {
         dimensionScene.add(p);
         // addArmrest();
         // removeButton();
+        try {
+            if (index != null) {
+                for (let i in sofa.single.children) {
+                    var parent = sofa.single.children[i];
+                    for (let j in parent.children) {
+                       
+                        if (parent.children[j].name.includes("Seat")) {
+                            var sofaSize = new THREE.Box3()
+                                .setFromObject(parent.children[j])
+                                .getSize(new THREE.Vector3());
+                        }
+                    }
+                }
+             
 
-        if (index != null) {
-            var sofaSize = new THREE.Box3()
-                .setFromObject(sofas[index].children[0])
-                .getSize(new THREE.Vector3());
-            // var cornerSize = new THREE.Box3().setFromObject(sofa.cornerL).getSize(new THREE.Vector3());
+                for (let i in sofa.cornerL.children) {
+                    var parent = sofa.cornerL.children[i];
+                    for (let j in parent.children) {
+                        if (parent.children[j].name.includes("Seat")) {
+                            var cornerSeatSize = new THREE.Box3()
+                                .setFromObject(parent.children[j])
+                                .getSize(new THREE.Vector3());
+                        }
+                        for (let k in parent.children[j].children) {
+                            var child = parent.children[j].children[k];
 
-            var cornerSeatSize = new THREE.Box3()
-                .setFromObject(sofa.cornerL.children[1].children[2])
-                .getSize(new THREE.Vector3());
-
-            var armrestSize = new THREE.Box3()
-                .setFromObject(sofa.armrestL)
-                .getSize(new THREE.Vector3());
-
-            if (isLeft) {
-                if (sofas[index].name == sofa.cornerR.name) {
-                    enableHorizontalBottomAdding = false;
-                    s.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI / 2);
-
-                    s.position.setX(sofas[index].position.x);
-                    s.position.setZ(sofas[index].position.z + cornerSeatSize.z);
+                        }
+                    }
+                }
 
 
-                    p.rotateOnAxis(new THREE.Vector3(0, 0, 1), Math.PI / 2);
-                    p.scale.set(2 * ftTom, 2 * ftTom + 6 / 12 * ftTom)
-                    p.position.setX(i_sofas[index].position.x);
-                    p.position.setZ(i_sofas[index].position.z + 2 * ftTom + 3 / 12 * ftTom);
+                var armrestSize = new THREE.Box3()
+                    .setFromObject(sofa.armrestL)
+                    .getSize(new THREE.Vector3());
 
-                    leftverticalSingleCount += 1;
+                if (isLeft) {
+                    if (sofas[index].name == sofa.cornerR.name) {
+                        enableHorizontalBottomAdding = false;
+                        s.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI / 2);
 
-                    addVerticalBottomLeft();
-                } else if (sofas[index].rotation.y > 0) {
-                    enableHorizontalBottomAdding = false;
-                    var a = new THREE.Object3D();
+                        s.position.setX(sofas[index].position.x);
+                        s.position.setZ(sofas[index].position.z + cornerSeatSize.z);
 
-                    s.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), Math.PI / 2);
-                    s.translateX((-1 - leftverticalSingleCount) * sofaSize.x);
-                    s.position.setX(sofas[index].position.x);
 
-                    p.rotateOnAxis(new THREE.Vector3(0, 0, 1), Math.PI / 2);
-                    p.scale.set(2 * ftTom, 2 * ftTom + 6 / 12 * ftTom)
-                    p.position.setX(i_sofas[index].position.x);
-                    p.position.setZ(i_sofas[index].position.z + 2 * ftTom);
+                        p.rotateOnAxis(new THREE.Vector3(0, 0, 1), Math.PI / 2);
+                        p.scale.set(2 * ftTom, 2 * ftTom + 6 / 12 * ftTom)
+                        p.position.setX(i_sofas[index].position.x);
+                        p.position.setZ(i_sofas[index].position.z + 2 * ftTom + 3 / 12 * ftTom);
 
-                    leftverticalSingleCount += 1;
+                        leftverticalSingleCount += 1;
 
-                    addVerticalBottomLeft();
-                } else {
-                    enableHorizontalBottomAdding = true;
-                    hSingleCount += 1;
-                    lasthSingleCount = hSingleCount;
-                    s.position.setX(sofas[index].position.x - sofaSize.x);
+                        addVerticalBottomLeft();
+                    } else if (sofas[index].rotation.y > 0) {
+                        enableHorizontalBottomAdding = false;
+                        var a = new THREE.Object3D();
 
-                    p.scale.set(2 * ftTom, 2 * ftTom + 6 / 12 * ftTom)
-                    p.position.setX(s.position.x);
-                    p.position.setZ(s.position.z - 3 / 12 * ftTom);
+                        s.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), Math.PI / 2);
+                        s.translateX((-1 - leftverticalSingleCount) * sofaSize.x);
+                        s.position.setX(sofas[index].position.x);
+
+                        p.rotateOnAxis(new THREE.Vector3(0, 0, 1), Math.PI / 2);
+                        p.scale.set(2 * ftTom, 2 * ftTom + 6 / 12 * ftTom)
+                        p.position.setX(i_sofas[index].position.x);
+                        p.position.setZ(i_sofas[index].position.z + 2 * ftTom);
+
+                        leftverticalSingleCount += 1;
+
+                        addVerticalBottomLeft();
+                    } else {
+                        enableHorizontalBottomAdding = true;
+                        hSingleCount += 1;
+                        lasthSingleCount = hSingleCount;
+                        s.position.setX(sofas[index].position.x - sofaSize.x);
+
+                        p.scale.set(2 * ftTom, 2 * ftTom + 6 / 12 * ftTom)
+                        p.position.setX(s.position.x);
+                        p.position.setZ(s.position.z - 3 / 12 * ftTom);
+                    }
+                }
+                if (isRight) {
+                    if (sofas[index].name == sofa.cornerL.name) {
+                        enableHorizontalBottomAdding = false;
+                        s.rotateOnAxis(new THREE.Vector3(0, 1, 0), -Math.PI / 2);
+
+                        s.position.setX(sofas[index].position.x);
+                        s.position.setZ(sofas[index].position.z + cornerSeatSize.z);
+
+
+                        p.rotateOnAxis(new THREE.Vector3(0, 0, 1), -Math.PI / 2);
+                        p.scale.set(2 * ftTom, 2 * ftTom + 6 / 12 * ftTom)
+                        p.position.setX(i_sofas[index].position.x);
+                        p.position.setZ(i_sofas[index].position.z + 2 * ftTom + 3 / 12 * ftTom);
+
+
+                        rightverticalSingleCount += 1;
+                        addVerticalBottomRight();
+                    } else if (sofas[index].rotation.y < 0) {
+                        enableHorizontalBottomAdding = false;
+                        s.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), -Math.PI / 2);
+                        s.translateX((1 + rightverticalSingleCount) * sofaSize.x);
+                        s.position.setX(sofas[index].position.x);
+
+                        p.rotateOnAxis(new THREE.Vector3(0, 0, 1), -Math.PI / 2);
+                        p.scale.set(2 * ftTom, 2 * ftTom + 6 / 12 * ftTom)
+                        p.position.setX(i_sofas[index].position.x);
+                        p.position.setZ(i_sofas[index].position.z + 2 * ftTom);
+
+                        rightverticalSingleCount += 1;
+                        addVerticalBottomRight();
+                    } else {
+                        enableHorizontalBottomAdding = true;
+                        hSingleCount += 1;
+                        lasthSingleCount = hSingleCount;
+                        s.position.setX(sofas[index].position.x + sofaSize.x);
+
+                        p.scale.set(2 * ftTom, 2 * ftTom + 6 / 12 * ftTom)
+                        p.position.setX(s.position.x);
+                        p.position.setZ(s.position.z - 3 / 12 * ftTom);
+                    }
+                }
+            } else {
+
+                s.position.setX(0);
+                p.scale.set(2 * ftTom, 2 * ftTom + 6 / 12 * ftTom)
+                p.position.setX(s.position.x);
+                p.position.setZ(s.position.z - 3 / 12 * ftTom);
+            }
+
+            if (!sofas.includes(s)) {
+                sofas.push(s);
+            }
+            if (!i_sofas.includes(p)) {
+                i_sofas.push(p);
+            }
+
+            if (sofas.length > 0) {
+                if (enableHorizontalBottomAdding) {
+                    addHorizontalBottom();
                 }
             }
-            if (isRight) {
-                if (sofas[index].name == sofa.cornerL.name) {
-                    enableHorizontalBottomAdding = false;
-                    s.rotateOnAxis(new THREE.Vector3(0, 1, 0), -Math.PI / 2);
-
-                    s.position.setX(sofas[index].position.x);
-                    s.position.setZ(sofas[index].position.z + cornerSeatSize.z);
-
-
-                    p.rotateOnAxis(new THREE.Vector3(0, 0, 1), -Math.PI / 2);
-                    p.scale.set(2 * ftTom, 2 * ftTom + 6 / 12 * ftTom)
-                    p.position.setX(i_sofas[index].position.x);
-                    p.position.setZ(i_sofas[index].position.z + 2 * ftTom + 3 / 12 * ftTom);
-
-
-                    rightverticalSingleCount += 1;
-                    addVerticalBottomRight();
-                } else if (sofas[index].rotation.y < 0) {
-                    enableHorizontalBottomAdding = false;
-                    s.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), -Math.PI / 2);
-                    s.translateX((1 + rightverticalSingleCount) * sofaSize.x);
-                    s.position.setX(sofas[index].position.x);
-
-                    p.rotateOnAxis(new THREE.Vector3(0, 0, 1), -Math.PI / 2);
-                    p.scale.set(2 * ftTom, 2 * ftTom + 6 / 12 * ftTom)
-                    p.position.setX(i_sofas[index].position.x);
-                    p.position.setZ(i_sofas[index].position.z + 2 * ftTom);
-
-                    rightverticalSingleCount += 1;
-                    addVerticalBottomRight();
-                } else {
-                    enableHorizontalBottomAdding = true;
-                    hSingleCount += 1;
-                    lasthSingleCount = hSingleCount;
-                    s.position.setX(sofas[index].position.x + sofaSize.x);
-
-                    p.scale.set(2 * ftTom, 2 * ftTom + 6 / 12 * ftTom)
-                    p.position.setX(s.position.x);
-                    p.position.setZ(s.position.z - 3 / 12 * ftTom);
-                }
-            }
-        } else {
-
-            s.position.setX(0);
-            p.scale.set(2 * ftTom, 2 * ftTom + 6 / 12 * ftTom)
-            p.position.setX(s.position.x);
-            p.position.setZ(s.position.z - 3 / 12 * ftTom);
+        } catch (err) {
+            console.log(err)
         }
 
-        if (!sofas.includes(s)) {
-            sofas.push(s);
-        }
-        if (!i_sofas.includes(p)) {
-            i_sofas.push(p);
-        }
-
-        if (sofas.length > 0) {
-            if (enableHorizontalBottomAdding) {
-                addHorizontalBottom();
-            }
-        }
     }
 
 }
@@ -1088,10 +1033,18 @@ function addHorizontalBottom(val) {
     }
 
     // console.log("SC: "+singleCount, ", Max: "+ max, ": HSignle: ",hSingleCount)
+    for (let i in sofa.single.children) {
+        var parent = sofa.single.children[i];
+        for (let j in parent.children) {
+            if (parent.children[j].name.includes("Seat")) {
+                var seatSize = new THREE.Box3()
+                    .setFromObject(parent.children[j])
+                    .getSize(new THREE.Vector3());
+            }
 
-    var seatSize = new THREE.Box3()
-        .setFromObject(sofa.single.children[0])
-        .getSize(new THREE.Vector3());
+        }
+    }
+ 
 
     if (lastBottomSofa.length > 0) {
         // Bottom
@@ -1241,9 +1194,22 @@ function updateHorizontalBottoms() {
         });
 
         // console.log(leftIndexs,leftHorizontalIndex)
-        var sofaSize = new THREE.Box3()
-            .setFromObject(sofas[leftHorizontalIndex])
-            .getSize(new THREE.Vector3());
+        
+        for (let i in sofas[leftHorizontalIndex].children) {
+            if(i==sofaType){
+                var parent = sofas[leftHorizontalIndex].children[i];
+                for (let j in parent.children) {
+                    if (parent.children[j].name.includes("Seat")) {
+                        var sofaSize = new THREE.Box3()
+                            .setFromObject(parent.children[j])
+                            .getSize(new THREE.Vector3());
+                    }
+        
+                }
+            }
+           
+        }
+      
 
         for (var i = 0; i < legs.length; i++) {
             if (legs[i] instanceof THREE.Group) {
@@ -1722,7 +1688,7 @@ function addVerticalBottomLeft() {
         leftCount = 1;
     }
 
-    // var seatSize = new THREE.Box3().setFromObject(sofas[0].children[0]).getSize(new THREE.Vector3());
+    
     if (lastBottomSofasLV.length > 0) {
         // Bottom
 
@@ -3006,14 +2972,18 @@ function addArmrest() {
 function updateArmrests(index1, index2) {
 
     if (sofas.length > 0) {
-
-        var a = new THREE.Box3()
-            .setFromObject(sofa.single.children[0])
-            .getSize(new THREE.Vector3());
-
-        var b = new THREE.Box3()
-            .setFromObject(sofa.single.children[0])
-            .getSize(new THREE.Vector3());
+        for (let i in sofa.single.children) {
+            var parent = sofa.single.children[i];
+            for (let j in parent.children) {
+                if (parent.children[j].name.includes("Seat")) {
+                    var a  = b = new THREE.Box3()
+                        .setFromObject(parent.children[j])
+                        .getSize(new THREE.Vector3());
+                }
+    
+            }
+        }
+      
 
         var armrestSizeL = new THREE.Box3()
             .setFromObject(sofa.armrestL)
@@ -3106,13 +3076,23 @@ function addChaise(index) {
             //3 - Bottom
             //4 - Armrest
             //5 - Back
-            for (var i = 0; i < sofa.chaiseL.children.length; i++) {
-                if (sofa.chaiseL.children[i] instanceof THREE.Object3D) {
-                    armSize = new THREE.Box3()
-                        .setFromObject(sofa.chaiseL.children[i].children[4])
-                        .getSize(new THREE.Vector3());
+            var chaiseSofaSize ;
+            for (let i in sofa.chaiseL.children) {
+                var parent = sofa.chaiseL.children[i];
+                for (let j in parent.children) {
+                    if (parent.children[j].name.includes("Armrest")) {
+                        armSize = new THREE.Box3()
+                            .setFromObject(parent.children[j])
+                            .getSize(new THREE.Vector3());
+                    }
+                    if (parent.children[j].name.includes("Seat")) {
+                        chaiseSofaSize = new THREE.Box3()
+                            .setFromObject(parent.children[j])
+                            .getSize(new THREE.Vector3());
+                    }
                 }
             }
+           
             if (isLeft) {
                 var s = sofa.chaiseR.clone();
                 var p = createTexturePlane(icons.chaiseR);
@@ -3124,7 +3104,7 @@ function addChaise(index) {
                 scene.add(s);
                 dimensionScene.add(p);
 
-                s.position.setX(sofas[index].position.x - sofaSize.x - armSize.x / 2);
+                s.position.setX(sofas[index].position.x - sofaSize.x - chaiseSofaSize.x/10);
 
                 p.scale.set(sSize.x, sSize.z);
                 p.position.setX(i_sofas[index].position.x - 2 * ftTom - 3 / 12 * ftTom);
@@ -3151,7 +3131,7 @@ function addChaise(index) {
                 scene.add(s);
                 dimensionScene.add(p);
 
-                s.position.setX(sofas[index].position.x + sofaSize.x + armSize.x / 2);
+                s.position.setX(sofas[index].position.x + sofaSize.x + chaiseSofaSize.x/10);
 
 
                 p.scale.set(sSize.x, sSize.z);
@@ -3242,15 +3222,29 @@ function addOttoman(index) {
                 sofas[index].name == sofa.chaiseL.name ||
                 sofas[index].name == sofa.chaiseR.name
             ) {
-                for (var i = 0; i < sofas[index].children.length; i++) {
-                    sofaSize = new THREE.Box3()
-                        .setFromObject(sofas[index].children[i].children[3])
-                        .getSize(new THREE.Vector3());
+                for (let i in sofa.chaiseL.children) {
+                    var parent = sofa.chaiseL.children[i];
+                    for (let j in parent.children) {
+                     
+                        if (parent.children[j].name.includes("Seat")) {
+                            sofaSize = new THREE.Box3()
+                                .setFromObject(parent.children[j])
+                                .getSize(new THREE.Vector3());
+                        }
+                    }
                 }
             } else if (sofas[index].name == sofa.ottoman.name) {
-                sofaSize = new THREE.Box3()
-                    .setFromObject(sofas[index])
-                    .getSize(new THREE.Vector3());
+                for (let i in sofa.ottoman.children) {
+                    var parent = sofa.ottoman.children[i];
+                    for (let j in parent.children) {
+                     
+                        if (parent.children[j].name.includes("Seat")) {
+                            sofaSize = new THREE.Box3()
+                                .setFromObject(parent.children[j])
+                                .getSize(new THREE.Vector3());
+                        }
+                    }
+                }
             }
             //0 - Pillow
             //1 - Legs
@@ -3462,6 +3456,7 @@ function setSofa(objA) {
             e.geometry.normalizeNormals();
             e.castShadow = true;
             e.receiveShadow = true;
+
             // e.material.wireframe = true;
 
             // if (e.name.includes("Leg")) {
@@ -3558,11 +3553,33 @@ function updateButtons(index1, index2) {
                 sofas[index1].name == sofa.cornerR.name ||
                 sofas[index1].name == sofa.chaiseR.name
             ) {
-                for (var i = 0; i < sofas[index1].children.length; i++) {
-                    sofaSize = new THREE.Box3()
-                        .setFromObject(sofas[index1].children[i].children[3])
-                        .getSize(new THREE.Vector3());
+                if (sofas[index1].name == sofa.cornerR.name) {
+                    for (let i in sofa.cornerR.children) {
+                        var parent = sofa.cornerR.children[i];
+                        for (let j in parent.children) {
+                            if (parent.children[j].name.includes("Seat")) {
+                                sofaSize = new THREE.Box3()
+                                    .setFromObject(parent.children[j])
+                                    .getSize(new THREE.Vector3());
+                            }
+
+                        }
+                    }
+                } else {
+                    for (let i in sofa.chaiseR.children) {
+                        var parent = sofa.chaiseR.children[i];
+                        for (let j in parent.children) {
+                            if (parent.children[j].name.includes("Seat")) {
+                                sofaSize = new THREE.Box3()
+                                    .setFromObject(parent.children[j])
+                                    .getSize(new THREE.Vector3());
+                            }
+
+                        }
+                    }
                 }
+
+
 
                 obj1.position.x = sofas[index1].position.x - 0.1;
                 obj1.position.z = sofas[index1].position.z + sofaSize.z + 0.15;
@@ -3662,15 +3679,34 @@ function updateButtons(index1, index2) {
                 sofas[index2].name == sofa.cornerL.name ||
                 sofas[index2].name == sofa.chaiseL.name
             ) {
-                sofaSize = new THREE.Box3()
-                    .setFromObject(sofas[index2])
-                    .getSize(new THREE.Vector3());
+                if (sofas[index2].name == sofa.cornerL.name) {
+                    for (let i in sofa.cornerL.children) {
+                        var parent = sofa.cornerL.children[i];
+                        for (let j in parent.children) {
+                            if (parent.children[j].name.includes("Seat")) {
+                                sofaSize = new THREE.Box3()
+                                    .setFromObject(parent.children[j])
+                                    .getSize(new THREE.Vector3());
+                            }
 
-                for (var i = 0; i < sofas[index2].children.length; i++) {
-                    sofaSize = new THREE.Box3()
-                        .setFromObject(sofas[index2].children[i].children[3])
-                        .getSize(new THREE.Vector3());
+                        }
+                    }
+                } else {
+
+                    for (let i in sofa.chaiseL.children) {
+                        var parent = sofa.chaiseL.children[i];
+                        for (let j in parent.children) {
+                            if (parent.children[j].name.includes("Seat")) {
+                                sofaSize = new THREE.Box3()
+                                    .setFromObject(parent.children[j])
+                                    .getSize(new THREE.Vector3());
+                            }
+
+                        }
+                    }
                 }
+
+
 
                 obj2.position.x = sofas[index2].position.x + 0.1;
                 obj2.position.z = sofas[index2].position.z + sofaSize.z + 0.15;
@@ -3772,34 +3808,109 @@ function removeButton() {
     });
 }
 
+
+
+
 function adjustHeight() {
     if (sofas.length > 0) {
         sofas.forEach((e) => {
             if (e instanceof THREE.Object3D) {
-                if (e.children[0].name == "SingleSeat") {
-                    var seatSize = new THREE.Box3()
-                        .setFromObject(sofa.single.children[0])
-                        .getSize(new THREE.Vector3());
-                    e.children[0].position.setY(sHeight * ftTom - seatSize.y);
-                }
-                if (e.children[1].name == "pillow") {
-                    var seatSize = new THREE.Box3()
-                        .setFromObject(sofa.single.children[0])
-                        .getSize(new THREE.Vector3());
+                
+                if (e.name == sofa.single.name) {
+                    for (let i in e.children) {
+                        if (i == sofaType) {
 
-                    e.children[1].position.setY(e.children[0].position.y + seatSize.y);
+                            for (let j in e.children[i].children) {
+                                var c = e.children[i].children[j];
+
+
+                                if (c.name.includes("Seat")) {
+
+                                    seat = c;
+                                    seatSize = new THREE.Box3().setFromObject(seat).getSize(new THREE.Vector3());
+                                 
+                                    seat.position.setY(sHeight * ftTom - seatSize.y);
+                                }
+
+
+                            }
+
+                        }
+
+                    }
+
+                    for (let i in e.children) {
+                        if (i == sofaType) {
+
+                            for (let j in e.children[i].children) {
+                                var c = e.children[i].children[j];
+
+
+                                if (c.name.includes("Pillow")) {
+
+                                    c.position.setY(seat.position.y + seatSize.y);
+                              
+                                }
+
+
+                            }
+
+                        }
+
+                    }
+                   
                 }
+                
+               
                 if (e.name == sofa.ottoman.name) {
-                    var seatSize = new THREE.Box3()
-                        .setFromObject(sofa.single.children[0])
-                        .getSize(new THREE.Vector3());
+                    for (let i in e.children) {
+                        if (i == sofaType) {
+
+                            for (let j in e.children[i].children) {
+                                var c = e.children[i].children[j];
+
+
+                                if (c.name.includes("Seat")) {
+
+                                    seat = c;
+                                    seatSize = new THREE.Box3().setFromObject(seat).getSize(new THREE.Vector3());
+                                 
+                                    seat.position.setY(sHeight * ftTom - seatSize.y);
+                                }
+
+
+                            }
+
+                        }
+
+                    }
                     var bottomSize = new THREE.Box3()
                         .setFromObject(sofa.bottom)
                         .getSize(new THREE.Vector3());
-                    e.children[1].position.setY(sHeight * ftTom - seatSize.y);
-                    e.children[2].scale.setY(
-                        ((sHeight * ftTom - seatSize.y) / bottomSize.y).toFixed(2)
-                    );
+                
+                        for (let i in e.children) {
+                            if (i == sofaType) {
+    
+                                for (let j in e.children[i].children) {
+                                    var c = e.children[i].children[j];
+    
+    
+                                    if (c.name.includes("Bottom")) {
+    
+                                        
+                                     
+                                       c.scale.setY(
+                                            ((sHeight * ftTom - seatSize.y) / bottomSize.y).toFixed(2)
+                                        );
+                                    }
+    
+    
+                                }
+    
+                            }
+    
+                        }
+                   
                 }
                 if (e.name == sofa.chaiseL.name) {
                     //0 - Pillow
@@ -3817,34 +3928,78 @@ function adjustHeight() {
                     var armSize = new THREE.Box3()
                         .setFromObject(sofa.armrestL)
                         .getSize(new THREE.Vector3());
-                    for (var i = 0; i < e.children.length; i++) {
-                        // console.log(e.children[i])
-                        var seatSize = new THREE.Box3()
-                            .setFromObject(e.children[i].children[2])
-                            .getSize(new THREE.Vector3());
+                    var seat, seatSize;
 
-                        e.children[i].children[2].position.setY(
-                            sHeight * ftTom - seatSize.y
-                        );
+                    for (let i in e.children) {
+                        if (i == sofaType) {
 
-                        if (sHeight == 1.25) {
-                            e.children[i].children[4].scale.setY(
-                                (armSize.y - seatSize.y + 0.05) / armSize.y
-                            );
-                            e.children[i].children[5].scale.setY(
-                                (backSize.y - seatSize.y + 0.05) / backSize.y
-                            );
-                        } else {
-                            e.children[i].children[4].scale.setY(1);
-                            e.children[i].children[5].scale.setY(1);
+                            for (let j in e.children[i].children) {
+                                var c = e.children[i].children[j];
+
+
+                                if (c.name.includes("Seat")) {
+
+                                    seat = c;
+                                    seatSize = new THREE.Box3().setFromObject(seat).getSize(new THREE.Vector3());
+                                    seat.position.setY(sHeight * ftTom - seatSize.y);
+
+                                }
+
+
+                            }
+
                         }
-                        e.children[i].children[3].scale.setY(
-                            ((sHeight * ftTom - seatSize.y) / bottomSize.y).toFixed(2)
-                        );
-                        e.children[i].children[0].position.setY(
-                            e.children[i].children[2].position.y + seatSize.y
-                        );
+
                     }
+
+                    for (let i in e.children) {
+                        if (i == sofaType) {
+
+                            for (let j in e.children[i].children) {
+                                var c = e.children[i].children[j];
+
+                                if (c.name.includes("Pillow")) {
+
+                                    c.position.setY(
+                                        seat.position.y + seatSize.y
+                                    );
+                                };
+
+
+                                if (c.name.includes("Bottom")) {
+                                    c.scale.setY(((sHeight * ftTom - seatSize.y) / bottomSize.y).toFixed(2));
+                                };
+
+
+                                if (c.name.includes("Back")) {
+
+                                    if (sHeight == 1.25) {
+                                        c.scale.setY(
+                                            (backSize.y - seatSize.y + 0.05) / backSize.y
+                                        );
+                                    } else {
+                                        c.scale.setY(1);
+                                    }
+                                };
+
+                                if (c.name.includes("Armrest")) {
+
+                                    if (sHeight == 1.25) {
+                                        c.scale.setY(
+                                            (armSize.y - seatSize.y + 0.05) / armSize.y
+                                        );
+                                    } else {
+                                        c.scale.setY(1);
+                                    }
+                                };
+
+                            }
+
+                        }
+
+                    }
+
+
                 } else if (e.name == sofa.chaiseR.name) {
                     //0 - Pillow
                     //1 - Legs
@@ -3861,33 +4016,75 @@ function adjustHeight() {
                     var armSize = new THREE.Box3()
                         .setFromObject(sofa.armrestL)
                         .getSize(new THREE.Vector3());
-                    for (var i = 0; i < e.children.length; i++) {
-                        // console.log(e.children[i])
-                        var seatSize = new THREE.Box3()
-                            .setFromObject(e.children[i].children[2])
-                            .getSize(new THREE.Vector3());
 
-                        e.children[i].children[2].position.setY(
-                            sHeight * ftTom - seatSize.y
-                        );
+                    var seat, seatSize;
+                    for (let i in e.children) {
+                        if (i == sofaType) {
 
-                        if (sHeight == 1.25) {
-                            e.children[i].children[4].scale.setY(
-                                (armSize.y - seatSize.y + 0.05) / armSize.y
-                            );
-                            e.children[i].children[5].scale.setY(
-                                (backSize.y - seatSize.y + 0.05) / backSize.y
-                            );
-                        } else {
-                            e.children[i].children[4].scale.setY(1);
-                            e.children[i].children[5].scale.setY(1);
+                            for (let j in e.children[i].children) {
+                                var c = e.children[i].children[j];
+
+
+                                if (c.name.includes("Seat")) {
+
+                                    seat = c;
+                                    seatSize = new THREE.Box3().setFromObject(seat).getSize(new THREE.Vector3());
+                                    seat.position.setY(sHeight * ftTom - seatSize.y);
+
+                                }
+
+
+                            }
+
                         }
-                        e.children[i].children[3].scale.setY(
-                            ((sHeight * ftTom - seatSize.y) / bottomSize.y).toFixed(2)
-                        );
-                        e.children[i].children[0].position.setY(
-                            e.children[i].children[2].position.y + seatSize.y
-                        );
+
+                    }
+
+                    for (let i in e.children) {
+                        if (i == sofaType) {
+
+                            for (let j in e.children[i].children) {
+                                var c = e.children[i].children[j];
+
+                                if (c.name.includes("Pillow")) {
+
+                                    c.position.setY(
+                                        seat.position.y + seatSize.y
+                                    );
+                                };
+
+
+                                if (c.name.includes("Bottom")) {
+                                    c.scale.setY(((sHeight * ftTom - seatSize.y) / bottomSize.y).toFixed(2));
+                                };
+
+
+                                if (c.name.includes("Back")) {
+
+                                    if (sHeight == 1.25) {
+                                        c.scale.setY(
+                                            (backSize.y - seatSize.y + 0.05) / backSize.y
+                                        );
+                                    } else {
+                                        c.scale.setY(1);
+                                    }
+                                };
+
+                                if (c.name.includes("Armrest")) {
+
+                                    if (sHeight == 1.25) {
+                                        c.scale.setY(
+                                            (armSize.y - seatSize.y + 0.05) / armSize.y
+                                        );
+                                    } else {
+                                        c.scale.setY(1);
+                                    }
+                                };
+
+                            }
+
+                        }
+
                     }
                 }
                 if (e.name == sofa.cornerL.name) {
@@ -3902,29 +4099,68 @@ function adjustHeight() {
                     var bottomSize = new THREE.Box3()
                         .setFromObject(sofa.bottom)
                         .getSize(new THREE.Vector3());
-                    for (var i = 0; i < e.children.length; i++) {
-                        var seatSize = new THREE.Box3()
-                            .setFromObject(e.children[i].children[2])
-                            .getSize(new THREE.Vector3());
 
-                        e.children[i].children[2].position.setY(
-                            sHeight * ftTom - seatSize.y
-                        );
-                        if (sHeight == 1.25) {
-                            e.children[i].children[4].scale.setY(
-                                (backSize.y - seatSize.y + 0.05) / backSize.y
-                            );
-                        } else {
-                            e.children[i].children[4].scale.setY(1);
+                    var seat, seatSize;
+                    for (let i in e.children) {
+                        if (i == sofaType) {
+
+                            for (let j in e.children[i].children) {
+                                var c = e.children[i].children[j];
+
+
+                                if (c.name.includes("Seat")) {
+
+                                    seat = c;
+                                    seatSize = new THREE.Box3().setFromObject(seat).getSize(new THREE.Vector3());
+                                    seat.position.setY(sHeight * ftTom - seatSize.y);
+
+                                }
+
+
+                            }
+
                         }
 
-                        e.children[i].children[3].scale.setY(
-                            ((sHeight * ftTom - seatSize.y) / bottomSize.y).toFixed(2)
-                        );
-                        e.children[i].children[0].position.setY(
-                            e.children[i].children[2].position.y + seatSize.y
-                        );
                     }
+
+                    for (let i in e.children) {
+                        if (i == sofaType) {
+
+                            for (let j in e.children[i].children) {
+                                var c = e.children[i].children[j];
+
+                                if (c.name.includes("Pillow")) {
+
+                                    c.position.setY(
+                                        seat.position.y + seatSize.y
+                                    );
+                                };
+
+
+                                if (c.name.includes("Bottom")) {
+                                    c.scale.setY(((sHeight * ftTom - seatSize.y) / bottomSize.y).toFixed(2));
+                                };
+
+
+                                if (c.name.includes("Back")) {
+
+                                    if (sHeight == 1.25) {
+                                        c.scale.setY(
+                                            (backSize.y - seatSize.y + 0.05) / backSize.y
+                                        );
+                                    } else {
+                                        c.scale.setY(1);
+                                    }
+                                };
+
+
+
+                            }
+
+                        }
+
+                    }
+
                 } else if (e.name == sofa.cornerR.name) {
                     //0 - Pillow
                     //1 - Legs
@@ -3937,38 +4173,95 @@ function adjustHeight() {
                     var bottomSize = new THREE.Box3()
                         .setFromObject(sofa.bottom)
                         .getSize(new THREE.Vector3());
-                    for (var i = 0; i < e.children.length; i++) {
-                        var seatSize = new THREE.Box3()
-                            .setFromObject(e.children[i].children[2])
-                            .getSize(new THREE.Vector3());
 
-                        e.children[i].children[2].position.setY(
-                            sHeight * ftTom - seatSize.y
-                        );
-                        if (sHeight == 1.25) {
-                            e.children[i].children[4].scale.setY(
-                                (backSize.y - seatSize.y + 0.05) / backSize.y
-                            );
-                        } else {
-                            e.children[i].children[4].scale.setY(1);
+                    var seat, seatSize;
+
+                    for (let i in e.children) {
+                        if (i == sofaType) {
+
+                            for (let j in e.children[i].children) {
+                                var c = e.children[i].children[j];
+
+
+                                if (c.name.includes("Seat")) {
+
+                                    seat = c;
+                                    seatSize = new THREE.Box3().setFromObject(seat).getSize(new THREE.Vector3());
+                                    seat.position.setY(sHeight * ftTom - seatSize.y);
+
+                                }
+
+
+                            }
+
                         }
 
-                        e.children[i].children[3].scale.setY(
-                            ((sHeight * ftTom - seatSize.y) / bottomSize.y).toFixed(2)
-                        );
-                        e.children[i].children[0].position.setY(
-                            e.children[i].children[2].position.y + seatSize.y
-                        );
                     }
+
+                    for (let i in e.children) {
+                        if (i == sofaType) {
+
+                            for (let j in e.children[i].children) {
+                                var c = e.children[i].children[j];
+
+                                if (c.name.includes("Pillow")) {
+
+                                    c.position.setY(
+                                        seat.position.y + seatSize.y
+                                    );
+                                };
+
+
+                                if (c.name.includes("Bottom")) {
+                                    c.scale.setY(((sHeight * ftTom - seatSize.y) / bottomSize.y).toFixed(2));
+                                };
+
+
+                                if (c.name.includes("Back")) {
+
+                                    if (sHeight == 1.25) {
+                                        c.scale.setY(
+                                            (backSize.y - seatSize.y + 0.05) / backSize.y
+                                        );
+                                    } else {
+                                        c.scale.setY(1);
+                                    }
+                                };
+
+
+
+                            }
+
+                        }
+
+                    }
+
+
+
+
+
+
                 }
             }
         });
 
         if (backs.length > 0) {
             backs.forEach((b) => {
-                var seatSize = new THREE.Box3()
-                    .setFromObject(sofa.single.children[0])
-                    .getSize(new THREE.Vector3());
+                var seatSize;
+                for (let i in sofa.single.children) {
+                    if(i == sofaType){
+                        var parent = sofa.single.children[i];
+                        for (let j in parent.children) {
+                         
+                            if (parent.children[j].name.includes("Seat")) {
+                                seatSize = new THREE.Box3()
+                                    .setFromObject(parent.children[j])
+                                    .getSize(new THREE.Vector3());
+                            }
+                        }
+                    }
+                   
+                }
                 var backSize = new THREE.Box3()
                     .setFromObject(sofa.singleback)
                     .getSize(new THREE.Vector3());
@@ -3985,9 +4278,21 @@ function adjustHeight() {
 
         if (leftbacks.length > 0) {
             leftbacks.forEach((b) => {
-                var seatSize = new THREE.Box3()
-                    .setFromObject(sofa.single.children[0])
-                    .getSize(new THREE.Vector3());
+                var seatSize;
+                for (let i in sofa.single.children) {
+                    if(i == sofaType){
+                        var parent = sofa.single.children[i];
+                        for (let j in parent.children) {
+                         
+                            if (parent.children[j].name.includes("Seat")) {
+                                seatSize = new THREE.Box3()
+                                    .setFromObject(parent.children[j])
+                                    .getSize(new THREE.Vector3());
+                            }
+                        }
+                    }
+                   
+                }
                 var backSize = new THREE.Box3()
                     .setFromObject(sofa.singleback)
                     .getSize(new THREE.Vector3());
@@ -4003,9 +4308,21 @@ function adjustHeight() {
 
         if (rightbacks.length > 0) {
             rightbacks.forEach((b) => {
-                var seatSize = new THREE.Box3()
-                    .setFromObject(sofa.single.children[0])
-                    .getSize(new THREE.Vector3());
+                var seatSize;
+                for (let i in sofa.single.children) {
+                    if(i == sofaType){
+                        var parent = sofa.single.children[i];
+                        for (let j in parent.children) {
+                         
+                            if (parent.children[j].name.includes("Seat")) {
+                                seatSize = new THREE.Box3()
+                                    .setFromObject(parent.children[j])
+                                    .getSize(new THREE.Vector3());
+                            }
+                        }
+                    }
+                   
+                }
                 var backSize = new THREE.Box3()
                     .setFromObject(sofa.singleback)
                     .getSize(new THREE.Vector3());
@@ -4021,9 +4338,21 @@ function adjustHeight() {
 
         if (bottoms.length > 0) {
             bottoms.forEach((b) => {
-                var seatSize = new THREE.Box3()
-                    .setFromObject(sofa.single.children[0])
-                    .getSize(new THREE.Vector3());
+                var seatSize;
+                for (let i in sofa.single.children) {
+                    if(i == sofaType){
+                        var parent = sofa.single.children[i];
+                        for (let j in parent.children) {
+                         
+                            if (parent.children[j].name.includes("Seat")) {
+                                seatSize = new THREE.Box3()
+                                    .setFromObject(parent.children[j])
+                                    .getSize(new THREE.Vector3());
+                            }
+                        }
+                    }
+                   
+                }
                 var bottomSize = new THREE.Box3()
                     .setFromObject(sofa.bottom)
                     .getSize(new THREE.Vector3());
@@ -4039,9 +4368,21 @@ function adjustHeight() {
 
         if (leftbottoms.length > 0) {
             leftbottoms.forEach((b) => {
-                var seatSize = new THREE.Box3()
-                    .setFromObject(sofa.single.children[0])
-                    .getSize(new THREE.Vector3());
+                var seatSize;
+                for (let i in sofa.single.children) {
+                    if(i == sofaType){
+                        var parent = sofa.single.children[i];
+                        for (let j in parent.children) {
+                         
+                            if (parent.children[j].name.includes("Seat")) {
+                                seatSize = new THREE.Box3()
+                                    .setFromObject(parent.children[j])
+                                    .getSize(new THREE.Vector3());
+                            }
+                        }
+                    }
+                   
+                }
                 var bottomSize = new THREE.Box3()
                     .setFromObject(sofa.bottom)
                     .getSize(new THREE.Vector3());
@@ -4054,9 +4395,21 @@ function adjustHeight() {
         }
         if (rightbottoms.length > 0) {
             rightbottoms.forEach((b) => {
-                var seatSize = new THREE.Box3()
-                    .setFromObject(sofa.single.children[0])
-                    .getSize(new THREE.Vector3());
+                var seatSize;
+                for (let i in sofa.single.children) {
+                    if(i == sofaType){
+                        var parent = sofa.single.children[i];
+                        for (let j in parent.children) {
+                         
+                            if (parent.children[j].name.includes("Seat")) {
+                                seatSize = new THREE.Box3()
+                                    .setFromObject(parent.children[j])
+                                    .getSize(new THREE.Vector3());
+                            }
+                        }
+                    }
+                   
+                }
                 var bottomSize = new THREE.Box3()
                     .setFromObject(sofa.bottom)
                     .getSize(new THREE.Vector3());
@@ -4069,9 +4422,21 @@ function adjustHeight() {
         }
         if (armrests.length > 0)
             armrests.forEach((a) => {
-                var seatSize = new THREE.Box3()
-                    .setFromObject(sofa.single.children[0])
-                    .getSize(new THREE.Vector3());
+                var seatSize;
+                for (let i in sofa.single.children) {
+                    if(i == sofaType){
+                        var parent = sofa.single.children[i];
+                        for (let j in parent.children) {
+                         
+                            if (parent.children[j].name.includes("Seat")) {
+                                seatSize = new THREE.Box3()
+                                    .setFromObject(parent.children[j])
+                                    .getSize(new THREE.Vector3());
+                            }
+                        }
+                    }
+                   
+                }
                 var armSize = new THREE.Box3()
                     .setFromObject(sofa.armrestL)
                     .getSize(new THREE.Vector3());
@@ -4282,7 +4647,7 @@ function createContextMenu(obj, index) {
 
                     addSingle(index);
 
-
+                    adjustHeight();
                     // updateButton(obj, index);
                 });
             }
@@ -4298,7 +4663,7 @@ function createContextMenu(obj, index) {
                 td.addEventListener("pointerdown", function () {
                     addCorner(index);
 
-
+                    adjustHeight();
                     // updateButton(obj, index);
                 });
             }
@@ -4320,6 +4685,7 @@ function createContextMenu(obj, index) {
                 td.innerHTML = "<span class='sofa-ottoman'>  Ottoman";
                 td.addEventListener("pointerdown", function () {
                     addOttoman(index);
+                    adjustHeight();
                     // updateButton(obj, index);
                 });
             }
@@ -4923,9 +5289,18 @@ function createMeasurementsWidth(index1, index2) {
             .setFromObject(sofas[index2])
             .getSize(new THREE.Vector3());
 
-        var singleSize = new THREE.Box3()
-            .setFromObject(sofa.single.children[0])
-            .getSize(new THREE.Vector3());
+            for (let i in sofa.single.children) {
+                var parent = sofa.single.children[i];
+                for (let j in parent.children) {
+                    if (parent.children[j].name.includes("Seat")) {
+                        var singleSize = new THREE.Box3()
+                            .setFromObject(parent.children[j])
+                            .getSize(new THREE.Vector3());
+                    }
+        
+                }
+            }
+         
 
         var chaiseSize = new THREE.Box3()
             .setFromObject(sofa.chaiseL)
@@ -4939,7 +5314,7 @@ function createMeasurementsWidth(index1, index2) {
         } else if (armrests[1].visible) {
 
         }
-        if (sofas[index1].rotation.y == 0 && sofas[index1].name!=sofa.ottoman.name) {
+        if (sofas[index1].rotation.y == 0 && sofas[index1].name != sofa.ottoman.name) {
             var fromLeft = new THREE.Vector3(sofas[0].position.x, 0, sofas[index1].position.z - 1);
             var toLeft = new THREE.Vector3(sofas[index1].position.x - leftSize.x / 2, 0, sofas[index1].position.z - 1);
             var directionLeft = toLeft.clone().sub(fromLeft);
@@ -4982,7 +5357,7 @@ function createMeasurementsWidth(index1, index2) {
 
 
                 wValue.innerHTML = distanceValue + " ft(" + distanceValue * 12 + " in)";
-                widthLabel.position.set((toRight.x+toLeft.x)/2, 0, -1.25);
+                widthLabel.position.set((toRight.x + toLeft.x) / 2, 0, -1.25);
 
             }
         }
@@ -5002,7 +5377,7 @@ function createMeasurementsHeightLeft(index1, index2) {
         var leftSofas = [];
         var ottomas = [];
 
-        var measurement  = 0;
+        var measurement = 0;
         sofas.forEach(e => {
             if (e.rotation.y > 0) {
                 if (!leftSofas.includes(e)) {
@@ -5010,7 +5385,7 @@ function createMeasurementsHeightLeft(index1, index2) {
                 }
             }
 
-            if(e.name == sofa.ottoman.name){
+            if (e.name == sofa.ottoman.name) {
                 if (!ottomas.includes(e)) {
                     ottomas.push(e);
                 }
@@ -5027,47 +5402,47 @@ function createMeasurementsHeightLeft(index1, index2) {
                 var tup = sofas[leftCornerIndex].position.z - ftTom - 6 / 12 * ftTom;
 
                 var fdown = (mid.position.z - ftTom);
-              
-                var tdown = leftSofas[leftSofas.length-1].position.z + ftTom + 6 / 12 * ftTom;
+
+                var tdown = leftSofas[leftSofas.length - 1].position.z + ftTom + 6 / 12 * ftTom;
                 toUp = new THREE.Vector3(sofas[leftCornerIndex].position.x - 0.8, 0, tup);
                 fromUp = new THREE.Vector3(sofas[leftCornerIndex].position.x - 0.8, 0, fup);
                 toDown = new THREE.Vector3(sofas[leftCornerIndex].position.x - 0.8, 0, tdown);
                 fromDown = new THREE.Vector3(sofas[leftCornerIndex].position.x - 0.8, 0, fdown);
-                measurement = (leftverticalSingleCount * (2) )+ 1 + 2;
+                measurement = (leftverticalSingleCount * (2)) + 1 + 2;
             } else {
-                if(leftCornerIndex){
+                if (leftCornerIndex) {
                     var fup = (sofas[leftCornerIndex || leftChaiseIndex].position.z);
                     var tup = sofas[leftCornerIndex || leftChaiseIndex].position.z - ftTom - 6 / 12 * ftTom;
-                    var fdown = (sofas[leftCornerIndex || leftChaiseIndex].position.z );
-                    var tdown = sofas[leftCornerIndex || leftChaiseIndex].position.z+ftTom ;
-                    measurement = 6/12 + 2;
-                }else if(leftChaiseIndex){
+                    var fdown = (sofas[leftCornerIndex || leftChaiseIndex].position.z);
+                    var tdown = sofas[leftCornerIndex || leftChaiseIndex].position.z + ftTom;
+                    measurement = 6 / 12 + 2;
+                } else if (leftChaiseIndex) {
 
                     for (var i = 0; i < sofas[leftChaiseIndex].children.length; i++) {
-                      var  sofaSize = new THREE.Box3()
+                        var sofaSize = new THREE.Box3()
                             .setFromObject(sofas[leftChaiseIndex].children[i].children[3])
                             .getSize(new THREE.Vector3());
                     }
 
-                    if(ottomas.length>0){
-                        var fup = (sofas[leftChaiseIndex].position.z+ftTom/2+oMid.position.z)/2  ;
-                        var tup = sofas[leftChaiseIndex].position.z -sofaSize.z/2+  ftTom/2;
+                    if (ottomas.length > 0) {
+                        var fup = (sofas[leftChaiseIndex].position.z + ftTom / 2 + oMid.position.z) / 2;
+                        var tup = sofas[leftChaiseIndex].position.z - sofaSize.z / 2 + ftTom / 2;
 
-                        var fdown = (sofas[leftChaiseIndex].position.z+ftTom/2+oMid.position.z)/2  ;
-                        var tdown = ottomas[ottomas.length-1].position.z + ftTom;
+                        var fdown = (sofas[leftChaiseIndex].position.z + ftTom / 2 + oMid.position.z) / 2;
+                        var tdown = ottomas[ottomas.length - 1].position.z + ftTom;
 
-                        measurement = 6/12 + 4 + (ottomas.length * (2+6/12));
-                    }else{
-                        var fup = (sofas[leftChaiseIndex].position.z+ftTom/2  );
-                        var tup = sofas[ leftChaiseIndex].position.z -sofaSize.z/2+  ftTom/2;
+                        measurement = 6 / 12 + 4 + (ottomas.length * (2 + 6 / 12));
+                    } else {
+                        var fup = (sofas[leftChaiseIndex].position.z + ftTom / 2);
+                        var tup = sofas[leftChaiseIndex].position.z - sofaSize.z / 2 + ftTom / 2;
 
-                        var fdown = (sofas[leftChaiseIndex].position.z+ftTom/2  );
-                        var tdown = sofas[ leftChaiseIndex].position.z +sofaSize.z/2+  ftTom;
-                        measurement = 6/12 + 4;
+                        var fdown = (sofas[leftChaiseIndex].position.z + ftTom / 2);
+                        var tdown = sofas[leftChaiseIndex].position.z + sofaSize.z / 2 + ftTom;
+                        measurement = 6 / 12 + 4;
                     }
-                    
+
                 }
-            
+
                 toUp = new THREE.Vector3(sofas[leftCornerIndex || leftChaiseIndex].position.x - 0.8, 0, tup);
                 fromUp = new THREE.Vector3(sofas[leftCornerIndex || leftChaiseIndex].position.x - 0.8, 0, fup);
 
@@ -5078,9 +5453,9 @@ function createMeasurementsHeightLeft(index1, index2) {
             toUp = new THREE.Vector3(sofas[index1].position.x - 0.8, 0, sofas[index1].position.z - ftTom - 6 / 12 * ftTom);
             fromUp = new THREE.Vector3(sofas[index1].position.x - 0.8, 0, sofas[index1].position.z);
 
-            fromDown = new THREE.Vector3(sofas[index1].position.x - 0.8, 0, sofas[index1].position.z );
-            toDown = new THREE.Vector3(sofas[index1].position.x - 0.8, 0, sofas[index1].position.z+ ftTom );
-            measurement = 6/12 +2;
+            fromDown = new THREE.Vector3(sofas[index1].position.x - 0.8, 0, sofas[index1].position.z);
+            toDown = new THREE.Vector3(sofas[index1].position.x - 0.8, 0, sofas[index1].position.z + ftTom);
+            measurement = 6 / 12 + 2;
         }
 
 
@@ -5096,7 +5471,7 @@ function createMeasurementsHeightLeft(index1, index2) {
         var directionDown = toDown.clone().sub(fromDown);
 
         var lengthDown = directionDown.manhattanLength();
-        
+
         if (vArrowUpL == null) {
             vArrowUpL = new THREE.ArrowHelper(directionUp.normalize(), fromUp, lengthUp, 0x000000, 0.05, 0.05);
             vArrowDownL = new THREE.ArrowHelper(directionDown.normalize(), fromDown, lengthDown, 0x000000, 0.05, 0.05);
@@ -5115,7 +5490,7 @@ function createMeasurementsHeightLeft(index1, index2) {
 
 
         } else {
-          
+
             vArrowUpL.setDirection(directionUp.normalize());
             vArrowUpL.setLength(lengthUp, 0.1, 0.1);
             vArrowUpL.position.copy(fromUp.clone());
@@ -5128,7 +5503,7 @@ function createMeasurementsHeightLeft(index1, index2) {
 
 
             LValue.innerHTML = distanceValue + " ft(" + distanceValue * 12 + " in)";
-            hLeftLabel.position.set(fromUp.x-0.5, 0, fromUp.z);
+            hLeftLabel.position.set(fromUp.x - 0.5, 0, fromUp.z);
 
         }
     }
@@ -5145,8 +5520,8 @@ function createMeasurementsHeightRight(index1, index2) {
         var toDown = new THREE.Vector3(0, 0, 0);
         var rightSofas = [];
         var ottomas = [];
-        var measurement  = 0;
-        
+        var measurement = 0;
+
         sofas.forEach(e => {
             if (e.rotation.y < 0) {
                 if (!rightSofas.includes(e)) {
@@ -5154,7 +5529,7 @@ function createMeasurementsHeightRight(index1, index2) {
                 }
             }
 
-            if(e.name == sofa.ottoman.name){
+            if (e.name == sofa.ottoman.name) {
                 if (!ottomas.includes(e)) {
                     ottomas.push(e);
                 }
@@ -5171,47 +5546,47 @@ function createMeasurementsHeightRight(index1, index2) {
                 var tup = sofas[rightCornerIndex].position.z - ftTom - 6 / 12 * ftTom;
 
                 var fdown = (mid.position.z - ftTom);
-              
-                var tdown = rightSofas[rightSofas.length-1].position.z + ftTom + 6 / 12 * ftTom;
+
+                var tdown = rightSofas[rightSofas.length - 1].position.z + ftTom + 6 / 12 * ftTom;
                 toUp = new THREE.Vector3(sofas[rightCornerIndex].position.x + 0.8, 0, tup);
                 fromUp = new THREE.Vector3(sofas[rightCornerIndex].position.x + 0.8, 0, fup);
                 toDown = new THREE.Vector3(sofas[rightCornerIndex].position.x + 0.8, 0, tdown);
                 fromDown = new THREE.Vector3(sofas[rightCornerIndex].position.x + 0.8, 0, fdown);
-                measurement = (leftverticalSingleCount * (2) )+ 1 + 2;
+                measurement = (leftverticalSingleCount * (2)) + 1 + 2;
             } else {
-                if(rightCornerIndex){
+                if (rightCornerIndex) {
                     var fup = (sofas[rightCornerIndex || rightChaiseIndex].position.z);
                     var tup = sofas[rightCornerIndex || rightChaiseIndex].position.z - ftTom - 6 / 12 * ftTom;
-                    var fdown = (sofas[rightCornerIndex || rightChaiseIndex].position.z );
-                    var tdown = sofas[rightCornerIndex || rightChaiseIndex].position.z+ftTom ;
-                    measurement = 6/12 + 2;
-                }else if(rightChaiseIndex){
+                    var fdown = (sofas[rightCornerIndex || rightChaiseIndex].position.z);
+                    var tdown = sofas[rightCornerIndex || rightChaiseIndex].position.z + ftTom;
+                    measurement = 6 / 12 + 2;
+                } else if (rightChaiseIndex) {
 
                     for (var i = 0; i < sofas[rightChaiseIndex].children.length; i++) {
-                      var  sofaSize = new THREE.Box3()
+                        var sofaSize = new THREE.Box3()
                             .setFromObject(sofas[rightChaiseIndex].children[i].children[3])
                             .getSize(new THREE.Vector3());
                     }
 
-                    if(ottomas.length>0){
-                        var fup = (sofas[rightChaiseIndex].position.z+ftTom/2+oMid.position.z)/2  ;
-                        var tup = sofas[rightChaiseIndex].position.z -sofaSize.z/2+  ftTom/2;
+                    if (ottomas.length > 0) {
+                        var fup = (sofas[rightChaiseIndex].position.z + ftTom / 2 + oMid.position.z) / 2;
+                        var tup = sofas[rightChaiseIndex].position.z - sofaSize.z / 2 + ftTom / 2;
 
-                        var fdown = (sofas[rightChaiseIndex].position.z+ftTom/2+oMid.position.z)/2  ;
-                        var tdown = ottomas[ottomas.length-1].position.z + ftTom;
-                        measurement = 6/12 + 4 + (ottomas.length * (2+6/12));
-                    }else{
-                        var fup = (sofas[rightChaiseIndex].position.z+ftTom/2  );
-                        var tup = sofas[ rightChaiseIndex].position.z -sofaSize.z/2+  ftTom/2;
+                        var fdown = (sofas[rightChaiseIndex].position.z + ftTom / 2 + oMid.position.z) / 2;
+                        var tdown = ottomas[ottomas.length - 1].position.z + ftTom;
+                        measurement = 6 / 12 + 4 + (ottomas.length * (2 + 6 / 12));
+                    } else {
+                        var fup = (sofas[rightChaiseIndex].position.z + ftTom / 2);
+                        var tup = sofas[rightChaiseIndex].position.z - sofaSize.z / 2 + ftTom / 2;
 
-                        var fdown = (sofas[rightChaiseIndex].position.z+ftTom/2  );
-                        var tdown = sofas[ rightChaiseIndex].position.z +sofaSize.z/2+  ftTom;
-                        measurement = 6/12 + 4;
+                        var fdown = (sofas[rightChaiseIndex].position.z + ftTom / 2);
+                        var tdown = sofas[rightChaiseIndex].position.z + sofaSize.z / 2 + ftTom;
+                        measurement = 6 / 12 + 4;
                     }
-                    
-                 
+
+
                 }
-            
+
                 toUp = new THREE.Vector3(sofas[rightCornerIndex || rightChaiseIndex].position.x + 0.8, 0, tup);
                 fromUp = new THREE.Vector3(sofas[rightCornerIndex || rightChaiseIndex].position.x + 0.8, 0, fup);
 
@@ -5222,16 +5597,10 @@ function createMeasurementsHeightRight(index1, index2) {
             toUp = new THREE.Vector3(sofas[index2].position.x + 0.8, 0, sofas[index2].position.z - ftTom - 6 / 12 * ftTom);
             fromUp = new THREE.Vector3(sofas[index2].position.x + 0.8, 0, sofas[index2].position.z);
 
-            fromDown = new THREE.Vector3(sofas[index2].position.x + 0.8, 0, sofas[index2].position.z );
-            toDown = new THREE.Vector3(sofas[index2].position.x + 0.8, 0, sofas[index2].position.z+ ftTom );
-            measurement = 6/12 +2;
+            fromDown = new THREE.Vector3(sofas[index2].position.x + 0.8, 0, sofas[index2].position.z);
+            toDown = new THREE.Vector3(sofas[index2].position.x + 0.8, 0, sofas[index2].position.z + ftTom);
+            measurement = 6 / 12 + 2;
         }
-
-
-
-
-
-
 
         var directionUp = toUp.clone().sub(fromUp);
 
@@ -5240,7 +5609,7 @@ function createMeasurementsHeightRight(index1, index2) {
         var directionDown = toDown.clone().sub(fromDown);
 
         var lengthDown = directionDown.manhattanLength();
-        
+
         if (vArrowUpR == null) {
             vArrowUpR = new THREE.ArrowHelper(directionUp.normalize(), fromUp, lengthUp, 0x000000, 0.05, 0.05);
             vArrowDownR = new THREE.ArrowHelper(directionDown.normalize(), fromDown, lengthDown, 0x000000, 0.05, 0.05);
@@ -5259,7 +5628,7 @@ function createMeasurementsHeightRight(index1, index2) {
 
 
         } else {
-         
+
             vArrowUpR.setDirection(directionUp.normalize());
             vArrowUpR.setLength(lengthUp, 0.1, 0.1);
             vArrowUpR.position.copy(fromUp.clone());
@@ -5267,12 +5636,12 @@ function createMeasurementsHeightRight(index1, index2) {
             vArrowDownR.setDirection(directionDown.normalize());
             vArrowDownR.setLength(lengthDown, 0.1, 0.1);
             vArrowDownR.position.copy(fromDown.clone());
-            var distanceValue = measurement ;
+            var distanceValue = measurement;
 
 
 
             vValue.innerHTML = distanceValue + " ft(" + distanceValue * 12 + " in)";
-            hRightLabel.position.set(fromUp.x+0.5, 0, fromUp.z);
+            hRightLabel.position.set(fromUp.x + 0.5, 0, fromUp.z);
 
         }
     }

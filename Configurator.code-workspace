@@ -5,6 +5,7 @@
         }
     ],
     "settings": {
-        "liveServer.settings.port": 5502
+        "liveServer.settings.port": 5500,
+        "liveServer.settings.donotShowInfoMsg": true
     }
 }
