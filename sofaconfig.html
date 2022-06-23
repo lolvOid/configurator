@@ -75,14 +75,17 @@
     <script src="./threejs/loaders/STLLoader.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="./threejs/THREE.CSG.js"></script>
-    
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+
     <!-- <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script> -->
 </head>
 
 <body>
+    
     <div id="loadingScreen">
+        <lottie-player src="https://assets8.lottiefiles.com/packages/lf20_ibg77r.json"  background="transparent"  speed="1"  style="width: 25%; height: 25%;"  loop  autoplay></lottie-player>
         <p id="loadingText">Loading Models</p>
-        
+      
         <div class="progressContent">
          
             <div id="progressbar"></div>

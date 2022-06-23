@@ -58,7 +58,12 @@
 
 
 
-
+lottie-player{
+  position: absolute;
+  left:36.5%;
+  top:30%;
+  
+}
 #modelviewer, #dimensionViewer{
     width: 70%;
     height: 100%;
