@@ -62,18 +62,37 @@ lottie-player{
   position: absolute;
   left:36.5%;
   top:30%;
+ 
+  
   
 }
-#modelviewer, #dimensionViewer{
+#modelviewer{
     width: 70%;
     height: 100%;
     position: fixed;
     margin: 0;
   
 }
-
-
-#modelviewer canvas, #dimensionViewer canvas{
+ #dimensionViewer{
+  width: 70%;
+  height: 35%;
+  position: fixed;
+  margin: 0;
+  z-index: 1000;
+}
+#dimensionViewer canvas{
+  width: 100%;
+  height: 35%;
+  margin: 0;
+  z-index: 9199;
+  position: fixed;
+} 
+#measurement{
+  position: relative !important;
+  height: 100% !important;
+  width: 100% !important;
+}
+#modelviewer canvas {
   width: 100%;
   height: 100%;
   margin: 0;

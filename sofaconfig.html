@@ -83,7 +83,7 @@
 <body>
     
     <div id="loadingScreen">
-        <lottie-player src="https://assets8.lottiefiles.com/packages/lf20_ibg77r.json"  background="transparent"  speed="1"  style="width: 25%; height: 25%;"  loop  autoplay></lottie-player>
+        <!-- <lottie-player src="https://assets8.lottiefiles.com/packages/lf20_ibg77r.json"  background="transparent"  speed="1"  style="width: 25%; height: 25%;"  loop  autoplay></lottie-player> -->
         <p id="loadingText">Loading Models</p>
       
         <div class="progressContent">
@@ -143,7 +143,9 @@
                  
                         <h6><br> Total Pieces : <span id="sofaCount"></span></h6>
                         <div class="row m-2">
-                            <a id="removeCorner" class="btn btn-outline-dark">Remove Corners</a>
+                            <a id="removeCorner" class="btn btn-outline-dark m-1">Remove Corners</a>
+                            <a id="removeL" class="btn btn-outline-dark m-1">Remove Left Side Sofas</a>
+                            <a id="removeR" class="btn btn-outline-dark m-1">Remove Right Side Sofas</a>
                             
                         </div>
                         
@@ -173,7 +175,14 @@
 
 
     <div id="modelviewer">
-
+        <div class="position-absolute top-0 start-50 translate-middle-x p-3" style="z-index: 11">
+            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+             
+              <div class="toast-body bg-danger text-white">
+                    Can't remove
+              </div>
+            </div>
+          </div>
     </div>
 
     <div id="dimensionViewer">
@@ -191,6 +200,9 @@
     <div class="price">
 
     </div>
+
+    
+    
     <!-- Small modal -->
 
 
