@@ -238,7 +238,7 @@ function init() {
     );
     camera = new THREE.PerspectiveCamera(25, fwidth / fheight, 0.01, 100);
 
-    camera.position.set(0, 5, 10);
+    camera.position.set(0, 5, 25);
     camera.aspect = fwidth / fheight;
 
     orthoCameraTop = new THREE.OrthographicCamera(
@@ -354,7 +354,7 @@ function init() {
     controls.enableDamping = true;
 
     controls.minDistance = 8;
-    controls.maxDistance = 15;
+    controls.maxDistance = 25;
     controls.panSpeed = 0;
 
     controls.enableDamping = true;
@@ -488,6 +488,7 @@ function chooseSofaDesign(type) {
 }
 
 function update() {
+   
     controls.update();
     updateFloor();
 
@@ -512,9 +513,12 @@ function update() {
         currentChaiseCount +
         currentCornerCount;
 
-
-    if (sofaCount > 0) {
        
+    
+  
+        
+    if (sofaCount > 0) {
+        
         if (leftverticalSingleCount == 7) {
             add_btn_group.children[0].visible = false;
         } else {
@@ -609,8 +613,8 @@ function update() {
 
 
     createMeasurementsWidth(leftIndexs[leftIndexs.length - 1], rightIndexs[rightIndexs.length - 1])
-    // createMeasurementsHeightLeft(leftIndexs[leftIndexs.length - 1], rightIndexs[rightIndexs.length - 1])
-    // createMeasurementsHeightRight(leftIndexs[leftIndexs.length - 1], rightIndexs[rightIndexs.length - 1])
+    createMeasurementsHeightLeft(leftIndexs[leftIndexs.length - 1], rightIndexs[rightIndexs.length - 1])
+    createMeasurementsHeightRight(leftIndexs[leftIndexs.length - 1], rightIndexs[rightIndexs.length - 1])
     delta = clock.getDelta();
     dimensionviewer.hidden = false;
     if (isMeasured) {
@@ -684,8 +688,8 @@ function render() {
 }
 
 function create_lights() {
-    directionalLight = new THREE.DirectionalLight(0xfff3db, 1);
-    directionalLight.position.set(0.5, 1.5, 10);
+    directionalLight = new THREE.DirectionalLight(0xfff3db, 0.5);
+    directionalLight.position.set(0.5, 5.5, 0);
     directionalLight.castShadow = true;
 
     directionalLight.shadow.mapSize.width = 512; // default
@@ -702,7 +706,7 @@ function create_lights() {
     directionalLight1.shadow.mapSize.height = 512;
     scene.add(directionalLight1);
 
-    var ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    var ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambientLight);
 
     var directionalLight2 = new THREE.DirectionalLight(0xdedede, 0.3);
@@ -929,7 +933,7 @@ function addSingle(index) {
         try {
             if (index != null) {
 
-                var sofaSize = getChildfromSofa(sofa.single, "Seat", sofaType).size;
+                var sofaSize = getChildfromSofa(sofas[index], "Seat", sofaType).size;
                 var cornerSeatSize = getActualSize(sofa.cornerL, "Seat");
 
 
@@ -1141,9 +1145,33 @@ function manipulateSofa() {
         }
     });
 
+  try{
+    if(leftIndexs.length==1){
+        remove_btn_group.children[0].visible = false;
+    }else{
+        if(isSideArmrestsAddedLeft){
+            remove_btn_group.children[0].visible = false;
+        }else{
+            remove_btn_group.children[0].visible = true;
+        }
+        
+    }
 
+    if(rightIndexs.length==1){
+        remove_btn_group.children[1].visible = false;
+    }else{
+        if(isSideArmrestsAddedRight){
+            
+            remove_btn_group.children[1].visible = false;
+        }else{
+            remove_btn_group.children[1].visible = true;
+        }
+        
+    }
+  }catch(err){
 
-
+  }
+    
 
     for (let i in sofas) {
         if (hSingleCount > 0) {
@@ -1227,9 +1255,11 @@ function manipulateSofa() {
             }
 
         }
+
+
         }
 
-     
+        
     }
 
 
@@ -1240,7 +1270,7 @@ function manipulateSofa() {
 
 
                     SetSofaChildVisiblity(sofas[d[i].id], "Seat", sofaType, false, true, false, false)
-                    // SetSofaChildVisiblity(sofas[d[i].id], "Back", sofaType, false, true, false, false)
+                    SetSofaChildVisiblity(sofas[d[i].id], "Back", sofaType, false, true, false, false,false,false)
                     SetSofaChildVisiblity(sofas[d[i].id], "Bottom", sofaType, false, true, false, false)
                     if (i == 0) {
                        
@@ -1337,7 +1367,7 @@ function manipulateSofa() {
             }else{
                 if(i==0){
 
-                    SetSofaChildVisiblity(sofas[d[i].id], "Back", sofaType, false, false, false, armrests[1].visible||armrests[0].visible,false,false)
+                    SetSofaChildVisiblity(sofas[d[i].id], "Back", sofaType, false, false, true, armrests[1].visible||armrests[0].visible,false,false)
                 }
               
             }
@@ -1347,19 +1377,36 @@ function manipulateSofa() {
         var armSize = getChildfromSofa(armrests[3], "Armrest", sofaType).size;
         if(isSideArmrestsAddedLeft||isSideArmrestsAddedRight){
             sofas[d[i].id].position.setZ(-armSize.x);
+            i_sofas[d[i].id].position.setZ(-armSize.x)
             armrests[2].position.setZ(-armSize.x);
             armrests[3].position.setZ(-armSize.x);
         }else{
+            i_sofas[d[i].id].position.setZ(0)
             sofas[d[i].id].position.setZ(0);
             armrests[3].position.setZ(0);
             armrests[2].position.setZ(0);
         }
         
         var sofaSize = getChildfromSofa(sofas[d[0].id], "Seat", sofaType).size;
-      
+        var bkSize = getChildfromSofa(sofas[d[0].id],"Back",sofaType).size;
+        
         armrests[3].position.setX(sofas[d[d.length - 1].id].position.x+sofaSize.x/2);
 
         armrests[2].position.setX(sofas[d[0].id].position.x-sofaSize.x/2);
+        i_armrests[3].scale.set(armSize.x,armSize.z);
+        i_armrests[2].scale.set(armSize.x,armSize.z);
+        if(sofaType == 2 ||sofaType==3){
+           
+            i_armrests[2].position.setZ(armrests[2].position.z+3 / 12 * ftTom)
+            i_armrests[3].position.setZ(armrests[3].position.z+3 / 12 * ftTom)
+            }else{
+                i_armrests[2].position.setZ(armrests[2].position.z)
+                i_armrests[3].position.setZ(armrests[3].position.z );
+            }
+
+        i_armrests[2].position.setX(armrests[2].position.x-armSize.x/2);
+        i_armrests[3].position.setX(armrests[3].position.x+armSize.x/2);
+    
        
     }
 
@@ -1462,17 +1509,33 @@ function manipulateSofa() {
       
         var sofaSize = getChildfromSofa(sofas[leftV[0].id], "Seat", sofaType).size;
         var armSize = getChildfromSofa(armrests[5],"Armrest",sofaType).size;
-
+        
+        
         if(isSideArmrestsAddedLeft){
-            var pos = sofas[d[0].id].position.x-armSize.x;         
+            var pos = sofas[d[0].id].position.x-armSize.x;       
+              
         }else{      
             var pos = sofas[d[0].id].position.x;
         }
-        sofas[leftV[i].id].position.setX(pos)
+        sofas[leftV[i].id].position.setX(pos);
+        i_sofas[leftV[i].id].position.setX(pos);
         armrests[5].rotation.y = Math.PI / 2;
         armrests[5].position.setZ(sofas[leftV[0].id].position.z - sofaSize.z / 2 );
         armrests[5].position.setX(sofas[leftV[0].id].position.x);
+     
+        i_armrests[5].scale.set(armSize.z,armSize.x);
+        i_armrests[5].rotation.z =  Math.PI / 2;
+        if(sofaType == 2 ||sofaType==3){
+           
+            i_armrests[5].position.setX(armrests[5].position.x+3 / 12 * ftTom)
+     
+            }else{
+                i_armrests[5].position.setX(armrests[5].position.x)
+               
+            }
 
+        i_armrests[5].position.setZ(armrests[5].position.z);
+      
     }
     for (let i in rightV) {
         if (rightV.length > 1) {
@@ -1568,29 +1631,45 @@ function manipulateSofa() {
       
         var sofaSize = getChildfromSofa(sofas[rightV[0].id], "Seat", sofaType).size;
         var armSize = getChildfromSofa(armrests[4],"Armrest",sofaType).size;
-
+        
         if(isSideArmrestsAddedRight){
             var pos = sofas[d[d.length-1].id].position.x+armSize.x;         
         }else{      
             var pos = sofas[d[d.length-1].id].position.x;
         }
         sofas[rightV[i].id].position.setX(pos)
+        i_sofas[rightV[i].id].position.setX(pos);
+
+        i_armrests[4].scale.set(armSize.z,armSize.x);
+        i_armrests[4].rotation.z = -Math.PI/2;
         armrests[4].rotation.y = -Math.PI / 2;
         armrests[4].position.setZ(sofas[rightV[0].id].position.z - sofaSize.z/2);
         armrests[4].position.setX(sofas[rightV[0].id].position.x);
-        
+
+        if(sofaType == 2 ||sofaType==3){
+           
+            i_armrests[4].position.setX(armrests[4].position.x-3 / 12 * ftTom)
+     
+            }else{
+                i_armrests[4].position.setX(armrests[4].position.x)
+               
+            }
+
+        i_armrests[4].position.setZ(armrests[4].position.z);
       
-   
+        
     
     }
 
    if(armrests.length>0){
-    armrests[2].visible = isSideArmrestsAddedLeft || isSideArmrestsAddedRight;
-    armrests[3].visible = isSideArmrestsAddedLeft || isSideArmrestsAddedRight;
-
     
-    armrests[5].visible = isSideArmrestsAddedLeft;
-    armrests[4].visible = isSideArmrestsAddedRight;
+    armrests[2].visible = i_armrests[2].visible = isSideArmrestsAddedLeft || isSideArmrestsAddedRight;
+    armrests[3].visible = i_armrests[3].visible = isSideArmrestsAddedLeft || isSideArmrestsAddedRight;
+    
+   
+    armrests[5].visible =  i_armrests[5].visible = isSideArmrestsAddedLeft;
+   
+    armrests[4].visible  =i_armrests[4].visible = isSideArmrestsAddedRight;
 
     
    }
@@ -1692,9 +1771,13 @@ function updateArmrests(index1, index2) {
                     armrests[0].position.setX(sofas[index1].position.x);
 
                     i_armrests[0].rotation.z = Math.PI / 2;
-
-                    i_armrests[0].position.setX(armrests[0].position.x - 3 / 12 * ftTom);
-                    i_armrests[0].position.setZ(armrests[0].position.z + armrestSizeL.x / 2);
+                    if(sofaType==2 || sofaType==3){
+                        i_armrests[0].position.setX(armrests[0].position.x+ 3 / 12 * ftTom );
+                    }else{
+                        i_armrests[0].position.setX(armrests[0].position.x );
+                    }
+                    
+                    i_armrests[0].position.setZ(armrests[0].position.z + armrestSizeL.x );
                 } else {
                     // armrests[0].visible = true;
                     armrests[0].rotation.y = 0;
@@ -1702,9 +1785,17 @@ function updateArmrests(index1, index2) {
                     armrests[0].position.setX(sofas[index1].position.x - a.x / 2);
                     armrests[0].position.setZ(sofas[index1].position.z);
 
-                    i_armrests[0].rotation.z = 0;
+                    if(sofaType == 2 || sofaType == 3){
+
+                        i_armrests[0].position.setZ(armrests[0].position.z );
+                    }else{
+                        
+                        i_armrests[0].position.setZ(armrests[0].position.z - 3 / 12 * ftTom);
+                    }
                     i_armrests[0].position.setX(armrests[0].position.x - armrestSizeL.x / 2);
-                    i_armrests[0].position.setZ(armrests[0].position.z - 3 / 12 * ftTom);
+                    i_armrests[0].rotation.z = 0;
+                    
+                   
                     // armrests[0].position.setZ(0.3)
                 }
 
@@ -1723,9 +1814,13 @@ function updateArmrests(index1, index2) {
                 );
 
                 i_armrests[1].rotation.z = -Math.PI / 2;
-
-                i_armrests[1].position.setX(armrests[1].position.x + 3 / 12 * ftTom);
-                i_armrests[1].position.setZ(armrests[1].position.z + armrestSizeR.x / 2);
+                if(sofaType==2 || sofaType==3){
+                    i_armrests[1].position.setX(armrests[1].position.x  -3 / 12 * ftTom);
+                }else{
+                    i_armrests[1].position.setX(armrests[1].position.x);
+                }
+               
+                i_armrests[1].position.setZ(armrests[1].position.z + armrestSizeR.x );
             } else {
                 // armrests[1].visible = true;
                 armrests[1].rotation.y = 0;
@@ -1735,8 +1830,13 @@ function updateArmrests(index1, index2) {
 
 
                 i_armrests[1].rotation.z = 0;
+                if(sofaType==2 || sofaType==3){
+                    i_armrests[1].position.setZ(armrests[1].position.z);
+                }else{
+                    i_armrests[1].position.setZ(armrests[1].position.z - 3 / 12 * ftTom);
+                }
                 i_armrests[1].position.setX(armrests[1].position.x + armrestSizeR.x / 2);
-                i_armrests[1].position.setZ(armrests[1].position.z - 3 / 12 * ftTom);
+                
             }
 
             // sofas[index1].position.setY(armrests[0].position.y);
@@ -2181,7 +2281,9 @@ function createRemoveButton(name, pos) {
     btn.position.setX(pos);
     btn.position.setZ(-0.25);
     btn.name = name;
+    btn.visible= false;
     scene.add(remove_btn_group);
+    
 }
 
 function updateButtons(index1, index2) {
@@ -3367,7 +3469,7 @@ function createMeasurementsWidth(index1, index2) {
                 wValue = document.createElement('div');
                 wValue.style.textAlign = "center";
 
-                wValue.style.fontSize = "15px";
+                wValue.style.fontSize = "12px";
 
 
                 widthLabel = new THREE.CSS2DObject(wValue);
@@ -3513,7 +3615,7 @@ function createMeasurementsHeightLeft(index1, index2) {
             LValue = document.createElement('div');
 
 
-            LValue.style.fontSize = "15px";
+            LValue.style.fontSize = "12px";
 
 
             hLeftLabel = new THREE.CSS2DObject(LValue);
@@ -3534,7 +3636,7 @@ function createMeasurementsHeightLeft(index1, index2) {
 
 
             LValue.innerHTML = distanceValue + " ft(" + distanceValue * 12 + " in)";
-            hLeftLabel.position.set(fromUp.x - 0.5, 0, fromUp.z);
+            hLeftLabel.position.set(fromUp.x - 0.8, 0, fromUp.z);
 
         }
     }
@@ -3651,7 +3753,7 @@ function createMeasurementsHeightRight(index1, index2) {
             vValue = document.createElement('div');
 
 
-            vValue.style.fontSize = "15px";
+            vValue.style.fontSize = "12px";
 
 
             hRightLabel = new THREE.CSS2DObject(vValue);
@@ -3672,7 +3774,7 @@ function createMeasurementsHeightRight(index1, index2) {
 
 
             vValue.innerHTML = distanceValue + " ft(" + distanceValue * 12 + " in)";
-            hRightLabel.position.set(fromUp.x + 0.5, 0, fromUp.z);
+            hRightLabel.position.set(fromUp.x + 0.8, 0, fromUp.z);
 
         }
     }
