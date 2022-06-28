@@ -57,7 +57,9 @@
 }
 
 
-
+#back{
+  z-index:1000 ;
+}
 lottie-player{
   position: absolute;
   left:36.5%;
@@ -66,25 +68,27 @@ lottie-player{
   
   
 }
-#modelviewer{
+#modelviewer,#dimensionViewer{
     width: 70%;
     height: 100%;
     position: fixed;
     margin: 0;
   
 }
- #dimensionViewer{
+ #dimensionViewer2{
   width: 70%;
   height: 35%;
   position: fixed;
   margin: 0;
+  left:25%;
   z-index: 1000;
 }
-#dimensionViewer canvas{
+#dimensionViewer2 canvas{
   width: 100%;
   height: 35%;
   margin: 0;
-  z-index: 9199;
+  
+  z-index: 999;
   position: fixed;
 } 
 #measurement{
@@ -92,7 +96,7 @@ lottie-player{
   height: 100% !important;
   width: 100% !important;
 }
-#modelviewer canvas {
+#modelviewer canvas,#dimensionViewer canvas {
   width: 100%;
   height: 100%;
   margin: 0;
