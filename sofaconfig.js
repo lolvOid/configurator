@@ -12,7 +12,7 @@ let scene,
 let css2DRenderer, css3DRenderer, css2DRenderer2;
 
 const viewer = document.getElementById("modelviewer");
-const dimensionviewer = document.getElementById("dimensionViewer");
+const dimensionviewer = document.getElementById("dimensionViewer2");
 
 const fwidth = viewer.offsetWidth ;
 const fheight = viewer.offsetHeight;
@@ -420,7 +420,7 @@ function chooseSofaDesign(type) {
 
 
             if (e instanceof THREE.Object3D) {
-
+                
                 for (let i in e.children) {
                     if (e.name.match(sofa.single.name)) {
                         e.children[i].visible = i == type ? true : false;
@@ -2199,7 +2199,7 @@ function loadSofa() {
     });
 }
 
-function setLeg(index) {}
+
 
 function setSofa(objA) {
     // objA.scale.set(0.01, 0.01, 0.01);
