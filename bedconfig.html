@@ -176,9 +176,16 @@
 
 
 
-                    <div class="row m-2">
+                    <div class="row m-3 p-1">
 
-
+                        <select name="selectBoard" class="form-select" id="selectBoard">
+                            <option value="" selected> Choose Designs</option>
+                            <option value="0">1</option>
+                            <option value="1">2</option>
+                            <option value="2">3</option>
+                            <option value="3">4</option>
+                            <option value="4">5</option>
+                        </select>
 
 
                         <a class="btn btn-outline-dark m-1" id="addDrawers">Add Drawers</a>
@@ -195,31 +202,7 @@
 
 
                 </div>
-                <!-- <div class="form-control m-1">
-
-                    <h6 class="p-2">Render Options:</h6>
-                    <div class="form-check-inline" id="loftOptionsPanel">
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input btn-check" type="radio" name="renderOptions"
-                                id="renderOption1" value="0" checked>
-                            <label class="form-check-label btn btn-outline-secondary" for="renderOption1">Shaded</label>
-                        </div>
-
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input btn-check" type="radio" name="renderOptions"
-                                id="renderOption2" value="1">
-                            <label class="form-check-label btn btn-outline-secondary" for="renderOption2">Debug</label>
-                        </div>
-                        <!-- <div class="form-check form-check-inline">
-                            <input class="form-check-input btn-check" type="radio" name="renderOptions"
-                                id="renderOption3" value="2">
-                            <label class="form-check-label btn btn-outline-secondary"
-                                for="renderOption3">Wireframe</label>
-                        </div> -->
-                    <!-- </div>
-
-
-                </div> --> 
+            
                 <div class="row m-1">
                     <!-- <a class="btn btn-outline-success m-1" onclick="reset()"> Reset</a> -->
                     <a class="btn btn-outline-dark m-1" id="export"> Export</a>

@@ -87,6 +87,9 @@ var drawerLeft, isDrawerHandleCreated = false;
 var bedTopsEdges = [],bedLegsEdges=[], bedDrawersEdges = [];
 var whArrowL,whArrowR, wvArrowUp, wvArrowDown , wvvArrowUp, wvvArrowDown , wdArrowUp, wdArrowDown ,wdArrowUp2, wdArrowDown2 ,wdArrowUp3, wdArrowDown3  ;
 var widthLabel,heightLabel,depthLabel, depthLabel2 , drawerLabel, drawerLabel2,drawerLabel3;
+
+var boardType = 0;
+var boards ;
 init();
 
 animate();
@@ -148,7 +151,10 @@ function getInputs() {
         }
 
     })
+    $("#selectBoard").change(function () {
+        boardType = $(this).children("option:selected").val();
 
+    });
     // $("#addMatress").click(function(){
 
     //     if(!bedMatress.visible && !pillowL.visible){
@@ -353,9 +359,9 @@ function init() {
      createBedLegs();
     bedFloor = createBox("bedFloor");
     createMatress();
-    createPillow();
+    
     createWall();
-    createBedSideTable();
+    // createBedSideTable();
     getInputs();
     
 }
@@ -395,8 +401,7 @@ function animate() {
     render();
 
 }
-
-function render() {
+function update(){
 
     updateBedTop();
     createHorizontalArrow();
@@ -406,7 +411,7 @@ function render() {
     updateBedLegs();
     updateBedFloor();
     updateDrawers();
-    updateBedSideTable();
+    // updateBedSideTable();
     if (bedMatress) {
         updateMatress();
     }
@@ -414,6 +419,7 @@ function render() {
     if (pillowL) {
         updatePillow();
     }
+    updateBoards();
     updateWall();
     delta = clock.getDelta();
 
@@ -432,6 +438,9 @@ function render() {
         $("input:radio[name='renderOptions']").prop("disabled", false);
 
     }
+}
+function render() {
+    update();
     
     dimensionRenderer.setViewport(left,Math.floor(fheight/2),fwidth,Math.floor(fheight/2));
     dimensionRenderer.setScissor(left, Math.floor(fheight/2), fwidth,Math.floor(fheight/2));
@@ -569,10 +578,19 @@ function createWall() {
 
 function updateWall() {
     if (bedTops.length > 0 && wall) {
+        try{
 
-        wallLeft.position.setX(8);
-        wallRight.position.setX(-8)
-        wall.position.setZ(bedTops[0].position.z - bedTops[0].scale.z / 2)
+            if(boards!=null){
+                var headboardSize = getChildfromObject(boards,"headboard",boardType).size;
+            }
+            wallLeft.position.setX(8);
+            wallRight.position.setX(-8)
+    
+            wall.position.setZ(bedTops[0].position.z - headboardSize.z+bedTops[0].scale.z/2)
+        }catch(err){
+
+        }
+
 
     }
 }
@@ -885,6 +903,364 @@ function updateBedFloor() {
 
 }
 
+function loadAsync(url) {
+
+    return new Promise((resolve) => {
+        new THREE.GLTFLoader(manager).load(url, resolve);
+    });
+
+}
+function loadBoards(){
+    let model;
+    model = loadAsync("models/bed/headboard_footboard.gltf").then((result) => {
+        boards = result.scene.children[0];
+    });
+    Promise.all([
+     model
+    ]).then(() => {
+       setModel(boards)
+      
+    })
+}
+function setModel(objA) {
+    // objA.scale.set(0.01, 0.01, 0.01);
+
+    objA.traverse(function (e) {
+        if (e instanceof THREE.Mesh) {
+            e.geometry.normalizeNormals();
+            e.castShadow = true;
+            e.receiveShadow = true;
+
+            // e.material.wireframe = true;
+
+            // if (e.name.includes("Leg")) {
+            //     var legSize = new THREE.Box3().setFromObject(e).getSize(new THREE.Vector3());
+
+            //     objA.position.set(0, objA.scale.y / 2 + legSize.y / 100, 0)
+            //     e.material.color.set("#59371E")
+            // } else {
+            //     e.material.color.set("#f0f0f0");
+            // }
+            // e.material.side = THREE.DoubleSide;
+            // e.material.metalness = 0;
+            // e.material.map = null;
+            // e.material.roughness = 1;
+
+            e.material.normalMap = null;
+        }
+    });
+    scene.add(objA)
+}
+
+function getChildfromObject(obj, name, type){
+    var object, size;
+    if (obj instanceof THREE.Object3D) {
+        for (let i in obj.children) {
+            if (type != null) {
+                if (i == type) {
+                    var parent = obj.children[i];
+                    for (let j in parent.children) {
+                        var child = parent.children[j];
+                        if (name != null) {
+                            if (child.name.includes(name)) {
+                                object = child;
+                                size = new THREE.Box3().setFromObject(child).getSize(new THREE.Vector3());
+                            }
+                        }
+
+                    }
+                }
+            } else {
+
+                if (i == sofaType) {
+                    var parent = obj.children[i];
+                    for (let j in parent.children) {
+                        var child = parent.children[j];
+                        if (name != null) {
+                            if (child.name.includes(name)) {
+                                object = child;
+                                size = new THREE.Box3().setFromObject(child).getSize(new THREE.Vector3());
+                            }
+                        }
+
+                    }
+                }
+            }
+
+        }
+        return {
+            object,
+            size
+        };
+    }
+}
+function chooseBoardDesign(type){
+   for(let i in boards.children){
+        
+    boards.children[i].visible = i==type?true:false;
+   }
+}
+function updateBoards(){
+    
+    if(boards!=null){
+        chooseBoardDesign(boardType);
+       
+        var headboard = getChildfromObject(boards,"headboard",boardType).object;
+        var footboard = getChildfromObject(boards,"footboard",boardType).object;
+        var tableLeft = getChildfromObject(boards,"tableleft",boardType).object;
+        var tableRight = getChildfromObject(boards,"tableright",boardType).object;
+        if(bedTops.length>0){
+            bedTops[0].visible = false;
+            bedTops[1].visible = false;
+            headboard.position.setZ(bedTops[0].position.z+bedTops[0].scale.z/2)
+            headboard.position.setY(bedTops[0].position.y-bedTops[0].scale.y/2)
+            footboard.position.setZ(bedTops[1].position.z-bedTops[1].scale.z/2)
+            footboard.position.setY(bedTops[1].position.y-bedTops[1].scale.y/2)
+            var bedTopSize = new THREE.Box3().setFromObject(bedTops[0]).getSize(new THREE.Vector3());
+            var tableSize = new THREE.Box3().setFromObject(tableLeft).getSize(new THREE.Vector3());
+            tableLeft.position.setX(bedTops[0].position.x-bedTopSize.x/2-tableSize.x)
+            tableLeft.position.setZ(bedTops[0].position.z-bedTops[0].scale.z)
+            tableRight.position.setX(bedTops[0].position.x+bedTopSize.x/2+tableSize.x)
+            tableRight.position.setZ(bedTops[0].position.z-bedTops[0].scale.z)
+        }
+        
+        
+       
+        headboard.traverse(e=>{
+            
+            if(e.name.includes("low")){
+                if(wHeight==1.25){
+                    
+                    e.visible= true;
+                }else{
+                    e.visible = false
+                 
+                }
+                if(e instanceof THREE.Object3D){
+                    e.traverse(i => {
+                        
+                        if(i instanceof THREE.Object3D){
+                            if(i.name.startsWith("board_a")){
+                            
+                                if(wWidth==3){
+                                    
+                                    i.visible = true;
+                                }else{
+                                    i.visible = false
+                                }
+                            }
+                            if(i.name.includes("board_b")){
+                                if(wWidth == 4){
+                                    i.visible = true;
+                                }else{
+                                    i.visible = false
+                                }
+                            }
+                            if(i.name.includes("board_c")){
+                                if(wWidth == 5){
+                                    i.visible = true;
+                                }else{
+                                    i.visible = false
+                                }
+                            }
+                            if(i.name.includes("board_d")){
+                                if(wWidth == 6){
+                                    i.visible = true;
+                                }else{
+                                    i.visible = false
+                                }
+                            }
+                        }
+                      
+                    });
+                }
+              
+            }
+        
+            
+           else if(e.name.includes("normal")){
+                if(wHeight == 1.75){
+                    e.visible= true
+                }else{
+                    e.visible = false
+                 
+                }
+                e.traverse(i => {
+                    if(i instanceof THREE.Object3D){
+                        if(i.name.startsWith("board_a")){
+                        
+                            if(wWidth==3){
+                                
+                                i.visible = true;
+                            }else{
+                                i.visible = false
+                            }
+                        }
+                        if(i.name.includes("board_b")){
+                            if(wWidth == 4){
+                                i.visible = true;
+                            }else{
+                                i.visible = false
+                            }
+                        }
+                        if(i.name.includes("board_c")){
+                            if(wWidth == 5){
+                                i.visible = true;
+                            }else{
+                                i.visible = false
+                            }
+                        }
+                        if(i.name.includes("board_d")){
+                            if(wWidth == 6){
+                                i.visible = true;
+                            }else{
+                                i.visible = false
+                            }
+                        }
+                    }
+                });
+            }
+        })
+
+        footboard.traverse(e=>{
+            
+            if(e.name.includes("low")){
+                if(wHeight==1.25){
+                    
+                    e.visible= true;
+                }else{
+                    e.visible = false
+                 
+                }
+                if(e instanceof THREE.Object3D){
+                    e.traverse(i => {
+                        
+                        if(i instanceof THREE.Object3D){
+                            if(i.name.startsWith("board_a")){
+                            
+                                if(wWidth==3){
+                                    
+                                    i.visible = true;
+                                }else{
+                                    i.visible = false
+                                }
+                            }
+                            if(i.name.includes("board_b")){
+                                if(wWidth == 4){
+                                    i.visible = true;
+                                }else{
+                                    i.visible = false
+                                }
+                            }
+                            if(i.name.includes("board_c")){
+                                if(wWidth == 5){
+                                    i.visible = true;
+                                }else{
+                                    i.visible = false
+                                }
+                            }
+                            if(i.name.includes("board_d")){
+                                if(wWidth == 6){
+                                    i.visible = true;
+                                }else{
+                                    i.visible = false
+                                }
+                            }
+                        }
+                      
+                    });
+                }
+              
+            }
+        
+            
+           else if(e.name.includes("normal")){
+                if(wHeight == 1.75){
+                    e.visible= true
+                }else{
+                    e.visible = false
+                 
+                }
+                e.traverse(i => {
+                    if(i instanceof THREE.Object3D){
+                        if(i.name.startsWith("board_a")){
+                        
+                            if(wWidth==3){
+                                
+                                i.visible = true;
+                            }else{
+                                i.visible = false
+                            }
+                        }
+                        if(i.name.includes("board_b")){
+                            if(wWidth == 4){
+                                i.visible = true;
+                            }else{
+                                i.visible = false
+                            }
+                        }
+                        if(i.name.includes("board_c")){
+                            if(wWidth == 5){
+                                i.visible = true;
+                            }else{
+                                i.visible = false
+                            }
+                        }
+                        if(i.name.includes("board_d")){
+                            if(wWidth == 6){
+                                i.visible = true;
+                            }else{
+                                i.visible = false
+                            }
+                        }
+                    }
+                });
+            }
+        })
+        tableLeft.traverse(e=>{
+            if(e.name.includes("low")){
+                if(wHeight==1.25){
+                    
+                    e.visible= true;
+                }else{
+                    e.visible = false
+                 
+                }
+            }
+            else if(e.name.includes("normal")){
+                if(wHeight==1.75){
+                    
+                    e.visible= true;
+                }else{
+                    e.visible = false
+                 
+                }
+            }
+        })
+
+        tableRight.traverse(e=>{
+            if(e.name.includes("low")){
+                if(wHeight==1.25){
+                    
+                    e.visible= true;
+                }else{
+                    e.visible = false
+                 
+                }
+            }
+            else if(e.name.includes("normal")){
+                if(wHeight==1.75){
+                    
+                    e.visible= true;
+                }else{
+                    e.visible = false
+                 
+                }
+            }
+        })
+        
+    }
+}
 function createMatress() {
     importMatress();
 
@@ -893,20 +1269,23 @@ function createMatress() {
 function setMatress(matress) {
     matress.scale.set(wWidth * ftTom, 4 * ftTom / 12, wDepth * ftTom);
     matress.position.setY(bedFloor.position.y + bedFloor.scale.y / 2)
-
+    
     var mat = matress.children[0].children[0];
 
 
-    var texAO = texLoader.load('./models/matress/ao.png');
+    // var texAO = texLoader.load('./models/matress/ao.png');
 
 
     mat.castShadow = true;
     mat.receiveShadow = true;
-    mat.material.color.set("#ffffff");
+    // mat.material.color.set("#ffffff");
+    mat.material.map = null;
+    mat.material.normalMap = null;
+    mat.material = new THREE.MeshStandardMaterial({color:0xcdcdcd,metalness:0, flatShading:"false"});
     // mat.material = new THREE.MeshStandardMaterial({color:0xf0f0f0,metalness:0, map:matAlbedo, normalMap:matNormal, aoMap:matAO, flatShading:"false", bum});
-    mat.material.metalness = 0;
+    // mat.material.metalness = 0;
 
-    // mat.material.bumpMap = matNormal;
+    mat.material.bumpMap = null;
 
     this.bedMatress = matress;
     bedMatress.visible = true;
@@ -917,17 +1296,10 @@ function updateMatress() {
 
     bedMatress.scale.set(wWidth * ftTom, 4 * ftTom / 12, wDepth * ftTom);
     bedMatress.position.setY(bedFloor.position.y + bedFloor.scale.y / 2)
+    
 }
 
 function importMatress() {
-
-    gltfLoader.load(
-        './models/matress/matress.gltf',
-        function (gltf) {
-            scene.add(gltf.scene)
-            setMatress(gltf.scene);
-        }
-    )
     manager.onStart = function (url, itemsLoaded, itemsTotal) {
 
         $("#loadingText").html("Please Wait...");
@@ -945,6 +1317,17 @@ function importMatress() {
         controls.enabled = true;
     };
 
+    loadBoards()
+
+    gltfLoader.load(
+        './models/matress/matress.gltf',
+        function (gltf) {
+            scene.add(gltf.scene)
+            setMatress(gltf.scene);
+        }
+    )
+    createPillow();
+    
 }
 
 function createPillow() {
@@ -976,8 +1359,8 @@ function setPillow(pillow) {
 function updatePillow() {
     if (bedMatress.visible) {
      
-        
-        pillowL.scale.set(1.8, 1.8, 1.8)
+        var scaleFactor = 1.95;
+        pillowL.scale.set(scaleFactor, scaleFactor, scaleFactor)
         pillowR.scale.copy(pillowL.scale)
 
         if (wWidth > 3) {
@@ -993,11 +1376,11 @@ function updatePillow() {
             pillowR.position.setX(0);
             pillowL.position.setX(0);
         }
-
-        pillowL.position.setZ(bedMatress.position.z - bedMatress.scale.z / 2 + 0.25)
+        pillowL.rotation.x = 25 * THREE.MathUtils.DEG2RAD;
+        pillowL.position.setZ(bedMatress.position.z - bedMatress.scale.z / 2 + 0.18)
         pillowL.position.setY(bedMatress.position.y + bedMatress.scale.y + pillowL.scale.y * ftTom / 12);
-
-        pillowR.position.setZ(bedMatress.position.z - bedMatress.scale.z / 2 + 0.25)
+        pillowR.rotation.x = 25 * THREE.MathUtils.DEG2RAD;
+        pillowR.position.setZ(bedMatress.position.z - bedMatress.scale.z / 2 + 0.18)
         pillowR.position.setY(bedMatress.position.y + bedMatress.scale.y + pillowL.scale.y * ftTom / 12);
     }
 
