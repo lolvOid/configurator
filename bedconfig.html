@@ -17,6 +17,8 @@
 
 
     <!-- <script src="./threejs/build/three.js"></script> -->
+
+
     <script src="https://unpkg.com/three@0.124.0/build/three.min.js"></script>
     <script src="https://unpkg.com/three@0.124.0/examples/js/exporters/GLTFExporter.js"></script>
     <script src="https://unpkg.com/three@0.124.0/examples/js/controls/OrbitControls.js"></script>
@@ -176,33 +178,63 @@
 
 
 
-                    <div class="row m-3 p-1">
+                  
+                        <div class="form-control-sm m-1">
+                            <label for="selectBoard" class="form-label">Choose Designs</label>
+                            <select name="selectBoard" class="form-select" id="selectBoard">
+                             
+                                <option value="0" selected>1</option>
+                                <option value="1">2</option>
+                                <option value="2">3</option>
+                                <option value="3">4</option>
+                                <option value="4">5</option>
+                            </select>
+                        </div>
+                        <div class="form-control-sm m-1">
+                            <label for="selectTexture" class="form-label">Choose Material</label>
+                            <select name="selectTexture" class="form-select" id="selectTexture">
+                             
+                                
+                            </select>
+                        </div>
+                        <div class="row m-1">
+                            <a class="btn btn-outline-dark m-1" id="addDrawers">Add Drawers</a>
+                            <a class="btn btn-outline-dark m-1" id="addSideTableLeft">Add Table Left</a>
+                            <a class="btn btn-outline-dark m-1" id="addSideTableRight">Add Table Right</a>
+                        </div>
 
-                        <select name="selectBoard" class="form-select" id="selectBoard">
-                            <option value="" selected> Choose Designs</option>
-                            <option value="0">1</option>
-                            <option value="1">2</option>
-                            <option value="2">3</option>
-                            <option value="3">4</option>
-                            <option value="4">5</option>
-                        </select>
-
-
-                        <a class="btn btn-outline-dark m-1" id="addDrawers">Add Drawers</a>
+                        
                         
                         <!-- <a class="btn btn-outline-dark m-1" id="addMatress">Add Matress & Pillow</a> -->
-                        <a class="btn btn-outline-dark m-1" id="addSideTableLeft">Add Table Left</a>
-                        <a class="btn btn-outline-dark m-1" id="addSideTableRight">Add Table Right</a>
+                      
                         <!-- <a class="btn btn-outline-dark m-1" id="addIDL">Add I.Drawer L $40</a>
                         <a class="btn btn-outline-dark m-1" id="addED">Add E.Drawer $35</a>
                         <a class="btn btn-outline-dark m-1" id="addBottomShelf">Add Bottom Shelf</a> -->
 
 
-                    </div>
+                
 
 
                 </div>
-            
+                <div id="scenesettings" class="form-control m-1">
+                    <!-- <a class="btn btn-outline-dark" id="backToDoors"><i class="fa fa-chevron-left"></i></a> -->
+                    <h6 class="m-2">Scene Settings: </h6>
+
+                    <div class="form-control m-1">
+                        <label for="floorColor" class="form-label">Floor Color</label>
+                        <input type="color" name="floorColor" id="floorColor">
+
+                        <label for="wallColor" class="form-label">Wall Color</label>
+                        <input type="color" name="wallColor" id="wallColor" >
+                    </div>  
+
+
+                    <div class="form-control m-1">
+                     
+                    </div>
+               
+
+                </div>
                 <div class="row m-1">
                     <!-- <a class="btn btn-outline-success m-1" onclick="reset()"> Reset</a> -->
                     <a class="btn btn-outline-dark m-1" id="export"> Export</a>
@@ -261,7 +293,8 @@
             bed dimensions &copy; configurator.freddielin.work
         </p>
     </div>
-
+    
+    
 
     <a class="btn btn-outline-dark dimension" onclick="swaprender()"> <i class="fa fa-2x fa-ruler-combined"></i></a>
     <a class="btn btn-outline-dark downloadDimension" onclick="downloadImage()"> <i

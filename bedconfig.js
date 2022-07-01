@@ -88,8 +88,39 @@ var bedTopsEdges = [],bedLegsEdges=[], bedDrawersEdges = [];
 var whArrowL,whArrowR, wvArrowUp, wvArrowDown , wvvArrowUp, wvvArrowDown , wdArrowUp, wdArrowDown ,wdArrowUp2, wdArrowDown2 ,wdArrowUp3, wdArrowDown3  ;
 var widthLabel,heightLabel,depthLabel, depthLabel2 , drawerLabel, drawerLabel2,drawerLabel3;
 
-var boardType = 0;
+var boardType = 0, textureType  = 0;;
 var boards ;
+var istableLeft = false, istableRight = false;
+var textures= {
+    wood_A: {
+        albedo:texLoader.load("models/bed/Wood_A.jpg"),
+        normal:null,
+        bump:null,
+        ao:null,
+        roughness:null
+    },
+    wood_B: {
+        albedo:texLoader.load("models/bed/Wood_B.jpg"),
+        normal:null,
+        bump:null,
+        ao:null,
+        roughness:null
+    },
+    tufted: {
+        albedo:null,
+        normal:texLoader.load("models/bed/tufted_normal.jpg"),
+        bump:texLoader.load("models/bed/tufted_height.jpg"),
+        ao:texLoader.load("models/bed/tufted_ao.jpg"),
+        roughness:texLoader.load("models/bed/tufted_roughness.jpg")
+    },
+    cotton: {
+        albedo:null,
+        normal:null,
+        bump:texLoader.load("models/bed/cotton.jpg")
+    },
+} 
+
+
 init();
 
 animate();
@@ -153,8 +184,16 @@ function getInputs() {
     })
     $("#selectBoard").change(function () {
         boardType = $(this).children("option:selected").val();
+     
+        $("#selectTexture").val(0);
+        
+    });
+    $("#selectTexture").click(function () {
+       
+        textureType = $(this).children("option:selected").val();
 
     });
+    
     // $("#addMatress").click(function(){
 
     //     if(!bedMatress.visible && !pillowL.visible){
@@ -180,34 +219,54 @@ function getInputs() {
 
     $("#addSideTableLeft").click(function () {
 
+        istableLeft = !istableLeft;
 
-
-        if (!bedTableLeft.visible) {
+        if(istableLeft){
             $(this).html("Remove Table Left");
-            $(this).addClass("btn-outline-danger");
-            $(this).removeClass("btn-outline-dark");
-            bedTableLeft.visible = true;
-        } else {
-            $(this).html("Add Table Left");
+                $(this).addClass("btn-outline-danger");
+                $(this).removeClass("btn-outline-dark");
+        }else{
+                  $(this).html("Add Table Left");
             $(this).addClass("btn-outline-dark");
             $(this).removeClass("btn-outline-danger");
-            bedTableLeft.visible = false;
         }
+        // if (!bedTableLeft.visible) {
+        //     $(this).html("Remove Table Left");
+        //     $(this).addClass("btn-outline-danger");
+        //     $(this).removeClass("btn-outline-dark");
+        //     bedTableLeft.visible = true;
+        // } else {
+        //     $(this).html("Add Table Left");
+        //     $(this).addClass("btn-outline-dark");
+        //     $(this).removeClass("btn-outline-danger");
+        //     bedTableLeft.visible = false;
+        // }
 
     })
 
     $("#addSideTableRight").click(function () {
-        if (!bedTableRight.visible) {
-            $(this).html("Remove Table Right");
-            $(this).addClass("btn-outline-danger");
-            $(this).removeClass("btn-outline-dark");
-            bedTableRight.visible = true;
-        } else {
-            $(this).html("Add Table Right");
+        istableRight = !istableRight;
+        
+        if(istableRight){
+            $(this).html("Remove Table Left");
+                $(this).addClass("btn-outline-danger");
+                $(this).removeClass("btn-outline-dark");
+        }else{
+                  $(this).html("Add Table Left");
             $(this).addClass("btn-outline-dark");
             $(this).removeClass("btn-outline-danger");
-            bedTableRight.visible = false;
         }
+        // if (!bedTableRight.visible) {
+        //     $(this).html("Remove Table Right");
+        //     $(this).addClass("btn-outline-danger");
+        //     $(this).removeClass("btn-outline-dark");
+        //     bedTableRight.visible = true;
+        // } else {
+        //     $(this).html("Add Table Right");
+        //     $(this).addClass("btn-outline-dark");
+        //     $(this).removeClass("btn-outline-danger");
+        //     bedTableRight.visible = false;
+        // }
 
     })
 
@@ -270,8 +329,19 @@ function init() {
 
     helpers();
 
+    createBedTop();
+
+    createDrawers();
+    createBedLegs();
+    bedFloor = createBox("bedFloor");
+    createMatress();
+    
+    createWall();
+    // createBedSideTable();
+    getInputs();
     exporter = new THREE.GLTFExporter();
     clock = new THREE.Clock();
+   
 
     renderer = new THREE.WebGLRenderer({
         antialias: true,
@@ -283,15 +353,19 @@ function init() {
     renderer.info.autoReset = false;
     renderer.setClearColor(0xFFFFFF, 1);
 
-    // renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    // renderer.toneMappingExposure = 1;
+    // renderer.toneMapping = THREE.LinearToneMapping;
+    
+    
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure =2.2;
     renderer.outputEncoding = THREE.sRGBEncoding;
-    renderer.toneMapping = THREE.LinearToneMapping;
-    renderer.toneMappingExposure = 0.7;
     renderer.shadowMap.enabled = true;
+    renderer.physicallyCorrectLights=false;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    renderer.compile(scene, camera);
 
+
+    renderer.compile(scene, camera);
+    
     pmremGenerator = new THREE.PMREMGenerator(renderer);
     pmremGenerator.compileEquirectangularShader();
 
@@ -346,23 +420,14 @@ function init() {
     controls.maxPolarAngle = Math.PI / 2;
     controls.minAzimuthAngle = -Math.PI / 2;
     controls.maxAzimuthAngle = Math.PI / 2;
+    controls.saveState();
     window.addEventListener('resize', onWindowResize, true);
     // document.addEventListener('pointermove', onPointerMove);
     // document.addEventListener('click', onClick);
 
-    controls.saveState();
+   
 
 
-    createBedTop();
-
-    createDrawers();
-     createBedLegs();
-    bedFloor = createBox("bedFloor");
-    createMatress();
-    
-    createWall();
-    // createBedSideTable();
-    getInputs();
     
 }
 
@@ -420,6 +485,8 @@ function update(){
         updatePillow();
     }
     updateBoards();
+    
+    setMaterial();
     updateWall();
     delta = clock.getDelta();
 
@@ -487,46 +554,52 @@ function render() {
 
 }
 
+function setLighting(){
 
+    new THREE.RGBELoader()
+        .setDataType( THREE.UnsignedByteType )
+        .setPath( './hdri/' )
+        .load( 'hotel_room_4k.hdr', function ( texture ) {
+
+        var envMap = pmremGenerator.fromEquirectangular( texture ).texture;
+
+        // scene.background = envMap;
+        // scene.environment = envMap;
+            
+        texture.dispose();
+        pmremGenerator.dispose();
+    })
+ 
+
+}
 function create_lights() {
+    setLighting();
+    scene.add( new THREE.AmbientLight( 0x6d6d6d,0.5) );
+
+    const light = new THREE.DirectionalLight( 0xababab, 1.35);
+    light.position.set( 2, 8, 4 );
+
+    light.castShadow = true;
+    light.shadow.mapSize.width = 2048;
+    light.shadow.mapSize.height = 2048;
+    light.shadow.camera.far = 20;
+	
+    scene.add( light );
+
+    var bulbLight = new THREE.PointLight( 0xfdfdfd, 1, 100, 1 );
+    bulbLight.position.set( 0, 2, 2 );
+    bulbLight.castShadow = true;
+   
+    bulbLight.shadow.mapSize.width = 2048;
+    bulbLight.shadow.mapSize.height = 2048;
+    bulbLight.shadow.camera.far = 10;
+    // scene.add( bulbLight );
 
 
-    directionalLight = new THREE.DirectionalLight(0xfff3db, 0.5);
-    directionalLight.position.set(0.5, 1.5, 10);
-    directionalLight.castShadow = true;
 
-    directionalLight.shadow.mapSize.width = 512; // default
-    directionalLight.shadow.mapSize.height = 512; // default
-
-    scene.add(directionalLight);
-
-
-
-
-    var directionalLight1 = new THREE.DirectionalLight(0xbfe4ff, 0.3);
-    directionalLight1.position.set(0, 5, 0);
-
-    directionalLight1.castShadow = true;
-
-    directionalLight1.shadow.mapSize.width = 512; // default
-    directionalLight1.shadow.mapSize.height = 512;
-    scene.add(directionalLight1);
-
-    var ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-    scene.add(ambientLight);
-
-
-    var directionalLight2 = new THREE.DirectionalLight(0xdedede, 0.3);
-    directionalLight2.position.set(0, 3, -3);
-    directionalLight2.castShadow = false;
-
-    directionalLight2.shadow.mapSize.width = 512; // default
-    directionalLight2.shadow.mapSize.height = 512;
-    scene.add(directionalLight2);
-
-    var hemiLight = new THREE.HemisphereLight(0xfff2e3, 0xd1ebff, 0.3);
-    scene.add(hemiLight);
-
+    hemiLight = new THREE.HemisphereLight( 0xddeeff, 0x0f0e0d, 0.2 );
+    scene.add( hemiLight );
+  
 }
 
 function createFloor() {
@@ -922,15 +995,225 @@ function loadBoards(){
       
     })
 }
-function setModel(objA) {
-    // objA.scale.set(0.01, 0.01, 0.01);
 
+function setTextureInteraction(row){
+    
+    var select = document.getElementById("selectTexture");
+    while (select.firstChild) {
+        select.removeChild(select.firstChild);
+    }
+
+    for(var i=0;i<row;i++){
+        var option = document.createElement("option");
+        option.value = i;
+        if(i==0) option.text = "Wood A";
+        if(i==1) option.text = "Wood B";
+        if(i==2) option.text = "Tufted";
+        select.appendChild(option);
+    }
+    
+    
+}
+function setTexture(texture = new THREE.Texture(),repeatX=1,repeatY=1){
+    texture.wrapS =THREE.RepeatWrapping;
+    texture.wrapT =THREE.RepeatWrapping;
+    texture.repeat.x=repeatX;
+    texture.repeat.y=repeatY;
+}
+function textureOptions(){
+    if(boardType!=2){
+        
+    }
+}
+function setMaterial(){
+    textureOptions();
+  
+    if(boards !=null){
+        boards.traverse(e=>{
+            
+            if(e instanceof THREE.Mesh){
+                
+                if(e.material.name.includes("table_wood")){
+                       
+                   
+                        if(textureType == 0){
+                        
+                            e.material.map = textures.wood_A.albedo;
+                            e.material.normalMap = null;
+                            e.material.color.set(0x8f6b57);
+                        }
+                         if(textureType == 1){
+                            e.material.map = textures.wood_B.albedo;
+                            e.material.normalMap = null;
+                            e.material.color.set(0x8f6b57);
+                        }
+                    
+
+                    
+                    e.material.roughness = 0.3
+                    e.material.needsUpdate = true;
+                }
+              
+                    if(e.material.name.includes("bed_wood")){
+                       
+
+                            if(textureType == 0){
+                            
+                                
+                                e.material.map = textures.wood_A.albedo;
+                              
+                                e.material.color.set(0x8f6b57);
+
+                                e.material.normalMap = null;
+                                e.material.bump = null;
+                                e.material.normalMap = null;
+                                e.material.aoMap = null;
+                                      
+                                 e.material.roughness = 0.3
+
+                                 e.material.needsUpdate = true;
+                            }
+                            else if(textureType == 1){
+                                e.material.map = textures.wood_B.albedo;
+                           
+                                e.material.color.set(0x8f6b57);
+                                      
+                                e.material.normalMap = null;
+                                e.material.bump = null;
+                                e.material.normalMap = null;
+                                e.material.aoMap = null;
+                                e.material.roughness = 0.3
+
+                                e.material.needsUpdate = true;
+                            }
+                       
+                            else if(textureType == 2 && boardType==0 || boardType==2){
+                                
+                                e.material.color.set(0x6e6e6e);
+                                e.material.map = null;
+                                // var b = new THREE.MeshStandardMaterial();
+                                e.material.roughness = textures.tufted.roughness;
+                                e.material.bump = textures.cotton.bump;
+                                e.material.normalMap = textures.tufted.normal;
+                                e.material.aoMap = textures.tufted.ao;
+                                
+
+                                e.material.bumpScale = 1;
+                                e.material.normalScale= new THREE.Vector2(1.5,1.5);
+                               
+                                e.material.roughness = 1;
+                                e.material.metalness = 0;
+                                e.material.needsUpdate = true;
+                            }
+                        
+                 
+                  
+                        
+                    }
+                  
+                
+            }
+        })
+    }
+}
+
+function setModel(objA) {
+    
+    setTextureInteraction(3)
+    // objA.scale.set(0.01, 0.01, 0.01);
+    // var a = getChildfromObject(objA,"headboard",boardType).object;
+    // for(var i in a.children){
+        
+        // for(var j in a.children[i].children){
+            
+        //     for(var k in a.children[i].children[j].children){
+        //         var child = a.children[i].children[j].children[k];
+        //         if(child.material.name.includes("wood")){
+        //             child.material = new THREE.MeshStandardMaterial({color:0xffffff,map:texLoader.load("models/bed/teak_1.jpg")})
+        //         }
+        //     }
+        // }
+    // }
+    setTexture(textures.wood_A.albedo,1,1);
+    setTexture(textures.wood_B.albedo,1,1);
+    setTexture(textures.tufted.normal,1,1);
+    setTexture(textures.tufted.roughness,1,1);
+    setTexture(textures.tufted.ao,1,1);
+    setTexture(textures.cotton.bump,1,1);
     objA.traverse(function (e) {
         if (e instanceof THREE.Mesh) {
             e.geometry.normalizeNormals();
             e.castShadow = true;
             e.receiveShadow = true;
+           
+            if(e.material.name.includes("hb3_table")){
+                e.material.color.set(0x101010);
+                e.material.roughness = 0.3
+            }
 
+            if(e.material.name.includes("handle")){
+                e.material.color.set(0x525252)
+                e.material.roughness = 0.1;
+                e.material.metalness = 1;
+            }
+
+            if(e.material.name.includes("hb5_door")){
+                e.material.map = texLoader.load("models/bed/wood_A.jpg")
+                e.material.roughnessMap = texLoader.load("models/bed/teak_1_roughness.jpg")
+                e.material.color.set(0x8f6b57);
+                e.material.roughness = 0.3;
+                e.material.bumpMap = texLoader.load("models/bed/gridH.jpg");
+                e.material.normalMap = texLoader.load("models/bed/gridH.jpg");
+                e.material.normalScale = new THREE.Vector2(2,2)
+                
+            }
+            if(e.material.name.includes("hb3_wood")){
+                e.material.map = null;
+               
+                
+                e.material.roughness = 0.3
+                e.material.color.set(0xdedede);
+            }
+            if(e.material.name.includes("hb3_metal")){
+                
+                e.material.color.set(0x151515);
+                e.material.roughness = 0.1;
+                e.material.metalness = 1;
+               
+                
+            }
+            if(e.material.name.includes("hb3_fabric")){
+                var normal=  texLoader.load("models/bed/tufted_normal.jpg");
+                var ao=  texLoader.load("models/bed/tufted_ao.jpg");
+                var cotton = texLoader.load("models/bed/cotton.jpg");
+                var disp = texLoader.load("models/bed/tufted_disp.jpg");
+                var height=  texLoader.load("models/bed/tufted_height.jpg");
+                var roughness = texLoader.load("models/bed/tufted_roughness.jpg");
+                
+                setTexture(normal);
+                setTexture(ao);
+                setTexture(cotton);
+                setTexture(disp);
+                setTexture(height);
+                setTexture(roughness);
+
+            
+                e.material.color.set(0x6e6e6e);
+                e.material.displacementMap = disp;
+                e.material.displacementScale = 0;
+                e.material.bumpMap = cotton;
+                e.material.roughnessMap = roughness;
+                e.material.aoMap=  ao;
+                e.material.normalMap = normal ;
+
+                e.material.bumpScale = 1;
+                e.material.normalScale= new THREE.Vector2(2,2);
+               
+                e.material.roughness = 1;
+                e.material.metalness = 0;
+               
+                
+            }
             // e.material.wireframe = true;
 
             // if (e.name.includes("Leg")) {
@@ -942,11 +1225,11 @@ function setModel(objA) {
             //     e.material.color.set("#f0f0f0");
             // }
             // e.material.side = THREE.DoubleSide;
-            // e.material.metalness = 0;
+            e.material.metalness = 0;
             // e.material.map = null;
-            // e.material.roughness = 1;
-
-            e.material.normalMap = null;
+            e.material.roughness = 1;
+            
+            
         }
     });
     scene.add(objA)
@@ -1218,8 +1501,9 @@ function updateBoards(){
             }
         })
         tableLeft.traverse(e=>{
+          
             if(e.name.includes("low")){
-                if(wHeight==1.25){
+                if(wHeight==1.25  && istableLeft){
                     
                     e.visible= true;
                 }else{
@@ -1227,8 +1511,8 @@ function updateBoards(){
                  
                 }
             }
-            else if(e.name.includes("normal")){
-                if(wHeight==1.75){
+            else if(e.name.includes("normal") ){
+                if(wHeight==1.75 && istableLeft){
                     
                     e.visible= true;
                 }else{
@@ -1240,7 +1524,7 @@ function updateBoards(){
 
         tableRight.traverse(e=>{
             if(e.name.includes("low")){
-                if(wHeight==1.25){
+                if(wHeight==1.25 && istableRight){
                     
                     e.visible= true;
                 }else{
@@ -1249,7 +1533,7 @@ function updateBoards(){
                 }
             }
             else if(e.name.includes("normal")){
-                if(wHeight==1.75){
+                if(wHeight==1.75 && istableRight){
                     
                     e.visible= true;
                 }else{
@@ -1273,17 +1557,20 @@ function setMatress(matress) {
     var mat = matress.children[0].children[0];
 
 
-    // var texAO = texLoader.load('./models/matress/ao.png');
+    var texAO = texLoader.load('./models/matress/ao.png');
 
-
+    
     mat.castShadow = true;
     mat.receiveShadow = true;
-    // mat.material.color.set("#ffffff");
+    mat.material.color.set("#8f8f8f");
     mat.material.map = null;
-    mat.material.normalMap = null;
-    mat.material = new THREE.MeshStandardMaterial({color:0xcdcdcd,metalness:0, flatShading:"false"});
+    
+    // mat.material.normalScale = new THREE.Vector2(0.5,0.5)
+    // mat.material.normalMap = null;
+    // mat.material = new THREE.MeshStandardMaterial({color:0xcdcdcd,metalness:0, flatShading:"false"});
     // mat.material = new THREE.MeshStandardMaterial({color:0xf0f0f0,metalness:0, map:matAlbedo, normalMap:matNormal, aoMap:matAO, flatShading:"false", bum});
-    // mat.material.metalness = 0;
+    mat.material.metalness = 0;
+    mat.material.roughness = 0.8;
 
     mat.material.bumpMap = null;
 
@@ -1303,7 +1590,7 @@ function importMatress() {
     manager.onStart = function (url, itemsLoaded, itemsTotal) {
 
         $("#loadingText").html("Please Wait...");
-        controls.enabled = false;
+        // controls.enabled = false;
     };
 
     manager.onProgress = function (url, itemsLoaded, itemsTotal) {
@@ -1314,7 +1601,7 @@ function importMatress() {
     };
     manager.onLoad = function () {
         $("#loadingScreen").addClass("d-none")
-        controls.enabled = true;
+        // controls.enabled = true;
     };
 
     loadBoards()
