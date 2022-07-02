@@ -1,3 +1,4 @@
+
 let scene,
     cssScene,
     camera,
@@ -287,8 +288,8 @@ function init() {
     renderer.info.autoReset = false;
     renderer.setClearColor(0xffffff, 1);
     renderer.outputEncoding = THREE.sRGBEncoding;
-    renderer.toneMapping = THREE.LinearToneMapping;
-    renderer.toneMappingExposure = 0.7;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.5;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.compile(scene, camera);
@@ -688,37 +689,31 @@ function render() {
 }
 
 function create_lights() {
-    directionalLight = new THREE.DirectionalLight(0xfff3db, 0.5);
-    directionalLight.position.set(0.5, 5.5, 0);
-    directionalLight.castShadow = true;
+    scene.add( new THREE.AmbientLight( 0x6d6d6d,0.5) );
 
-    directionalLight.shadow.mapSize.width = 512; // default
-    directionalLight.shadow.mapSize.height = 512; // default
+    const light = new THREE.DirectionalLight( 0xababab, 1.35);
+    light.position.set( 2, 8, 4 );
 
-    scene.add(directionalLight);
+    light.castShadow = true;
+    light.shadow.mapSize.width = 2048;
+    light.shadow.mapSize.height = 2048;
+    light.shadow.camera.far = 20;
+	
+    scene.add( light );
 
-    var directionalLight1 = new THREE.DirectionalLight(0xbfe4ff, 0.3);
-    directionalLight1.position.set(0, 5, 0);
+    var bulbLight = new THREE.PointLight( 0xfdfdfd, 1, 100, 1 );
+    bulbLight.position.set( 0, 2, 2 );
+    bulbLight.castShadow = true;
+   
+    bulbLight.shadow.mapSize.width = 2048;
+    bulbLight.shadow.mapSize.height = 2048;
+    bulbLight.shadow.camera.far = 10;
+    // scene.add( bulbLight );
 
-    // directionalLight1.castShadow = true;
 
-    directionalLight1.shadow.mapSize.width = 512; // default
-    directionalLight1.shadow.mapSize.height = 512;
-    scene.add(directionalLight1);
 
-    var ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-    scene.add(ambientLight);
-
-    var directionalLight2 = new THREE.DirectionalLight(0xdedede, 0.3);
-    directionalLight2.position.set(0, 3, -3);
-    directionalLight2.castShadow = false;
-
-    directionalLight2.shadow.mapSize.width = 512; // default
-    directionalLight2.shadow.mapSize.height = 512;
-    scene.add(directionalLight2);
-
-    var hemiLight = new THREE.HemisphereLight(0xfff2e3, 0xd1ebff, 0.3);
-    scene.add(hemiLight);
+    hemiLight = new THREE.HemisphereLight( 0xddeeff, 0x0f0e0d, 0.2 );
+    scene.add( hemiLight );
 }
 
 function createFloor() {
@@ -2247,7 +2242,7 @@ function createNullGroup(name, pos) {
 function createAddButton(name, pos) {
     var g = new THREE.PlaneGeometry(1, 1);
     var m = new THREE.MeshBasicMaterial({
-        color: 0xffffff,
+        color: 0x000000,
         map: btnPlus,
         alphaMap: btnPlus,
         transparent: true,
@@ -2267,7 +2262,7 @@ function createAddButton(name, pos) {
 function createRemoveButton(name, pos) {
     var g = new THREE.PlaneGeometry(1, 1);
     var m = new THREE.MeshBasicMaterial({
-        color: 0xffffff,
+        color: 0x000000,
         map: btnMinus,
         alphaMap: btnMinus,
         transparent: true,
@@ -2745,7 +2740,7 @@ function onClick() {
 
 function onPointerMove(event) {
     if (selectedBtn) {
-        selectedBtn.material.color.set("#ffffff");
+        selectedBtn.material.color.set("#000000");
 
         selectedBtn = null;
     }
@@ -2776,7 +2771,7 @@ function onPointerMove(event) {
             if (add_btn_group.visible) {
                 if (res.object.visible) {
                     selectedBtn = res.object;
-                    selectedBtn.material.color.set("#000000");
+                    selectedBtn.material.color.set("#00adef");
                 }
             }
         }
@@ -2789,7 +2784,7 @@ function onPointerMove(event) {
             if (remove_btn_group.visible) {
                 if (res.object.visible) {
                     selectedBtn = res.object;
-                    selectedBtn.material.color.set("#000000");
+                    selectedBtn.material.color.set("#ff0000");
                 }
             }
         }

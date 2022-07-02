@@ -286,9 +286,10 @@ function init() {
     // renderer.toneMapping = THREE.ACESFilmicToneMapping;
     // renderer.toneMappingExposure = 1;
     renderer.outputEncoding = THREE.sRGBEncoding;
-    renderer.toneMapping = THREE.LinearToneMapping;
-    renderer.toneMappingExposure = 0.7;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 2;
     renderer.shadowMap.enabled = true;
+    
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.compile(scene, camera);
 
@@ -769,41 +770,66 @@ function featuresControl() {
 function create_lights() {
 
 
-    directionalLight = new THREE.DirectionalLight(0xfff3db, 0.5);
-    directionalLight.position.set(0.5, 1.5, 10);
-    directionalLight.castShadow = true;
+    // directionalLight = new THREE.DirectionalLight(0xfff3db, 0.5);
+    // directionalLight.position.set(0.5, 1.5, 10);
+    // directionalLight.castShadow = true;
 
-    directionalLight.shadow.mapSize.width = 512; // default
-    directionalLight.shadow.mapSize.height = 512; // default
+    // directionalLight.shadow.mapSize.width = 512; // default
+    // directionalLight.shadow.mapSize.height = 512; // default
 
-    scene.add(directionalLight);
-
-
+    // scene.add(directionalLight);
 
 
-    var directionalLight1 = new THREE.DirectionalLight(0xbfe4ff, 0.3);
-    directionalLight1.position.set(0, 5, 0);
-
-    directionalLight1.castShadow = true;
-
-    directionalLight1.shadow.mapSize.width = 512; // default
-    directionalLight1.shadow.mapSize.height = 512;
-    scene.add(directionalLight1);
-
-    var ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-    scene.add(ambientLight);
 
 
-    var directionalLight2 = new THREE.DirectionalLight(0xdedede, 0.3);
-    directionalLight2.position.set(0, 3, -3);
-    directionalLight2.castShadow = false;
+    // var directionalLight1 = new THREE.DirectionalLight(0xbfe4ff, 0.3);
+    // directionalLight1.position.set(0, 5, 0);
 
-    directionalLight2.shadow.mapSize.width = 512; // default
-    directionalLight2.shadow.mapSize.height = 512;
-    scene.add(directionalLight2);
+    // directionalLight1.castShadow = true;
 
-    var hemiLight = new THREE.HemisphereLight(0xfff2e3, 0xd1ebff, 0.3);
-    scene.add(hemiLight);
+    // directionalLight1.shadow.mapSize.width = 512; // default
+    // directionalLight1.shadow.mapSize.height = 512;
+    // scene.add(directionalLight1);
+
+    // var ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    // scene.add(ambientLight);
+
+
+    // var directionalLight2 = new THREE.DirectionalLight(0xdedede, 0.3);
+    // directionalLight2.position.set(0, 3, -3);
+    // directionalLight2.castShadow = false;
+
+    // directionalLight2.shadow.mapSize.width = 512; // default
+    // directionalLight2.shadow.mapSize.height = 512;
+    // scene.add(directionalLight2);
+
+    // var hemiLight = new THREE.HemisphereLight(0xfff2e3, 0xd1ebff, 0.3);
+    // scene.add(hemiLight);
+    scene.add( new THREE.AmbientLight( 0x6d6d6d,0.5) );
+
+    const light = new THREE.DirectionalLight( 0xababab, 1.35);
+    light.position.set( 2, 8, 4 );
+
+    light.castShadow = true;
+    light.shadow.mapSize.width = 2048;
+    light.shadow.mapSize.height = 2048;
+    light.shadow.camera.far = 20;
+	
+    scene.add( light );
+
+    var bulbLight = new THREE.PointLight( 0xfdfdfd, 1, 100, 1 );
+    bulbLight.position.set( 0, 2, 2 );
+    bulbLight.castShadow = true;
+   
+    bulbLight.shadow.mapSize.width = 2048;
+    bulbLight.shadow.mapSize.height = 2048;
+    bulbLight.shadow.camera.far = 10;
+    // scene.add( bulbLight );
+
+
+
+    var hemiLight = new THREE.HemisphereLight( 0xddeeff, 0x0f0e0d, 0.2 );
+    scene.add( hemiLight );
 
 }
 
