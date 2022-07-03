@@ -3,7 +3,7 @@ let css2DRenderer, css2DRenderer2;
 
 const viewer = document.getElementById("modelviewer");
 const dimensionviewer = document.getElementById("dimensionViewer");
-
+var stats;
 
 const fwidth = viewer.offsetWidth || dimensionviewer.offsetWidth;
 const fheight = viewer.offsetHeight || dimensionviewer.offsetHeight;
@@ -12,6 +12,13 @@ var dimensionImage;
 
 var cubeCamera,cubeMap;
 var groundReflector;
+const selects = [];
+const params = {
+    enableSSR: true,
+    autoRotate: true,
+    otherMeshes: true,
+    groundReflector: true,
+};
 let wWidth = 3,
     wHeight = 1.75,
     wDepth = 6
@@ -416,7 +423,9 @@ function init() {
     
     
     create_lights();
-    loadBoards()
+    loadBoards();
+    createReflector();
+    post_process();
     dimensionRenderer = new THREE.WebGLRenderer({
         antialias: true,
         alpha: true,
@@ -448,7 +457,7 @@ function init() {
 
     // dimensionCanvas = document.querySelector('#dimensionviewer :nth-child(2)')
 
-    post_process();
+    
 
     controls = new THREE.OrbitControls(camera, renderer.domElement);
 
@@ -474,7 +483,8 @@ function init() {
     // document.addEventListener('click', onClick);
 
   
-
+    stats = new Stats();
+    viewer.appendChild( stats.dom );
 
 }
 
@@ -483,8 +493,8 @@ function onWindowResize() {
 
     const width = canvas.clientWidth;
     const height = canvas.clientHeight;
-    if (canvas.width !== width || canvas.height !== height) {
-
+    // if (canvas.width !== width || canvas.height !== height) {
+        const pixelRatio = renderer.getPixelRatio();
         camera.aspect = fwidth / fheight;
         camera.updateProjectionMatrix();
 
@@ -496,8 +506,12 @@ function onWindowResize() {
 
         orthoCameraTop.updateProjectionMatrix();
         orthoCameraLeft.updateProjectionMatrix();
-    }
-    const pixelRatio = renderer.getPixelRatio();
+        groundReflector.getRenderTarget().setSize( fwidth, fheight );
+		groundReflector.resolution.set( fwidth, fheight );
+// }
+   
+
+   
     fxaaPass.material.uniforms['resolution'].value.x = 1 / (fwidth * pixelRatio);
     fxaaPass.material.uniforms['resolution'].value.y = 1 / (fheight * pixelRatio);
     render();
@@ -507,15 +521,18 @@ function onWindowResize() {
 function animate() {
     requestAnimationFrame(animate);
 
-    controls.update();
+   
 
 
+   
+    stats.begin();
     render();
-
+    stats.end();
 }
 
 function update() {
     try {
+        controls.update();
         updateBedTop();
         updateBedLegs();
         updateBedFloor();
@@ -527,6 +544,8 @@ function update() {
         createHeightArrows();
         setColor()
         setTuftedMaterial()
+        
+        
     } catch (err) {
         console.log(err)
     }
@@ -562,6 +581,7 @@ function update() {
 }
 
 function render() {
+ 
     update();
 
     dimensionRenderer.setViewport(left, Math.floor(fheight / 2), fwidth, Math.floor(fheight / 2));
@@ -600,10 +620,14 @@ function render() {
     css2DRenderer.setSize(fwidth, fheight);
     css2DRenderer.render(dimensionScene, orthoCameraTop);
 
-
+   
     // cubeCamera.update( renderer, scene );
-
-    composer.render();
+ 
+    if(composer){
+        composer.render();
+     
+    }
+    
 
 
 
@@ -633,7 +657,7 @@ function setLighting() {
         cubeTexture.encoding = THREE.sRGBEncoding;
         var map = pmremGenerator.fromCubemap(cubeTexture).texture;
         scene.background = map;
-        scene.environment = map;
+   
         
         var blurred = pmremGenerator.fromScene(scene,0.0035).texture;
         scene.environment = blurred;
@@ -681,7 +705,7 @@ function create_lights() {
     if(room){
         light.target= room;
     }
-     light.position.set(9,2.2,4);
+     light.position.set(11,1,4);
     // light.position.set(10, 8, 4);
     light.castShadow = true;
     light.shadow.radius = 0.4;
@@ -813,6 +837,8 @@ function updateWall() {
 
 
 function post_process() {
+   
+
     composer = new THREE.EffectComposer(renderer);
 
     const renderPass = new THREE.RenderPass(scene, camera);
@@ -824,71 +850,71 @@ function post_process() {
     const smaaPass = new THREE.SMAAPass(fwidth * pixelRatio, fheight * pixelRatio);
     composer.addPass(smaaPass);
     
-    const copyPass = new THREE.ShaderPass(THREE.CopyShader);
-    composer.addPass(copyPass);
+    // const copyPass = new THREE.ShaderPass(THREE.CopyShader);
+    // composer.addPass(copyPass);
 
-    saoPass= new THREE.SAOPass( scene, camera, false, true );
     
+    ssrPass = new THREE.SSRPass( {
+        renderer,
+        scene,
+        camera,
+        groundReflector : groundReflector,
+        
+        selects: selects
+    } );
     
-    // saoPass.saoBias= 0.2;
-    // saoPass.saoIntensity = 0.1;
+    ssrPass.enable = params.enableSSR;
+    ssrPass.thickness = 0.018;
+    ssrPass.infiniteThick = true;
+    ssrPass.opacity = 0.5;
+    ssrPass.maxDistance = .5;
+    ssrPass.distanceAttenuation = true;
+    groundReflector.fresnel = ssrPass.fresnel;
+    groundReflector.distanceAttenuation = ssrPass.distanceAttenuation;
+    groundReflector.maxDistance = ssrPass.maxDistance;
+	groundReflector.opacity = ssrPass.opacity;
+    ssrPass.blur = true;
+    ssrPass.output = 0;
    
-    // saoPass.saoScale = 0.1;
-    // saoPass.saoKernelRadius  = 100;
-    // saoPass.saoMinResolution = 0;
-    // saoPass.saoBlur = true;
-    // saoPass.saoBlurRadius = 8;
-    // saoPass.saoBlurStdDev= 4;
-    // saoPass.saoBlurDepthCutoff = 0.01;
+    // composer.addPass( ssrPass );
+  
+    
+    saoPass= new THREE.SAOPass( scene, camera, false, true );
+    saoPass.saoBias= 0.2;
+    saoPass.saoIntensity = 0.1;
+   
+    saoPass.saoScale = 0.1;
+    saoPass.saoKernelRadius  = 100;
+    saoPass.saoMinResolution = 0;
+    saoPass.saoBlur = true;
+    saoPass.saoBlurRadius = 8;
+    saoPass.saoBlurStdDev= 4;
+    saoPass.saoBlurDepthCutoff = 0.01;
     saoPass.params = {
         output: 0,
-        saoBias:0.164,
-        saoIntensity: 0.08,
+        saoBias:-0.164,
+        saoIntensity: 0.09,
         saoScale: 8,
-        saoKernelRadius: 100,
+        saoKernelRadius: 50,
         saoMinResolution: 0,
         saoBlur: true,
         saoBlurRadius: 8,
         saoBlurStdDev: 4,
-        saoBlurDepthCutoff: 0.01
+        saoBlurDepthCutoff: 0.1
     };
   
-    console.log(saoPass.params.saoIntensity )
-    composer.addPass( saoPass);
+    // console.log(saoPass.params.saoIntensity )
+    // composer.addPass( saoPass);
    
-    ssaoPass = new THREE.SSAOPass(scene, camera, fwidth, fheight);
-    ssaoPass.kernalRadius = 5;
-    ssaoPass.kernelSize = 32;
+    // ssaoPass = new THREE.SSAOPass(scene, camera, fwidth, fheight);
+    // ssaoPass.kernalRadius = 5;
+    // ssaoPass.kernelSize = 32;
 
-    ssaoPass.minDistance = 0.01;
-    ssaoPass.maxDistance = 0.3;
+    // ssaoPass.minDistance = 0.2;
+    // ssaoPass.maxDistance = 0.3;
     
     // composer.addPass(ssaoPass);
 
-    outlinePass = new THREE.OutlinePass(new THREE.Vector2(fwidth, fheight), scene, camera);
-    outlinePass.edgeStrength = 16;
-    outlinePass.edgeGlow = 0;
-    outlinePass.edgeThickness = 0.5;
-    outlinePass.pulsePeriod = 0;
-
-    planeOultinePass = new THREE.OutlinePass(new THREE.Vector2(fwidth, fheight), scene, camera);
-    planeOultinePass.edgeStrength = 16;
-    planeOultinePass.edgeGlow = 0;
-    planeOultinePass.edgeThickness = 0.5;
-    planeOultinePass.pulsePeriod = 0;
-
-
-    doorOutlinePass = new THREE.OutlinePass(new THREE.Vector2(fwidth, fheight), scene, camera);
-    doorOutlinePass.edgeStrength = 16;
-    doorOutlinePass.edgeGlow = 0;
-    doorOutlinePass.edgeThickness = 0.5;
-    doorOutlinePass.pulsePeriod = 0;
-    // outlinePass.visibleEdgeColor.set("#ff0000");
-
-    // outlinePass.hiddenEdgeColor.set("#ff0000");
-    composer.addPass(outlinePass);
-    composer.addPass(planeOultinePass);
-    composer.addPass(doorOutlinePass);
     fxaaPass = new THREE.ShaderPass(THREE.FXAAShader);
 
 
@@ -897,13 +923,19 @@ function post_process() {
 
     composer.addPass(fxaaPass);
 
+
+
+   
+    
     composer.addPass( new THREE.ShaderPass( THREE.GammaCorrectionShader ) );
 
-    const bloomPass = new THREE.UnrealBloomPass( new THREE.Vector2( fwidth, fheight ), 1.5, 0.4, 0.85 );
-    bloomPass.threshold = 0.152;
-    bloomPass.strength = 5;
-    bloomPass.radius =0.5;
 
+    
+    const bloomPass = new THREE.UnrealBloomPass( new THREE.Vector2( fwidth, fheight ), 1.5, 0.4, 0.85 );
+    bloomPass.threshold = 1.552;
+    bloomPass.strength = 0.1;
+    bloomPass.radius =0.85;
+    // composer.addPass(bloomPass);
 }
 
 function helpers() {
@@ -1232,7 +1264,7 @@ function loadBoards() {
         createMatress();
          updateRoomMaterial(room);
          cubeCamera.update(renderer,scene)
-        //  createReflector();
+
         // createFloor();
         // var g = new THREE.SphereGeometry(0.5,32,32);
         // var m = new THREE.MeshStandardMaterial({color:0xdedede,envMap:cubeMap.texture,envMapIntensity:1,roughness:0,metalness:1})
@@ -1243,10 +1275,10 @@ function loadBoards() {
     })
 }
 function createReflector(){
-
-    var geometry = new THREE.PlaneGeometry( 10, 10 );
+    const pixelRatio = renderer.getPixelRatio();
+    var geometry = new THREE.PlaneGeometry( 1, 1 );
     groundReflector = new THREE.ReflectorForSSRPass( geometry, {
-        clipBias: 0.0003,
+        clipBias: 0.0001,
         textureWidth: fwidth,
         textureHeight:fheight,
         color: 0x888888,
@@ -1255,8 +1287,10 @@ function createReflector(){
     groundReflector.material.depthWrite = false;
 			groundReflector.rotation.x = - Math.PI / 2;
 			groundReflector.visible = false;
+            
 			scene.add( groundReflector );
 }
+
 function updateRoomMaterial(room){
     if(room){
         room.traverse(e=>{
@@ -1417,10 +1451,12 @@ function updateRoomMaterial(room){
                   
                      
                  }
+                 selects.push( e );
             }
         })
     }
 }
+
 function updateRoom(){
     if (boards != null) {
         var headboardSize = getChildfromObject(boards, "headboard", boardType).size;
@@ -1434,6 +1470,7 @@ function updateRoom(){
         
     }
 }
+
 function setTextureInteraction(row) {
 
     var select = document.getElementById("selectTexture");
@@ -1924,7 +1961,7 @@ function setModel(objA) {
 
        
 
-
+            selects.push( e );
 
         }
     });
