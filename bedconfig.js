@@ -847,8 +847,8 @@ function post_process() {
     composer.addPass(renderPass);
     const pixelRatio = renderer.getPixelRatio();
 
-    const smaaPass = new THREE.SMAAPass(fwidth * pixelRatio, fheight * pixelRatio);
-    composer.addPass(smaaPass);
+    // const smaaPass = new THREE.SMAAPass(fwidth * pixelRatio, fheight * pixelRatio);
+    // composer.addPass(smaaPass);
     
     // const copyPass = new THREE.ShaderPass(THREE.CopyShader);
     // composer.addPass(copyPass);
@@ -876,7 +876,7 @@ function post_process() {
     ssrPass.blur = true;
     ssrPass.output = 0;
    
-    // composer.addPass( ssrPass );
+    composer.addPass( ssrPass );
   
     
     saoPass= new THREE.SAOPass( scene, camera, false, true );
