@@ -18,6 +18,8 @@
 
     <!-- <script src="./threejs/build/three.js"></script> -->
 
+    <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js"
+    integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="anonymous"></script>
 
     <script src="https://unpkg.com/three@0.142.0/build/three.min.js"></script>
     <script src="https://unpkg.com/three@0.142.0/examples/js/libs/stats.min.js"></script>
@@ -29,6 +31,7 @@
     <script src="https://unpkg.com/three@0.142.0/examples/js/loaders/GLTFLoader.js"></script>
     <script src="https://unpkg.com/three@0.142.0/examples/js/postprocessing/EffectComposer.js"></script>
     <script src="https://unpkg.com/three@0.142.0/examples/js/objects/ReflectorForSSRPass.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/objects/Reflector.js"></script>
     <script src="https://unpkg.com/three@0.142.0/examples/js/shaders/SSRShader.js"></script>
     
     <script src="https://unpkg.com/three@0.142.0/examples/js/postprocessing/SSRPass.js"></script>
@@ -217,52 +220,76 @@
                             </select>
                            
                         </div>
-                        <div class="row m-1 ">
-                            <div class="form-control-sm m-1" id="wood_color">
-                                <div class="form-color" >
-                                    <label for="woodColor">Tufted Color:</label>
-                                    <input type="color" name="woodColor" id="woodColor" class="p-1" value="#4d4d4d" >
-                               
-                                </div>
-                                
+                
+                        <div class="form-control m-1 " id="wood_colors">
+                            <p>Select Colors</p>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input btn-check" type="radio" name="wood_colors" id="colors1"
+                                    value="0" checked>
+                                <label class="form-check-label btn btn-outline-warning" for="colors1">Natural</label>
                             </div>
-                           
-                            <div class="form-control-sm m-1" id="board_color">
-                                <div class="form-color" >
-                                    <label for="boardColor">Board Color:</label>
-                                    <input type="color" name="boardColor" id="boardColor" class="p-1" value="#4d4d4d" >
-                                    
-                                </div>
+    
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input btn-check" type="radio" name="wood_colors"  id="colors2"
+                                    value="1" >
+                                <label class="form-check-label btn  btn-outline-warning" for="colors2">Cherry</label>
                             </div>
 
-                            <div class="form-control-sm m-1" id="side_color" >
-                                <p>Side Panel Color:</p>
-                                <div class="form-color" >
-                                    
-                                    
-                                    <div class="form-check-inline form-check">
-                                        <label for="sideColorType" class="form-check-label">Same with Board Color</label>
-                                        <input type="radio" name="sideColorType" class="form-check-input" checked value="0">
-                                        
-                                    </div>
-                                    <div class="form-check-inline form-check">
-                                        <label for="sideColorType" class="form-check-label">Same with Tufted Color</label>
-                                        <input type="radio" name="sideColorType"  class="form-check-input" value="1">
-                                        
-                                    </div>
-                                    <div class="form-check-inline form-check">
-                                        <label for="sideColorType" class="form-check-label">Custom Color</label>
-                                        <input type="radio" name="sideColorType" class="form-check-input" value="2">
-                                        
-                                    </div>
-                                    <input type="color" name="sideColor" id="sideColor" class="p-1" value="#dfdfdf" >
-                                   
-                                </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input btn-check" type="radio" name="wood_colors"  id="colors3"
+                                    value="2" >
+                                <label class="form-check-label btn btn-outline-warning " for="colors3">Walnut</label>
                             </div>
-
-                        
+    
                         </div>
-                      
+
+                        <div class="form-control m-1 " id="colorTypes">
+                            <p>Choose Board Colors</p>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input btn-check" type="radio" name="colorTypes" id="colorTypes1"
+                                    value="0" checked>
+                                <label class="form-check-label btn btn-outline-secondary" for="colorTypes1">Lacquer</label>
+                            </div>
+    
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input btn-check" type="radio" name="colorTypes"  id="colorTypes2"
+                                    value="1" >
+                                <label class="form-check-label btn btn-outline-secondary" for="colorTypes2">Laminate</label>
+                            </div>
+    
+                        </div>
+                        <div class="form-control m-1 " id="board_Colors">
+                            <p>Select Colors</p>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input btn-check" type="radio" name="boardColors" id="boardColors1"
+                                    value="0" checked>
+                                <label class="form-check-label btn btn-outline-dark" for="boardColors1">Off White</label>
+                            </div>
+    
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input btn-check" type="radio" name="boardColors"  id="boardColors2"
+                                    value="1" >
+                                <label class="form-check-label btn  btn-outline-dark" for="boardColors2">Grey</label>
+                            </div>
+
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input btn-check" type="radio" name="boardColors"  id="boardColors3"
+                                    value="2" >
+                                <label class="form-check-label btn btn-outline-dark " for="boardColors3">Light Brown</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input btn-check" type="radio" name="boardColors"  id="boardColors4"
+                                    value="3" >
+                                <label class="form-check-label btn btn-outline-dark " for="boardColors4">Dark Brown</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input btn-check" type="radio" name="boardColors"  id="boardColors5"
+                                    value="4" >
+                                <label class="form-check-label btn btn-outline-dark " for="boardColors5">Black</label>
+                            </div>
+                        </div>
+                     
+
                         <div class="row m-1">
                             <a class="btn btn-outline-dark m-1" id="addDrawers">Add Drawers</a>
                             <a class="btn btn-outline-dark m-1" id="addSideTableLeft">Add Table Left</a>
@@ -379,8 +406,6 @@
         integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous">
     </script>
 
-<script src="https://code.jquery.com/jquery-3.6.0.slim.min.js"
-integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="anonymous"></script>
 
     <script src="./bedconfig.js"></script>
 </body>
