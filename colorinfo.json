@@ -1,80 +1,95 @@
 {
-  "tint": {
-    "natural": "#f1d6b8",
-    "traditionalcherry": "#d49262",
-    "americanwalnut": "#af6633"
-  },
-  "online":{
-    "wood": {
-      "wood_a": {
-        "albedo": "https://i.ibb.co/3vw3ycT/4-K-ovankol-basecolor.jpg",
-        "normal": "https://i.ibb.co/88rHDSj/4-K-ovankol-normal.jpg",
-        "ao": "https://i.ibb.co/17vjv8z/4-K-ovankol-ao.jpg",
-        "roughness": "https://i.ibb.co/84sT4Cx/4-K-ovankol-roughness.jpg",
-        "height": "https://i.ibb.co/YLW5xT2/4-K-ovankol-height.jpg"
-      },
-      "wood_b": {
-        "albedo": "https://i.ibb.co/pJpMPfW/4-K-american-oak-1-basecolor.jpg",
-        "normal": "https://i.ibb.co/zJzThGX/4-K-american-oak-1-normal.jpg",
-        "ao": "https://i.ibb.co/88fkCzn/4-K-american-oak-1-ao.jpg",
-        "roughness": "https://i.ibb.co/ZLxDHzj/4-K-american-oak-1-roughness.jpg",
-        "height": "https://i.ibb.co/Rp1ZphF/4-K-american-oak-1-height.jpg"
-      },
-      "wood_c": {
-        "albedo": "https://i.ibb.co/yFMTSCM/4-K-anzem-basecolor.jpg",
-        "normal": "https://i.ibb.co/zGds2Th/4-K-anzem-normal.jpg",
-        "ao": "https://i.ibb.co/RcDBBMP/4-K-anzem-ao.jpg",
-        "roughness": "https://i.ibb.co/zNZ8q4q/4-K-anzem-roughness.jpg",
-        "height": "https://i.ibb.co/ZfmcD2g/4-K-anzem-height.jpg"
-      }
+    "tint": {
+        "natural": "#f1d6b8",
+        "traditionalcherry": "#d49262",
+        "americanwalnut": "#af6633"
+    },
+    "online": {
+        "wood": {
+            "wood_a": {
+                "albedo": "https://i.ibb.co/3vw3ycT/4-K-ovankol-basecolor.jpg",
+                "normal": "https://i.ibb.co/88rHDSj/4-K-ovankol-normal.jpg",
+                "ao": "https://i.ibb.co/17vjv8z/4-K-ovankol-ao.jpg",
+                "roughness": "https://i.ibb.co/84sT4Cx/4-K-ovankol-roughness.jpg",
+                "height": "https://i.ibb.co/YLW5xT2/4-K-ovankol-height.jpg"
+            },
+            "wood_b": {
+                "albedo": "https://i.ibb.co/pJpMPfW/4-K-american-oak-1-basecolor.jpg",
+                "normal": "https://i.ibb.co/zJzThGX/4-K-american-oak-1-normal.jpg",
+                "ao": "https://i.ibb.co/88fkCzn/4-K-american-oak-1-ao.jpg",
+                "roughness": "https://i.ibb.co/ZLxDHzj/4-K-american-oak-1-roughness.jpg",
+                "height": "https://i.ibb.co/Rp1ZphF/4-K-american-oak-1-height.jpg"
+            },
+            "wood_c": {
+                "albedo": "https://i.ibb.co/yFMTSCM/4-K-anzem-basecolor.jpg",
+                "normal": "https://i.ibb.co/zGds2Th/4-K-anzem-normal.jpg",
+                "ao": "https://i.ibb.co/RcDBBMP/4-K-anzem-ao.jpg",
+                "roughness": "https://i.ibb.co/zNZ8q4q/4-K-anzem-roughness.jpg",
+                "height": "https://i.ibb.co/ZfmcD2g/4-K-anzem-height.jpg"
+            }
+        }
+    },
+    "offline": {
+        "wood": {
+            "wood_a": {
+                "albedo": "Textures/wood/4K-ovankol_basecolor.png",
+                "natural": "Textures/wood/4K-ovankol_basecolor_1.png",
+                "cherry": "Textures/wood/4K-ovankol_basecolor_2.png",
+                "walnut": "Textures/wood/4K-ovankol_basecolor_3.png",
+                "normal": "Textures/wood/4K-ovankol_normal.png",
+                "ao": "Textures/wood/4K-ovankol_ao.png",
+                "roughness": "Textures/wood/4K-ovankol_roughness.png",
+                "height": "Textures/wood/4K-ovankol_height.png"
+            },
+            "wood_b": {
+                "albedo": "Textures/wood/4K-american_oak_1_basecolor.png",
+                "natural": "Textures/wood/4K-american_oak_1_basecolor_1.png",
+                "cherry": "Textures/wood/4K-american_oak_1_basecolor_2.png",
+                "walnut": "Textures/wood/4K-american_oak_1_basecolor_3.png",
+                "normal": "Textures/wood/4K-american_oak_1_normal.png",
+                "ao": "Textures/wood/4K-american_oak_1_ao.png",
+                "roughness": "Textures/wood/4K-american_oak_1_roughness.png",
+                "height": "Textures/wood/4K-american_oak_1_height.png"
+            },
+            "wood_c": {
+                "albedo": "Textures/wood/4K-anzem_basecolor.png",
+                "natural": "Textures/wood/4K-anzem_basecolor_1.png",
+                "cherry": "Textures/wood/4K-anzem_basecolor_2.png",
+                "walnut": "Textures/wood/4K-anzem_basecolor_3.png",
+                "normal": "Textures/wood/4K-anzem_normal.png",
+                "ao": "Textures/wood/4K-anzem_ao.png",
+                "roughness": "Textures/wood/4K-anzem_roughness.png",
+                "height": "Textures/wood/4K-anzem_height.png"
+            }
+        }
+    },
+    "colors": {
+        "black": "#000000",
+        "offwhite": "#4d4d4d",
+        "grey": "#252525",
+        "darkbrown": "#332211",
+        "lightbrown": "#804613"
+    },
+    "lacquer": {
+        "roughness": "0.9",
+        "metalness": "0"
+    },
+    "lamniate": {
+        "roughness": "0.5",
+        "metalness": "0"
+    },
+    "handle": {
+        "metallicgold": "#D4AF37",
+        "charcoal": "#34282C",
+        "silver": "#C0C0C0"
+    },
+    "fabric": {
+        "cotton": {
+            "albedo": "",
+            "roughness": "Textures/fabric/Fabric_Cotton_1K_roughness.jpg",
+            "height": "Textures/fabric/Fabric_Cotton_1K_height.jpg",
+            "normal": "Textures/fabric/Fabric_Cotton_1K_normal.jpg",
+            "ao": "Textures/fabric/Fabric_Cotton_1K_ao.jpg"
+        }
     }
-  },
-  "offline":{
-    "wood": {
-      "wood_a": {
-        "albedo": "Textures/wood/4K-ovankol_basecolor.jpg",
-        "normal": "Textures/wood/4K-ovankol_normal.jpg",
-        "ao": "Textures/wood/4K-ovankol_ao.jpg",
-        "roughness": "Textures/wood/4K-ovankol_roughness.jpg",
-        "height": "Textures/wood/4K-ovankol_height.jpg"
-      },
-      "wood_b": {
-        "albedo": "Textures/wood/4K-american_oak_1_basecolor.jpg",
-        "normal": "Textures/wood/4K-american_oak_1_normal.jpg",
-        "ao": "Textures/wood/4K-american_oak_1_ao.jpg",
-        "roughness": "Textures/wood/4K-american_oak_1_roughness.jpg",
-        "height": "Textures/wood/4K-american_oak_1_height.jpg"
-      },
-      "wood_c": {
-        "albedo": "Textures/wood/4K-anzem_basecolor.jpg",
-        "normal": "Textures/wood/4K-anzem_normal.jpg",
-        "ao": "Textures/wood/4K-anzem_ao.jpg",
-        "roughness": "Textures/wood/4K-anzem_roughness.jpg",
-        "height": "Textures/wood/4K-anzem_height.jpg"
-      }
-    }
-  },
-  "colors": {
-    "black": "#000000",
-    "offwhite": "#4d4d4d",
-    "grey": "#252525",
-    "darkbrown": "#332211",
-    "lightbrown": "#804613"
-  },
-  "lacquer": {
-    "roughness": "0.9",
-    "metalness": "0"
-  },
-  "lamniate": {
-    "roughness": "0.5",
-    "metalness": "0"
-  },
-  "handle": {
-    "metallicgold": "#D4AF37",
-    "charcoal": "#34282C",
-    "silver": "#C0C0C0"
-  },
-  "fabric": {
-    "src": ""
-  }
 }
