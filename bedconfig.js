@@ -528,7 +528,7 @@ function init() {
 
 
 
-    renderer.toneMapping = THREE.LinearToneMapping;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 2.2;
     renderer.outputEncoding = THREE.sRGBEncoding;
     renderer.shadowMap.enabled = true;
@@ -615,8 +615,8 @@ function init() {
     // document.addEventListener('click', onClick);
 
 
-    stats = new Stats();
-    viewer.appendChild(stats.dom);
+    // stats = new Stats();
+    // viewer.appendChild(stats.dom);
     controls.addEventListener('change', updateCubeMap);
 
 }
@@ -662,9 +662,9 @@ function animate() {
 
 
 
-    stats.begin();
+    // stats.begin();
     render();
-    stats.end();
+    // stats.end();
 }
 
 function update() {
@@ -811,7 +811,7 @@ function setLighting() {
 
         roomCubeCamera.update(renderer, scene);
 
-        // lightProbe.copy(THREE.LightProbeGenerator.fromCubeRenderTarget(renderer, roomCubeMap));
+        lightProbe.copy(THREE.LightProbeGenerator.fromCubeRenderTarget(renderer, roomCubeMap));
 
 
         cubeTexture.dispose();
@@ -863,14 +863,14 @@ function create_lights() {
     light.shadow.mapSize.height = 1024;
     // light.shadow.camera.near = 0.5; // default
     light.shadow.autoUpdate = true;
-    const d = 20;
+    // const d = 20;
 
-    light.shadow.camera.left = - d;
-    light.shadow.camera.right = d;
-    light.shadow.camera.top = d;
-    light.shadow.camera.bottom = - d;
+    // light.shadow.camera.left = - d;
+    // light.shadow.camera.right = d;
+    // light.shadow.camera.top = d;
+    // light.shadow.camera.bottom = - d;
     // scene.add(new THREE.CameraHelper(light.shadow.camera))
-    light.shadow.needsUpdate = true;
+    // light.shadow.needsUpdate = true;
 
 
     scene.add(light);
@@ -987,7 +987,10 @@ function post_process() {
 
     composer = new THREE.EffectComposer(renderer);
 
-
+    const renderPass = new THREE.RenderPass(scene, camera);
+    renderPass.clearColor = new THREE.Color(0, 0, 0);
+    renderPass.clearAlpha = 0;
+    composer.addPass(renderPass);
     const pixelRatio = renderer.getPixelRatio();
 
     // const smaaPass = new THREE.SMAAPass(fwidth * pixelRatio, fheight * pixelRatio);
@@ -998,21 +1001,12 @@ function post_process() {
 
 
     saoPass = new THREE.SAOPass(scene, camera, false, true);
-    // saoPass.saoBias = 0.2;
-    // saoPass.saoIntensity = 0.1;
 
-    // saoPass.saoScale = 0.1;
-    // saoPass.saoKernelRadius = 100;
-    // saoPass.saoMinResolution = 0;
-    // saoPass.saoBlur = true;
-    // saoPass.saoBlurRadius = 8;
-    // saoPass.saoBlurStdDev = 4;
-    // saoPass.saoBlurDepthCutoff = 0.01;
     saoPass.params = {
         output: 0,
         saoBias: 0.15,
-        saoIntensity: 0.08,
-        saoScale: 10,
+        saoIntensity: 0.1,
+        saoScale: 8,
         saoKernelRadius: 80,
         saoMinResolution: 0,
         saoBlur: true,
@@ -1025,7 +1019,7 @@ function post_process() {
     composer.addPass(saoPass);
 
     // ssaoPass = new THREE.SSAOPass(scene, camera, fwidth, fheight);
-    // ssaoPass.kernalRadius = 5;
+    // ssaoPass.kernalRadius = 16;
     // ssaoPass.kernelSize = 32;
 
     // ssaoPass.minDistance = 0.2;
@@ -1050,10 +1044,7 @@ function post_process() {
     // bloomPass.strength = 0.1;
     // bloomPass.radius = 0.85;
     // composer.addPass(bloomPass);
-    const renderPass = new THREE.RenderPass(scene, camera);
-    renderPass.clearColor = new THREE.Color(0, 0, 0);
-    renderPass.clearAlpha = 0;
-    composer.addPass(renderPass);
+  
 }
 
 function helpers() {
