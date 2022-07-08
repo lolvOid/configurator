@@ -2793,7 +2793,7 @@ function updateDrawers() {
         bedDrawerRight.position.setY(wHeight * ftTom / 2 - bedTops[2].scale.y / 2);
 
 
-        bedDrawerLeft.children[0].scale.set(wWidth * ftTom, ftTom / 12, wDepth * ftTom - bedTops[1].scale.z - ftTom - ftTom / 6); // bottom
+        bedDrawerLeft.children[0].scale.set(wWidth * ftTom, ftTom / 12, wDepth * ftTom - bedTops[1].scale.z - ftTom - ftTom / 6-0.5*ftTom/12); // bottom
         bedDrawerLeft.children[1].scale.set(ftTom / 12, height, bedDrawerLeft.children[0].scale.z + ftTom / 6); // left
         bedDrawerLeft.children[2].scale.set(ftTom / 12, height, bedDrawerLeft.children[1].scale.z); // right
         bedDrawerLeft.children[3].scale.set(bedDrawerLeft.children[0].scale.x, height, ftTom / 12); // front
@@ -2811,7 +2811,7 @@ function updateDrawers() {
         // bedDrawerLeft.children[6].position.setY(bedDrawerLeft.children[1].position.y + bedDrawerLeft.children[1].scale.y / 2)
         // bedDrawerLeft.children[6].rotation.y = (90 * THREE.MathUtils.DEG2RAD)
 
-        bedDrawerRight.children[0].scale.set(wWidth * ftTom - ftTom / 12, ftTom / 12, wDepth * ftTom - bedTops[1].scale.z - ftTom - ftTom / 6); // bottom
+        bedDrawerRight.children[0].scale.set(wWidth * ftTom - ftTom / 12, ftTom / 12, wDepth * ftTom - bedTops[1].scale.z - ftTom - ftTom / 6-0.5*ftTom/12); // bottom
         bedDrawerRight.children[1].scale.set(ftTom / 12, height, bedDrawerRight.children[0].scale.z + ftTom / 6); // left
         bedDrawerRight.children[2].scale.set(ftTom / 12, height, bedDrawerRight.children[1].scale.z); // right
         bedDrawerRight.children[3].scale.set(bedDrawerRight.children[0].scale.x, height, ftTom / 12); // front
@@ -2865,7 +2865,7 @@ function updateDrawers() {
         bedDrawerRightEdge.visible = bedDrawerRight.visible;
 
         bedDrawerLeft.children[0].position.setY(-wHeight * ftTom / 2 + bedTops[2].scale.y / 2 + ftTom / 24); // bottom
-        bedDrawerLeft.children[0].position.setZ(bedTops[1].position.z - bedDrawerLeft.children[0].scale.z / 2 - bedDrawerLeft.children[4].scale.z - bedTops[1].scale.z / 2); // bottom
+        bedDrawerLeft.children[0].position.setZ(bedTops[1].position.z - bedDrawerLeft.children[0].scale.z / 2 - bedDrawerLeft.children[4].scale.z - bedTops[1].scale.z / 2-0.5*ftTom/24 ); // bottom
 
         bedDrawerLeft.children[1].position.setX(-bedDrawerLeft.children[0].scale.x / 2 - bedDrawerLeft.children[1].scale.x / 2); // left
         bedDrawerLeft.children[1].position.setZ(bedDrawerLeft.children[0].position.z); // left
@@ -2881,7 +2881,7 @@ function updateDrawers() {
 
         drawerPanelL.rotation.y = Math.PI / 2;
         bedDrawerRight.children[0].position.setY(-wHeight * ftTom / 2 + bedTops[2].scale.y / 2 + ftTom / 24); // bottom
-        bedDrawerRight.children[0].position.setZ(bedTops[1].position.z - bedDrawerRight.children[0].scale.z / 2 - bedDrawerRight.children[4].scale.z - bedTops[1].scale.z / 2); // bottom
+        bedDrawerRight.children[0].position.setZ(bedTops[1].position.z - bedDrawerRight.children[0].scale.z / 2 - bedDrawerRight.children[4].scale.z - bedTops[1].scale.z / 2-0.5*ftTom/24); // bottom
 
         bedDrawerRight.children[1].position.setX(-bedDrawerRight.children[0].scale.x / 2 - bedDrawerRight.children[1].scale.x / 2); // left
         bedDrawerRight.children[1].position.setZ(bedDrawerRight.children[0].position.z); // left
