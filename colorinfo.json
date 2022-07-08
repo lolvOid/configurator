@@ -5,28 +5,52 @@
         "americanwalnut": "#af6633"
     },
     "online": {
+
+       
+
+
+
+
+
+
+
+
         "wood": {
             "wood_a": {
-                "albedo": "https://i.ibb.co/3vw3ycT/4-K-ovankol-basecolor.jpg",
-                "normal": "https://i.ibb.co/88rHDSj/4-K-ovankol-normal.jpg",
-                "ao": "https://i.ibb.co/17vjv8z/4-K-ovankol-ao.jpg",
-                "roughness": "https://i.ibb.co/84sT4Cx/4-K-ovankol-roughness.jpg",
-                "height": "https://i.ibb.co/YLW5xT2/4-K-ovankol-height.jpg"
+                "albedo": "https://i.ibb.co/9tBsLM6/4-K-ovankol-basecolor.jpg",
+                "normal": "https://i.ibb.co/7CBj8Gt/4-K-ovankol-normal.jpg",
+                "ao": "https://i.ibb.co/nQNQQMz/4-K-ovankol-ao.jpg",
+                "roughness": "https://i.ibb.co/2Spq0pJ/4-K-ovankol-roughness.jpg",
+                "height": "https://i.ibb.co/W3WwNpk/4-K-ovankol-height.jpg",
+                "cherry":"https://i.ibb.co/KqNp4HQ/4-K-ovankol-basecolor-2.jpg",
+                "walnut":"https://i.ibb.co/DWRCw2D/4-K-ovankol-basecolor-3.jpg",
+                "natural":"https://i.ibb.co/m6yZv4n/4-K-ovankol-basecolor-1.jpg"
             },
             "wood_b": {
-                "albedo": "https://i.ibb.co/pJpMPfW/4-K-american-oak-1-basecolor.jpg",
-                "normal": "https://i.ibb.co/zJzThGX/4-K-american-oak-1-normal.jpg",
-                "ao": "https://i.ibb.co/88fkCzn/4-K-american-oak-1-ao.jpg",
-                "roughness": "https://i.ibb.co/ZLxDHzj/4-K-american-oak-1-roughness.jpg",
-                "height": "https://i.ibb.co/Rp1ZphF/4-K-american-oak-1-height.jpg"
+                "albedo": "https://i.ibb.co/m9nBdhn/4-K-american-oak-1-basecolor.jpg",
+                "normal": "https://i.ibb.co/yq9CVR9/4-K-american-oak-1-normal.jpg",
+                "ao": "https://i.ibb.co/HgBHQ9n/4-K-american-oak-1-ao.jpg",
+                "roughness": "https://i.ibb.co/D1Rypjg/4-K-american-oak-1-roughness.jpg",
+                "height": "https://i.ibb.co/5RBkMcY/4-K-american-oak-1-height.jpg",
+                "cherry":"https://i.ibb.co/wMZjpWZ/4-K-american-oak-1-basecolor-2.jpg",
+                "walnut":"https://i.ibb.co/sKW7krL/4-K-american-oak-1-basecolor-3.jpg",
+                "natural":"https://i.ibb.co/RTnJTCB/4-K-american-oak-1-basecolor-1.jpg"
             },
             "wood_c": {
-                "albedo": "https://i.ibb.co/yFMTSCM/4-K-anzem-basecolor.jpg",
-                "normal": "https://i.ibb.co/zGds2Th/4-K-anzem-normal.jpg",
-                "ao": "https://i.ibb.co/RcDBBMP/4-K-anzem-ao.jpg",
-                "roughness": "https://i.ibb.co/zNZ8q4q/4-K-anzem-roughness.jpg",
-                "height": "https://i.ibb.co/ZfmcD2g/4-K-anzem-height.jpg"
+                "albedo": "https://i.ibb.co/pbwk7kG/4-K-anzem-basecolor.jpg",
+                "normal": "https://i.ibb.co/W06XtMF/4-K-anzem-normal.jpg",
+                "ao": "https://i.ibb.co/jbJyM8b/4-K-anzem-ao.jpg",
+                "roughness": "https://i.ibb.co/FhjzHff/4-K-anzem-roughness.jpg",
+                "height": "https://i.ibb.co/7XxkhPY/4-K-anzem-height.jpg",
+                "cherry":"https://i.ibb.co/RCYGybF/4-K-anzem-basecolor-2.jpg",
+                "walnut":" https://i.ibb.co/LgdCPBm/4-K-anzem-basecolor-3.jpg",
+                "natural":"https://i.ibb.co/Dz0FGDC/4-K-anzem-basecolor-1.jpg"
             }
+      
+            
+            
+            
+
         }
     },
     "offline": {
