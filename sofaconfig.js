@@ -2622,7 +2622,7 @@ setInterval(function(){
                  
                 }
                 if(e.name.includes("Hours")){
-                    e.rotation.z = d.getHours()* -30* Math.PI / 180;
+                    e.rotation.z = d.getHours()* -36* Math.PI / 180;
                     console.log( d.getMinutes())
                 }
             }
