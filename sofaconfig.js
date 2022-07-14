@@ -2613,23 +2613,23 @@ setInterval(function(){
             if(e instanceof THREE.Object3D){
                 if(e.name.includes("Minutes")){
                        
-                    e.rotation.z = d.getMinutes()* (-6)* Math.PI / 180;
+                    e.rotation.z =  d.getMinutes()*-6 * Math.PI / 180;
                    
                     // minuteHand.rotation.y = (((-now / 60000)%60 * 6) * Math.PI / 180);
                     // hourHand.rotation.y = (((-now / 3600000)%12 * 30) * Math.PI / 180);
                 }
                 if(e.name.includes("Seconds")){
-                    e.rotation.z = d.getSeconds()* -6 *  Math.PI / 180;
+                    e.rotation.z = d.getSeconds() * -6  * Math.PI / 180;
                  
                 }
                 if(e.name.includes("Hours")){
-                    e.rotation.z = d.getHours()* -36* Math.PI / 180;
-                    console.log( d.getMinutes())
+                    e.rotation.z = -d.getHours()*12*3  * Math.PI / 180;
+                  
                 }
             }
         })
     }
-  
+    console.log( (((-now / 60000)%60 * 6)) )
     /*
     secondHand.rotation.y = (((-now / 1000)%60 * 6) * Math.PI / 180);
     minuteHand.rotation.y = (((-now / 60000)%60 * 6) * Math.PI / 180);
