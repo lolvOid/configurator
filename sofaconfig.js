@@ -2376,7 +2376,7 @@ function updateRoomMaterial(room){
                        mat.roughness =0.05;
                      }
                     if(mat.name.includes("Wall") || mat.name.includes("WindowFrame")){
-                       mat.color.set("#8d8d8d")
+                       mat.color.set("#8f8075")
                     }
 
                     if(mat.name.includes("Glass")){
@@ -2614,23 +2614,23 @@ setInterval(function(){
             if(e instanceof THREE.Object3D){
                 if(e.name.includes("Minutes")){
                        
-                    e.rotation.z =  d.getMinutes()*-6 * Math.PI / 180;
+                    e.rotation.z = -(d.getMinutes()*Math.PI/30)+(d.getSeconds()*Math.PI/(30*60))
                    
                     // minuteHand.rotation.y = (((-now / 60000)%60 * 6) * Math.PI / 180);
                     // hourHand.rotation.y = (((-now / 3600000)%12 * 30) * Math.PI / 180);
                 }
                 if(e.name.includes("Seconds")){
-                    e.rotation.z = d.getSeconds() * -6  * Math.PI / 180;
+                    e.rotation.z = -d.getSeconds()*Math.PI/30;
                  
                 }
                 if(e.name.includes("Hours")){
-                    e.rotation.z = -d.getHours()*12*3  * Math.PI / 180;
-                  
+                    e.rotation.z =-d.getHours()%12* Math.PI / 6;
+                    console.log(d.getHours()%12)
                 }
             }
         })
     }
-    console.log( (((-now / 60000)%60 * 6)) )
+ 
     /*
     secondHand.rotation.y = (((-now / 1000)%60 * 6) * Math.PI / 180);
     minuteHand.rotation.y = (((-now / 60000)%60 * 6) * Math.PI / 180);
