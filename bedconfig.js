@@ -1521,9 +1521,21 @@ function updateRoomMaterial(room) {
                 }
 
                 if (mat.name.includes("Curtain")) {
+                    // mat.color.set("#050505")
+                    mat.color.set("#6a5430")
+                    mat.transparent = true;
+                    mat.opacity = 0.8;
+                    mat.normalScale = new THREE.Vector2(3, 3)
+
+                    mat.roughness = 0.7;
+             
+
+                }
+                if (mat.name.includes("CurtainCover")) {
                     mat.color.set("#050505")
 
-
+                    mat.transparent = false;
+                 
                     mat.normalScale = new THREE.Vector2(3, 3)
 
                     mat.roughness = 0.7;
