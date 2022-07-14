@@ -12,6 +12,7 @@ let scene,
     controls;
 let css2DRenderer, css3DRenderer, css2DRenderer2;
 
+var floorCubeCamera, floorCubeMap, roomCubeCamera, roomCubeMap;
 const viewer = document.getElementById("modelviewer");
 const dimensionviewer = document.getElementById("dimensionViewer2");
 
@@ -59,7 +60,11 @@ var btnMinus = texLoader.load("assets/minus_white.png");
 
 var pmremGenerator;
 
-let ssaoPass;
+let lightProbe;
+var envMap;
+let ssaoPass, saoPass;
+
+
 
 var thicknessInmeter = 0.022225;
 
@@ -170,35 +175,36 @@ var hArrowL, hArrowR, vArrowUpL, vArrowDownL, vArrowUpR, vArrowDownR, hLeftLabel
 var d = [],
     leftV = [],
     rightV = [];
-
+var livingRoom;
 init();
 
 animate();
 
-dimensionviewer.hidden = false;
+dimensionviewer.hidden = true;
 
 function getInputs() {
-    $("#btn").click(function () {});
+    // $("#btn").click(function () {});
 
     $("#export").click(function () {
         Export();
+
     });
 
     $("input:radio[name='heightOptions']").click(function () {
         sHeight = $(this).val();
-
+        updateCubeMap();
     });
 
     $("#selectSofa").change(function () {
         sofaType = $(this).children("option:selected").val();
-
+        updateCubeMap();
     });
     $("#removeL").click(function () {
             for(var i = leftV.length-1;i>=0;i--){
                 removeSofas(Math.round(leftV[i].id))
             }
            
-
+            updateCubeMap();
          
     })
     $("#removeR").click(function () {
@@ -207,7 +213,7 @@ function getInputs() {
             removeSofas(Math.round(rightV[i].id))
         }
 
-     
+        updateCubeMap();
 })  
 
 
@@ -221,7 +227,7 @@ function getInputs() {
         removeSofas(rightCornerIndex);
         checkDistance();
         manipulateSofa();
-
+        updateCubeMap();
     })
 }
 
@@ -234,10 +240,10 @@ function init() {
     window.scene = scene;
     THREE.Cache.enabled = true;
 
-    font = new THREE.FontLoader().load(
-        "./assets/fonts/helvetiker_regular.typeface.json"
-    );
-    camera = new THREE.PerspectiveCamera(25, fwidth / fheight, 0.01, 100);
+    // font = new THREE.FontLoader().load(
+    //     "./assets/fonts/helvetiker_regular.typeface.json"
+    // );
+    camera = new THREE.PerspectiveCamera(30, fwidth / fheight, 0.01, 100);
 
     camera.position.set(0, 5, 25);
     camera.aspect = fwidth / fheight;
@@ -251,8 +257,8 @@ function init() {
         1000
     );
 
-    // orthoCameraTop.rotation.z = 180*THREE.Math.DEG2RAD;
-    orthoCameraTop.rotation.x = -90 * THREE.Math.DEG2RAD;
+    // orthoCameraTop.rotation.z = 180*THREE.MathUtils.DEG2RAD;
+    orthoCameraTop.rotation.x = -90 * THREE.MathUtils.DEG2RAD;
     orthoCameraTop.position.y = 2;
     orthoCameraTop.position.z = 1.5;
     // orthoCameraTop.zoom = 250;
@@ -270,8 +276,8 @@ function init() {
 
     group = new THREE.Group();
 
-    create_lights();
-    createFloor();
+   
+    // createFloor();
 
     helpers();
 
@@ -289,13 +295,27 @@ function init() {
     renderer.setClearColor(0xffffff, 1);
     renderer.outputEncoding = THREE.sRGBEncoding;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.5;
+    renderer.toneMappingExposure = 2.2;
+    renderer.physicallyCorrectLights = true;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.compile(scene, camera);
 
-    pmremGenerator = new THREE.PMREMGenerator(renderer);
-    pmremGenerator.compileEquirectangularShader();
+
+    floorCubeMap = new THREE.WebGLCubeRenderTarget(512, {
+        generateMipmaps: true,
+        minFilter: THREE.LinearMipmapLinearFilter
+    });
+
+    roomCubeMap = new THREE.WebGLCubeRenderTarget(512, {
+        generateMipmaps: true,
+        minFilter: THREE.LinearMipmapLinearFilter
+    });
+
+    roomCubeCamera = new THREE.CubeCamera(0.1, 20, roomCubeMap);
+    floorCubeCamera = new THREE.CubeCamera(0.1, 20, floorCubeMap);
+    create_lights();
+
 
     dimensionRenderer = new THREE.WebGLRenderer({
         antialias: true,
@@ -355,7 +375,7 @@ function init() {
     controls.enableDamping = true;
 
     controls.minDistance = 8;
-    controls.maxDistance = 25;
+    controls.maxDistance = 10;
     controls.panSpeed = 0;
 
     controls.enableDamping = true;
@@ -364,11 +384,12 @@ function init() {
 
     controls.minPolarAngle = 0; // radians
     controls.maxPolarAngle = Math.PI / 2;
-    // controls.minAzimuthAngle = -Math.PI / 2;
-    // controls.maxAzimuthAngle = Math.PI / 2;
+    controls.minAzimuthAngle = -Math.PI / 16;
+    controls.maxAzimuthAngle = Math.PI / 16;
     window.addEventListener("resize", onWindowResize, true);
     document.addEventListener("pointermove", onPointerMove);
     document.addEventListener("click", onClick);
+    controls.addEventListener('change', updateCubeMap);
 
     controls.saveState();
 
@@ -378,7 +399,7 @@ function init() {
 
     getInputs();
     // createArmRest();
-    loadSofa();
+    loadModel();
     
 }
 
@@ -490,8 +511,10 @@ function chooseSofaDesign(type) {
 
 function update() {
    
-    controls.update();
-    updateFloor();
+
+
+   
+    // updateFloor();
 
     var singles = sofas.filter((sofas) => sofas.name == sofa.single.name);
     var chaiseL = sofas.filter((sofas) => sofas.name == sofa.chaiseL.name);
@@ -616,8 +639,10 @@ function update() {
     createMeasurementsWidth(leftIndexs[leftIndexs.length - 1], rightIndexs[rightIndexs.length - 1])
     createMeasurementsHeightLeft(leftIndexs[leftIndexs.length - 1], rightIndexs[rightIndexs.length - 1])
     createMeasurementsHeightRight(leftIndexs[leftIndexs.length - 1], rightIndexs[rightIndexs.length - 1])
+
+    updateRoom();
     delta = clock.getDelta();
-    dimensionviewer.hidden = false;
+    dimensionviewer.hidden = true;
     if (isMeasured) {
         // viewer.hidden = true;
         dimensionviewer.hidden = false;
@@ -631,6 +656,12 @@ function update() {
         $(".downloadDimension").hide();
         $("input:radio[name='renderOptions']").prop("disabled", false);
     }
+    if(camera instanceof THREE.PerspectiveCamera){
+        camera.fov = 30+sofaCount/10;
+        camera.updateProjectionMatrix();
+    }
+    controls.maxDistance = (10+leftverticalSingleCount/100)
+    controls.update();
 }
 
 function addArmrestsOnRemovedCorners() {
@@ -684,36 +715,144 @@ function render() {
 
     css2DRenderer2.render(scene, camera);
 
+    roomCubeCamera.position.copy(camera.position.clone())
+    floorCubeCamera.position.copy(camera.position.clone());
+
+    floorCubeCamera.position.y *= -1;
     composer.render();
     css3DRenderer.render(scene, camera);
+
 }
 
+function setLighting() {
+
+    lightProbe = new THREE.LightProbe();
+    scene.add(lightProbe);
+
+    const pmremGenerator = new THREE.PMREMGenerator(renderer);
+    pmremGenerator.compileCubemapShader();
+
+    // envmap
+    const genCubeUrls = function (prefix, postfix) {
+
+        return [
+            prefix + 'px' + postfix, prefix + 'nx' + postfix,
+            prefix + 'py' + postfix, prefix + 'ny' + postfix,
+            prefix + 'pz' + postfix, prefix + 'nz' + postfix
+        ];
+
+    };
+
+    const urls = genCubeUrls('hdri/garden/', '.png');
+
+    envMap = new THREE.CubeTextureLoader().load(urls, function (cubeTexture) {
+
+        cubeTexture.encoding = THREE.sRGBEncoding;
+        var map = pmremGenerator.fromCubemap(cubeTexture).texture;
+
+
+        scene.background = map;
+
+
+        // var blurred = pmremGenerator.fromScene(scene, 1).texture;
+        scene.environment = map;
+        floorCubeCamera.update(renderer, scene);
+
+
+
+
+
+        roomCubeCamera.update(renderer, scene);
+
+        lightProbe.copy(THREE.LightProbeGenerator.fromCubeRenderTarget(renderer, roomCubeMap));
+
+
+        cubeTexture.dispose();
+        pmremGenerator.dispose();
+        // return map;
+
+    });
+
+
+    //    var env = new THREE.RGBELoader()
+    //         .setDataType(THREE.UnsignedByteType)
+    //         .setPath('./hdri/')
+    //         .load('brown_photostudio_02_4k.hdr', function (texture) {
+    //         texture.encoding  =  THREE.sRGBEncoding;
+    //         var map = pmremGenerator.fromEquirectangular(texture).texture;
+    //         scene.background = map;
+    //         texture.mapping = THREE.EquirectangularReflectionMapping;
+    //         lightProbe.copy( THREE.LightProbeGenerator.fromCubeTexture( texture ) );
+
+
+    //         var blurred = pmremGenerator.fromScene(scene,0.0035).texture;
+
+    //         scene.environment = blurred;
+    //             texture.dispose();
+    //             pmremGenerator.dispose();
+    //             return blurred;
+    //         })
+
+
+}
 function create_lights() {
-    scene.add( new THREE.AmbientLight( 0x6d6d6d,0.5) );
+    setLighting();
+    scene.add(new THREE.AmbientLight(0xfcedd8, 0.5));
 
-    const light = new THREE.DirectionalLight( 0xababab, 1.35);
-    light.position.set( 2, 8, 4 );
+    const light = new THREE.DirectionalLight(0xfdfbd3, 4);
 
+    if (livingRoom) {
+        light.target = livingRoom;
+    }
+    light.position.set(-11, 8, -4);
+    // light.position.set(10, 8, 4);
     light.castShadow = true;
-    light.shadow.mapSize.width = 2048;
-    light.shadow.mapSize.height = 2048;
-    light.shadow.camera.far = 20;
-	
-    scene.add( light );
+    light.shadow.radius = 0.4;
+    light.shadow.mapSize.width = 1024;
+    light.shadow.mapSize.height = 1024;
+    // light.shadow.camera.near = 0.5; // default
+    light.shadow.autoUpdate = true;
+    const d = 20;
 
-    var bulbLight = new THREE.PointLight( 0xfdfdfd, 1, 100, 1 );
-    bulbLight.position.set( 0, 2, 2 );
+    light.shadow.camera.left = - d;
+    light.shadow.camera.right = d;
+    light.shadow.camera.top = d;
+    light.shadow.camera.bottom = - d;
+    // scene.add(new THREE.CameraHelper(light.shadow.camera))
+    light.shadow.needsUpdate = true;
+
+
+    scene.add(light);
+
+    // var areaLight = new THREE.RectAreaLight(0xffe8c9, 2, 3, 3);
+    // areaLight.rotation.x = -Math.PI / 2;
+    // areaLight.position.set(0, 3, 2)
+    // scene.add(areaLight);
+
+    var bulbLight = new THREE.PointLight(0xfdfdfd, 1, 5, 2);
+    bulbLight.position.set(0, 2, 2);
     bulbLight.castShadow = true;
-   
-    bulbLight.shadow.mapSize.width = 2048;
-    bulbLight.shadow.mapSize.height = 2048;
-    bulbLight.shadow.camera.far = 10;
-    // scene.add( bulbLight );
+
+    bulbLight.shadow.mapSize.width = 512;
+    bulbLight.shadow.mapSize.height = 512;
+    // bulbLight.shadow.camera.far = 10;
+    bulbLight.shadow.radius = 0.4;
+    scene.add(bulbLight)
+
+    var bulbLight2 = new THREE.PointLight(0xfdfdfd, 0.5, 5, 0);
+    bulbLight2.position.set(0, 2, 2);
+    bulbLight2.castShadow = true;
+
+    bulbLight2.shadow.mapSize.width = 512;
+    bulbLight2.shadow.mapSize.height = 512;
+    // bulbLight.shadow.camera.far = 10;
+    bulbLight2.shadow.radius = 0.4;
+    scene.add(bulbLight2)
 
 
 
-    hemiLight = new THREE.HemisphereLight( 0xddeeff, 0x0f0e0d, 0.2 );
-    scene.add( hemiLight );
+    // var hemiLight = new THREE.HemisphereLight(0xddeeff, 0x0f0e0d, 0.2);
+    // scene.add(hemiLight);
 }
 
 function createFloor() {
@@ -727,7 +866,7 @@ function createFloor() {
     floor.position.set(0, 0, 0);
     floor.receiveShadow = true;
 
-    floor.rotateX(-90 * THREE.Math.DEG2RAD);
+    floor.rotateX(-90 * THREE.MathUtils.DEG2RAD);
     scene.add(floor);
 }
 
@@ -747,48 +886,32 @@ function post_process() {
     const copyPass = new THREE.ShaderPass(THREE.CopyShader);
     composer.addPass(copyPass);
 
+    
+    saoPass = new THREE.SAOPass(scene, camera, false, true);
+
+    saoPass.params = {
+        output: 0,
+        saoBias: 0.15,
+        saoIntensity: 0.011,
+        saoScale: 2,
+        saoKernelRadius: 80,
+        saoMinResolution: 0,
+        saoBlur: true,
+        saoBlurRadius: 8,
+        saoBlurStdDev: 4,
+        saoBlurDepthCutoff: 0.1
+    };
+
+
+    // composer.addPass(saoPass);
     ssaoPass = new THREE.SSAOPass(scene, camera, fwidth, fheight);
     ssaoPass.kernalRadius = 16;
-    ssaoPass.minDistance = 0.005;
-    ssaoPass.maxDistance = 0.1;
+    ssaoPass.minDistance = 0.1;
+    ssaoPass.maxDistance = 0.2;
 
     // composer.addPass(ssaoPass);
 
-    outlinePass = new THREE.OutlinePass(
-        new THREE.Vector2(fwidth, fheight),
-        scene,
-        camera
-    );
-    outlinePass.edgeStrength = 16;
-    outlinePass.edgeGlow = 0;
-    outlinePass.edgeThickness = 0.5;
-    outlinePass.pulsePeriod = 0;
-
-    planeOultinePass = new THREE.OutlinePass(
-        new THREE.Vector2(fwidth, fheight),
-        scene,
-        camera
-    );
-    planeOultinePass.edgeStrength = 16;
-    planeOultinePass.edgeGlow = 0;
-    planeOultinePass.edgeThickness = 0.5;
-    planeOultinePass.pulsePeriod = 0;
-
-    doorOutlinePass = new THREE.OutlinePass(
-        new THREE.Vector2(fwidth, fheight),
-        scene,
-        camera
-    );
-    doorOutlinePass.edgeStrength = 16;
-    doorOutlinePass.edgeGlow = 0;
-    doorOutlinePass.edgeThickness = 0.5;
-    doorOutlinePass.pulsePeriod = 0;
-    // outlinePass.visibleEdgeColor.set("#ff0000");
-
-    // outlinePass.hiddenEdgeColor.set("#ff0000");
-    composer.addPass(outlinePass);
-    composer.addPass(planeOultinePass);
-    composer.addPass(doorOutlinePass);
+   
     fxaaPass = new THREE.ShaderPass(THREE.FXAAShader);
 
     fxaaPass.material.uniforms["resolution"].value.x = 1 / (fwidth * pixelRatio);
@@ -857,12 +980,14 @@ function helpers() {
     }
 
     function Export() {
-        floor.visible = false;
-        add_btn_group.visible = false;
-        remove_btn_group.visible = false;
+      
+        // add_btn_group.visible = false;
+        // remove_btn_group.visible = false;
+        
         // Parse the input and generate the glTF output
         exporter.parse(
-            scene,
+            
+            sofas            ,
             // called when the gltf has been generated
             function (gltf) {
                 if (gltf instanceof ArrayBuffer) {
@@ -872,10 +997,10 @@ function helpers() {
                     console.log(output);
                     saveString(output, "sofa.gltf");
 
-                    floor.visible = true;
+                    // floor.visible = true;
 
-                    add_btn_group.visible = true;
-                    remove_btn_group.visible = true;
+                    // add_btn_group.visible = true;
+                    // remove_btn_group.visible = true;
                 }
             },
             // called when there is an error in the generation
@@ -2061,9 +2186,9 @@ function loadAsync(url) {
 
 }
 
-function loadSofa() {
+function loadModel() {
 
-    let p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16;
+    let p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, room;
 
     manager.onStart = function (url, itemsLoaded, itemsTotal) {
 
@@ -2147,6 +2272,9 @@ function loadSofa() {
     p16 = loadAsync("models/sofas/sofa/components/leg.gltf").then((result) => {
         sofa.leg = result.scene.children[0];
     });
+    room = loadAsync("models/room/livingroom.gltf").then((result) => {
+        livingRoom = result.scene.children[0];
+    });
 
     Promise.all([
         p1,
@@ -2165,7 +2293,10 @@ function loadSofa() {
         p14,
         p15,
         p16,
+        room
     ]).then(() => {
+
+        setRoom(livingRoom)
         setSofa(sofa.single);
         setSofa(sofa.armrestL);
         setSofa(sofa.armrestR);
@@ -2188,17 +2319,337 @@ function loadSofa() {
 
         hSingleCount += 1;
         addButton();
-
-
+        // createSphere()
+        updateCubeMap();
 
     });
 }
 
+function updateCubeMap() {
+    floorCubeCamera.update(renderer, scene);
+    roomCubeCamera.update(renderer, scene);
+}
+function setTexture(texture = new THREE.Texture(), repeatX = 1, repeatY = 1) {
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.x = repeatX;
+    texture.repeat.y = repeatY;
+    texture.encoding = THREE.sRGBEncoding;
+    texture.needsUpdate = true;
+    // texture.encoding = THREE.sRGBEncoding
+}
+function setRoom(objA){
+    if(objA instanceof THREE.Object3D){
+        objA.layers.set(1);
+    }
+    objA.traverse(function (e) {
+        if (e instanceof THREE.Mesh) {
+           
+            e.castShadow = true;
+            e.receiveShadow = true;
+        }
+    });
+    updateRoomMaterial(objA);
+    scene.add(objA);
+}
+function updateRoomMaterial(room){
+    if(room!=null){
+        if(room instanceof THREE.Object3D){
+            room.traverse(e=>{
+                var mat = e.material;
+                if(mat instanceof THREE.MeshStandardMaterial){
+                    // if(mat.map){
+                    //     setTexture(mat.map,1,1);
+                        
+                    // }
+                    if(mat.name.includes("PDM Leaf Monstera")){
+                        mat.color.set("#2d5c00")
+                        mat.aoMap = null;
+                        mat.normalScale = new THREE.Vector2(2,2)
+                    }
+                    if(mat.name.includes("Pot") ){
+                        mat.color.set("#8d8d8d")
+                        mat.envMap = roomCubeMap.texture;
+                       mat.envMapIntensity = 1;
+                       mat.roughness =0.05;
+                     }
+                    if(mat.name.includes("Wall") || mat.name.includes("WindowFrame")){
+                       mat.color.set("#8d8d8d")
+                    }
 
+                    if(mat.name.includes("Glass")){
+                        mat.side = THREE.BackSide;
+                        // mat.envMap = roomCubeMap.texture;
+                        mat.opacity = 0.5;
+                        mat.roughness = 0;
 
+                    }
+                    if(mat.name.includes("Clock")){
+                    
+                        mat.color.set("#fefefe");
+                        mat.roughness = 0.5;
+                        mat.metalness = 1;
+                    }
+                    if(mat.name.includes("blinn1")){
+                    
+                        mat.color.set("#5e5e5e");
+                        mat.roughness = 0.5;
+                        mat.metalness = 1;
+                    }
+                    if(mat.name.includes("Curtain")){
+                        mat.side = THREE.DoubleSide;
+                        mat.transparent = true;
+                        mat.opacity = 0.8;
+                        // mat.color.set("#");
+                        mat.normalScale = new THREE.Vector2(2,2)
+                    }
+
+                    if(mat.name.includes("Floor")){
+                       mat.envMap = floorCubeMap.texture;
+                       mat.envMapIntensity = 0.5;
+                       mat.roughness =0.05;
+                       mat.side = THREE.FrontSide;
+                       
+                    }
+                    if(mat.name.includes("leg")){
+                     
+                        mat.roughness = 0.5;
+                      
+                        
+                    }
+                    if(mat.name.includes("WindowPole")){
+                        mat.color.set("#0d0d0d")
+                        mat.roughness = 0.5;
+                        mat.metalness = 0.5;
+                        
+                    }
+                    if(mat.name.includes("[Wood Floor Light]1")){
+                        mat.color.set("#ffffff")
+                        mat.roughness = 0.5;
+                        mat.metalness = 0.5;
+                        
+                    }
+                    if(mat.name.includes("[Metal_Corrogated_Shiny]1")){
+                        mat.envMap = roomCubeMap.texture;
+                        mat.envMapIntensity = 1;
+                        mat.color.set("#ffffff")
+                        mat.roughness =0;
+                        mat.opacity = 0.6;
+                    }
+                    if(mat.name.includes("*2")){
+                        mat.envMap = roomCubeMap.texture;
+                        mat.envMapIntensity = 1;
+                        mat.roughness = 0;
+
+                        
+                    }
+                }
+                
+            })
+        }
+     }
+}
+
+function createSphere(){
+    var g = new THREE.SphereGeometry(0.5);
+    var m = new THREE.MeshStandardMaterial({color:0xff0000});
+    sphere = new THREE.Mesh(g,m);
+    scene.add(sphere)
+
+}
+function updateRoom(){
+    try{
+        var left_sofaIndex,right_sofaIndex,mid_sofaIndex,hSofas = [];
+        var horizontalSofas  = sofas.filter((sofas) => sofas.rotation.y == 0);
+        var hSofaCount = horizontalSofas.length;
+        for (let i in sofas) {
+            if (hSingleCount > 0) {
+    
+                if (( sofas[i].rotation.y == 0) && sofas[i].name != sofa.ottoman.name ) {
+    
+    
+                    //Horizontal Sofa
+                    var dist = sofas[i].position.x - sofas[leftIndexHorizontal].position.x;
+    
+                    if (dist >= 0) {
+    
+                        if (!hSofas.includes(dist.toFixed(1))) {
+                            hSofas.push({
+                                "id": i,
+                                "dist": dist.toFixed(1)
+                            });
+                        }
+    
+                        hSofas = sortByKey(hSofas, "dist")
+    
+    
+    
+                    }
+                }
+          
+    
+    
+            }
+    
+            
+        }
+        
+       
+        leftIndexs.forEach(function (l) {
+            if (sofas.includes(sofas[l])) {
+               
+                    if (sofas[l].rotation.y == 0) {
+                       
+                        left_sofaIndex = leftIndexs[leftIndexs.length-1];
+                        
+    
+    
+                    }
+                
+            }
+        });
+    
+        rightIndexs.forEach(function (l) {
+            if (sofas.includes(sofas[l])) {
+              
+                    if (sofas[l].rotation.y == 0) {
+                        
+                        right_sofaIndex = rightIndexs[rightIndexs.length-1];
+                        
+    
+    
+                    }
+                
+            }
+        });
+        if(hSofaCount%2==0){
+    
+        }
+            mid_sofaIndex = hSofas[Math.floor((hSofas.length-1) / 2)];
+            var mid_sofaIndexNext = hSofas[Math.ceil((hSofas.length-1) / 2)];
+            var sum = 0;
+            sofas.forEach(e => {
+                sum += e.position.x;
+                
+            });
+           
+        
+                // var pos = (sofas[mid_sofaIndexNext.id].position.x-sofas[mid_sofaIndex.id].position.x)/2;
+            
+    
+                if(hSofaCount%2==0){
+                    pos = sofas[mid_sofaIndexNext.id].position.x/2;
+                }else{
+                    pos = sofas[mid_sofaIndex.id].position.x;
+                }
+                var zDistance = 7*ftTom;
+                if(hSofaCount>3){
+                    zDistance = 6*ftTom;
+                }else{
+                    zDistance = 7*ftTom;
+                }
+                var yDistance = 0;
+                if (sofas.length > 0) {
+                    sofas.forEach(e => {
+            
+                        var leg = getChildfromSofa(e, "Legs", sofaType);
+                        if (sofaType < 4) {
+
+                            yDistance = -leg.size.y;
+                        } else {
+                            yDistance = leg.object.position.y;
+                        }
+            
+                    })
+                }
+                // sphere.position.setX(pos)
+        if(livingRoom!=null ){
+            livingRoom.position.set(0,0,0)
+            livingRoom.traverse(e=>{
+                if(e instanceof THREE.Object3D){
+                    
+    
+                    if(e.name.includes("BackWall") ){
+                        e.position.set(pos,yDistance,sofas[0].position.z - 3*ftTom)
+                        
+                    }
+                    if(e.name.includes("Floor") ){
+                        e.position.set(pos,yDistance,sofas[0].position.z - 3*ftTom)
+                    }
+                    if(e.name.includes("Ceiling") ){
+                        e.position.setX(pos);
+                        e.position.setZ(sofas[0].position.z - 3*ftTom);
+                    }
+               
+                    if(e.name.includes("RightWall")){
+                     
+                        e.position.setX(sofas[right_sofaIndex].position.x+zDistance)
+                        e.position.setZ(sofas[0].position.z - 3*ftTom)
+                        e.position.setY(yDistance);
+                    }
+                    if(e.name.includes("LeftWall")){
+                     
+                        e.position.setX(sofas[left_sofaIndex].position.x-zDistance)
+                        e.position.setY(yDistance);
+                        e.position.setZ(sofas[0].position.z - 3*ftTom)
+                    }
+                    
+                 
+                }
+           })
+        }
+       
+    }catch(err){
+
+    }
+   
+}
+setInterval(function(){
+    var now = new Date().getTime();
+    var d = new Date();
+    if(livingRoom!=null){
+        livingRoom.traverse(e=>{
+            if(e instanceof THREE.Object3D){
+                if(e.name.includes("Minutes")){
+                       
+                    e.rotation.z = d.getMinutes()* (-6)* Math.PI / 180;
+                   
+                    // minuteHand.rotation.y = (((-now / 60000)%60 * 6) * Math.PI / 180);
+                    // hourHand.rotation.y = (((-now / 3600000)%12 * 30) * Math.PI / 180);
+                }
+                if(e.name.includes("Seconds")){
+                    e.rotation.z = d.getSeconds()* -6 *  Math.PI / 180;
+                 
+                }
+                if(e.name.includes("Hours")){
+                    e.rotation.z = d.getHours()* -30* Math.PI / 180;
+                    console.log( d.getMinutes())
+                }
+            }
+        })
+    }
+  
+    /*
+    secondHand.rotation.y = (((-now / 1000)%60 * 6) * Math.PI / 180);
+    minuteHand.rotation.y = (((-now / 60000)%60 * 6) * Math.PI / 180);
+    hourHand.rotation.y = (((-now / 3600000)%12 * 30) * Math.PI / 180);
+    */
+    
+    // $('#secRadTxt').val(((-now / 1000)%60 * 6) * Math.PI / 180);
+    // $('#secDegTxt').val((-now / 1000)%60 * 6);
+    
+    // $('#minRadTxt').val(((-now / 60000)%60 * 6) * Math.PI / 180);
+    // $('#minDegTxt').val((-now / 60000)%60 * 6);
+
+    // $('#hrRadTxt').val(((-now / 3600000)%12 * 30) * Math.PI / 180);
+    // $('#hrDegTxt').val((-now / 3600000)%12 * 30);
+    
+},1000);
 function setSofa(objA) {
     // objA.scale.set(0.01, 0.01, 0.01);
-
+    if(objA instanceof THREE.Object3D){
+        objA.layers.set(0);
+    }
     objA.traverse(function (e) {
         if (e instanceof THREE.Mesh) {
             e.geometry.normalizeNormals();
@@ -2736,6 +3187,7 @@ function onClick() {
     } else {
         removeContextMenu(selectedBtnParent);
     }
+    updateCubeMap();
 }
 
 function onPointerMove(event) {
@@ -3398,7 +3850,6 @@ function removeSofas(index) {
             armrests[1].visible =false;
         }
     }
-
 
 
 }

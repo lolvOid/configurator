@@ -16,66 +16,65 @@
    
    
     
+    <!-- <script src="./threejs/build/three.js"></script> -->
 
-    <script src="./threejs/build/three.js"></script>
-    <!-- <script src="https://unpkg.com/three@0.124.0/build/three.min.js"></script>
-    <script src="https://unpkg.com/three@0.124.0/examples/js/exporters/GLTFExporter.js"></script>
-    <script src="https://unpkg.com/three@0.124.0/examples/js/controls/OrbitControls.js"></script>
-    <script src="https://unpkg.com/three@0.124.0/examples/js/exporters/GLTFExporter.js"></script>
-    <script src="https://unpkg.com/three@0.124.0/examples/js/loaders/RGBELoader.js"></script>
-    <script src="https://unpkg.com/three@0.124.0/examples/js/loaders/GLTFLoader.js"></script>
-    <script src="https://unpkg.com/three@0.124.0/examples/js/postprocessing/EffectComposer.js"></script>
-    <script src="https://unpkg.com/three@0.124.0/examples/js/postprocessing/SSAARenderPass.js"></script>
-    <script src="https://unpkg.com/three@0.124.0/examples/js/shaders/FXAAShader.js"></script>
-    <script src="https://unpkg.com/three@0.124.0/examples/js/postprocessing/RenderPass.js"></script>
-    <script src="https://unpkg.com/three@0.124.0/examples/js/postprocessing/ShaderPass.js"></script>
-    <script src="https://unpkg.com/three@0.124.0/examples/js/postprocessing/OutlinePass.js"></script>
-    <script src="https://unpkg.com/three@0.124.0/examples/js/shaders/SSAOShader.js"></script>
-    <script src="https://unpkg.com/three@0.124.0/examples/js/shaders/CopyShader.js"></script>
-    <script src="https://unpkg.com/three@0.124.0/examples/js/math/SimplexNoise.js"></script>
-    <script src="https://unpkg.com/three@0.124.0/examples/js/postprocessing/SSAOPass.js"></script>
-    <script src="https://unpkg.com/three@0.124.0/examples/js/postprocessing/SSAARenderPass.js"></script>
-    <script src="https://unpkg.com/three@0.124.0/examples/js/shaders/HorizontalBlurShader.js"></script>
-    <script src="https://unpkg.com/three@0.124.0/examples/js/shaders/VerticalBlurShader.js"></script>
-    <script src="https://unpkg.com/three@0.124.0/examples/js/shaders/SMAAShader.js"></script>
-    <script src="https://unpkg.com/three@0.124.0/examples/js/postprocessing/SMAAPass.js"></script>
-    <script src="https://unpkg.com/three@0.124.0/examples/js/loaders/STLLoader.js"></script>
-    <script src="https://unpkg.com/three@0.124.0/examples/js/loaders/STLLoader.js"></script> -->
+    <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js"
+    integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="anonymous"></script>
+
+    <script src="https://unpkg.com/three@0.142.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/libs/stats.min.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/lights/LightProbeGenerator.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/exporters/GLTFExporter.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/exporters/GLTFExporter.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/loaders/RGBELoader.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/objects/ReflectorForSSRPass.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/objects/Reflector.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/shaders/SSRShader.js"></script>
     
+    <script src="https://unpkg.com/three@0.142.0/examples/js/postprocessing/SSRPass.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/postprocessing/SSAARenderPass.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/shaders/FXAAShader.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/postprocessing/ShaderPass.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/postprocessing/OutlinePass.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/shaders/SSAOShader.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/shaders/CopyShader.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/math/SimplexNoise.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/shaders/UnpackDepthRGBAShader.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/shaders/DepthLimitedBlurShader.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/shaders/SAOShader.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/postprocessing/SAOPass.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/postprocessing/SSAOPass.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/postprocessing/SSAARenderPass.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/misc/ProgressiveLightMap.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/shaders/GammaCorrectionShader.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/shaders/HorizontalBlurShader.js"></script>
+
+    <script src="https://unpkg.com/three@0.142.0/examples/js/shaders/VerticalBlurShader.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/shaders/SMAAShader.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/postprocessing/LUTPass.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/loaders/LUTCubeLoader.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/loaders/LUT3dlLoader.js"></script>
+  
+    <script src="https://unpkg.com/three@0.142.0/examples/js/postprocessing/SMAAPass.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/loaders/STLLoader.js"></script>
+    
+    <!-- <script src="https://unpkg.com/three@0.142.0/examples/jsm/webxr/ARButton.js"></script> -->
     <script src="./threejs/renderers/CSS2DRenderer.js"></script>
     <script src="./threejs/renderers/CSS3DRenderer.js"></script>
     
-    <script src="./threejs/exporters/GLTFExporter.js"></script>
-    <script src="./threejs/controls/OrbitControls.js"></script>
-    <script src="./threejs/loaders/RGBELoader.js"></script>
-    <script src="./threejs/loaders/GLTFLoader.js"></script>
-    <script src="./threejs/postprocessing/EffectComposer.js"></script>
-    <script src="./threejs/postprocessing/SSAARenderPass.js"></script>
-    <script src="./threejs/shaders/FXAAShader.js"></script>
-    <script src="./threejs/postprocessing/RenderPass.js"></script>
-    <script src="./threejs/postprocessing/ShaderPass.js"></script>
-    <script src="./threejs/postprocessing/OutlinePass.js"></script>
-    <script src="./threejs/shaders/SSAOShader.js"></script>
-    <script src="./threejs/shaders/CopyShader.js"></script>
-    <script src="./threejs/math/SimplexNoise.js"></script>
-    <script src="./threejs/postprocessing/SSAOPass.js"></script>
-    <script src="./threejs/postprocessing/SSAARenderPass.js"></script>
-    <script src="./threejs/shaders/HorizontalBlurShader.js"></script>
-    <script src="./threejs/shaders/VerticalBlurShader.js"></script>
-    <script src="./threejs/shaders/SMAAShader.js"></script>
-    <script src="./threejs/postprocessing/SMAAPass.js"></script>
-    <script src="./threejs/loaders/FontLoader.js"></script>
-    <script src="./threejs/geometries/TextGeometry.js"></script>
-
-    
-
     
 
     
     <script src="./threejs/loaders/STLLoader.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    <script src="./threejs/THREE.CSG.js"></script>
-    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <!-- <script src="./threejs/THREE.CSG.js"></script> -->
+    <!-- <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script> -->
 
     <!-- <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script> -->
 </head>
