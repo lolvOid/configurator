@@ -803,31 +803,34 @@ function chooseHandleType(type){
        
     
         externalDrawerHandles.forEach(e => {
-            for(let i in e.children){
-                var parent = e.children[i];
-                if(type == i){
-                    parent.visible = true;
-                    parent.children.forEach(a=>{
-                        if(handleSize == 0){
-                            if(a.name.includes("Small")){
-                                a.visible = true;
-                            }else{
-                                a.visible = false;
-                            }
-                        }else{
-                            if(a.name.includes("Large")){
-                                a.visible = true;
-                            }else{
-                                a.visible = false;
-                            }
-                        }
-                       
-                    })
-                }else{
-                    parent.visible =false;
-                }
-
-            }  
+            if(e instanceof THREE.Object3D){
+                for(let i in e.children){
+                    var parent = e.children[i];
+                    if(type == i){
+                        parent.visible = true;
+                        // parent.children.forEach(a=>{
+                        //     // if(handleSize == 0){
+                        //         if(a.name.includes("Small")){
+                        //             a.visible = true;
+                        //         }else{
+                        //             a.visible = false;
+                        //         }
+                        //     // }else{
+                        //         if(a.name.includes("Large")){
+                        //             a.visible = true;
+                        //         }else{
+                        //             a.visible = false;
+                        //         }
+                        //     // }
+                           
+                        // })
+                    }else{
+                        parent.visible =false;
+                    }
+    
+                }  
+            }
+        
         });
 }
 function featuresControl() {
@@ -2342,13 +2345,34 @@ function   updateExternalDrawerSmallHandles(index){
         externalDrawerHandles_group.position.copy(_extDrawers_group.position);
        
         externalDrawerHandles[index].position.set(_extDrawers[index].position.x,_extDrawers[index].position.y,_extDrawers[index].position.z+_extDrawers[index].scale.z/2);
-       
+        var e = externalDrawerHandles[index];
+        if(e instanceof THREE.Object3D){
+            for(let i in e.children){
+                var parent = e.children[i];
+            
+                    
+                    parent.children.forEach(a=>{
+                       
+                            if(a.name.includes("Small")){
+                                a.visible = true;
+                            }else{
+                                a.visible = false;
+                            }
+                      
+                        
+                    })
+                
+
+            }  
+        }
+        
+        
     }
 }
 function removeExternalDrawerSmallHandles(index){
     if(index!=null){
         externalDrawerHandles.forEach(e => {
-            if (externalDrawerHandles[index] instanceof THREE.Mesh && externalDrawerHandles[index] == e) {
+            if (externalDrawerHandles[index] instanceof THREE.Object3D && externalDrawerHandles[index] == e) {
                 if (externalDrawerHandles_group instanceof THREE.Group) {
                     externalDrawerHandles_group.remove(e);
                 }
@@ -2357,14 +2381,18 @@ function removeExternalDrawerSmallHandles(index){
         externalDrawerHandles[index] = null;
 
       
-  
     }else {
 
-        externalDrawerHandles_group.clear();
-        scene.remove(externalDrawerHandles_group);
+        externalDrawerHandles.forEach(e => {
+            if (e instanceof THREE.Object3D) {
+                if (externalDrawerHandles_group instanceof THREE.Group) {
+                    externalDrawerHandles_group.remove(e);
+                    scene.remove(externalDrawerHandles_group);
+                }
+            }
+        })
         externalDrawerHandles = [];
-
-      
+        
 
     }
 
@@ -2384,6 +2412,7 @@ function  updateExternalDrawerInterior(index){
     extDrawerInterior_Group.position.copy(_extDrawers_group.position);
     if(extDrawerInterior[index] instanceof THREE.Object3D){
         var parent = _extDrawers[index];
+        console.log(_extDrawers[index].scale.x)
         var parentSize = new THREE.Box3().setFromObject(parent).getSize(new THREE.Vector3());
         var drawer = extDrawerInterior[index];
         drawer.position.copy(parent.position);
@@ -2439,9 +2468,9 @@ function  updateExternalDrawerInterior(index){
 }
 
 function removeExternalDrawerInterior(index){
-    if(index){
+    if(index!=null){
         extDrawerInterior.forEach(e => {
-            if (extDrawerInterior[index] instanceof THREE.Mesh && extDrawerInterior[index] == e) {
+            if (extDrawerInterior[index] instanceof THREE.Object3D && extDrawerInterior[index] == e) {
                 if (extDrawerInterior_Group instanceof THREE.Group) {
                     extDrawerInterior_Group.remove(e);
                 }
@@ -2449,8 +2478,14 @@ function removeExternalDrawerInterior(index){
         })
         extDrawerInterior[index] = null;
     }else{
-        extDrawerInterior_Group.clear();
-        scene.remove(extDrawerInterior_Group);           
+        extDrawerInterior.forEach(e => {
+            if (e instanceof THREE.Object3D) {
+                if (extDrawerInterior_Group instanceof THREE.Group) {
+                    extDrawerInterior_Group.remove(e);
+                    scene.remove(extDrawerInterior_Group);
+                }
+            }
+        })
         extDrawerInterior = [];
     
     }
@@ -4365,6 +4400,30 @@ function columnsCombination() {
                         b.scale.setX(sizeToChange);
                         b.position.setX(posToChange);
                         removeExternalDrawer(i + 1);
+                        updateExternalDrawerSmallHandles(i);
+                        updateExternalDrawerInterior(i);
+
+                        var e = externalDrawerHandles[i];
+                        if(e instanceof THREE.Object3D){
+                            for(let i in e.children){
+                                var parent = e.children[i];
+                            
+                                    
+                                    parent.children.forEach(a=>{
+                                    
+                                            if(a.name.includes("Large")){
+                                                a.visible = true;
+                                            }else{
+                                                a.visible = false;
+                                            }
+                                    
+                                        
+                                    })
+                                
+
+                            }  
+                        }
+
                     } else if (_extDrawers[i + 1]) {
                         var a = _extDrawers[i + 1];
                         var b = _extDrawers_splitters[i + 1];
@@ -4373,6 +4432,29 @@ function columnsCombination() {
                         b.scale.setX(sizeToChange);
                         b.position.setX(posToChange);
                         removeExternalDrawer(i);
+                        updateExternalDrawerSmallHandles(i+1);
+                        updateExternalDrawerInterior(i+1);
+                        var e = externalDrawerHandles[i+1];
+                        if(e instanceof THREE.Object3D){
+                            for(let i in e.children){
+                                var parent = e.children[i];
+                            
+                                    
+                                    parent.children.forEach(a=>{
+                                    
+                                            if(a.name.includes("Large")){
+                                                a.visible = true;
+                                            }else{
+                                                a.visible = false;
+                                            }
+                                    
+                                        
+                                    })
+                                
+
+                            }  
+                        }
+
                     }
 
 
@@ -4549,10 +4631,10 @@ function createHingedDoorHandles(index){
     if(handles!=null){
         var h = handles.clone();
         hingedDoorsHandles[index] = h;
-        // hingedDoorsHandles_group.name = "DoorHandles";
-        // hingedDoorsHandles_group.add(hingedDoorsHandles[index]);
-        _hDoors_parent[index].add(hingedDoorsHandles[index]); 
-        // scene.add(hingedDoorsHandles_group);
+        hingedDoorsHandles_group.name = "DoorHandles";
+        hingedDoorsHandles_group.add(hingedDoorsHandles[index]);
+        // _hDoors_parent[index].add(hingedDoorsHandles[index]); 
+        scene.add(hingedDoorsHandles_group);
     }
 }
 
@@ -4562,41 +4644,43 @@ function   updateHingedDoorsHandles(index){
         var parent = _hDoors_parent[index];
         // hingedDoorsHandles_group.position.set(offset / 2 + wLeft.position.x, smallIntDrawerHandles_group.position.y, smallIntDrawerHandles_group.position.z);
         var doorSize = new THREE.Box3().setFromObject(parent).getSize(new THREE.Vector3());
-        
-        
-        
-        hingedDoorsHandles[index].rotation.z = Math.PI/2;
-
-        if(_extDrawers.length>0){
-            hingedDoorsHandles[index].position.set(doorSize.x-ftTom/12, parent.position.y+doorSize.y/1.25,0);
+        hingedDoorsHandles[index].position.copy(parent.position)
+        hingedDoorsHandles[index].rotation.copy(parent.rotation)
+          if(_extDrawers.length>0){
+            hingedDoorsHandles[index].position.setY(parent.position.y+doorSize.y/1.25);
         }
         else{
-            hingedDoorsHandles[index].position.set(doorSize.x-ftTom/12,parent.position.y+doorSize.y/2,0);
+            hingedDoorsHandles[index].position.setY(parent.position.y+doorSize.y/2);
         }
+     
         
-        if(index%2==0){
-            hingedDoorsHandles[index].rotation.y =0;
-        }else{
-            hingedDoorsHandles[index].rotation.y = Math.PI;
+        hingedDoorsHandles[index].rotation.z = Math.PI/2;
+        for(let i in hingedDoorsHandles[index].children){
+            var d = hingedDoorsHandles[index].children[i];
+            console.log(offset)
+            d.position.set(0,-offset+2*ftTom/12,0);
+
+
+            if(index%2!=0){
+                d.rotation.y = Math.PI;
+            }
             
         }
-        // if(index%2==0){
-         
-        //     if(_extDrawers.length>0){
-        //         hingedDoorsHandles[index].position.set(0.325, _hDoors_parent[index].position.y+doorSize.y/1.25,0);
-        //     }else{
-        //         hingedDoorsHandles[index].position.set(0.325, _hDoors_parent[index].position.y+doorSize.y/2,0);
-        //     }
-        // }else{
-        //     if(_extDrawers.length>0){
-        //         hingedDoorsHandles[index].position.set(0.325, _hDoors_parent[index].position.y+doorSize.y/1.25,0);
-        //     }else{
-        //         hingedDoorsHandles[index].position.set(0.325, _hDoors_parent[index].position.y+doorSize.y/2,0);
-        //     }
-        //     hingedDoorsHandles[index].rotation.y = Math.PI;
+        hingedDoorsHandles_group.visible = _hDoors_parent_group.visible;
+        // if(_extDrawers.length>0){
+        //     hingedDoorsHandles[index].position.set(doorSize.x-ftTom/12, parent.position.y+doorSize.y/1.25,0);
         // }
-        // console.log(doorSize.y)
-        // hingedDoorsHandles_group.visible = _hDoors_parent_group.visible;
+        // else{
+        //     hingedDoorsHandles[index].position.set(doorSize.x-ftTom/12,parent.position.y+doorSize.y/2,0);
+        // }
+        
+        // if(index%2==0){
+        //     hingedDoorsHandles[index].rotation.y =0;
+        // }else{
+        //     hingedDoorsHandles[index].rotation.y = Math.PI;
+            
+        // }
+     
     }
 }
 
@@ -4605,16 +4689,16 @@ function removeHingedDoorsHandles(index){
 
 
 
-        // if (hingedDoorsHandles_group[index] instanceof THREE.Group) {
-        //     hingedDoorsHandles_group.remove(hingedDoorsHandles[index]);
+        if (hingedDoorsHandles_group[index] instanceof THREE.Group) {
+            hingedDoorsHandles_group.remove(hingedDoorsHandles[index]);
 
-        // }
+        }
 
 
 
     } else {
-    //     hingedDoorsHandles_group.clear();
-    //    hingedDoorsHandles = [];
+        hingedDoorsHandles_group.clear();
+       hingedDoorsHandles = [];
    
 
 
