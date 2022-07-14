@@ -43,7 +43,6 @@ var substitubale = 0;
 var columns_group = document.getElementById("columns-group");
 var isMeasured = false;
 
-let lightProbe;
 let top_shelves = [],
     bot_shelves = [];
 
@@ -55,6 +54,8 @@ var delta = 0;
 var texLoader = new THREE.TextureLoader();
 
 var pmremGenerator;
+
+let lightProbe;
 var envMap;
 let ssaoPass, saoPass;
 
@@ -177,12 +178,12 @@ var textures = {
         silver: ""
     },
     fabric: {
-        cotton:{
-            albedo:"",
-            normal:"",
-            roughness:"",
-            bump:"",
-            ao:""
+        cotton: {
+            albedo: "",
+            normal: "",
+            roughness: "",
+            bump: "",
+            ao: ""
         }
 
     }
@@ -236,9 +237,9 @@ async function getTextures() {
             textures.lamniate.roughness = data.lamniate.roughness;
 
             textures.fabric.cotton.normal = texLoader.load(data.fabric.cotton.normal);
-            textures.fabric.cotton.roughness =texLoader.load(data.fabric.cotton.roughness);
+            textures.fabric.cotton.roughness = texLoader.load(data.fabric.cotton.roughness);
             textures.fabric.cotton.ao = texLoader.load(data.fabric.cotton.ao);
-            textures.fabric.cotton.bump =texLoader.load(data.fabric.cotton.height);
+            textures.fabric.cotton.bump = texLoader.load(data.fabric.cotton.height);
         });
 }
 
@@ -256,8 +257,8 @@ function getInputs() {
     $("#depth").on("input", function () {
         wDepth = $(this).val();
         isDrawerHandleCreated = true;
-        updateCubeMap();
         
+        updateCubeMap();
 
     })
 
@@ -276,8 +277,8 @@ function getInputs() {
 
         wWidth = $(this).val();
         isDrawerHandleCreated = true;
-       
         updateCubeMap();
+        
 
     });
 
@@ -297,7 +298,7 @@ function getInputs() {
             bedDrawerLeft.visible = true;
 
             isDrawerHandleCreated = true;
-            updateCubeMap();
+            
 
 
 
@@ -314,13 +315,13 @@ function getInputs() {
             bedDrawerRight.visible = false;
 
         }
-
+        updateCubeMap();
     })
     $("#selectBoard").change(function () {
         boardType = $(this).children("option:selected").val();
 
+        
         updateCubeMap();
-
     });
     $("#selectTexture").click(function () {
 
@@ -349,8 +350,8 @@ function getInputs() {
 
         boardColor = $(this).val();
         setMaterialType()
+        
         updateCubeMap();
-
     });
 
     // $("#addMatress").click(function(){
@@ -652,7 +653,12 @@ function onWindowResize() {
 }
 
 function updateCubeMap() {
-    floorCubeCamera.update(renderer, scene);
+    try {
+        floorCubeCamera.update(renderer, scene);
+    } catch (err) {
+
+    }
+
 }
 
 function animate() {
@@ -760,12 +766,9 @@ function render() {
     floorCubeCamera.position.y *= -1;
 
 
-    if (composer) {
-        composer.render();
 
-    } else {
-        renderer.render(scene, camera)
-    }
+    composer.render();
+
 
 
 
@@ -774,6 +777,8 @@ function render() {
 
 function setLighting() {
 
+    lightProbe = new THREE.LightProbe();
+    scene.add(lightProbe);
 
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
     pmremGenerator.compileCubemapShader();
@@ -844,8 +849,6 @@ function setLighting() {
 }
 
 function create_lights() {
-    lightProbe = new THREE.LightProbe();
-    scene.add(lightProbe);
 
     setLighting();
     scene.add(new THREE.AmbientLight(0xfcedd8, 1));
@@ -1016,7 +1019,7 @@ function post_process() {
     };
 
 
-    composer.addPass(saoPass);
+    // composer.addPass(saoPass);
 
     // ssaoPass = new THREE.SSAOPass(scene, camera, fwidth, fheight);
     // ssaoPass.kernalRadius = 16;
@@ -1044,7 +1047,7 @@ function post_process() {
     // bloomPass.strength = 0.1;
     // bloomPass.radius = 0.85;
     // composer.addPass(bloomPass);
-  
+
 }
 
 function helpers() {
@@ -1384,7 +1387,7 @@ function loadBoards() {
         createMatress();
 
 
-        updateCubeMap();
+
 
 
         // createFloor();
@@ -1789,7 +1792,7 @@ function updateBedMaterial() {
     if (drawerBoard != null) {
 
         drawerBoard.traverse(e => {
-         
+
             if (e instanceof THREE.Mesh) {
 
                 e.material.metalness = 0;
@@ -1818,7 +1821,7 @@ function updateBedMaterial() {
                     e.material.aoMap = textures.wood.wood_a.ao;
                     e.material.aoMapIntensity = 2;
                     e.material.roughnessMap = textures.wood.wood_a.roughness;
-                   
+
 
                     e.material.needsUpdate = true;
                 }
@@ -1843,7 +1846,7 @@ function updateBedMaterial() {
                     e.material.aoMapIntensity = 2;
                     e.material.roughnessMap = textures.wood.wood_b.roughness;
 
-              
+
                     e.material.needsUpdate = true;
                 }
                 if (textureType == 2) {
@@ -1866,7 +1869,7 @@ function updateBedMaterial() {
                     e.material.aoMap = textures.wood.wood_c.ao;
                     e.material.aoMapIntensity = 2;
                     e.material.roughnessMap = textures.wood.wood_c.roughness;
-   
+
 
                     e.material.needsUpdate = true;
                 }
@@ -2449,15 +2452,15 @@ function setMatress(matress) {
 
                 if (mat.name.includes("blanket")) {
                     mat.shading = THREE.SmoothShading;
-                    
-                    setTexture(textures.fabric.cotton.normal,0.1,0.1)
-                    setTexture(textures.fabric.cotton.roughness,2,2)
-                    setTexture(textures.fabric.cotton.height,2,2)
+
+                    setTexture(textures.fabric.cotton.normal, 0.1, 0.1)
+                    setTexture(textures.fabric.cotton.roughness, 2, 2)
+                    setTexture(textures.fabric.cotton.height, 2, 2)
                     mat.color.set("#bcbcbc")
-                    mat.roughnessMap =null;
+                    mat.roughnessMap = null;
                     mat.normalMap = null;
                     mat.bumpMap = null;
-               
+
                     mat.roughness = 1;
                 }
                 if (mat.name.includes("matress")) {
@@ -2734,8 +2737,8 @@ function createDrawers() {
     if (drawerBoard) {
         drawerPanelL = drawerBoard.clone();
         drawerPanelR = drawerBoard.clone();
-      
-        
+
+
         scene.add(drawerPanelL)
         scene.add(drawerPanelR)
     }
@@ -2793,7 +2796,7 @@ function updateDrawers() {
         bedDrawerRight.position.setY(wHeight * ftTom / 2 - bedTops[2].scale.y / 2);
 
 
-        bedDrawerLeft.children[0].scale.set(wWidth * ftTom, ftTom / 12, wDepth * ftTom - bedTops[1].scale.z - ftTom - ftTom / 6-0.5*ftTom/12); // bottom
+        bedDrawerLeft.children[0].scale.set(wWidth * ftTom, ftTom / 12, wDepth * ftTom - bedTops[1].scale.z - ftTom - ftTom / 6 - 0.5 * ftTom / 12); // bottom
         bedDrawerLeft.children[1].scale.set(ftTom / 12, height, bedDrawerLeft.children[0].scale.z + ftTom / 6); // left
         bedDrawerLeft.children[2].scale.set(ftTom / 12, height, bedDrawerLeft.children[1].scale.z); // right
         bedDrawerLeft.children[3].scale.set(bedDrawerLeft.children[0].scale.x, height, ftTom / 12); // front
@@ -2811,7 +2814,7 @@ function updateDrawers() {
         // bedDrawerLeft.children[6].position.setY(bedDrawerLeft.children[1].position.y + bedDrawerLeft.children[1].scale.y / 2)
         // bedDrawerLeft.children[6].rotation.y = (90 * THREE.MathUtils.DEG2RAD)
 
-        bedDrawerRight.children[0].scale.set(wWidth * ftTom - ftTom / 12, ftTom / 12, wDepth * ftTom - bedTops[1].scale.z - ftTom - ftTom / 6-0.5*ftTom/12); // bottom
+        bedDrawerRight.children[0].scale.set(wWidth * ftTom - ftTom / 12, ftTom / 12, wDepth * ftTom - bedTops[1].scale.z - ftTom - ftTom / 6 - 0.5 * ftTom / 12); // bottom
         bedDrawerRight.children[1].scale.set(ftTom / 12, height, bedDrawerRight.children[0].scale.z + ftTom / 6); // left
         bedDrawerRight.children[2].scale.set(ftTom / 12, height, bedDrawerRight.children[1].scale.z); // right
         bedDrawerRight.children[3].scale.set(bedDrawerRight.children[0].scale.x, height, ftTom / 12); // front
@@ -2865,7 +2868,7 @@ function updateDrawers() {
         bedDrawerRightEdge.visible = bedDrawerRight.visible;
 
         bedDrawerLeft.children[0].position.setY(-wHeight * ftTom / 2 + bedTops[2].scale.y / 2 + ftTom / 24); // bottom
-        bedDrawerLeft.children[0].position.setZ(bedTops[1].position.z - bedDrawerLeft.children[0].scale.z / 2 - bedDrawerLeft.children[4].scale.z - bedTops[1].scale.z / 2-0.5*ftTom/24 ); // bottom
+        bedDrawerLeft.children[0].position.setZ(bedTops[1].position.z - bedDrawerLeft.children[0].scale.z / 2 - bedDrawerLeft.children[4].scale.z - bedTops[1].scale.z / 2 - 0.5 * ftTom / 24); // bottom
 
         bedDrawerLeft.children[1].position.setX(-bedDrawerLeft.children[0].scale.x / 2 - bedDrawerLeft.children[1].scale.x / 2); // left
         bedDrawerLeft.children[1].position.setZ(bedDrawerLeft.children[0].position.z); // left
@@ -2881,7 +2884,7 @@ function updateDrawers() {
 
         drawerPanelL.rotation.y = Math.PI / 2;
         bedDrawerRight.children[0].position.setY(-wHeight * ftTom / 2 + bedTops[2].scale.y / 2 + ftTom / 24); // bottom
-        bedDrawerRight.children[0].position.setZ(bedTops[1].position.z - bedDrawerRight.children[0].scale.z / 2 - bedDrawerRight.children[4].scale.z - bedTops[1].scale.z / 2-0.5*ftTom/24); // bottom
+        bedDrawerRight.children[0].position.setZ(bedTops[1].position.z - bedDrawerRight.children[0].scale.z / 2 - bedDrawerRight.children[4].scale.z - bedTops[1].scale.z / 2 - 0.5 * ftTom / 24); // bottom
 
         bedDrawerRight.children[1].position.setX(-bedDrawerRight.children[0].scale.x / 2 - bedDrawerRight.children[1].scale.x / 2); // left
         bedDrawerRight.children[1].position.setZ(bedDrawerRight.children[0].position.z); // left
@@ -2921,14 +2924,14 @@ function updateDrawers() {
         drawerPanelR.position.setZ(bedDrawerRight.position.z + bedDrawerRight.children[2].position.z);
 
         drawerPanelR.rotation.y = Math.PI / 2;
-        
+
         drawerBoardsLeft.visible = bedDrawerLeft.visible;
         drawerBoardsRight.visible = bedDrawerRight.visible;
         drawerPanelL.visible = bedDrawerLeft.visible;
         drawerPanelR.visible = bedDrawerRight.visible;
 
         drawerPanelL.traverse(e => {
-            if(e instanceof THREE.Mesh){
+            if (e instanceof THREE.Mesh) {
                 e.matrixAutoUpdate = true;
             }
             if (e.name.startsWith("low")) {
