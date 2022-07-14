@@ -295,7 +295,7 @@ function init() {
     renderer.setClearColor(0xffffff, 1);
     renderer.outputEncoding = THREE.sRGBEncoding;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 2.2;
+    renderer.toneMappingExposure = 1;
     renderer.physicallyCorrectLights = true;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -879,35 +879,35 @@ function post_process() {
     composer.addPass(renderPass);
     const pixelRatio = renderer.getPixelRatio();
 
-    // const smaaPass = new THREE.SMAAPass(fwidth * pixelRatio, fheight * pixelRatio);
-    // composer.addPass(smaaPass);
-    const ssaaPass = new THREE.SSAARenderPass(scene, camera);
+    const smaaPass = new THREE.SMAAPass(fwidth * pixelRatio, fheight * pixelRatio);
+    composer.addPass(smaaPass);
+    // const ssaaPass = new THREE.SSAARenderPass(scene, camera);
     // composer.addPass(ssaaPass);
     const copyPass = new THREE.ShaderPass(THREE.CopyShader);
     composer.addPass(copyPass);
 
     
-    saoPass = new THREE.SAOPass(scene, camera, false, true);
+    // saoPass = new THREE.SAOPass(scene, camera, false, true);
 
-    saoPass.params = {
-        output: 0,
-        saoBias: 0.15,
-        saoIntensity: 0.011,
-        saoScale: 2,
-        saoKernelRadius: 80,
-        saoMinResolution: 0,
-        saoBlur: true,
-        saoBlurRadius: 8,
-        saoBlurStdDev: 4,
-        saoBlurDepthCutoff: 0.1
-    };
+    // saoPass.params = {
+    //     output: 0,
+    //     saoBias: 0.15,
+    //     saoIntensity: 0.011,
+    //     saoScale: 2,
+    //     saoKernelRadius: 80,
+    //     saoMinResolution: 0,
+    //     saoBlur: true,
+    //     saoBlurRadius: 8,
+    //     saoBlurStdDev: 4,
+    //     saoBlurDepthCutoff: 0.1
+    // };
 
 
     // composer.addPass(saoPass);
-    ssaoPass = new THREE.SSAOPass(scene, camera, fwidth, fheight);
-    ssaoPass.kernalRadius = 16;
-    ssaoPass.minDistance = 0.1;
-    ssaoPass.maxDistance = 0.2;
+    // ssaoPass = new THREE.SSAOPass(scene, camera, fwidth, fheight);
+    // ssaoPass.kernalRadius = 16;
+    // ssaoPass.minDistance = 0.1;
+    // ssaoPass.maxDistance = 0.2;
 
     // composer.addPass(ssaoPass);
 
@@ -918,6 +918,7 @@ function post_process() {
     fxaaPass.material.uniforms["resolution"].value.y = 1 / (fheight * pixelRatio);
 
     composer.addPass(fxaaPass);
+    composer.addPass(new THREE.ShaderPass(THREE.GammaCorrectionShader));
 }
 
 function helpers() {
