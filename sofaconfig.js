@@ -2365,6 +2365,7 @@ function updateRoomMaterial(room){
                     if(mat.name.includes("PDM Leaf Monstera")){
                         mat.color.set("#2d5c00")
                         mat.aoMap = null;
+                        mat.side = THREE.DoubleSide;
                         mat.normalScale = new THREE.Vector2(2,2)
                     }
                     if(mat.name.includes("Pot") ){
