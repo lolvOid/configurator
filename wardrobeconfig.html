@@ -13,8 +13,67 @@
         integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
     <link rel="stylesheet" href="https://unpkg.com/@fortawesome/fontawesome-free@6.1.1/css/fontawesome.min.css">
     <link rel="stylesheet" href="https://unpkg.com/@fortawesome/fontawesome-free@6.1.1/css/all.min.css">
+    <!-- <script src="./threejs/build/three.js"></script> -->
+
+    <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js"
+        integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="anonymous"></script>
+
+    <script src="https://unpkg.com/three@0.142.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/libs/stats.min.js"></script>
+
+    <script src="https://unpkg.com/three@0.142.0/examples/js/lights/LightProbeGenerator.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/exporters/GLTFExporter.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/exporters/GLTFExporter.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/loaders/RGBELoader.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/objects/ReflectorForSSRPass.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/objects/Reflector.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/shaders/SSRShader.js"></script>
+
+    <script src="https://unpkg.com/three@0.142.0/examples/js/postprocessing/SSRPass.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/postprocessing/SSAARenderPass.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/shaders/FXAAShader.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/postprocessing/ShaderPass.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/postprocessing/OutlinePass.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/shaders/SSAOShader.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/shaders/CopyShader.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/math/SimplexNoise.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/shaders/UnpackDepthRGBAShader.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/shaders/DepthLimitedBlurShader.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/shaders/SAOShader.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/postprocessing/SAOPass.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/postprocessing/SSAOPass.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/postprocessing/SSAARenderPass.js"></script>
+    
+    <script src="https://unpkg.com/three@0.142.0/examples/js/misc/ProgressiveLightMap.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/shaders/GammaCorrectionShader.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/shaders/HorizontalBlurShader.js"></script>
+
+    <script src="https://unpkg.com/three@0.142.0/examples/js/shaders/VerticalBlurShader.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/shaders/SMAAShader.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/postprocessing/LUTPass.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/loaders/LUTCubeLoader.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/loaders/LUT3dlLoader.js"></script>
+
+    <script src="https://unpkg.com/three@0.142.0/examples/js/postprocessing/SMAAPass.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/loaders/STLLoader.js"></script>
+
+    <!-- <script src="https://unpkg.com/three@0.142.0/examples/jsm/webxr/ARButton.js"></script> -->
+    <script src="./threejs/renderers/CSS2DRenderer.js"></script>
+    <script src="./threejs/renderers/CSS3DRenderer.js"></script>
 
 
+
+
+
+    <script src="./threejs/loaders/STLLoader.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<!-- 
 
     <script src="./threejs/build/three.js"></script>
     <script src="./threejs/exporters/GLTFExporter.js"></script>
@@ -40,10 +99,25 @@
     <script src="./threejs/geometries/TextGeometry.js"></script>
     <script src="./threejs/renderers/CSS2DRenderer.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    -->
+    
 </head>
 
 <body>
-    <a href="./" class="btn btn-outline-dark home rounded-circle" ><i class="fa fa-chevron-left "></i></a>
+    <div id="exportScreen" class=" d-none"> 
+        <iframe  class="col-12  top-50 position-absolute" src="https://embed.lottiefiles.com/animation/94063"></iframe>
+    </div>
+    <div id="loadingScreen">
+        <p id="loadingText">Loading Models</p>
+
+        <div class="progressContent">
+
+            <div id="progressbar"></div>
+            <p id="progressText">Loading Models</p>
+        </div>
+
+    </div>
+    <a href="./" class="btn btn-outline-dark home rounded-circle"><i class="fa fa-chevron-left "></i></a>
     <div class="rightnavigator shadow">
         <div class="col-12">
             <form action="POST" class="p-2 ">
@@ -55,7 +129,10 @@
 
                     <h6 class="m-2">Choose Dimensions:</h6>
                     <div class="form-control m-1 ">
-                        <p>Height:</p>
+                        <p>Height:  <input class="form-check-input btn-check" type="checkbox" name="eye" id="eye" checked>
+                        <label class="form-check-label " for="eye"> <i class="fa fa-eye"  id="eyeLable"></i></label>
+                    </p> 
+
                         <div class="form-check form-check-inline">
                             <input class="form-check-input btn-check" type="radio" name="heightOptions" id="height1"
                                 value="6" checked>
@@ -229,19 +306,7 @@
 
                         <!-- <a class="btn btn-outline-danger m-1" id="removeAll">Remove All</a> -->
                     </div>
-                    <h6>Choose Handles Designs</h6>
-                    <select class="form-select m-1" name="drawerHandles" id="drawerHandles">
-                        <option >Select Drawer Handles</option>
-                        <option value="0" selected>1</option>
-                        <option value="1">2</option>
-                        <option value="2">3</option>
-
-                        <option value="3">4</option>
-
-                     
-
-
-                    </select>  
+                   
                     <!-- <div class="form-control m-1 d-md-flex">
 
              
@@ -287,10 +352,114 @@
                             <option value="3">Three</option> -->
                     <!-- </select> -->
                     <!-- </div> -->
+                    <h6>Choose Handles Designs</h6>
+                    <select class="form-select m-1" name="drawerHandles" id="drawerHandles">
+                        <option>Select Drawer Handles</option>
+                        <option value="0" selected>1</option>
+                        <option value="1">2</option>
+                        <option value="2">3</option>
+
+                        <option value="3">4</option>
 
 
+
+
+                    </select>
+                    <div class="form-control m-1">
+
+                        <label for="selectHandleColor" class="form-label">Handle Color</label>
+                        <select name="selectHandleColor" class="form-select" id="selectHandleColor">
+                            <option value="0" selected>Silver</option>
+                            <option value="1">Gold</option>
+                            <option value="2">Copper</option>
+                                               
+                        </select>
+    
+                    </div>
+                    <div class="form-control m-1">
+
+                        <label for="selectMaterial" class="form-label">Wardrobe Material</label>
+                        <select name="selectMaterial" class="form-select" id="selectMaterial">
+                            <option value="0" selected>Laminate</option>
+                            <option value="1">Lacquer</option>
+                            <option value="2">Solid Wood</option>
+                            <option value="3">Veneer</option>                           
+                        </select>
+    
+                    </div>
+                    <div class="form-control m-1" id="woodTexture">
+    
+                        <label for="selectTexture" class="form-label">Wood Texture</label>
+                        <select name="selectTexture" class="form-select" id="selectTexture">
+                            <option value="0" selected>Type 1</option>
+                            <option value="1">Type 2</option>
+                            <option value="2">Type 3</option>
+    
+                        </select>
+    
+                    </div>
+                    <div class="form-control m-1 " id="wood_colors">
+                        <p>Select Colors</p>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input btn-check" type="radio" name="wood_colors" id="colors1"
+                                value="0" checked>
+                            <label class="form-check-label btn btn-outline-warning" for="colors1">Natural</label>
+                        </div>
+    
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input btn-check" type="radio" name="wood_colors" id="colors2"
+                                value="1">
+                            <label class="form-check-label btn  btn-outline-warning" for="colors2">Cherry</label>
+                        </div>
+    
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input btn-check" type="radio" name="wood_colors" id="colors3"
+                                value="2">
+                            <label class="form-check-label btn btn-outline-warning " for="colors3">Walnut</label>
+                        </div>
+    
+                    </div>
+    
+                   
+                    <div class="form-control m-1 " id="board_Colors">
+                        <p>Select Colors</p>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input btn-check" type="radio" name="boardColors" id="boardColors1"
+                                value="0" checked>
+                            <label class="form-check-label btn btn-outline-dark" for="boardColors1">Off White</label>
+                        </div>
+    
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input btn-check" type="radio" name="boardColors" id="boardColors2"
+                                value="1">
+                            <label class="form-check-label btn  btn-outline-dark" for="boardColors2">Grey</label>
+                        </div>
+    
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input btn-check" type="radio" name="boardColors" id="boardColors3"
+                                value="2">
+                            <label class="form-check-label btn btn-outline-dark " for="boardColors3">Light Brown</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input btn-check" type="radio" name="boardColors" id="boardColors4"
+                                value="3">
+                            <label class="form-check-label btn btn-outline-dark " for="boardColors4">Dark Brown</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input btn-check" type="radio" name="boardColors" id="boardColors5"
+                                value="4">
+                            <label class="form-check-label btn btn-outline-dark " for="boardColors5">Black</label>
+                        </div>
+                    </div>
+                
+                
+                
+                
+                
+                
                 </div>
-                <div class="form-control m-1">
+              
+                <!-- <div class="form-control m-1">
 
                     <h6 class="p-2">Render Options:</h6>
                     <div class="form-check-inline" id="loftOptionsPanel">
@@ -305,23 +474,18 @@
                                 id="renderOption2" value="1">
                             <label class="form-check-label btn btn-outline-secondary" for="renderOption2">Debug</label>
                         </div>
-                        <!-- <div class="form-check form-check-inline">
-                            <input class="form-check-input btn-check" type="radio" name="renderOptions"
-                                id="renderOption3" value="2">
-                            <label class="form-check-label btn btn-outline-secondary"
-                                for="renderOption3">Wireframe</label>
-                        </div> -->
+                        
                     </div>
 
 
-                </div>
+                </div> -->
                 <div class="row m-1">
-                    <a class="btn btn-outline-success m-1" onclick="reset()"> Reset</a>
+                    <!-- <a class="btn btn-outline-success m-1" onclick="reset()"> Reset</a> -->
                     <a class="btn btn-outline-dark m-1" id="export"> Export</a>
 
                 </div>
 
-<!-- 
+                <!-- 
                 <div class="row  m-1 position-relative ">
 
                     <div class="row row-cols-1 row-cols-md-2 g-4">
@@ -372,8 +536,7 @@
 
 
     <a class="btn btn-outline-dark dimension" id="swapRender"> <i class="fa fa-2x fa-ruler-combined"></i></a>
-    <a class="btn btn-outline-dark downloadDimension" id="downloadImage"> <i
-            class="fa fa-2x fa-download"></i></a>
+    <a class="btn btn-outline-dark downloadDimension" id="downloadImage"> <i class="fa fa-2x fa-download"></i></a>
     <div class="price">
 
     </div>
@@ -392,9 +555,9 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"
         integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous">
     </script>
- <script type="module" src="./wardrobeconfig.js"></script>
+    <script type="module" src="./wardrobeconfig.js"></script>
     <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script> -->
-   
+
 </body>
 
 </html>
