@@ -107,6 +107,23 @@
         "charcoal": "#34282C",
         "silver": "#C0C0C0"
     },
+    "metal":{
+        "gold":{
+            "albedo":"https://i.ibb.co/TLdTCdS/Gold-Lot-Pixel-com-1k-2-base-Color.png",
+            "metallic":"https://i.ibb.co/ZHych2V/Gold-Lot-Pixel-com-1k-2-metallic.png",
+            "roughness":"https://i.ibb.co/t3hpSS4/Gold-Lot-Pixel-com-1k-2-roughness.png"
+        },
+        "silver":{
+            "albedo":"https://i.ibb.co/9b1Jwnv/Silver-Lot-Pixel-com-1k-2-base-Color.png",
+            "metallic":"https://i.ibb.co/N1JXpYk/Silver-Lot-Pixel-com-1k-2-metallic.png",
+            "roughness":"https://i.ibb.co/SXVr89t/Silver-Lot-Pixel-com-1k-2-roughness.png"
+        },
+        "copper":{
+            "albedo":"https://i.ibb.co/9vDL6sf/Copper-Lot-Pixel-com-1k-1-base-Color.png",
+            "metallic":"https://i.ibb.co/NLQ22pc/Copper-Lot-Pixel-com-1k-1-metallic.png",
+            "roughness":"https://i.ibb.co/2WmXyWY/Copper-Lot-Pixel-com-1k-1-roughness.png"
+        }
+    },
     "fabric": {
         "cotton": {
             "albedo": "",
