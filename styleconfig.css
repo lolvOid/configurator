@@ -278,7 +278,15 @@ lottie-player{
 #opendoorLabel{
   cursor:pointer;
 }
-
+#exportScreen{
+  position: fixed;
+  width: 100vw;
+  height: 100vh ;
+  
+  background-color: rgb(0, 0, 0);
+  opacity:0.5;
+  z-index: 9969;
+}
 #loadingScreen {
   position: fixed;
   width: 100vw;
