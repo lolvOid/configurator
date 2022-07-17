@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "potpack": "^1.0.2",
+    "three": "^0.142.0"
+  }
+}

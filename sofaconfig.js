@@ -53,7 +53,9 @@ const bottom = 0;
 var clock;
 var delta = 0;
 
-var texLoader = new THREE.TextureLoader();
+const manager = new THREE.LoadingManager();
+const gltfLoader = new THREE.GLTFLoader(manager);
+const texLoader = new THREE.TextureLoader(manager);
 var btnPlus = texLoader.load("assets/plus_white.png");
 var btnMinus = texLoader.load("assets/minus_white.png");
 
@@ -85,8 +87,7 @@ var sofas = [],
 
     sofas_group = new THREE.Group();
 var s_armL, s_armR;
-const gltfLoader = new THREE.GLTFLoader();
-const manager = new THREE.LoadingManager();
+
 var sofaCount = 1;
 var isCorner = false;
 var armrestsOnCorners = [];
@@ -288,6 +289,7 @@ function init() {
         antialias: true,
         alpha: true,
         preserveDrawingBuffer: true,
+        logarithmicDepthBuffer : true
     });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(fwidth, fheight);
@@ -726,7 +728,7 @@ function render() {
 
 function setLighting() {
 
-    lightProbe = new THREE.LightProbe();
+    var lightProbe = new THREE.LightProbe();
     scene.add(lightProbe);
 
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
@@ -2625,7 +2627,7 @@ setInterval(function(){
                 }
                 if(e.name.includes("Hours")){
                     e.rotation.z =-d.getHours()%12* Math.PI / 6;
-                    console.log(d.getHours()%12)
+                    // console.log(d.getHours()%12)
                 }
             }
         })
