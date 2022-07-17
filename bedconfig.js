@@ -51,8 +51,10 @@ const bottom = 0;
 var clock;
 var delta = 0;
 
-var texLoader = new THREE.TextureLoader();
 
+const manager = new THREE.LoadingManager();
+const gltfLoader = new THREE.GLTFLoader(manager);
+const texLoader = new THREE.TextureLoader(manager);
 var pmremGenerator;
 
 let lightProbe;
@@ -88,8 +90,6 @@ var bedTableRightEdge = new THREE.Group();
 
 
 var font;
-const manager = new THREE.LoadingManager();
-const gltfLoader = new THREE.GLTFLoader(manager);
 
 var bedMatress, pillowL, pillowR;
 var drawerLeft, isDrawerHandleCreated = false;
@@ -191,7 +191,6 @@ var textures = {
 }
 
 
-getTextures();
 
 async function getTextures() {
     fetch("colorinfo.json").then(response => response.json())
@@ -242,6 +241,8 @@ async function getTextures() {
             textures.fabric.cotton.bump = texLoader.load(data.fabric.cotton.height);
         });
 }
+
+getTextures();
 
 
 
@@ -556,7 +557,7 @@ function init() {
 
 
     create_lights();
-    loadBoards();
+    loadModel();
     createReflector();
     post_process();
     dimensionRenderer = new THREE.WebGLRenderer({
@@ -794,7 +795,7 @@ function setLighting() {
 
     };
 
-    const urls = genCubeUrls('hdri/studio/', '.png');
+    const urls = genCubeUrls('hdri/garden/', '.png');
 
     envMap = new THREE.CubeTextureLoader().load(urls, function (cubeTexture) {
 
@@ -1345,7 +1346,7 @@ function loadAsync(url) {
 
 }
 
-function loadBoards() {
+function loadModel() {
     let model, model1, handle, interior;
     interior = loadAsync("models/room/Room.gltf").then((result) => {
         room = result.scene.children[0];
@@ -1498,8 +1499,8 @@ function updateRoomMaterial(room) {
                     mat.envMap = floorCubeMap.texture;
                     mat.envMapIntensity = 1;
                     mat.color.set("#4d4d4d")
-
-                    setTexture(mat.map, 1.5, 1.5)
+                    
+                    updateTexture(mat.map, 1.5, 1.5)
 
 
                     mat.roughness = 0;
@@ -1664,7 +1665,10 @@ function setTexture(texture = new THREE.Texture(), repeatX = 1, repeatY = 1) {
     texture.needsUpdate = true;
     // texture.encoding = THREE.sRGBEncoding
 }
-
+function updateTexture(tex = new THREE.Texture(),x=1,y=1){
+    tex.repeat = new THREE.Vector2(x,y);
+    
+}
 function setMaterialType() {
     if (boardType == 0) {
 
@@ -1729,8 +1733,8 @@ function updateBedMaterial() {
                         if (woodcolors == 2) {
                             e.material.map = textures.wood.wood_a.walnut
                         }
-
-                        setTexture(e.material.map, 1.5, 2)
+                        
+                        updateTexture(e.material.map, 1.5, 2)
                         e.material.envMap = roomCubeMap.texture;
                         e.material.envMapIntensity = 1;
 
@@ -1758,7 +1762,7 @@ function updateBedMaterial() {
                         if (woodcolors == 2) {
                             e.material.map = textures.wood.wood_b.walnut
                         }
-                        setTexture(e.material.map, 1.5, 2)
+                        updateTexture(e.material.map, 1.5, 2)
                         e.material.normalMap = textures.wood.wood_b.normal;
                         e.material.normalScale = new THREE.Vector2(0.25, 0.25)
 
@@ -1782,7 +1786,7 @@ function updateBedMaterial() {
                         if (woodcolors == 2) {
                             e.material.map = textures.wood.wood_c.walnut
                         }
-                        setTexture(e.material.map, 1.5, 2)
+                        updateTexture(e.material.map, 1.5, 2)
                         e.material.normalMap = textures.wood.wood_c.normal;
                         e.material.normalScale = new THREE.Vector2(0.25, 0.25)
 
@@ -1822,7 +1826,7 @@ function updateBedMaterial() {
                         e.material.map = textures.wood.wood_a.walnut
                     }
 
-                    setTexture(e.material.map, 2.4, 2)
+                    updateTexture(e.material.map, 2.4, 2)
                     e.material.envMap = roomCubeMap.texture;
                     e.material.envMapIntensity = 1;
 
@@ -1850,7 +1854,7 @@ function updateBedMaterial() {
                     if (woodcolors == 2) {
                         e.material.map = textures.wood.wood_b.walnut
                     }
-                    setTexture(e.material.map, 2.4, 2)
+                    updateTexture(e.material.map, 2.4, 2)
                     e.material.normalMap = textures.wood.wood_b.normal;
                     e.material.normalScale = new THREE.Vector2(0.25, 0.25)
 
@@ -1874,7 +1878,7 @@ function updateBedMaterial() {
                     if (woodcolors == 2) {
                         e.material.map = textures.wood.wood_c.walnut
                     }
-                    setTexture(e.material.map, 2.4, 2)
+                    updateTexture(e.material.map, 2.4, 2)
                     e.material.normalMap = textures.wood.wood_c.normal;
                     e.material.normalScale = new THREE.Vector2(0.25, 0.25)
 
@@ -2465,9 +2469,9 @@ function setMatress(matress) {
                 if (mat.name.includes("blanket")) {
                     mat.shading = THREE.SmoothShading;
 
-                    setTexture(textures.fabric.cotton.normal, 0.1, 0.1)
-                    setTexture(textures.fabric.cotton.roughness, 2, 2)
-                    setTexture(textures.fabric.cotton.height, 2, 2)
+                    updateTexture(textures.fabric.cotton.normal, 0.1, 0.1)
+                    updateTexture(textures.fabric.cotton.roughness, 2, 2)
+                    updateTexture(textures.fabric.cotton.height, 2, 2)
                     mat.color.set("#bcbcbc")
                     mat.roughnessMap = null;
                     mat.normalMap = null;
