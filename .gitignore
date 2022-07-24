@@ -2,3 +2,5 @@
 /Configurator.code-workspace
 /Textures/wood/*
 /node_modules
+
+*.zip
