@@ -1,23 +1,14 @@
 {
     "tint": {
-        "natural": "#f1d6b8",
-        "traditionalcherry": "#d49262",
-        "americanwalnut": "#af6633"
+        "natural": "#e7a044",
+        "cherry": "#ff873e",
+        "walnut": "#802903"
     },
-    "online": {
 
-       
-
-
-
-
-
-
-
-
-        "wood": {
-            "wood_a": {
-                "albedo": "https://i.ibb.co/9tBsLM6/4-K-ovankol-basecolor.jpg",
+    
+        "wood": [
+          { 
+                "albedo": "https://i.ibb.co/kG7fNsC/4-K-ovankol-grey.jpg",
                 "normal": "https://i.ibb.co/7CBj8Gt/4-K-ovankol-normal.jpg",
                 "ao": "https://i.ibb.co/nQNQQMz/4-K-ovankol-ao.jpg",
                 "roughness": "https://i.ibb.co/2Spq0pJ/4-K-ovankol-roughness.jpg",
@@ -26,8 +17,8 @@
                 "walnut":"https://i.ibb.co/DWRCw2D/4-K-ovankol-basecolor-3.jpg",
                 "natural":"https://i.ibb.co/m6yZv4n/4-K-ovankol-basecolor-1.jpg"
             },
-            "wood_b": {
-                "albedo": "https://i.ibb.co/m9nBdhn/4-K-american-oak-1-basecolor.jpg",
+           { 
+                "albedo": "https://i.ibb.co/DMNxjrL/4-K-american-oak-1-grey.jpg",
                 "normal": "https://i.ibb.co/yq9CVR9/4-K-american-oak-1-normal.jpg",
                 "ao": "https://i.ibb.co/HgBHQ9n/4-K-american-oak-1-ao.jpg",
                 "roughness": "https://i.ibb.co/D1Rypjg/4-K-american-oak-1-roughness.jpg",
@@ -36,8 +27,8 @@
                 "walnut":"https://i.ibb.co/sKW7krL/4-K-american-oak-1-basecolor-3.jpg",
                 "natural":"https://i.ibb.co/RTnJTCB/4-K-american-oak-1-basecolor-1.jpg"
             },
-            "wood_c": {
-                "albedo": "https://i.ibb.co/pbwk7kG/4-K-anzem-basecolor.jpg",
+          { 
+                "albedo": "https://i.ibb.co/RzQN7wF/4-K-anzem-grey.jpg",
                 "normal": "https://i.ibb.co/W06XtMF/4-K-anzem-normal.jpg",
                 "ao": "https://i.ibb.co/jbJyM8b/4-K-anzem-ao.jpg",
                 "roughness": "https://i.ibb.co/FhjzHff/4-K-anzem-roughness.jpg",
@@ -45,52 +36,37 @@
                 "cherry":"https://i.ibb.co/RCYGybF/4-K-anzem-basecolor-2.jpg",
                 "walnut":" https://i.ibb.co/LgdCPBm/4-K-anzem-basecolor-3.jpg",
                 "natural":"https://i.ibb.co/Dz0FGDC/4-K-anzem-basecolor-1.jpg"
+            },
+           {
+                "albedo": "https://i.ibb.co/CmpFpWT/4-K-american-walnut-1-grey.jpg",
+                "natural": "",
+                "cherry": "",
+                "walnut": "",
+                "normal": "https://i.ibb.co/GsGPqWV/4-K-american-walnut-1-normal.jpg",
+                "ao": "https://i.ibb.co/YjgXccY/4-K-american-walnut-1-ao.jpg",
+                "roughness": "https://i.ibb.co/PhLZ1tq/4-K-teak-tree-roughness.jpg",
+                "height": "https://i.ibb.co/vwMjZ4J/4-K-american-walnut-1-height.jpg"
+            },{
+                "albedo": "https://i.ibb.co/TrPfyhZ/4-K-teak-tree-grey.jpg",
+                "natural": "",
+                "cherry": "",
+                "walnut": "",
+                "normal": "https://i.ibb.co/GMNRWCS/4-K-teak-tree-normal.jpg",
+                "ao": "https://i.ibb.co/hWhk4FG/4-K-teak-tree-ao.jpg",
+                "roughness": "https://i.ibb.co/PhLZ1tq/4-K-teak-tree-roughness.jpg",
+                "height": "https://i.ibb.co/T28LTZ0/4-K-teak-tree-height.jpg"
             }
       
             
             
             
 
-        }
-    },
-    "offline": {
-        "wood": {
-            "wood_a": {
-                "albedo": "Textures/wood/4K-ovankol_basecolor.png",
-                "natural": "Textures/wood/4K-ovankol_basecolor_1.png",
-                "cherry": "Textures/wood/4K-ovankol_basecolor_2.png",
-                "walnut": "Textures/wood/4K-ovankol_basecolor_3.png",
-                "normal": "Textures/wood/4K-ovankol_normal.png",
-                "ao": "Textures/wood/4K-ovankol_ao.png",
-                "roughness": "Textures/wood/4K-ovankol_roughness.png",
-                "height": "Textures/wood/4K-ovankol_height.png"
-            },
-            "wood_b": {
-                "albedo": "Textures/wood/4K-american_oak_1_basecolor.png",
-                "natural": "Textures/wood/4K-american_oak_1_basecolor_1.png",
-                "cherry": "Textures/wood/4K-american_oak_1_basecolor_2.png",
-                "walnut": "Textures/wood/4K-american_oak_1_basecolor_3.png",
-                "normal": "Textures/wood/4K-american_oak_1_normal.png",
-                "ao": "Textures/wood/4K-american_oak_1_ao.png",
-                "roughness": "Textures/wood/4K-american_oak_1_roughness.png",
-                "height": "Textures/wood/4K-american_oak_1_height.png"
-            },
-            "wood_c": {
-                "albedo": "Textures/wood/4K-anzem_basecolor.png",
-                "natural": "Textures/wood/4K-anzem_basecolor_1.png",
-                "cherry": "Textures/wood/4K-anzem_basecolor_2.png",
-                "walnut": "Textures/wood/4K-anzem_basecolor_3.png",
-                "normal": "Textures/wood/4K-anzem_normal.png",
-                "ao": "Textures/wood/4K-anzem_ao.png",
-                "roughness": "Textures/wood/4K-anzem_roughness.png",
-                "height": "Textures/wood/4K-anzem_height.png"
-            }
-        }
-    },
+        ]
+    ,
     "colors": {
-        "black": "#000000",
-        "offwhite": "#4d4d4d",
-        "grey": "#252525",
+        "black": "#101010",
+        "offwhite": "#F8F0E3",
+        "grey": "#9e9e9e",
         "darkbrown": "#332211",
         "lightbrown": "#804613"
     },
@@ -107,23 +83,24 @@
         "charcoal": "#34282C",
         "silver": "#C0C0C0"
     },
-    "metal":{
-        "gold":{
-            "albedo":"https://i.ibb.co/TLdTCdS/Gold-Lot-Pixel-com-1k-2-base-Color.png",
-            "metallic":"https://i.ibb.co/ZHych2V/Gold-Lot-Pixel-com-1k-2-metallic.png",
-            "roughness":"https://i.ibb.co/t3hpSS4/Gold-Lot-Pixel-com-1k-2-roughness.png"
-        },
-        "silver":{
+    "metal":[
+        
+        {
             "albedo":"https://i.ibb.co/9b1Jwnv/Silver-Lot-Pixel-com-1k-2-base-Color.png",
             "metallic":"https://i.ibb.co/N1JXpYk/Silver-Lot-Pixel-com-1k-2-metallic.png",
             "roughness":"https://i.ibb.co/SXVr89t/Silver-Lot-Pixel-com-1k-2-roughness.png"
         },
-        "copper":{
+        {
+            "albedo":"https://i.ibb.co/TLdTCdS/Gold-Lot-Pixel-com-1k-2-base-Color.png",
+            "metallic":"https://i.ibb.co/ZHych2V/Gold-Lot-Pixel-com-1k-2-metallic.png",
+            "roughness":"https://i.ibb.co/t3hpSS4/Gold-Lot-Pixel-com-1k-2-roughness.png"
+        },
+       {
             "albedo":"https://i.ibb.co/9vDL6sf/Copper-Lot-Pixel-com-1k-1-base-Color.png",
             "metallic":"https://i.ibb.co/NLQ22pc/Copper-Lot-Pixel-com-1k-1-metallic.png",
             "roughness":"https://i.ibb.co/2WmXyWY/Copper-Lot-Pixel-com-1k-1-roughness.png"
         }
-    },
+    ],
     "fabric": {
         "cotton": {
             "albedo": "",
