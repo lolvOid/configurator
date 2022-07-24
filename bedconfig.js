@@ -1,4 +1,4 @@
-let scene, roomScene, camera, orthoCameraTop, orthoCameraLeft, dimensionScene, dimensionRenderer, renderer, directionalLight, ambientLight, controls;
+let scene, camera, orthoCameraTop, orthoCameraLeft, dimensionScene, dimensionRenderer, renderer, directionalLight, ambientLight, controls;
 let css2DRenderer, css2DRenderer2;
 
 const viewer = document.getElementById("modelviewer");
@@ -99,12 +99,13 @@ var bedTopsEdges = [],
     bedDrawersEdges = [];
 var whArrowL, whArrowR, wvArrowUp, wvArrowDown, wvvArrowUp, wvvArrowDown, wdArrowUp, wdArrowDown, wdArrowUp2, wdArrowDown2, wdArrowUp3, wdArrowDown3;
 var widthLabel, heightLabel, depthLabel, depthLabel2, drawerLabel, drawerLabel2, drawerLabel3;
+var boardType =0;
 
-var boardType = 0,
-    textureType = 0,
-    woodcolors = 0,
-    boardColor = 0,
-    colorTypes = 0;
+var materialType = 0;
+var woodColor = 0;
+var woodTexture = 0;
+var colorType = 0;
+var colorIndex = 0;
 var boards, sideboard, drawerHandle, drawerBoard, drawerPanelL, drawerPanelR;
 var sidePanelL, sidePanelR;
 var bedLegL, bedLegR;
@@ -115,131 +116,41 @@ var istableLeft = false,
 var room;
 
 
-
-var textures = {
-    tint: {
-        natural: "",
-        traditionalcherry: "",
-        americanwalnut: ""
-    },
-
-    wood: {
-        wood_a: {
-            albedo: null,
-            normal: null,
-            ao: null,
-            height: null,
-            roughness: null,
-            natural: null,
-            walnut: null,
-            cherry: null
-        },
-        wood_b: {
-            albedo: null,
-            normal: null,
-            ao: null,
-            height: null,
-            roughness: null,
-            natural: null,
-            walnut: null,
-            cherry: null
-
-        },
-        wood_c: {
-            albedo: null,
-            normal: null,
-            ao: null,
-            height: null,
-            roughness: null,
-            natural: null,
-            walnut: null,
-            cherry: null
-
-        }
-    },
-    colors: {
-        black: "",
-        offwhite: "",
-        grey: "",
-        darkbrown: "",
-        lightbrown: ""
-    },
-    lacquer: {
-        roughness: "",
-        metalness: ""
-    },
-    lamniate: {
-        roughness: "",
-        metalness: ""
-    },
-    handle: {
-        metallicgold: "",
-        charcoal: "",
-        silver: ""
-    },
-    fabric: {
-        cotton: {
-            albedo: "",
-            normal: "",
-            roughness: "",
-            bump: "",
-            ao: ""
-        }
-
-    }
-
-}
-
-
-
+var textures;
 async function getTextures() {
-    fetch("colorinfo.json").then(response => response.json())
-        .then(data => {
-            textures.tint.americanwalnut = data.tint.americanwalnut;
-            textures.tint.natural = data.tint.natural;
-            textures.tint.traditionalcherry = data.tint.traditionalcherry;
-            textures.colors.black = data.colors.black;
-            textures.colors.darkbrown = data.colors.darkbrown;
-            textures.colors.grey = data.colors.grey;
-            textures.colors.lightbrown = data.colors.lightbrown;
-            textures.colors.offwhite = data.colors.offwhite;
+  fetch("colorinfo.json")
+    .then((response) => response.json())
+    .then((data) => {
+      textures = data;
+      for (let i in textures.metal) {
+        textures.metal[i].albedo = texLoader.load(data.metal[i].albedo);
+        textures.metal[i].metallic = texLoader.load(data.metal[i].metallic);
+        textures.metal[i].roughness = texLoader.load(data.metal[i].roughness);
 
-            textures.wood.wood_a.albedo = texLoader.load(data.online.wood.wood_a.albedo);
-            textures.wood.wood_a.natural = texLoader.load(data.online.wood.wood_a.natural);
-            textures.wood.wood_a.walnut = texLoader.load(data.online.wood.wood_a.walnut);
-            textures.wood.wood_a.cherry = texLoader.load(data.online.wood.wood_a.cherry);
-            textures.wood.wood_a.normal = texLoader.load(data.online.wood.wood_a.normal);
-            textures.wood.wood_a.ao = texLoader.load(data.online.wood.wood_a.ao);
-            textures.wood.wood_a.height = texLoader.load(data.online.wood.wood_a.height);
-            textures.wood.wood_a.roughness = texLoader.load(data.online.wood.wood_a.roughness);
+        updateTexture(textures.metal[i].albedo,1,1,true);
+        updateTexture(textures.metal[i].metallic,1,1,true);
+        updateTexture(textures.metal[i].roughness,1,1,true);
 
-            textures.wood.wood_b.albedo = texLoader.load(data.online.wood.wood_b.albedo);
-            textures.wood.wood_b.natural = texLoader.load(data.online.wood.wood_b.natural);
-            textures.wood.wood_b.walnut = texLoader.load(data.online.wood.wood_b.walnut);
-            textures.wood.wood_b.cherry = texLoader.load(data.online.wood.wood_b.cherry);
-            textures.wood.wood_b.normal = texLoader.load(data.online.wood.wood_b.normal);
-            textures.wood.wood_b.ao = texLoader.load(data.online.wood.wood_b.ao);
-            textures.wood.wood_b.height = texLoader.load(data.online.wood.wood_b.height);
-            textures.wood.wood_b.roughness = texLoader.load(data.online.wood.wood_b.roughness);
+      }
+      for (let i in textures.wood) {
 
-            textures.wood.wood_c.albedo = texLoader.load(data.online.wood.wood_c.albedo);
-            textures.wood.wood_c.natural = texLoader.load(data.online.wood.wood_c.natural);
-            textures.wood.wood_c.walnut = texLoader.load(data.online.wood.wood_c.walnut);
-            textures.wood.wood_c.cherry = texLoader.load(data.online.wood.wood_c.cherry);
-            textures.wood.wood_c.normal = texLoader.load(data.online.wood.wood_c.normal);
-            textures.wood.wood_c.ao = texLoader.load(data.online.wood.wood_c.ao);
-            textures.wood.wood_c.height = texLoader.load(data.online.wood.wood_c.height);
-            textures.wood.wood_c.roughness = texLoader.load(data.online.wood.wood_c.roughness);
-            textures.lacquer.metalness = data.lacquer.metalness;
-            textures.lacquer.roughness = data.lacquer.roughness;
-            textures.lamniate.metalness = data.lamniate.metalness;
-            textures.lamniate.roughness = data.lamniate.roughness;
+        textures.wood[i].albedo = texLoader.load(data.wood[i].albedo);
+        textures.wood[i].normal = texLoader.load(data.wood[i].normal);
+        textures.wood[i].ao = texLoader.load(data.wood[i].ao);
+        textures.wood[i].height = texLoader.load(data.wood[i].height);
+        textures.wood[i].roughness = texLoader.load(data.wood[i].roughness);
 
-            textures.fabric.cotton.normal = texLoader.load(data.fabric.cotton.normal);
-            textures.fabric.cotton.roughness = texLoader.load(data.fabric.cotton.roughness);
-            textures.fabric.cotton.ao = texLoader.load(data.fabric.cotton.ao);
-            textures.fabric.cotton.bump = texLoader.load(data.fabric.cotton.height);
-        });
+        updateTexture(textures.wood[i].albedo);
+        updateTexture(textures.wood[i].normal);
+        updateTexture(textures.wood[i].ao);
+        updateTexture(textures.wood[i].height);
+        updateTexture(textures.wood[i].roughness);
+
+
+      }
+
+
+    });
 }
 
 getTextures();
@@ -259,7 +170,7 @@ function getInputs() {
         wDepth = $(this).val();
         isDrawerHandleCreated = true;
         
-        updateCubeMap();
+        
 
     })
 
@@ -269,7 +180,7 @@ function getInputs() {
 
         wHeight = $(this).val();
         isDrawerHandleCreated = true;
-        updateCubeMap();
+        
 
     });
 
@@ -278,7 +189,7 @@ function getInputs() {
 
         wWidth = $(this).val();
         isDrawerHandleCreated = true;
-        updateCubeMap();
+        
         
 
     });
@@ -316,45 +227,36 @@ function getInputs() {
             bedDrawerRight.visible = false;
 
         }
-        updateCubeMap();
+        
     })
     $("#selectBoard").change(function () {
         boardType = $(this).children("option:selected").val();
 
         
-        updateCubeMap();
-    });
-    $("#selectTexture").click(function () {
-
-        textureType = $(this).children("option:selected").val();
-        updateBedMaterial();
-        updateCubeMap();
-
-    });
-    $("input:radio[name='wood_colors']").click(function () {
-
-        woodcolors = $(this).val();
-        updateBedMaterial();
-        updateCubeMap();
-
-    });
-
-    $("input:radio[name='colorTypes']").click(function () {
-
-        colorTypes = $(this).val();
-        setMaterialType();
-        updateCubeMap();
-
-    });
-
-    $("input:radio[name='boardColors']").click(function () {
-
-        boardColor = $(this).val();
-        setMaterialType()
         
-        updateCubeMap();
     });
+   
+  $("#selectMaterial").change(function () {
+    materialType = $(this).val();
+    updateMaterials();
+    
+  });
 
+  $("#selectTexture").change(function () {
+    woodTexture = $(this).val();
+    updateMaterials();
+    
+  });
+  $("input:radio[name='wood_colors']").click(function () {
+    woodColor = $(this).val();
+    updateMaterials();
+    
+  });
+  $("input:radio[name='boardColors']").click(function () {
+    colorType = $(this).val();
+    updateMaterials();
+    
+  });
     // $("#addMatress").click(function(){
 
     //     if(!bedMatress.visible && !pillowL.visible){
@@ -391,7 +293,7 @@ function getInputs() {
             $(this).addClass("btn-outline-dark");
             $(this).removeClass("btn-outline-danger");
         }
-        updateCubeMap();
+        
         // if (!bedTableLeft.visible) {
         //     $(this).html("Remove Table Left");
         //     $(this).addClass("btn-outline-danger");
@@ -418,7 +320,7 @@ function getInputs() {
             $(this).addClass("btn-outline-dark");
             $(this).removeClass("btn-outline-danger");
         }
-        updateCubeMap();
+        
         // if (!bedTableRight.visible) {
         //     $(this).html("Remove Table Right");
         //     $(this).addClass("btn-outline-danger");
@@ -434,16 +336,16 @@ function getInputs() {
     })
     // $("#woodColor").toggle(function(){
 
-    //     updateBedMaterial();
+    //     updateMaterials();
     // })
     // $("#boardColor").change(function(){
 
-    //     updateBedMaterial();
+    //     updateMaterials();
     // })
 
     // $("#sideColor").change(function(){
 
-    //     updateBedMaterial();
+    //     updateMaterials();
     // })
 
 }
@@ -452,7 +354,7 @@ function init() {
 
 
     scene = new THREE.Scene();
-    roomScene = new THREE.Scene();
+    
     dimensionScene = new THREE.Scene();
 
 
@@ -530,8 +432,8 @@ function init() {
 
 
 
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 2.2;
+    renderer.toneMapping = THREE.LinearToneMapping;
+    renderer.toneMappingExposure = 1.25;
     renderer.outputEncoding = THREE.sRGBEncoding;
     renderer.shadowMap.enabled = true;
     renderer.physicallyCorrectLights = true;
@@ -539,7 +441,7 @@ function init() {
 
 
     renderer.compile(scene, camera);
-    renderer.compile(roomScene, camera);
+    
 
     floorCubeMap = new THREE.WebGLCubeRenderTarget(512, {
         generateMipmaps: true,
@@ -619,7 +521,7 @@ function init() {
 
     // stats = new Stats();
     // viewer.appendChild(stats.dom);
-    controls.addEventListener('change', updateCubeMap);
+    // controls.addEventListener('change', updateCubeMap);
 
 }
 
@@ -670,7 +572,9 @@ function animate() {
 
 
     // stats.begin();
+    updateCubeMap();
     render();
+    
     // stats.end();
 }
 
@@ -852,9 +756,9 @@ function setLighting() {
 function create_lights() {
 
     setLighting();
-    scene.add(new THREE.AmbientLight(0xfcedd8, 1));
+    scene.add(new THREE.AmbientLight(0xdedede, 1));
 
-    const light = new THREE.DirectionalLight(0xfdfbd3, 5);
+    const light = new THREE.DirectionalLight(0xfdfbd3, 3);
 
     if (room) {
         light.target = room;
@@ -884,7 +788,7 @@ function create_lights() {
     // areaLight.position.set(0, 3, 2)
     // scene.add(areaLight);
 
-    var bulbLight = new THREE.PointLight(0xfdfdfd, 2, 10, 1);
+    var bulbLight = new THREE.PointLight(0xfdfdfd, 1, 10, 1);
     bulbLight.position.set(2, 2, 2);
     bulbLight.castShadow = true;
 
@@ -1364,7 +1268,7 @@ function loadModel() {
     Promise.all([
         model, model1, handle, interior
     ]).then(() => {
-        updateTextures()
+        
         scene.add(room);
         updateRoomMaterial(room);
         roomCubeCamera.update(renderer, scene);
@@ -1379,7 +1283,7 @@ function loadModel() {
         createBedTop();
         createDrawers();
         createBedLegs();
-        updateBedMaterial();
+        updateMaterials();
         setMaterialType();
         bedFloor = createBox("bedFloor");
         sideboardFloor = sideboard.clone();
@@ -1500,7 +1404,7 @@ function updateRoomMaterial(room) {
                     mat.envMapIntensity = 1;
                     mat.color.set("#4d4d4d")
                     
-                    updateTexture(mat.map, 1.5, 1.5)
+                    // updateTexture(mat.map, 1.5, 1.5)
 
 
                     mat.roughness = 0;
@@ -1647,9 +1551,8 @@ function setTextureInteraction(row) {
     for (var i = 0; i < row; i++) {
         var option = document.createElement("option");
         option.value = i;
-        if (i == 0) option.text = "Wood A";
-        if (i == 1) option.text = "Wood B";
-        if (i == 2) option.text = "Wood C";
+        option.text = "Wood "+(i+1);
+      
         select.appendChild(option);
     }
 
@@ -1665,10 +1568,28 @@ function setTexture(texture = new THREE.Texture(), repeatX = 1, repeatY = 1) {
     texture.needsUpdate = true;
     // texture.encoding = THREE.sRGBEncoding
 }
-function updateTexture(tex = new THREE.Texture(),x=1,y=1){
-    tex.repeat = new THREE.Vector2(x,y);
-    
-}
+
+function updateTexture(tex = new THREE.Texture(), x = 1, y = 1,mirrorrepeat= false) {
+    if (tex != null) {
+  
+      tex.encoding = THREE.sRGBEncoding;
+      if(mirrorrepeat){
+        tex.wrapS = tex.wrapT = THREE.MirroredRepeatWrapping;
+      }else{
+        tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+      }
+      
+      tex.mapping = THREE.UVMapping;
+      tex.repeat.x = x;
+      tex.repeat.y = y;
+     
+      tex.anisotropy = 8;
+      tex.dispose();
+  
+  
+    }
+  }
+  
 function setMaterialType() {
     if (boardType == 0) {
 
@@ -1680,28 +1601,28 @@ function setMaterialType() {
 
                         e.material.envMap = roomCubeMap.texture;
                         e.material.envMapIntensity = 1;
-                        if (colorTypes == 0) {
+                        if (colorType == 0) {
                             e.material.metalness = textures.lacquer.metalness;
                             e.material.roughness = textures.lacquer.roughness;
 
                         }
-                        if (colorTypes == 1) {
+                        if (colorType == 1) {
                             e.material.metalness = textures.lamniate.metalness;
                             e.material.roughness = textures.lamniate.roughness;
 
                         }
 
-                        if (boardColor == 0) {
-                            e.material.color.set(textures.colors.offwhite);
-                        } else if (boardColor == 1) {
-                            e.material.color.set(textures.colors.grey);
-                        } else if (boardColor == 2) {
-                            e.material.color.set(textures.colors.lightbrown);
-                        } else if (boardColor == 3) {
-                            e.material.color.set(textures.colors.darkbrown);
-                        } else if (boardColor == 4) {
-                            e.material.color.set(textures.colors.black);
-                        }
+                        // if (boardColor == 0) {
+                        //     e.material.color.set(textures.colors.offwhite);
+                        // } else if (boardColor == 1) {
+                        //     e.material.color.set(textures.colors.grey);
+                        // } else if (boardColor == 2) {
+                        //     e.material.color.set(textures.colors.lightbrown);
+                        // } else if (boardColor == 3) {
+                        //     e.material.color.set(textures.colors.darkbrown);
+                        // } else if (boardColor == 4) {
+                        //     e.material.color.set(textures.colors.black);
+                        // }
                     }
                 }
             })
@@ -1710,7 +1631,7 @@ function setMaterialType() {
 
 }
 
-function updateBedMaterial() {
+function updateMaterials() {
 
 
     if (boards != null) {
@@ -1721,313 +1642,287 @@ function updateBedMaterial() {
                 if (e.material.name.includes("table_wood") || e.material.name.includes("bed_wood")) {
 
 
-                    if (textureType == 0) {
-
-                        e.material.color.set("#4d4d4d")
-                        if (woodcolors == 0) {
-                            e.material.map = textures.wood.wood_a.natural
-                        } else
-                        if (woodcolors == 1) {
-                            e.material.map = textures.wood.wood_a.cherry
-                        } else
-                        if (woodcolors == 2) {
-                            e.material.map = textures.wood.wood_a.walnut
-                        }
-                        
-                        updateTexture(e.material.map, 1.5, 2)
                         e.material.envMap = roomCubeMap.texture;
                         e.material.envMapIntensity = 1;
-
-
-                        e.material.normalMap = textures.wood.wood_a.normal;
+                        setWoodColor(e.material,materialType)
+                        e.material.map = setWoodTexture()[0];
+                        e.material.normalMap = setWoodTexture()[1];
+                        e.material.aoMap = setWoodTexture()[2];
+                        e.material.roughnessMap = setWoodTexture()[3];
+                        e.material.bumpMap =  setWoodTexture()[4];
 
                         e.material.normalScale = new THREE.Vector2(0.25, 0.25)
-                        e.material.aoMap = textures.wood.wood_a.ao;
-                        e.material.aoMapIntensity = 2;
-                        e.material.roughnessMap = textures.wood.wood_a.roughness;
-                        e.material.roughness = 0.35;
+                       
+                        e.material.aoMapIntensity = 1;
+                        
+                        e.material.roughness = 1;
 
-                        e.material.needsUpdate = true;
+                     
                     }
-                    if (textureType == 1) {
-
-
-                        e.material.color.set("#4d4d4d")
-                        if (woodcolors == 0) {
-                            e.material.map = textures.wood.wood_b.natural
-                        } else
-                        if (woodcolors == 1) {
-                            e.material.map = textures.wood.wood_b.cherry
-                        } else
-                        if (woodcolors == 2) {
-                            e.material.map = textures.wood.wood_b.walnut
-                        }
-                        updateTexture(e.material.map, 1.5, 2)
-                        e.material.normalMap = textures.wood.wood_b.normal;
-                        e.material.normalScale = new THREE.Vector2(0.25, 0.25)
-
-                        e.material.aoMap = textures.wood.wood_b.ao;
-                        e.material.aoMapIntensity = 2;
-                        e.material.roughnessMap = textures.wood.wood_b.roughness;
-
-                        e.material.roughness = 0.35;
-                        e.material.needsUpdate = true;
-                    }
-                    if (textureType == 2) {
-
-
-                        e.material.color.set("#4d4d4d")
-                        if (woodcolors == 0) {
-                            e.material.map = textures.wood.wood_c.natural
-                        } else
-                        if (woodcolors == 1) {
-                            e.material.map = textures.wood.wood_c.cherry
-                        } else
-                        if (woodcolors == 2) {
-                            e.material.map = textures.wood.wood_c.walnut
-                        }
-                        updateTexture(e.material.map, 1.5, 2)
-                        e.material.normalMap = textures.wood.wood_c.normal;
-                        e.material.normalScale = new THREE.Vector2(0.25, 0.25)
-
-                        e.material.aoMap = textures.wood.wood_c.ao;
-                        e.material.aoMapIntensity = 2;
-                        e.material.roughnessMap = textures.wood.wood_c.roughness;
-                        e.material.roughness = 0.35;
-
-                        e.material.needsUpdate = true;
-                    }
-                }
-
+                    
+                
 
 
             }
         })
     }
+        if (drawerBoard != null) {
 
-    if (drawerBoard != null) {
-
-        drawerBoard.traverse(e => {
+            drawerBoard.traverse(e => {
 
             if (e instanceof THREE.Mesh) {
+              
+                if (e.material instanceof THREE.MeshStandardMaterial) {
+                            
+                            
+                            e.material.envMap = roomCubeMap.texture;
+                            e.material.envMapIntensity = 1;
+                            setWoodColor(e.material,materialType)
+                            e.material.map = setWoodTexture()[0];
+                        e.material.normalMap = setWoodTexture()[1];
+                        e.material.aoMap = setWoodTexture()[2];
+                        e.material.roughnessMap = setWoodTexture()[3];
+                        e.material.bumpMap =  setWoodTexture()[4];
 
-                e.material.metalness = 0;
-                e.material.roughness = 0.45;
-                if (textureType == 0) {
+                        e.material.normalScale = new THREE.Vector2(0.25, 0.25)
+                       
+                        e.material.aoMapIntensity = 1;
+                        
+                        e.material.roughness = 1;
 
-                    e.material.color.set("#4d4d4d")
-                    if (woodcolors == 0) {
-                        e.material.map = textures.wood.wood_a.natural
-                    } else
-                    if (woodcolors == 1) {
-                        e.material.map = textures.wood.wood_a.cherry
-                    } else
-                    if (woodcolors == 2) {
-                        e.material.map = textures.wood.wood_a.walnut
-                    }
-
-                    updateTexture(e.material.map, 2.4, 2)
-                    e.material.envMap = roomCubeMap.texture;
-                    e.material.envMapIntensity = 1;
-
-
-                    e.material.normalMap = textures.wood.wood_a.normal;
-
-                    e.material.normalScale = new THREE.Vector2(0.25, 0.25)
-                    e.material.aoMap = textures.wood.wood_a.ao;
-                    e.material.aoMapIntensity = 2;
-                    e.material.roughnessMap = textures.wood.wood_a.roughness;
-
-
-                    e.material.needsUpdate = true;
                 }
-                if (textureType == 1) {
 
+            }});
+        }
+        if (sideboard != null) {
 
-                    e.material.color.set("#4d4d4d")
-                    if (woodcolors == 0) {
-                        e.material.map = textures.wood.wood_b.natural
-                    } else
-                    if (woodcolors == 1) {
-                        e.material.map = textures.wood.wood_b.cherry
-                    } else
-                    if (woodcolors == 2) {
-                        e.material.map = textures.wood.wood_b.walnut
-                    }
-                    updateTexture(e.material.map, 2.4, 2)
-                    e.material.normalMap = textures.wood.wood_b.normal;
-                    e.material.normalScale = new THREE.Vector2(0.25, 0.25)
+            sideboard.traverse(e => {
 
-                    e.material.aoMap = textures.wood.wood_b.ao;
-                    e.material.aoMapIntensity = 2;
-                    e.material.roughnessMap = textures.wood.wood_b.roughness;
-
-
-                    e.material.needsUpdate = true;
-                }
-                if (textureType == 2) {
-
-
-                    e.material.color.set("#4d4d4d")
-                    if (woodcolors == 0) {
-                        e.material.map = textures.wood.wood_c.natural
-                    } else
-                    if (woodcolors == 1) {
-                        e.material.map = textures.wood.wood_c.cherry
-                    } else
-                    if (woodcolors == 2) {
-                        e.material.map = textures.wood.wood_c.walnut
-                    }
-                    updateTexture(e.material.map, 2.4, 2)
-                    e.material.normalMap = textures.wood.wood_c.normal;
-                    e.material.normalScale = new THREE.Vector2(0.25, 0.25)
-
-                    e.material.aoMap = textures.wood.wood_c.ao;
-                    e.material.aoMapIntensity = 2;
-                    e.material.roughnessMap = textures.wood.wood_c.roughness;
-
-
-                    e.material.needsUpdate = true;
-                }
-            }
-
-
-
-
-        })
-    }
-
-    if (sideboard != null) {
-
-        sideboard.traverse(e => {
             if (e instanceof THREE.Mesh) {
-
-
-
-
-                if (textureType == 0) {
-                    e.material.color.set("#4d4d4d")
-                    if (woodcolors == 0) {
-                        e.material.map = textures.wood.wood_a.natural
-                    } else
-                    if (woodcolors == 1) {
-                        e.material.map = textures.wood.wood_a.cherry
-                    } else
-                    if (woodcolors == 2) {
-                        e.material.map = textures.wood.wood_a.walnut
-                    }
-
-
-                    e.material.envMap = roomCubeMap.texture;
-                    e.material.envMapIntensity = 1;
-
-
-                    e.material.normalMap = textures.wood.wood_a.normal;
-                    e.material.normalScale = new THREE.Vector2(0.25, 0.25)
-
-                    e.material.aoMap = textures.wood.wood_a.ao;
-
-                    e.material.roughnessMap = textures.wood.wood_a.roughness;
-                    e.material.roughness = 0.5;
-
-                    e.material.needsUpdate = true;
+                if (e.material instanceof THREE.MeshStandardMaterial) {
+                            e.material.envMap = roomCubeMap.texture;
+                            e.material.envMapIntensity = 1;
+                            setWoodColor(e.material,materialType)
+                            e.material.map = setWoodTexture()[0];
+                            e.material.normalMap = setWoodTexture()[1];
+                            e.material.aoMap = setWoodTexture()[2];
+                            e.material.roughnessMap = setWoodTexture()[3];
+                            e.material.bumpMap =  setWoodTexture()[4];
+    
+                            e.material.normalScale = new THREE.Vector2(0.25, 0.25)
+                           
+                            e.material.aoMapIntensity = 1;
+                            
+                            e.material.roughness = 1;
                 }
-                if (textureType == 1) {
 
-                    e.material.color.set("#4d4d4d")
-                    if (woodcolors == 0) {
-                        e.material.map = textures.wood.wood_b.natural
-                    } else
-                    if (woodcolors == 1) {
-                        e.material.map = textures.wood.wood_b.cherry
-                    } else
-                    if (woodcolors == 2) {
-                        e.material.map = textures.wood.wood_b.walnut
-                    }
+            }});
+        }
+   
+    // if (sideboard != null) {
 
-                    e.material.normalMap = textures.wood.wood_b.normal;
-                    e.material.normalScale = new THREE.Vector2(0.25, 0.25)
-                    e.material.bump = null;
-                    e.material.aoMap = textures.wood.wood_b.ao;
-
-                    e.material.roughnessMap = textures.wood.wood_b.roughness;
-
-
-                    e.material.needsUpdate = true;
-                }
-                if (textureType == 2) {
-
-                    e.material.color.set("#4d4d4d")
-                    if (woodcolors == 0) {
-                        e.material.map = textures.wood.wood_c.natural
-                    } else
-                    if (woodcolors == 1) {
-                        e.material.map = textures.wood.wood_c.cherry
-                    } else
-                    if (woodcolors == 2) {
-                        e.material.map = textures.wood.wood_c.walnut
-                    }
-
-                    e.material.normalMap = textures.wood.wood_c.normal;
-                    e.material.normalScale = new THREE.Vector2(0.25, 0.25)
-                    e.material.bump = null;
-                    e.material.aoMap = textures.wood.wood_c.ao;
-
-                    e.material.roughnessMap = textures.wood.wood_c.roughness;
-
-
-                    e.material.needsUpdate = true;
-                }
-            }
+    //     sideboard.traverse(e => {
+    //         if (e instanceof THREE.Mesh) {
 
 
 
 
+    //             if (woodTexture == 0) {
 
-        })
+    //                 e.material.color.set("#4d4d4d")
+    //                 if (woodcolors == 0) {
+    //                     e.material.map = textures.wood.wood_a.natural
+    //                 } else
+    //                 if (woodcolors == 1) {
+    //                     e.material.map = textures.wood.wood_a.cherry
+    //                 } else
+    //                 if (woodcolors == 2) {
+    //                     e.material.map = textures.wood.wood_a.walnut
+    //                 }
+
+
+    //                 e.material.envMap = roomCubeMap.texture;
+    //                 e.material.envMapIntensity = 1;
+
+
+    //                 e.material.normalMap = textures.wood.wood_a.normal;
+    //                 e.material.normalScale = new THREE.Vector2(0.25, 0.25)
+
+    //                 e.material.aoMap = textures.wood.wood_a.ao;
+
+    //                 e.material.roughnessMap = textures.wood.wood_a.roughness;
+    //                 e.material.roughness = 0.5;
+
+    //                 e.material.needsUpdate = true;
+    //             }
+    //             if (woodTexture == 1) {
+
+
+    //                 e.material.color.set("#4d4d4d")
+    //                 if (woodcolors == 0) {
+    //                     e.material.map = textures.wood.wood_b.natural
+    //                 } else
+    //                 if (woodcolors == 1) {
+    //                     e.material.map = textures.wood.wood_b.cherry
+    //                 } else
+    //                 if (woodcolors == 2) {
+    //                     e.material.map = textures.wood.wood_b.walnut
+    //                 }
+
+    //                 e.material.normalMap = textures.wood.wood_b.normal;
+    //                 e.material.normalScale = new THREE.Vector2(0.25, 0.25)
+    //                 e.material.bump = null;
+    //                 e.material.aoMap = textures.wood.wood_b.ao;
+
+    //                 e.material.roughnessMap = textures.wood.wood_b.roughness;
+
+
+    //                 e.material.needsUpdate = true;
+    //             }
+    //             if (woodTexture == 2) {
+
+
+    //                 e.material.color.set("#4d4d4d")
+    //                 if (woodcolors == 0) {
+    //                     e.material.map = textures.wood.wood_c.natural
+    //                 } else
+    //                 if (woodcolors == 1) {
+    //                     e.material.map = textures.wood.wood_c.cherry
+    //                 } else
+    //                 if (woodcolors == 2) {
+    //                     e.material.map = textures.wood.wood_c.walnut
+    //                 }
+
+    //                 e.material.normalMap = textures.wood.wood_c.normal;
+    //                 e.material.normalScale = new THREE.Vector2(0.25, 0.25)
+    //                 e.material.bump = null;
+    //                 e.material.aoMap = textures.wood.wood_c.ao;
+
+    //                 e.material.roughnessMap = textures.wood.wood_c.roughness;
+
+
+    //                 e.material.needsUpdate = true;
+    //             }
+    //         }
+
+
+
+
+
+    //     })
+    // }
+
+}
+function setWoodTexture() {
+  
+    
+    return [
+      textures.wood[woodTexture].albedo,
+      textures.wood[woodTexture].normal,
+      textures.wood[woodTexture].ao,
+      textures.wood[woodTexture].roughness,
+      textures.wood[woodTexture].height
+    ];
+  
+  
+  
+  }
+
+  
+function scaleUV(obj, x, y) {
+    try {
+      if (obj != null) {
+  
+        
+        var uvAttribute = obj.geometry.attributes.uv;
+  
+        var factorX = (x / 2.5) * 0.25;
+        var factorY = (y / 2.5) * 0.25;
+        for (var i = 0; i < uvAttribute.count; i++) {
+  
+          var u = uvAttribute.getX(i);
+          var v = uvAttribute.getY(i);
+  
+          if (u != 0) {
+            u = factorX;
+            u = u.toFixed(2);
+          }
+          if (v != 0) {
+            v = factorY;
+            v = v.toFixed(2);
+          }
+          uvAttribute.setXY(i, u, v);
+  
+  
+        }
+  
+  
+        uvAttribute.needsUpdate = true;
+  
+      }
+  
+  
+    } catch (err) {}
+  }
+
+
+  function setWoodColor(material, type) {
+
+    if (type == 0 || type == 1) {
+      switch (Math.round(colorType)) {
+        case 0:
+          colorTo(material, textures.colors.offwhite);
+          break;
+        case 1:
+          colorTo(material, textures.colors.grey);
+          break;
+        case 2:
+          colorTo(material, textures.colors.lightbrown);
+          break;
+        case 3:
+          colorTo(material, textures.colors.darkbrown);
+          break;
+        case 4:
+          colorTo(material, textures.colors.black);
+          break;
+  
+      }
+    } else if (type == 2 || type == 3) {
+      switch (Math.round(woodColor)) {
+        case 0:
+          colorTo(material, textures.tint.natural);
+          break;
+        case 1:
+          colorTo(material, textures.tint.cherry);
+          break;
+        case 2:
+          colorTo(material, textures.tint.walnut);
+          break;
+      }
     }
+  
+  
+  }
 
-}
+  function colorTo(material, value) {
 
-function updateTextures() {
-    setTexture(textures.wood.wood_a.albedo, 1, 1);
-    setTexture(textures.wood.wood_a.walnut, 1, 1);
-    setTexture(textures.wood.wood_a.cherry, 1, 1);
-    setTexture(textures.wood.wood_a.natural, 1, 1);
-
-    setTexture(textures.wood.wood_a.height, 1, 1);
-    setTexture(textures.wood.wood_a.ao, 1, 1);
-    setTexture(textures.wood.wood_a.normal, 1, 1);
-    setTexture(textures.wood.wood_a.roughness, 1, 1);
-
-    setTexture(textures.wood.wood_b.albedo, 1, 1);
-    setTexture(textures.wood.wood_b.walnut, 1, 1);
-    setTexture(textures.wood.wood_b.cherry, 1, 1);
-    setTexture(textures.wood.wood_b.natural, 1, 1);
-    setTexture(textures.wood.wood_b.height, 1, 1);
-    setTexture(textures.wood.wood_b.normal, 1, 1);
-    setTexture(textures.wood.wood_b.ao, 1, 1);
-    setTexture(textures.wood.wood_b.roughness, 1, 1);
-
-    setTexture(textures.wood.wood_c.walnut, 1, 1);
-    setTexture(textures.wood.wood_c.cherry, 1, 1);
-    setTexture(textures.wood.wood_c.natural, 1, 1);
-    setTexture(textures.wood.wood_c.albedo, 1, 1);
-    setTexture(textures.wood.wood_c.height, 1, 1);
-    setTexture(textures.wood.wood_c.normal, 1, 1);
-    setTexture(textures.wood.wood_c.ao, 1, 1);
-    setTexture(textures.wood.wood_c.roughness, 1, 1);
-    // setTexture(textures.tufted.normal, 1, 1);
-    // setTexture(textures.tufted.roughness, 1, 1);
-    // setTexture(textures.tufted.ao, 1, 1);
-    // setTexture(textures.tufted.bump, 1, 1);
-    // setTexture(textures.cotton.bump, 1, 1);
-}
-
+    var initial = new THREE.Color(material.color.getHex());
+    var value = new THREE.Color(value);
+  
+    TweenLite.to(initial, 0.5, {
+      r: value.r,
+      g: value.g,
+      b: value.b,
+  
+      onUpdate: function () {
+        material.color = initial;
+      }
+    });
+  }
 function setModel(objA) {
 
 
-    setTextureInteraction(3)
+    setTextureInteraction(textures.wood.length)
 
     objA.traverse(function (e) {
         if (e instanceof THREE.Mesh) {
@@ -2119,7 +2014,7 @@ function setModel(objA) {
 
         }
     });
-    updateBedMaterial();
+    updateMaterials();
 
 
 }
@@ -2465,24 +2360,48 @@ function setMatress(matress) {
                 e.castShadow = true;
                 e.receiveShadow = true;
                 var mat = e.material;
-
-                if (mat.name.includes("blanket")) {
-                    mat.shading = THREE.SmoothShading;
-
-                    updateTexture(textures.fabric.cotton.normal, 0.1, 0.1)
-                    updateTexture(textures.fabric.cotton.roughness, 2, 2)
-                    updateTexture(textures.fabric.cotton.height, 2, 2)
-                    mat.color.set("#bcbcbc")
-                    mat.roughnessMap = null;
-                    mat.normalMap = null;
-                    mat.bumpMap = null;
-
-                    mat.roughness = 1;
+                if(mat instanceof THREE.MeshStandardMaterial){
+                        
+                    if (mat.name.includes("blanket")) {
+                        
+                        
+                        mat.lightMap = texLoader.load("models/matress/blanketIllumination.jpg")
+                        
+                        mat.aoMap = texLoader.load("models/matress/blanketAmbient_Occlusion.jpg")
+                        mat.normalMap =  null;
+                        mat.bumpMap = texLoader.load("Textures/fabric/cotton/Fabric_Cotton_1K_height.jpg")
+                        // mat.roughnessMap =  texLoader.load("Textures/fabric/cotton/Fabric_Cotton_1K_roughness.jpg")
+                        mat.bumpScale = 0.02;
+                        mat.aoMapIntensity = 1;
+                        updateTexture(mat.aoMap,1,1,false);
+                        
+                        updateTexture(mat.bumpMap,10,10,false);
+                        updateTexture(mat.roughnessMap,10,10,false);
+                        // updateTexture(textures.fabric.cotton.normal, 0.1, 0.1)
+                        // updateTexture(textures.fabric.cotton.roughness, 2, 2)
+                        // updateTexture(textures.fabric.cotton.height, 2, 2)
+                        mat.color.set("#ffffff")
+                     
+                        mat.roughness = 1;
+                    }
+                    if (mat.name.includes("matress")) {
+                        mat.shading = THREE.SmoothShading;
+                        mat.color.set("#ffffff")
+                        mat.lightMap = texLoader.load("models/matress/matressIllumination.jpg")
+                        mat.aoMap = texLoader.load("models/matress/matressAmbient_Occlusion.jpg")
+                        mat.normalMap =  null;
+                        mat.bumpMap = texLoader.load("Textures/fabric/cotton/Fabric_Cotton_1K_height.jpg")
+                        // mat.roughnessMap =  texLoader.load("Textures/fabric/cotton/Fabric_Cotton_1K_roughness.jpg")
+                        mat.bumpScale = 0.02;
+                        mat.aoMapIntensity = 1;
+                        updateTexture(mat.aoMap,1,1,false);
+                        
+                        updateTexture(mat.bumpMap,10,10,false);
+                        updateTexture(mat.roughnessMap,10,10,false);
+                        mat.roughness = 1;
+                    }
                 }
-                if (mat.name.includes("matress")) {
-                    mat.color.set("#a0a0a0")
-                    mat.roughness = 1;
-                }
+                
             }
         })
     }
@@ -2548,11 +2467,11 @@ function setPillow(pillow) {
 
 
     pillow.children[0].material = new THREE.MeshStandardMaterial({
-        color: 0x3d3d3d,
+        color: 0x7e7e7e,
         normalMap: texNormal,
         normalScale: new THREE.Vector2(2, 2),
         aoMap: texAO,
-        aoMapIntensity: 2,
+        aoMapIntensity: 1,
         roughness: 1,
         roughnessMap: texRoughness
     });
