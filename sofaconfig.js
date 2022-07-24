@@ -177,6 +177,31 @@ var d = [],
     leftV = [],
     rightV = [];
 var livingRoom;
+let colorIndex = 0,textureIndex = 0, textureType = 0;
+
+var fabric = {
+    velvet:{
+        ao:texLoader.load("Textures/fabric/velvet/fabric-046_velvet-fine-100x100cm_s.png"),
+        roughness:texLoader.load("Textures/fabric/velvet/fabric-046_velvet-fine-100x100cm_s.png"),
+        normal:texLoader.load("Textures/fabric/velvet/fabric-046_velvet-fine-100x100cm_n.png"),
+        bump:texLoader.load("Textures/fabric/velvet/fabric-046_velvet-fine-100x100cm_b.png"),
+        
+    },
+    leather:{
+        ao:texLoader.load("Textures/fabric/leather/4K-brown_leather_2_ambientocclusion.png"),
+        roughness:texLoader.load("Textures/fabric/leather/4K-brown_leather_2_roughness.png"),
+        normal:texLoader.load("Textures/fabric/leather/4K-brown_leather_2_normal.png"),
+        bump:texLoader.load("Textures/fabric/leather/4K-brown_leather_2_height.png"),
+        
+    }
+}
+var textures = {
+    texture_1:texLoader.load("Textures/pattern/Checker.jpg"),    
+    texture_2:texLoader.load("Textures/pattern/Stripe.jpg"),
+    texture_3:texLoader.load("Textures/pattern/Ornament.jpg"),
+    // texture_4:texLoader.load(""),
+
+}
 init();
 
 animate();
@@ -229,6 +254,18 @@ function getInputs() {
         checkDistance();
         manipulateSofa();
         updateCubeMap();
+    })
+    $("#selectType").change(function(){
+        textureType = $(this).val();
+        updateColors();
+    })
+    $("#selectTextures").change(function(){
+        textureIndex = $(this).val();
+        updateColors();
+    })
+    $("#selectColors").change(function(){
+        colorIndex = $(this).val();
+        updateColors();
     })
 }
 
@@ -376,7 +413,7 @@ function init() {
     //controls.addEventListener('change', render); // use if there is no animation loop
     controls.enableDamping = true;
 
-    controls.minDistance = 8;
+    controls.minDistance = 0;
     controls.maxDistance = 10;
     controls.panSpeed = 0;
 
@@ -384,7 +421,7 @@ function init() {
     controls.dampingFactor = 0;
     controls.target.set(0, 0.5, 0);
 
-    controls.minPolarAngle = 0; // radians
+    controls.minPolarAngle = Math.PI/2.25; // radians
     controls.maxPolarAngle = Math.PI / 2;
     controls.minAzimuthAngle = -Math.PI / 16;
     controls.maxAzimuthAngle = Math.PI / 16;
@@ -643,6 +680,7 @@ function update() {
     createMeasurementsHeightRight(leftIndexs[leftIndexs.length - 1], rightIndexs[rightIndexs.length - 1])
 
     updateRoom();
+    
     delta = clock.getDelta();
     dimensionviewer.hidden = true;
     if (isMeasured) {
@@ -2210,7 +2248,7 @@ function loadModel() {
         controls.enabled = true;
     };
 
-
+   
 
     p1 = loadAsync("models/sofas/sofa/components/single.gltf").then((result) => {
         sofa.single = result.scene.children[0];
@@ -2323,8 +2361,9 @@ function loadModel() {
         hSingleCount += 1;
         addButton();
         // createSphere()
+        updateColors();
         updateCubeMap();
-
+    
     });
 }
 
@@ -2671,11 +2710,24 @@ function setSofa(objA) {
             //     e.material.color.set("#f0f0f0");
             // }
             // e.material.side = THREE.DoubleSide;
-            e.material.metalness = 0;
-            e.material.map = null;
-            e.material.roughness = 1;
+            // e.material.metalness = 0;
+            // e.material.map = null;
+            
+            e.material.color.set("#9d2c35");
+            e.material.normalScale = new THREE.Vector2(2,2)
+            e.material.aoMapIntensity = 0.25;
+            e.material.roughness = 0.65;
 
-            e.material.normalMap = null;
+
+
+            //Sofa color
+            /*
+
+            */
+
+            
+
+            // e.material.normalMap = null;
         }
     });
 }
@@ -4249,4 +4301,75 @@ function downloadImage() {
         $(".textOver").addClass("d-none");
     });
 
+}
+function getFabrics(c){
+    switch(Math.round(c)){
+        case 0: return [ fabric.velvet.ao, fabric.velvet.normal, fabric.velvet.roughness, fabric.velvet.bump];break;
+        case 1: return [ fabric.leather.ao, fabric.leather.normal, fabric.leather.roughness, fabric.leather.bump];break;
+    }
+}
+function setTexture(tex){
+    if(tex!=null){
+       tex.encoding = THREE.sRGBEncoding;    
+                    
+        tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+        tex.repeat.set(0.5,0.5)
+        return tex;
+    }
+}
+function getTextures(c){
+    switch(Math.round(c)){
+        case 0: return  textures.texture_1;
+        case 1: return textures.texture_2;
+        case 2: return textures.texture_3; 
+        case 3: return textures.texture_4; 
+        case 4: return textures.texture_5; 
+    }
+}
+
+function getColors(c){
+    switch(Math.round(c)){
+        case 0: return "#9d2c35";
+        case 1: return "#47c6e6";
+        case 2: return "#3b695d"; 
+        case 3: return "#dbbfa3"; 
+        case 4: return "#d4969e"; 
+    }
+}
+
+
+function updateColors(){
+    
+    scene.traverse(e=>{
+        if(e instanceof THREE.Mesh){
+            if(e.material.name.includes("Sofa")){
+                    if(e.material instanceof THREE.MeshStandardMaterial){
+                        
+                        e.material.color.set(getColors(colorIndex));
+                        
+                        e.material.map= textureType ==0? getTextures(textureIndex):null;
+                        e.material.aoMap = getFabrics(textureType)[0];
+                        e.material.normalMap = getFabrics(textureType)[1];
+                        e.material.roughnessMap = getFabrics(textureType)[2];
+                        e.material.bumpMap = getFabrics(textureType)[3];
+
+                        setTexture(e.material.map)
+                        setTexture(e.material.aoMap)
+                        setTexture(e.material.normalMap)
+                        setTexture(e.material.roughnessMap)
+                        setTexture(e.material.bumpMap)
+
+                        e.material.aoMapIntensity = 0.8;
+                        e.material.normalScale = new THREE.Vector2(2,2);
+                        e.material.roughness = 1;
+                        e.material.metalness = 0;
+                        e.material.bumpScale = 0.5;
+                    }
+                  
+                 
+                
+             
+            }
+        }
+    })
 }
