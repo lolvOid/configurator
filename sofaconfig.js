@@ -57,8 +57,9 @@ const manager = new THREE.LoadingManager();
 const gltfLoader = new THREE.GLTFLoader(manager);
 const texLoader = new THREE.TextureLoader(manager);
 var btnPlus = texLoader.load("assets/plus_white.png");
-var btnMinus = texLoader.load("assets/minus_white.png");
 
+var btnMinus = texLoader.load("assets/minus_white.png");
+btnPlus.anisotropy = btnMinus.anisotropy = 8;
 
 var pmremGenerator;
 
@@ -195,13 +196,16 @@ var fabric = {
         
     }
 }
-var textures = {
-    texture_1:texLoader.load("Textures/pattern/Checker.jpg"),    
-    texture_2:texLoader.load("Textures/pattern/Stripe.jpg"),
-    texture_3:texLoader.load("Textures/pattern/Ornament.jpg"),
+var textures = [
+ texLoader.load("Textures/pattern/Checker.jpg"),    
+   texLoader.load("Textures/pattern/Stripe.jpg"),
+    texLoader.load("Textures/pattern/Ornament.jpg"),
+  texLoader.load("Textures/pattern/Floral.jpg")
     // texture_4:texLoader.load(""),
 
-}
+]
+
+var armrest_group= new THREE.Group();
 init();
 
 animate();
@@ -233,6 +237,7 @@ function getInputs() {
             updateCubeMap();
          
     })
+    
     $("#removeR").click(function () {
      
         for(var i = rightV.length-1;i>=0;i--){
@@ -919,8 +924,8 @@ function post_process() {
     composer.addPass(renderPass);
     const pixelRatio = renderer.getPixelRatio();
 
-    const smaaPass = new THREE.SMAAPass(fwidth * pixelRatio, fheight * pixelRatio);
-    composer.addPass(smaaPass);
+    // const smaaPass = new THREE.SMAAPass(fwidth * pixelRatio, fheight * pixelRatio);
+    // composer.addPass(smaaPass);
     // const ssaaPass = new THREE.SSAARenderPass(scene, camera);
     // composer.addPass(ssaaPass);
     const copyPass = new THREE.ShaderPass(THREE.CopyShader);
@@ -1019,7 +1024,21 @@ function helpers() {
             filename
         );
     }
+    function meshToExport(){
+        var s = new THREE.Group();
+        scene.add(s)
+                sofas.forEach(i=>{
 
+                        s.add(i);
+                       
+              })
+            
+           
+        
+      
+        return [s,armrest_group];
+        
+    }
     function Export() {
       
         // add_btn_group.visible = false;
@@ -1028,7 +1047,7 @@ function helpers() {
         // Parse the input and generate the glTF output
         exporter.parse(
             
-            sofas            ,
+            meshToExport(),
             // called when the gltf has been generated
             function (gltf) {
                 if (gltf instanceof ArrayBuffer) {
@@ -1906,6 +1925,11 @@ function addArmrest() {
             }
         });
     }
+    armrests.forEach(e=>{
+        armrest_group.add(e);
+    })
+   
+    scene.add(armrest_group)
 }
 
 function updateArmrests(index1, index2) {
@@ -2371,15 +2395,15 @@ function updateCubeMap() {
     floorCubeCamera.update(renderer, scene);
     roomCubeCamera.update(renderer, scene);
 }
-function setTexture(texture = new THREE.Texture(), repeatX = 1, repeatY = 1) {
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.x = repeatX;
-    texture.repeat.y = repeatY;
-    texture.encoding = THREE.sRGBEncoding;
-    texture.needsUpdate = true;
-    // texture.encoding = THREE.sRGBEncoding
-}
+// function setTexture(texture = new THREE.Texture(), repeatX = 1, repeatY = 1) {
+//     texture.wrapS = THREE.RepeatWrapping;
+//     texture.wrapT = THREE.RepeatWrapping;
+//     texture.repeat.x = repeatX;
+//     texture.repeat.y = repeatY;
+//     texture.encoding = THREE.sRGBEncoding;
+    
+//     // texture.encoding = THREE.sRGBEncoding
+// }
 function setRoom(objA){
     if(objA instanceof THREE.Object3D){
         objA.layers.set(1);
@@ -2448,6 +2472,7 @@ function updateRoomMaterial(room){
                     }
 
                     if(mat.name.includes("Floor")){
+                        mat.map.anisotropy = 8;
                        mat.envMap = floorCubeMap.texture;
                        mat.envMapIntensity = 0.5;
                        mat.roughness =0.05;
@@ -3211,7 +3236,7 @@ function onClick() {
             isLeft = true;
         
             createContextMenu(selectedBtn, leftIndexs[leftIndexs.length - 1]);
-          
+         
             selectedBtnParent = selectedBtn;
             
         } else if (selectedBtn == remove_btn_group.children[0]) {
@@ -3229,7 +3254,7 @@ function onClick() {
             isRight = true;
 
             createContextMenu(selectedBtn, rightIndexs[rightIndexs.length - 1]);
-
+          
             selectedBtnParent = selectedBtn;
            
         } else if (selectedBtn == remove_btn_group.children[1]) {
@@ -3344,7 +3369,7 @@ function createContextMenu(obj, index) {
 
 
                     addSingle(index);
-
+                    updateColors();
                     //adjustHeight();
                     // updateButton(obj, index);
 
@@ -3362,7 +3387,7 @@ function createContextMenu(obj, index) {
 
                 td.addEventListener("pointerdown", function () {
                     addCorner(index);
-
+                    updateColors();
                     //adjustHeight();
                     // updateButton(obj, index);
                 });
@@ -3377,6 +3402,7 @@ function createContextMenu(obj, index) {
                 }
                 td.addEventListener("pointerdown", function () {
                     addChaise(index);
+                    updateColors();
                     // updateButton(obj, index);
                 });
             }
@@ -3385,6 +3411,7 @@ function createContextMenu(obj, index) {
                 td.innerHTML = "<span class='sofa-ottoman'>  Ottoman";
                 td.addEventListener("pointerdown", function () {
                     addOttoman(index);
+                    updateColors();
                     //adjustHeight();
                     // updateButton(obj, index);
                 });
@@ -3412,7 +3439,7 @@ function createContextMenu(obj, index) {
                     if (isRight) {
                         armrests[1].visible = true;
                     }
-
+                    updateColors();
 
                 });
             }
@@ -4308,23 +4335,19 @@ function getFabrics(c){
         case 1: return [ fabric.leather.ao, fabric.leather.normal, fabric.leather.roughness, fabric.leather.bump];break;
     }
 }
-function setTexture(tex){
+function setTexture(tex=new THREE.Texture()||undefined,x=1,y=1,mirror=false){
     if(tex!=null){
        tex.encoding = THREE.sRGBEncoding;    
-                    
-        tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-        tex.repeat.set(0.5,0.5)
+        mirror?tex.wrapS = tex.wrapT = THREE.MirroredRepeatWrapping:tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+        tex.anisotropy = 8;
+        tex.repeat.set(x,y)
         return tex;
     }
 }
 function getTextures(c){
-    switch(Math.round(c)){
-        case 0: return  textures.texture_1;
-        case 1: return textures.texture_2;
-        case 2: return textures.texture_3; 
-        case 3: return textures.texture_4; 
-        case 4: return textures.texture_5; 
-    }
+    
+       return textures[c];
+    
 }
 
 function getColors(c){
@@ -4337,33 +4360,50 @@ function getColors(c){
     }
 }
 
+function colorTo(material, value) {
 
+    var initial = new THREE.Color(material.color.getHex());
+    var value = new THREE.Color(value);
+  
+    TweenLite.to(initial, 0.5, {
+      r: value.r,
+      g: value.g,
+      b: value.b,
+  
+      onUpdate: function () {
+        material.color = initial;
+      }
+    });
+  }
 function updateColors(){
     
     scene.traverse(e=>{
         if(e instanceof THREE.Mesh){
             if(e.material.name.includes("Sofa")){
                     if(e.material instanceof THREE.MeshStandardMaterial){
-                        
-                        e.material.color.set(getColors(colorIndex));
+                        colorTo(e.material,getColors(colorIndex));
+                        // e.material.color.set(getColors(colorIndex));
                         
                         e.material.map= textureType ==0? getTextures(textureIndex):null;
+                        // e.material.map = null;
                         e.material.aoMap = getFabrics(textureType)[0];
                         e.material.normalMap = getFabrics(textureType)[1];
-                        e.material.roughnessMap = getFabrics(textureType)[2];
+                        // e.material.roughnessMap = getFabrics(textureType)[2];
                         e.material.bumpMap = getFabrics(textureType)[3];
 
-                        setTexture(e.material.map)
-                        setTexture(e.material.aoMap)
-                        setTexture(e.material.normalMap)
-                        setTexture(e.material.roughnessMap)
-                        setTexture(e.material.bumpMap)
+                        setTexture(e.material.map,1,1   ,true)
+                        setTexture(e.material.aoMap,1,1,true)
+                        setTexture(e.material.normalMap,1,1,true)
+                        // setTexture(e.material.roughnessMap)
+                        setTexture(e.material.bumpMap,1,1,true)
 
-                        e.material.aoMapIntensity = 0.8;
+                        e.material.aoMapIntensity = 1;
                         e.material.normalScale = new THREE.Vector2(2,2);
-                        e.material.roughness = 1;
+                        e.material.roughness = 0.5;
                         e.material.metalness = 0;
-                        e.material.bumpScale = 0.5;
+                        e.material.bumpScale = 0.2;
+
+                        e.material.side = THREE.FrontSide;
                     }
                   
                  
